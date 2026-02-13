@@ -399,10 +399,10 @@ class NewBookingMail(BaseBookingMail):
         Reply-To: Bookee
         """
         self.schedule_name = schedule_name
-        lang = kwargs['lang'] if 'lang' in kwargs else None
+        lang = kwargs.pop('lang', None)
         default_kwargs = {'subject': l10n('new-booking-subject', {'name': name}, lang)}
         super(NewBookingMail, self).__init__(
-            name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs
+            name=name, email=email, date=date, duration=duration, lang=lang, *args, **default_kwargs, **kwargs
         )
         self.reply_to = email
 
@@ -414,6 +414,7 @@ class NewBookingMail(BaseBookingMail):
                 'email': self.email,
                 'date': self.date,
             },
+            lang=self.lang
         )
 
     def html(self):
@@ -425,6 +426,7 @@ class NewBookingMail(BaseBookingMail):
             day=self.day,
             duration=self.duration,
             schedule_name=self.schedule_name,
+            lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
             calendar_icon_cid=self._attachments()[1].filename,

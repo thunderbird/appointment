@@ -1,5 +1,7 @@
 import datetime
 
+from starlette_context import request_cycle_context
+
 from appointment.controller.mailer import (
     CancelMail,
     ConfirmationMail,
@@ -11,6 +13,7 @@ from appointment.controller.mailer import (
     Attachment,
 )
 from appointment.database import schemas
+from appointment.middleware.l10n import L10n
 
 
 class TestMailer:
@@ -120,3 +123,51 @@ class TestMailer:
         for idx, content in enumerate([mailer.text(), mailer.html()]):
             fault = 'text' if idx == 0 else 'html'
             assert fake_title in content, fault
+
+    def test_booking_emails_use_correct_language(self, faker):
+        """Bookee's invite email should be in German (bookee's language from context),
+        while the owner's new-booking email should be in English (owner's explicit lang).
+
+        This simulates a German-speaking bookee booking with an English-speaking owner.
+        """
+        now = datetime.datetime.now()
+        attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
+
+        # Set up a German context (simulating bookee's Accept-Language: de)
+        l10n_plugin = L10n()
+        l10n_fn = l10n_plugin.get_fluent_with_header('de')
+
+        with request_cycle_context({'l10n': l10n_fn}):
+            # InvitationMail goes to the bookee — no explicit lang, uses context (German)
+            invite_mail = InvitationMail(
+                to='bookee@example.org',
+                name='Owner Name',
+                email='owner@example.org',
+                date=now,
+                duration=30,
+                attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+            )
+
+            # Subject should be in German (bookee's context language)
+            assert 'Buchung bestätigt' in invite_mail.subject
+            assert 'Booking confirmed' not in invite_mail.subject
+
+            # NewBookingMail goes to the owner — explicit lang='en' (owner's language)
+            new_booking_mail = NewBookingMail(
+                attendee.name,
+                attendee.email,
+                now,
+                30,
+                'Test Schedule',
+                to='owner@example.org',
+                lang='en',
+            )
+
+            # Subject should be in English (owner's language), not German
+            assert 'new confirmed booking' in new_booking_mail.subject
+            assert 'bestätigte Terminbuchung' not in new_booking_mail.subject
+
+            # Text body should also be in English
+            text = new_booking_mail.text()
+            assert 'has just booked' in text
+            assert 'hat soeben' not in text

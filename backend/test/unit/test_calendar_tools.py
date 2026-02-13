@@ -1,7 +1,11 @@
-from appointment.controller.calendar import Tools
+from appointment.controller.calendar import Tools, GoogleConnector
 from appointment.database import schemas, models
 from datetime import datetime, timedelta, time, date
 from unittest.mock import Mock, PropertyMock
+from starlette_context import request_cycle_context
+from appointment.middleware.l10n import L10n
+
+import uuid
 import zoneinfo
 
 
@@ -434,3 +438,65 @@ class TestAvailableSlotsFromSchedule:
         tuesday = datetime(2026, 1, 27, tzinfo=zoneinfo.ZoneInfo('UTC'))
         slots_tuesday = Tools.available_slots_from_schedule(schedule, day=tuesday)
         assert len(slots_tuesday) == 0
+
+
+class TestGoogleConnectorSaveEventLanguage:
+    """Verify that GoogleConnector.save_event uses the organizer's language
+    for the event description, not the language from the request context."""
+
+    def test_description_uses_organizer_language_not_context(self):
+        """When the request context is German but the organizer speaks English,
+        the 'join-online' and 'join-phone' strings in the event description
+        must be in English."""
+
+        # Set up starlette context with German (simulating a German-speaking bookee)
+        l10n_plugin = L10n()
+        l10n_fn = l10n_plugin.get_fluent_with_header('de')
+
+        # English-speaking organizer
+        organizer = Mock(spec=['name', 'email', 'language'])
+        organizer.name = 'Owner'
+        organizer.email = 'owner@example.com'
+        organizer.language = 'en'
+
+        attendee = schemas.AttendeeBase(email='bookee@example.org', name='Hans', timezone='Europe/Berlin')
+
+        event = schemas.Event(
+            title='Test Appointment',
+            start=datetime(2024, 4, 1, 9, 0),
+            end=datetime(2024, 4, 1, 9, 30),
+            description='Some details',
+            location=schemas.EventLocation(url='https://meet.example.com', phone='+1234567890'),
+            uuid=uuid.uuid4(),
+        )
+
+        # Mock the GoogleConnector so we can capture the body passed to google_client.save_event
+        mock_google_client = Mock()
+        mock_google_client.save_event.return_value = {'id': 'mock_event_id'}
+
+        connector = GoogleConnector.__new__(GoogleConnector)
+        connector.google_client = mock_google_client
+        connector.remote_calendar_id = 'cal@example.com'
+        connector.google_token = None
+        connector.subscriber_id = 1
+        connector.calendar_id = 1
+        connector.redis_instance = None
+
+        with request_cycle_context({'l10n': l10n_fn}):
+            connector.save_event(
+                event=event,
+                attendee=attendee,
+                organizer=organizer,
+                organizer_email='owner@example.com',
+            )
+
+        # Extract the description from the body passed to google_client.save_event
+        call_kwargs = mock_google_client.save_event.call_args
+        body = call_kwargs.kwargs.get('body') or call_kwargs[1].get('body')
+        description = body['description']
+
+        # Must be in English (organizer's language), not German
+        assert 'Join online at:' in description
+        assert 'Join by phone:' in description
+        assert 'Online teilnehmen unter:' not in description
+        assert 'Per Telefon teilnehmen:' not in description
