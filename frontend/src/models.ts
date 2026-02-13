@@ -164,12 +164,19 @@ export type CalendarItem = {
   checked: boolean;
 };
 
+export enum ExternalConnectionStatus {
+  ok = 'ok',
+  error = 'error',
+}
+
 export type ExternalConnection = {
   id: number;
   owner_id: number;
   name: string;
   type: string;
   type_id: string;
+  status: ExternalConnectionStatus;
+  status_checked_at: string | null;
 };
 
 export type ExternalConnectionCollection = {
