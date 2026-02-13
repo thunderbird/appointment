@@ -28,6 +28,7 @@ from ..dependencies.google import get_google_client
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
+from ..defines import FALLBACK_LOCALE
 from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
 from ..exceptions.calendar import EventNotCreatedException, EventNotDeletedException
@@ -390,7 +391,8 @@ def request_schedule_availability_slot(
     attendee = repo.slot.add_attendee_to_slot(db, slot.id, s_a.attendee)
 
     # Create a pending appointment
-    prefix = f'{l10n("event-hold-prefix")} ' if schedule.booking_confirmation else ''
+    owner_language = subscriber.language if subscriber.language is not None else FALLBACK_LOCALE
+    prefix = f'{l10n("event-hold-prefix", lang=owner_language)} ' if schedule.booking_confirmation else ''
     title = Tools.default_event_title(slot, subscriber, prefix)
     status = models.AppointmentStatus.opened if schedule.booking_confirmation else models.AppointmentStatus.closed
 

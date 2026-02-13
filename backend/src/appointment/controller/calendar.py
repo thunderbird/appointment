@@ -28,7 +28,7 @@ from enum import Enum
 from sqlalchemy.orm import Session
 
 from .. import utils
-from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR
+from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE
 from .apis.google_client import GoogleClient
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
@@ -272,13 +272,14 @@ class GoogleConnector(BaseConnector):
         """add a new event to the connected calendar"""
 
         description = [event.description]
+        organizer_language = organizer.language if organizer.language is not None else FALLBACK_LOCALE
 
         # Place url and phone in desc if available:
         if event.location.url:
-            description.append(l10n('join-online', {'url': event.location.url}))
+            description.append(l10n('join-online', {'url': event.location.url}, lang=organizer_language))
 
         if event.location.phone:
-            description.append(l10n('join-phone', {'phone': event.location.phone}))
+            description.append(l10n('join-phone', {'phone': event.location.phone}, lang=organizer_language))
 
         body = {
             'iCalUID': event.uuid.hex,
@@ -1090,4 +1091,10 @@ class Tools:
         """
         attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
         owner_name = owner.name if owner.name is not None else owner.email
-        return l10n('event-title-template', {'prefix': prefix, 'name1': owner_name, 'name2': attendee_name})
+        owner_language = owner.language if owner.language is not None else FALLBACK_LOCALE
+
+        return l10n(
+            'event-title-template',
+            {'prefix': prefix, 'name1': owner_name, 'name2': attendee_name},
+            lang=owner_language,
+        )
