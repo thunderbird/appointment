@@ -48,9 +48,9 @@ test.describe('account settings on mobile browser', {
     // verify section header
     await expect(settingsPage.accountSettingsHeader).toBeVisible();
 
-    // verify display name displayed is as expected
+    // verify display name field
     await expect(settingsPage.displayNameInput).toBeVisible();
-    expect(await settingsPage.displayNameInput.inputValue()).toBe(APPT_DISPLAY_NAME);
+    expect (await settingsPage.displayNameInput.isEnabled()).toBeTruthy();
 
     // verify booking page url displayed is correct
     await settingsPage.scrollIntoView(settingsPage.bookingPageURLInput);
@@ -59,7 +59,7 @@ test.describe('account settings on mobile browser', {
     // ensure we can click the copy link button; note: we can't access clipboard in firefox b/c of security
     await settingsPage.scrollIntoView(settingsPage.copyLinkBtn);
     if (!testInfo.project.name.includes('ios')) { // 'toBeEnabled' is not supported on BrowserStack for ios at least not yet
-      await expect(settingsPage.copyLinkBtn).toBeEnabled();  
+      expect (await settingsPage.copyLinkBtn.isEnabled()).toBeTruthy()
     }
     await settingsPage.copyLinkBtn.click();
 

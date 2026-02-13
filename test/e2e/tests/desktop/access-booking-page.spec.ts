@@ -49,13 +49,6 @@ test.beforeEach(async ({ page }) => {
   dashboardPage = new DashboardPage(page);
 });
 
-// the share link (request a booking page) will display in the local browser context timezone but the main
-// appointment account settings could be a different timezone; set the browser context to always be in
-// the primary timezone
-test.use({
-  timezoneId: APPT_TIMEZONE_SETTING_PRIMARY,
-});
-
 test.describe('access booking page on desktop browser', () => {
   test('able to access booking page via short link', {
     tag: [PLAYWRIGHT_TAG_PROD_SANITY],
