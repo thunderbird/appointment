@@ -17,6 +17,8 @@ jobs:
     if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
     environment: production
     runs-on: ubuntu-latest
+    container:
+        image: ghcr.io/${{ github.repository }}/cached-devcontainer:latest
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -24,9 +26,6 @@ jobs:
           aws-region: eu-central-1
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PULUMI }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PULUMI }}
-
-      - name: Clean up before Pulumi release
-        run: rm -rf dist
 
       - name: Get Artifact from Release
         uses: dsaltares/fetch-gh-release-asset@master
@@ -46,6 +45,8 @@ jobs:
     if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
     environment: production
     runs-on: ubuntu-latest
+    container:
+        image: ghcr.io/${{ github.repository }}/cached-devcontainer:latest
     steps:
       - name: Download ECR tag artifact
         uses: dsaltares/fetch-gh-release-asset@master
@@ -77,20 +78,12 @@ jobs:
         with:
           mask-password: "true"
 
-      - name: Set up Python 3.13
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.13
-
       - name: Set up Pulumi environment
         id: pulumi-env
-        shell: bash
         run: |
           tar -xvf pulumi.tbz
-          curl -fsSL https://get.pulumi.com | sh
 
       - name: Deploy to prod
-        shell: bash
         env:
           PULUMI_ACCESS_TOKEN: "${{ secrets.PULUMI_ACCESS_TOKEN }}"
         run: |
@@ -126,6 +119,8 @@ jobs:
     name: prod-sanity-browserstack
     needs: [deploy-prod-backend, deploy-prod-frontend]
     runs-on: ubuntu-latest
+    container:
+        image: ghcr.io/${{ github.repository }}/cached-devcontainer:latest
     environment: production
     env:
       TB_ACCTS_EMAIL: ${{ secrets.E2E_APPT_PROD_TB_ACCTS_EMAIL }}
@@ -135,12 +130,6 @@ jobs:
       APPT_BOOKEE_EMAIL: ${{ secrets.E2E_APPT_PROD_BOOKEE_EMAIL }}
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: 'test/e2e/package-lock.json'
 
       - name: Install dependencies
         run: |
