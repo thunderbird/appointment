@@ -78,7 +78,7 @@ class TestMailer:
         now = datetime.datetime.now()
         fake_email = 'to@example.org'
 
-        mailer = PendingRequestMail(owner_name=subscriber.name, date=now, to=fake_email)
+        mailer = PendingRequestMail(owner_name=subscriber.name, date=now, duration=30, to=fake_email)
         assert mailer.html()
         assert mailer.text()
 
@@ -91,7 +91,7 @@ class TestMailer:
         now = datetime.datetime.now()
         fake_email = 'to@example.org'
 
-        mailer = RejectionMail(owner_name=subscriber.name, date=now, to=fake_email)
+        mailer = RejectionMail(owner_name=subscriber.name, date=now, duration=30, to=fake_email)
         assert mailer.html()
         assert mailer.text()
 

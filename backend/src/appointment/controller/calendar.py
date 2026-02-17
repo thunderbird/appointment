@@ -709,7 +709,8 @@ class Tools:
 
         # Send mail
         background_tasks.add_task(
-            send_pending_email, organizer.name, date=date, to=attendee.email, attachment=ics_file, lang=lang
+            send_pending_email, organizer.name, date=date, duration=slot.duration,
+            to=attendee.email, attachment=ics_file, lang=lang,
         )
 
     def send_reject_vevent(
@@ -735,7 +736,8 @@ class Tools:
 
         # Send mail
         background_tasks.add_task(
-            send_rejection_email, organizer.name, date=date, to=attendee.email, attachment=ics_file, lang=lang
+            send_rejection_email, organizer.name, date=date, duration=slot.duration,
+            to=attendee.email, attachment=ics_file, lang=lang,
         )
 
     def send_cancel_vevent(

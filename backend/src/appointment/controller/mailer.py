@@ -353,46 +353,84 @@ class CancelMail(Mailer):
 
 
 class RejectionMail(Mailer):
-    def __init__(self, owner_name, date, *args, **kwargs):
+    def __init__(self, owner_name, date, duration, *args, **kwargs):
         """Init Mailer with rejection specific defaults
         To: Bookee
         Reply-To: Event owner
         """
         self.owner_name = owner_name
         self.date = date
+        self.duration = duration
         default_kwargs = {'subject': l10n('reject-mail-subject', lang=kwargs.get('lang'))}
         super(RejectionMail, self).__init__(*args, **default_kwargs, **kwargs)
         self.method = 'CANCEL'
 
+        # Localize date and time
+        time_format = l10n('time-format', lang=self.lang)
+        if time_format == 'time-format':
+            time_format = '%I:%M%p'
+
+        date_end = self.date + datetime.timedelta(minutes=self.duration)
+        self.time_range = ' - '.join([date.strftime(time_format), date_end.strftime(time_format)])
+        self.timezone = ''
+        if self.date.tzinfo:
+            self.timezone = f'({date.strftime("%Z")})'
+        self.day = format_date(date, format='full', locale=self.lang or FALLBACK_LOCALE)
+
     def text(self):
-        return l10n('reject-mail-plain', {'owner_name': self.owner_name, 'date': self.date}, lang=self.lang)
+        return l10n(
+            'reject-mail-plain',
+            {'owner_name': self.owner_name, 'day': self.day, 'time_range': self.time_range, 'timezone': self.timezone},
+            lang=self.lang,
+        )
 
     def html(self):
         return get_template('rejected.jinja2').render(
             owner_name=self.owner_name,
-            date=self.date,
+            day=self.day,
+            time_range=self.time_range,
+            timezone=self.timezone,
             tbpro_logo_cid=self._attachments()[0].filename,
             lang=self.lang,
         )
 
 
 class PendingRequestMail(Mailer):
-    def __init__(self, owner_name, date, *args, **kwargs):
+    def __init__(self, owner_name, date, duration, *args, **kwargs):
         """Init Mailer with pending-request specific defaults
         To: Bookee
         """
         self.owner_name = owner_name
         self.date = date
+        self.duration = duration
         default_kwargs = {'subject': l10n('pending-mail-subject', lang=kwargs.get('lang'))}
         super(PendingRequestMail, self).__init__(*args, **default_kwargs, **kwargs)
 
+        # Localize date and time
+        time_format = l10n('time-format', lang=self.lang)
+        if time_format == 'time-format':
+            time_format = '%I:%M%p'
+
+        date_end = self.date + datetime.timedelta(minutes=self.duration)
+        self.time_range = ' - '.join([date.strftime(time_format), date_end.strftime(time_format)])
+        self.timezone = ''
+        if self.date.tzinfo:
+            self.timezone = f'({date.strftime("%Z")})'
+        self.day = format_date(date, format='full', locale=self.lang or FALLBACK_LOCALE)
+
     def text(self):
-        return l10n('pending-mail-plain', {'owner_name': self.owner_name, 'date': self.date}, lang=self.lang)
+        return l10n(
+            'pending-mail-plain',
+            {'owner_name': self.owner_name, 'day': self.day, 'time_range': self.time_range, 'timezone': self.timezone},
+            lang=self.lang,
+        )
 
     def html(self):
         return get_template('pending.jinja2').render(
             owner_name=self.owner_name,
-            date=self.date,
+            day=self.day,
+            time_range=self.time_range,
+            timezone=self.timezone,
             tbpro_logo_cid=self._attachments()[0].filename,
             lang=self.lang,
         )
