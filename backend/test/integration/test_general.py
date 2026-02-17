@@ -78,19 +78,3 @@ class TestGeneral:
         else:
             response = with_client.delete(f'{api_route}')
         assert response.status_code == 401
-
-    def test_send_feedback(self, with_client):
-        response = with_client.post(
-            '/support', json={'topic': 'Hello World', 'details': 'Hello World but longer'}, headers=auth_headers
-        )
-        assert response.status_code == 200
-
-    def test_send_feedback_no_email_configured(self, with_client):
-        """Attempt to send feedback with no support email configured; expect error"""
-        saved_email = os.environ['SUPPORT_EMAIL']
-        os.environ['SUPPORT_EMAIL'] = ''
-        response = with_client.post(
-            '/support', json={'topic': 'Hello World', 'details': 'Hello World but longer'}, headers=auth_headers
-        )
-        os.environ['SUPPORT_EMAIL'] = saved_email
-        assert response.status_code == 500

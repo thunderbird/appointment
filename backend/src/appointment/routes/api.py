@@ -30,7 +30,6 @@ from ..exceptions import validation
 from ..exceptions.calendar import EventNotDeletedException
 from ..exceptions.validation import RemoteCalendarConnectionError, APIException, EventCouldNotBeDeleted
 from ..l10n import l10n
-from ..tasks.emails import send_support_email
 
 router = APIRouter()
 
@@ -597,30 +596,3 @@ def cancel_my_appointment(
     except EventNotDeletedException:
         raise EventCouldNotBeDeleted
 
-
-@router.post('/support')
-def send_feedback(
-    form_data: schemas.SupportRequest,
-    background_tasks: BackgroundTasks,
-    subscriber: Subscriber = Depends(get_subscriber),
-):
-    """Send a subscriber's support request to the configured support email address"""
-    if not os.getenv('SUPPORT_EMAIL'):
-        # Ensure sentry at least captures it!
-        if os.getenv('SENTRY_DSN'):
-            sentry_sdk.capture_message('No SUPPORT_EMAIL is set, support messages are being ignored!')
-            sentry_sdk.capture_message(f"""
-            Support Email Alert!
-            FROM: {subscriber.name} <{subscriber.preferred_email}>
-            SUBJECT: {form_data.topic}
-            MESSAGE: {form_data.details}""")
-        raise APIException()
-
-    background_tasks.add_task(
-        send_support_email,
-        requestee_name=subscriber.name,
-        requestee_email=subscriber.preferred_email,
-        topic=form_data.topic,
-        details=form_data.details,
-    )
-    return True

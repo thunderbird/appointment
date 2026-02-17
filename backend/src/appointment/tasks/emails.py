@@ -10,7 +10,6 @@ from appointment.controller.mailer import (
     InvitationMail,
     ZoomMeetingFailedMail,
     RejectionMail,
-    SupportRequestMail,
     InviteAccountMail,
     ConfirmYourEmailMail,
     NewBookingMail,
@@ -100,23 +99,6 @@ def send_rejection_email(owner_name, date, to, attachment):
 def send_zoom_meeting_failed_email(to, appointment_title):
     try:
         mail = ZoomMeetingFailedMail(to=to, appointment_title=appointment_title)
-        mail.send()
-    except Exception as e:
-        if os.getenv('APP_ENV') == APP_ENV_DEV:
-            logging.error('[tasks.emails] An exception has occurred: ', e)
-            traceback.print_exc()
-        if os.getenv('SENTRY_DSN'):
-            sentry_sdk.capture_exception(e)
-
-
-def send_support_email(requestee_name, requestee_email, topic, details):
-    try:
-        mail = SupportRequestMail(
-            requestee_name=requestee_name,
-            requestee_email=requestee_email,
-            topic=topic,
-            details=details,
-        )
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:

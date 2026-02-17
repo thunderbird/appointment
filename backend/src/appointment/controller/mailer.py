@@ -434,43 +434,6 @@ class NewBookingMail(BaseBookingMail):
         )
 
 
-class SupportRequestMail(Mailer):
-    def __init__(self, requestee_name, requestee_email, topic, details, *args, **kwargs):
-        """Init Mailer with support specific defaults
-        To: Support
-        Reply-To: Requestee
-        """
-        self.requestee_name = requestee_name
-        self.requestee_email = requestee_email
-        self.topic = topic
-        self.details = details
-        default_kwargs = {'subject': l10n('support-mail-subject', {'topic': topic})}
-        super(SupportRequestMail, self).__init__(
-            os.getenv('SUPPORT_EMAIL', 'help@tb.net'), *args, **default_kwargs, **kwargs
-        )
-        self.reply_to = requestee_email
-
-    def text(self):
-        return l10n(
-            'support-mail-plain',
-            {
-                'requestee_name': self.requestee_name,
-                'requestee_email': self.requestee_email,
-                'topic': self.topic,
-                'details': self.details,
-            },
-        )
-
-    def html(self):
-        return get_template('support.jinja2').render(
-            requestee_name=self.requestee_name,
-            requestee_email=self.requestee_email,
-            topic=self.topic,
-            details=self.details,
-            tbpro_logo_cid=self._attachments()[0].filename,
-        )
-
-
 class InviteAccountMail(Mailer):
     def __init__(self, date, *args, **kwargs):
         self.date = date
