@@ -87,11 +87,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <step-title :title="t('ftue.videoMeetingLink')" />
-
   <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
     {{ errorMessage }}
   </notice-bar>
+
+  <step-title :title="t('ftue.videoMeetingLink')" />
 
   <div class="video-meeting-link-container">
     <provider-card-button

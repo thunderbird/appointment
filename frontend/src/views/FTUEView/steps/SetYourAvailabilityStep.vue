@@ -80,11 +80,11 @@ const onContinueButtonClick = async () => {
 </script>
 
 <template>
-  <step-title :title="t('ftue.setYourAvailability')" />
-
   <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
     {{ errorMessage }}
   </notice-bar>
+
+  <step-title :title="t('ftue.setYourAvailability')" />
 
   <form ref="formRef" @submit.prevent @keyup.enter="onContinueButtonClick" class="availability-container">
     <bubble-select

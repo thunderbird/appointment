@@ -110,8 +110,6 @@ onMounted(async () => {
 </script>
 
 <template>
-  <step-title :title="t('ftue.connectGoogleCalendar')" />
-
   <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
     {{ errorMessage.title }}
     <template v-if="errorMessage.details">
@@ -120,6 +118,8 @@ onMounted(async () => {
     </template>
     {{ errorMessage.details }}
   </notice-bar>
+
+  <step-title :title="t('ftue.connectGoogleCalendar')" />
 
   <p class="info-text">{{ t('ftue.connectGoogleCalendarInfo') }}</p>
 

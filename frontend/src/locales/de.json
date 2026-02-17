@@ -73,6 +73,8 @@
     "calendarUrl": "Kalender URL",
     "calendarUrlPlaceholder": "Vollständige URL eingeben",
     "calendarUrlErrorMessage": "Die Kalender-URL ist nicht gültig. Bitte überprüfe die URL und versuche es erneut.",
+    "calendarUrlCantSignIn": "Anmelden nicht möglich.",
+    "calendarCheckCredentials": "Überprüfe deinen Benutzernamen und dein Passwort.",
     "calendarIcon": "Kalender Icon",
     "noSignInCredentialsRequired": "Dieser Kalender benötigt keine Anmeldeinformationen",
     "connectGoogleCalendar": "Mit Google Kalender verbinden",
