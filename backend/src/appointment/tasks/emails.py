@@ -18,10 +18,11 @@ from appointment.controller.mailer import (
 from appointment.defines import APP_ENV_DEV
 
 
-def send_invite_email(owner_name, owner_email, date, duration, to, attachment):
+def send_invite_email(owner_name, owner_email, date, duration, to, attachment, lang):
     try:
         mail = InvitationMail(
-            name=owner_name, email=owner_email, date=date, duration=duration, to=to, attachments=[attachment]
+            name=owner_name, email=owner_email, date=date, duration=duration,
+            to=to, attachments=[attachment], lang=lang,
         )
         mail.send()
     except Exception as e:
@@ -60,9 +61,9 @@ def send_new_booking_email(name, email, date, duration, to, schedule_name, lang)
             sentry_sdk.capture_exception(e)
 
 
-def send_pending_email(owner_name, date, to, attachment):
+def send_pending_email(owner_name, date, to, attachment, lang):
     try:
-        mail = PendingRequestMail(owner_name=owner_name, date=date, to=to, attachments=[attachment])
+        mail = PendingRequestMail(owner_name=owner_name, date=date, to=to, attachments=[attachment], lang=lang)
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:
@@ -72,9 +73,9 @@ def send_pending_email(owner_name, date, to, attachment):
             sentry_sdk.capture_exception(e)
 
 
-def send_cancel_email(owner_name, date, to, attachment):
+def send_cancel_email(owner_name, date, to, attachment, lang):
     try:
-        mail = CancelMail(owner_name=owner_name, date=date, to=to, attachments=[attachment])
+        mail = CancelMail(owner_name=owner_name, date=date, to=to, attachments=[attachment], lang=lang)
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:
@@ -84,9 +85,9 @@ def send_cancel_email(owner_name, date, to, attachment):
             sentry_sdk.capture_exception(e)
 
 
-def send_rejection_email(owner_name, date, to, attachment):
+def send_rejection_email(owner_name, date, to, attachment, lang):
     try:
-        mail = RejectionMail(owner_name=owner_name, date=date, to=to, attachments=[attachment])
+        mail = RejectionMail(owner_name=owner_name, date=date, to=to, attachments=[attachment], lang=lang)
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:
@@ -96,9 +97,9 @@ def send_rejection_email(owner_name, date, to, attachment):
             sentry_sdk.capture_exception(e)
 
 
-def send_zoom_meeting_failed_email(to, appointment_title):
+def send_zoom_meeting_failed_email(to, appointment_title, lang):
     try:
-        mail = ZoomMeetingFailedMail(to=to, appointment_title=appointment_title)
+        mail = ZoomMeetingFailedMail(to=to, appointment_title=appointment_title, lang=lang)
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:

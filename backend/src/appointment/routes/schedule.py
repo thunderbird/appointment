@@ -622,7 +622,10 @@ def handle_schedule_availability_decision(
 
             # Notify the organizer that the meeting link could not be created!
             background_tasks.add_task(
-                send_zoom_meeting_failed_email, to=subscriber.preferred_email, appointment_title=schedule.name
+                send_zoom_meeting_failed_email,
+                to=subscriber.preferred_email,
+                appointment_title=schedule.name,
+                lang=subscriber.language,
             )
         except OAuth2Error as err:
             logging.error('OAuth flow error during zoom meeting creation: ', err)
@@ -631,7 +634,10 @@ def handle_schedule_availability_decision(
 
             # Notify the organizer that the meeting link could not be created!
             background_tasks.add_task(
-                send_zoom_meeting_failed_email, to=subscriber.preferred_email, appointment_title=schedule.name
+                send_zoom_meeting_failed_email,
+                to=subscriber.preferred_email,
+                appointment_title=schedule.name,
+                lang=subscriber.language,
             )
         except SQLAlchemyError as err:  # Not fatal, but could make things tricky
             logging.error('Failed to save the zoom meeting link to the appointment: ', err)

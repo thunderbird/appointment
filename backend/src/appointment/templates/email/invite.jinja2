@@ -14,7 +14,7 @@
       {{ l10n('invite-mail-html-heading-email', {'email': email}) }}
     </p>
     <p style="font-weight: 400; margin: 0;">
-      {{ l10n('invite-mail-html-heading-text') }}
+      {{ l10n('invite-mail-html-heading-text', lang=lang) }}
     </p>
   </div>
 {% endblock %}
@@ -43,13 +43,13 @@
       font-weight: 700;
       height: 16px;
       ">
-      {{ clock_image_small|safe }} {{ l10n('invite-mail-html-time', {'duration': duration}) }}
+      {{ clock_image_small|safe }} {{ l10n('invite-mail-html-time', {'duration': duration}, lang=lang) }}
     </div>
   </div>
 {% endblock %}
 {% block call_to_action %}
   <p style="margin: 12px;">
-  {{ l10n('invite-mail-html-invite-is-attached') }}
+  {{ l10n('invite-mail-html-invite-is-attached', lang=lang) }}
   </p>
   {#
   # This doesn't work Apple Mail, and it also hides the attachment...bleh.
@@ -68,7 +68,7 @@
         text-decoration:none;
         white-space: nowrap;
         "
-    >{{ l10n('invite-mail-html-download') }}</a>
+    >{{ l10n('invite-mail-html-download', lang=lang) }}</a>
   </div>
   #}
 {% endblock %}

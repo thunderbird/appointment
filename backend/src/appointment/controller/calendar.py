@@ -670,6 +670,10 @@ class Tools:
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+
+        # Emails to attendee should be sent in the attendee's language if available
+        lang = attendee.language if attendee.language is not None else FALLBACK_LOCALE
+
         # Send mail
         background_tasks.add_task(
             send_invite_email,
@@ -679,6 +683,7 @@ class Tools:
             duration=slot.duration,
             to=attendee.email,
             attachment=ics_file,
+            lang=lang,
         )
 
     def send_hold_vevent(
@@ -698,8 +703,14 @@ class Tools:
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+
+        # Emails to attendee should be sent in the attendee's language if available
+        lang = attendee.language if attendee.language is not None else FALLBACK_LOCALE
+
         # Send mail
-        background_tasks.add_task(send_pending_email, organizer.name, date=date, to=attendee.email, attachment=ics_file)
+        background_tasks.add_task(
+            send_pending_email, organizer.name, date=date, to=attendee.email, attachment=ics_file, lang=lang
+        )
 
     def send_reject_vevent(
         self,
@@ -718,9 +729,13 @@ class Tools:
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+
+        # Emails to attendee should be sent in the attendee's language if available
+        lang = attendee.language if attendee.language is not None else FALLBACK_LOCALE
+
         # Send mail
         background_tasks.add_task(
-            send_rejection_email, organizer.name, date=date, to=attendee.email, attachment=ics_file
+            send_rejection_email, organizer.name, date=date, to=attendee.email, attachment=ics_file, lang=lang
         )
 
     def send_cancel_vevent(
@@ -740,6 +755,10 @@ class Tools:
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+
+        # Emails to attendee should be sent in the attendee's language if available
+        lang = attendee.language if attendee.language is not None else FALLBACK_LOCALE
+
         # Send mail
         background_tasks.add_task(
             send_cancel_email,
@@ -747,6 +766,7 @@ class Tools:
             date=date,
             to=attendee.email,
             attachment=ics_file,
+            lang=lang,
         )
 
     @staticmethod
