@@ -104,7 +104,7 @@ class TestMailer:
         now = datetime.datetime.now()
         fake_email = 'to@example.org'
 
-        mailer = CancelMail(owner_name=subscriber.name, date=now, to=fake_email)
+        mailer = CancelMail(owner_name=subscriber.name, date=now, duration=30, to=fake_email, lang='en')
         assert mailer.html()
         assert mailer.text()
 

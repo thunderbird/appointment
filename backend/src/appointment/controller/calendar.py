@@ -766,6 +766,7 @@ class Tools:
             send_cancel_email,
             owner_name=organizer.name,
             date=date,
+            duration=slot.duration,
             to=attendee.email,
             attachment=ics_file,
             lang=lang,

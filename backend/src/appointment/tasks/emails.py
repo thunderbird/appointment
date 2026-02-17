@@ -75,9 +75,11 @@ def send_pending_email(owner_name, date, duration, to, attachment, lang):
             sentry_sdk.capture_exception(e)
 
 
-def send_cancel_email(owner_name, date, to, attachment, lang):
+def send_cancel_email(owner_name, date, duration, to, attachment, lang):
     try:
-        mail = CancelMail(owner_name=owner_name, date=date, to=to, attachments=[attachment], lang=lang)
+        mail = CancelMail(
+            owner_name=owner_name, date=date, duration=duration, to=to, attachments=[attachment], lang=lang,
+        )
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:

@@ -108,12 +108,16 @@ confirm-mail-html-deny-action = Buchung ablehnen
 cancel-mail-subject = Buchungsanfrage abgesagt
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-cancel-mail-html-heading = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfenster abgesagt: { $date }.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+cancel-mail-html-heading = { $owner_name } hat deine Buchungsanfrage für { $day } um { $time_range } { $timezone } abgesagt.
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-cancel-mail-plain = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfenster abgesagt: { $date }.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+cancel-mail-plain = { $owner_name } hat deine Buchungsanfrage für { $day } um { $time_range } { $timezone } abgesagt.
 {-brand-footer}
 
 ## Rejected Appointment
