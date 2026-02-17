@@ -378,3 +378,7 @@ class ConnectionContainsDefaultCalendarException(APIException):
 class RemoteCalendarAuthenticationException(APIException):
     id_code = 'REMOTE_CALENDAR_AUTHENTICATION_ERROR'
     status_code = 400
+
+class ScheduleAvailabilitySlotRequestException(APIException):
+    id_code = 'SCHEDULE_AVAILABILITY_SLOT_REQUEST_EXCEPTION'
+    status_code = 400
