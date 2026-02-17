@@ -14,10 +14,11 @@ import jinja2
 import sentry_sdk
 import validators
 
+from babel.dates import format_date
 from html import escape
 from fastapi.templating import Jinja2Templates
 
-from ..defines import BASE_PATH
+from ..defines import BASE_PATH, FALLBACK_LOCALE
 from ..l10n import l10n
 
 
@@ -185,15 +186,12 @@ class BaseBookingMail(Mailer):
         # Pass to super now!
         super().__init__(*args, **kwargs)
 
-        # Localize date and time range format
+        # Localize time format
         self.time_format = l10n('time-format', lang=self.lang)
-        self.date_format = l10n('date-format', lang=self.lang)
 
         # If value is key then there's no localization available, set a default.
         if self.time_format == 'time-format':
             self.time_format = '%I:%M%p'
-        if self.date_format == 'date-format':
-            self.date_format = '%A, %B %d, %Y'
 
         date_end = self.date + datetime.timedelta(minutes=self.duration)
 
@@ -201,7 +199,7 @@ class BaseBookingMail(Mailer):
         self.timezone = ''
         if self.date.tzinfo:
             self.timezone += f'({date.strftime("%Z")})'
-        self.day = date.strftime(self.date_format)
+        self.day = format_date(date, format='full', locale=self.lang or FALLBACK_LOCALE)
 
     def _attachments(self):
         """We need these little icons for the message body"""
