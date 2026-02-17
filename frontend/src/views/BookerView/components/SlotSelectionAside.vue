@@ -16,7 +16,7 @@ import { useUserStore } from '@/stores/user-store';
 import { BookingCalendarView, MetricEvents, AlertSchemes } from '@/definitions';
 import AlertBox from '@/elements/AlertBox.vue';
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const dj = inject(dayjsKey);
 const call = inject(callKey);
@@ -64,6 +64,7 @@ const bookEvent = async () => {
     email: guestUserEmail.value,
     name: guestUserName.value,
     timezone: timezone.value,
+    language: locale.value,
   }
 
   const obj = {

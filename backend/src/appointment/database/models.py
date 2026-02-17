@@ -290,6 +290,7 @@ class Attendee(Base):
     email = Column(encrypted_type(String), index=True)
     name = Column(encrypted_type(String), index=True)
     timezone = Column(String(255), index=True)
+    language = Column(encrypted_type(String), index=True)
 
     slots: Mapped[list['Slot']] = relationship('Slot', cascade='all,delete', back_populates='attendee')
 
