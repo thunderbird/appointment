@@ -70,9 +70,12 @@ export const getUserDisplayNameFromLocalStore = async (page: Page) => {
 }
 
 /**
- * Set the appointment user settings in the local browser store to default values required by the tests
+ * Set the appointment user settings in the local browser store to default values required by the tests.
+ * If setTimeZone is provided set the Appointment app default timezone setting to that value, otherwise use
+ * APPT_TIMEZONE_SETTING_PRIMARY. This allows the book an appoitment test to set the timezone in Appointment
+ * to the timezone that was used by the booking page, when a timeslot was selected.
  */
-export const setDefaultUserSettingsLocalStore = async (page: Page) => {
+export const setDefaultUserSettingsLocalStore = async (page: Page, setTimeZone: string = APPT_TIMEZONE_SETTING_PRIMARY) => {
   console.log('setting user settings to default values in browser local store')
   var localUserStoreData;
 
@@ -86,13 +89,19 @@ export const setDefaultUserSettingsLocalStore = async (page: Page) => {
 
   console.log(`original user settings from local browser store: ${JSON.stringify(localUserStoreData['settings'])}`);
 
+  // if setTimeZone is 'UTC' use 'Europe/Dublin'
+  if (setTimeZone == 'UTC')
+     setTimeZone = 'Europe/Dublin';
+
+  console.log(`setting Appointment timezone setting to: ${setTimeZone}`);
+
   // now set them
   localUserStoreData['name'] = APPT_DISPLAY_NAME;
   localUserStoreData['settings'] = {
       "language": APPT_BROWSER_STORE_LANGUAGE_EN,
       "colourScheme": APPT_BROWSER_STORE_THEME_LIGHT,
       "timeFormat": APPT_BROWSER_STORE_12HR_TIME,
-      "timezone": APPT_TIMEZONE_SETTING_PRIMARY,
+      "timezone": setTimeZone,
       "startOfWeek": APPT_BROWSER_STORE_START_WEEK_SUN,
   }
 

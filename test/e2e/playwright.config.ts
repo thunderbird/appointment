@@ -17,8 +17,8 @@ export default defineConfig({
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* 1 failed test retry in CI */
-  retries: process.env.CI ? 1 : 0,
+  /* No retries locally or in CI (b/c BrowserStack will count a retried test as failure anyway) */
+  retries: 0,
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : 1, // actualy don't run in parallel locally either, for now
   // Global timeout: Playwright will timeout if the entire session (includes all test runs) exceeds this.
