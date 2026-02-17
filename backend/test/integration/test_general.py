@@ -1,6 +1,6 @@
 import os
 import pytest
-from defines import DAY1, DAY5, auth_headers
+from defines import DAY1, DAY5
 
 
 class TestGeneral:

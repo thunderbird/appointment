@@ -28,7 +28,7 @@ from ..dependencies.auth import get_subscriber
 from ..dependencies.database import get_db, get_redis
 from ..exceptions import validation
 from ..exceptions.calendar import EventNotDeletedException
-from ..exceptions.validation import RemoteCalendarConnectionError, APIException, EventCouldNotBeDeleted
+from ..exceptions.validation import RemoteCalendarConnectionError, EventCouldNotBeDeleted
 from ..l10n import l10n
 
 router = APIRouter()
