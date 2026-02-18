@@ -5,6 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from posthog import Posthog
 
 from ..controller import data
+from ..controller.external_connection import check_status
 from sqlalchemy.orm import Session
 
 from ..dependencies.auth import get_subscriber
@@ -22,10 +23,8 @@ from ..exceptions.account_api import AccountDeletionException
 router = APIRouter()
 
 
-@router.get('/external-connections', tags=['no-cache'])
-def get_external_connections(subscriber: Subscriber = Depends(get_subscriber)):
-    # This could be moved to a helper function in the future
-    # Create a list of supported external connections
+def _serialize_external_connections(subscriber: Subscriber) -> dict:
+    """Serialize a subscriber's external connections into a grouped dict by type."""
     external_connections = defaultdict(list)
 
     if os.getenv('ZOOM_API_ENABLED'):
@@ -34,11 +33,34 @@ def get_external_connections(subscriber: Subscriber = Depends(get_subscriber)):
     for ec in subscriber.external_connections:
         external_connections[ec.type.name].append(
             schemas.ExternalConnectionOut(
-                id=ec.id, owner_id=ec.owner_id, type=ec.type.name, type_id=ec.type_id, name=ec.name
+                id=ec.id,
+                owner_id=ec.owner_id,
+                type=ec.type.name,
+                type_id=ec.type_id,
+                name=ec.name,
+                status=ec.status.value if ec.status else 'ok',
+                status_checked_at=ec.status_checked_at.isoformat() if ec.status_checked_at else None,
             )
         )
 
     return external_connections
+
+
+@router.get('/external-connections', tags=['no-cache'])
+def get_external_connections(subscriber: Subscriber = Depends(get_subscriber)):
+    """Return all external connections for the authenticated subscriber."""
+    return _serialize_external_connections(subscriber)
+
+
+@router.post('/external-connections/check-status', tags=['no-cache'])
+def check_external_connection_status(
+    db: Session = Depends(get_db),
+    subscriber: Subscriber = Depends(get_subscriber),
+):
+    """Run health checks on the subscriber's external connections (Zoom, Google, CalDAV).
+    Updates connection statuses in the database and returns the updated list."""
+    check_status(db, subscriber)
+    return _serialize_external_connections(subscriber)
 
 
 @router.post('/download')

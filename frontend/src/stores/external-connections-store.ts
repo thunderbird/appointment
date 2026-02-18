@@ -25,6 +25,14 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     caldav: caldav.value,
   }));
 
+  /**
+   * Whether any checkable external connection (zoom, google, caldav) has an error status.
+   */
+  const hasUnhealthyConnections = computed((): boolean => {
+    const checkable = [...zoom.value, ...google.value, ...caldav.value];
+    return checkable.some((ec) => ec.status === 'error');
+  });
+
   const call = ref(null);
 
   /**
@@ -78,6 +86,23 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     // CalDAV is handled in the modal
   };
 
+  /**
+   * Run health checks on external connections (zoom, google, caldav).
+   * Updates the store with the latest connection statuses from the server.
+   */
+  const checkStatus = async () => {
+    const { data }: ExternalConnectionCollectionResponse = await call.value('account/external-connections/check-status').post().json();
+
+    if (data.value) {
+      oidc.value = data.value?.oidc ?? oidc.value;
+      zoom.value = data.value?.zoom ?? zoom.value;
+      fxa.value = data.value?.fxa ?? fxa.value;
+      google.value = data.value?.google ?? google.value;
+      caldav.value = data.value?.caldav ?? caldav.value;
+      isLoaded.value = true;
+    }
+  };
+
   const disconnect = async (provider: ExternalConnectionProviders, typeId: string | null = null) => {
     if (provider === ExternalConnectionProviders.Zoom) {
       return call.value('zoom/disconnect').post();
@@ -97,7 +122,19 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
   };
 
   return {
-    connections, isLoaded, oidc, fxa, zoom, google, init, fetch, $reset, connect, disconnect,
+    connections,
+    isLoaded,
+    hasUnhealthyConnections,
+    oidc,
+    fxa,
+    zoom,
+    google,
+    init,
+    fetch,
+    checkStatus,
+    $reset,
+    connect,
+    disconnect,
   };
 });
 

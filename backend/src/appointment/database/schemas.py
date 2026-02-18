@@ -490,6 +490,8 @@ class ExternalConnectionOut(BaseModel):
     name: str
     type: str
     type_id: str
+    status: str = 'ok'
+    status_checked_at: str | None = None
 
 
 class SupportRequest(BaseModel):
