@@ -13,7 +13,7 @@ class TestMiddleware:
     def test_cache_control_middleware_random_post_route(self, with_client):
         """Test that a random POST route without no-cache tag doesn't have cache-control header"""
         # Test a route that doesn't have no-cache tag
-        response = with_client.post('/support', json={'topic': 'test', 'details': 'test'}, headers=auth_headers)
+        response = with_client.post('/me/signature', headers=auth_headers)
         assert response.status_code == 200
         assert 'cache-control' not in response.headers
 

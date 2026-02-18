@@ -28,7 +28,7 @@ from enum import Enum
 from sqlalchemy.orm import Session
 
 from .. import utils
-from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR
+from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE
 from .apis.google_client import GoogleClient
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
@@ -272,13 +272,14 @@ class GoogleConnector(BaseConnector):
         """add a new event to the connected calendar"""
 
         description = [event.description]
+        organizer_language = organizer.language if organizer.language is not None else FALLBACK_LOCALE
 
         # Place url and phone in desc if available:
         if event.location.url:
-            description.append(l10n('join-online', {'url': event.location.url}))
+            description.append(l10n('join-online', {'url': event.location.url}, lang=organizer_language))
 
         if event.location.phone:
-            description.append(l10n('join-phone', {'phone': event.location.phone}))
+            description.append(l10n('join-phone', {'phone': event.location.phone}, lang=organizer_language))
 
         body = {
             'iCalUID': event.uuid.hex,
@@ -669,6 +670,10 @@ class Tools:
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+
+        # Emails to attendee should be sent in the attendee's language if available
+        lang = attendee.language if attendee.language is not None else FALLBACK_LOCALE
+
         # Send mail
         background_tasks.add_task(
             send_invite_email,
@@ -678,6 +683,7 @@ class Tools:
             duration=slot.duration,
             to=attendee.email,
             attachment=ics_file,
+            lang=lang,
         )
 
     def send_hold_vevent(
@@ -697,8 +703,15 @@ class Tools:
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+
+        # Emails to attendee should be sent in the attendee's language if available
+        lang = attendee.language if attendee.language is not None else FALLBACK_LOCALE
+
         # Send mail
-        background_tasks.add_task(send_pending_email, organizer.name, date=date, to=attendee.email, attachment=ics_file)
+        background_tasks.add_task(
+            send_pending_email, organizer.name, date=date, duration=slot.duration,
+            to=attendee.email, attachment=ics_file, lang=lang,
+        )
 
     def send_reject_vevent(
         self,
@@ -717,9 +730,14 @@ class Tools:
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+
+        # Emails to attendee should be sent in the attendee's language if available
+        lang = attendee.language if attendee.language is not None else FALLBACK_LOCALE
+
         # Send mail
         background_tasks.add_task(
-            send_rejection_email, organizer.name, date=date, to=attendee.email, attachment=ics_file
+            send_rejection_email, organizer.name, date=date, duration=slot.duration,
+            to=attendee.email, attachment=ics_file, lang=lang,
         )
 
     def send_cancel_vevent(
@@ -739,13 +757,19 @@ class Tools:
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
         date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+
+        # Emails to attendee should be sent in the attendee's language if available
+        lang = attendee.language if attendee.language is not None else FALLBACK_LOCALE
+
         # Send mail
         background_tasks.add_task(
             send_cancel_email,
             owner_name=organizer.name,
             date=date,
+            duration=slot.duration,
             to=attendee.email,
             attachment=ics_file,
+            lang=lang,
         )
 
     @staticmethod
@@ -1090,4 +1114,10 @@ class Tools:
         """
         attendee_name = slot.attendee.name if slot.attendee.name is not None else slot.attendee.email
         owner_name = owner.name if owner.name is not None else owner.email
-        return l10n('event-title-template', {'prefix': prefix, 'name1': owner_name, 'name2': attendee_name})
+        owner_language = owner.language if owner.language is not None else FALLBACK_LOCALE
+
+        return l10n(
+            'event-title-template',
+            {'prefix': prefix, 'name1': owner_name, 'name2': attendee_name},
+            lang=owner_language,
+        )

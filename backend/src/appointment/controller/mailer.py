@@ -14,10 +14,11 @@ import jinja2
 import sentry_sdk
 import validators
 
+from babel.dates import format_date
 from html import escape
 from fastapi.templating import Jinja2Templates
 
-from ..defines import BASE_PATH
+from ..defines import BASE_PATH, FALLBACK_LOCALE
 from ..l10n import l10n
 
 
@@ -185,15 +186,12 @@ class BaseBookingMail(Mailer):
         # Pass to super now!
         super().__init__(*args, **kwargs)
 
-        # Localize date and time range format
+        # Localize time format
         self.time_format = l10n('time-format', lang=self.lang)
-        self.date_format = l10n('date-format', lang=self.lang)
 
         # If value is key then there's no localization available, set a default.
         if self.time_format == 'time-format':
             self.time_format = '%I:%M%p'
-        if self.date_format == 'date-format':
-            self.date_format = '%A, %B %d, %Y'
 
         date_end = self.date + datetime.timedelta(minutes=self.duration)
 
@@ -201,7 +199,7 @@ class BaseBookingMail(Mailer):
         self.timezone = ''
         if self.date.tzinfo:
             self.timezone += f'({date.strftime("%Z")})'
-        self.day = date.strftime(self.date_format)
+        self.day = format_date(date, format='full', locale=self.lang or FALLBACK_LOCALE)
 
     def _attachments(self):
         """We need these little icons for the message body"""
@@ -233,9 +231,10 @@ class InvitationMail(BaseBookingMail):
         To: Bookee
         Reply-To: Event owner
         """
+        lang = kwargs.get('lang')
         default_kwargs = {
-            'subject': l10n('invite-mail-subject'),
-            'plain': l10n('invite-mail-plain'),
+            'subject': l10n('invite-mail-subject', lang=lang),
+            'plain': l10n('invite-mail-plain', lang=lang),
         }
         super().__init__(*args, **default_kwargs, **kwargs)
         self.reply_to = self.email
@@ -248,6 +247,7 @@ class InvitationMail(BaseBookingMail):
             timezone=self.timezone,
             day=self.day,
             duration=self.duration,
+            lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
             calendar_icon_cid=self._attachments()[2].filename,
@@ -260,7 +260,7 @@ class ZoomMeetingFailedMail(Mailer):
         """Init Mailer with zoom-meeting-failed specific defaults
         To: Event owner
         """
-        default_kwargs = {'subject': l10n('zoom-invite-failed-subject')}
+        default_kwargs = {'subject': l10n('zoom-invite-failed-subject', lang=kwargs.get('lang'))}
         super(ZoomMeetingFailedMail, self).__init__(*args, **default_kwargs, **kwargs)
 
         self.appointment_title = appointment_title
@@ -269,10 +269,11 @@ class ZoomMeetingFailedMail(Mailer):
         return get_template('errors/zoom_invite_failed.jinja2').render(
             title=self.appointment_title,
             tbpro_logo_cid=self._attachments()[0].filename,
+            lang=self.lang,
         )
 
     def text(self):
-        return l10n('zoom-invite-failed-plain', {'title': self.appointment_title})
+        return l10n('zoom-invite-failed-plain', {'title': self.appointment_title}, lang=self.lang)
 
 
 class ConfirmationMail(BaseBookingMail):
@@ -299,6 +300,7 @@ class ConfirmationMail(BaseBookingMail):
                 'confirm_url': self.confirmUrl,
                 'deny_url': self.denyUrl,
             },
+            lang=self.lang,
         )
 
     def html(self):
@@ -321,74 +323,133 @@ class ConfirmationMail(BaseBookingMail):
 
 
 class CancelMail(Mailer):
-    def __init__(self, owner_name, date, *args, **kwargs):
+    def __init__(self, owner_name, date, duration, *args, **kwargs):
         """Init Mailer with cancel specific defaults
         To: Bookee
         Reply-To: Event owner
         """
         self.owner_name = owner_name
         self.date = date
-        default_kwargs = {'subject': l10n('cancel-mail-subject')}
+        self.duration = duration
+        default_kwargs = {'subject': l10n('cancel-mail-subject', lang=kwargs.get('lang'))}
         super(CancelMail, self).__init__(*args, **default_kwargs, **kwargs)
+
+        # Localize date and time
+        time_format = l10n('time-format', lang=self.lang)
+        if time_format == 'time-format':
+            time_format = '%I:%M%p'
+
+        date_end = self.date + datetime.timedelta(minutes=self.duration)
+        self.time_range = ' - '.join([date.strftime(time_format), date_end.strftime(time_format)])
+        self.timezone = ''
+        if self.date.tzinfo:
+            self.timezone = f'({date.strftime("%Z")})'
+        self.day = format_date(date, format='full', locale=self.lang or FALLBACK_LOCALE)
 
     def text(self):
         return l10n(
             'cancel-mail-plain',
             {
                 'owner_name': self.owner_name,
-                'date': self.date,
+                'day': self.day,
+                'time_range': self.time_range,
+                'timezone': self.timezone,
             },
+            lang=self.lang,
         )
 
     def html(self):
         return get_template('cancelled.jinja2').render(
             owner_name=self.owner_name,
-            date=self.date,
+            day=self.day,
+            time_range=self.time_range,
+            timezone=self.timezone,
             tbpro_logo_cid=self._attachments()[0].filename,
+            lang=self.lang,
         )
 
 
 class RejectionMail(Mailer):
-    def __init__(self, owner_name, date, *args, **kwargs):
+    def __init__(self, owner_name, date, duration, *args, **kwargs):
         """Init Mailer with rejection specific defaults
         To: Bookee
         Reply-To: Event owner
         """
         self.owner_name = owner_name
         self.date = date
-        default_kwargs = {'subject': l10n('reject-mail-subject')}
+        self.duration = duration
+        default_kwargs = {'subject': l10n('reject-mail-subject', lang=kwargs.get('lang'))}
         super(RejectionMail, self).__init__(*args, **default_kwargs, **kwargs)
         self.method = 'CANCEL'
 
+        # Localize date and time
+        time_format = l10n('time-format', lang=self.lang)
+        if time_format == 'time-format':
+            time_format = '%I:%M%p'
+
+        date_end = self.date + datetime.timedelta(minutes=self.duration)
+        self.time_range = ' - '.join([date.strftime(time_format), date_end.strftime(time_format)])
+        self.timezone = ''
+        if self.date.tzinfo:
+            self.timezone = f'({date.strftime("%Z")})'
+        self.day = format_date(date, format='full', locale=self.lang or FALLBACK_LOCALE)
+
     def text(self):
-        return l10n('reject-mail-plain', {'owner_name': self.owner_name, 'date': self.date})
+        return l10n(
+            'reject-mail-plain',
+            {'owner_name': self.owner_name, 'day': self.day, 'time_range': self.time_range, 'timezone': self.timezone},
+            lang=self.lang,
+        )
 
     def html(self):
         return get_template('rejected.jinja2').render(
             owner_name=self.owner_name,
-            date=self.date,
+            day=self.day,
+            time_range=self.time_range,
+            timezone=self.timezone,
             tbpro_logo_cid=self._attachments()[0].filename,
+            lang=self.lang,
         )
 
 
 class PendingRequestMail(Mailer):
-    def __init__(self, owner_name, date, *args, **kwargs):
+    def __init__(self, owner_name, date, duration, *args, **kwargs):
         """Init Mailer with pending-request specific defaults
         To: Bookee
         """
         self.owner_name = owner_name
         self.date = date
-        default_kwargs = {'subject': l10n('pending-mail-subject')}
+        self.duration = duration
+        default_kwargs = {'subject': l10n('pending-mail-subject', lang=kwargs.get('lang'))}
         super(PendingRequestMail, self).__init__(*args, **default_kwargs, **kwargs)
 
+        # Localize date and time
+        time_format = l10n('time-format', lang=self.lang)
+        if time_format == 'time-format':
+            time_format = '%I:%M%p'
+
+        date_end = self.date + datetime.timedelta(minutes=self.duration)
+        self.time_range = ' - '.join([date.strftime(time_format), date_end.strftime(time_format)])
+        self.timezone = ''
+        if self.date.tzinfo:
+            self.timezone = f'({date.strftime("%Z")})'
+        self.day = format_date(date, format='full', locale=self.lang or FALLBACK_LOCALE)
+
     def text(self):
-        return l10n('pending-mail-plain', {'owner_name': self.owner_name, 'date': self.date})
+        return l10n(
+            'pending-mail-plain',
+            {'owner_name': self.owner_name, 'day': self.day, 'time_range': self.time_range, 'timezone': self.timezone},
+            lang=self.lang,
+        )
 
     def html(self):
         return get_template('pending.jinja2').render(
             owner_name=self.owner_name,
-            date=self.date,
+            day=self.day,
+            time_range=self.time_range,
+            timezone=self.timezone,
             tbpro_logo_cid=self._attachments()[0].filename,
+            lang=self.lang,
         )
 
 
@@ -399,8 +460,7 @@ class NewBookingMail(BaseBookingMail):
         Reply-To: Bookee
         """
         self.schedule_name = schedule_name
-        lang = kwargs['lang'] if 'lang' in kwargs else None
-        default_kwargs = {'subject': l10n('new-booking-subject', {'name': name}, lang)}
+        default_kwargs = {'subject': l10n('new-booking-subject', {'name': name}, lang=kwargs.get('lang'))}
         super(NewBookingMail, self).__init__(
             name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs
         )
@@ -414,6 +474,7 @@ class NewBookingMail(BaseBookingMail):
                 'email': self.email,
                 'date': self.date,
             },
+            lang=self.lang
         )
 
     def html(self):
@@ -425,47 +486,11 @@ class NewBookingMail(BaseBookingMail):
             day=self.day,
             duration=self.duration,
             schedule_name=self.schedule_name,
+            lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
             calendar_icon_cid=self._attachments()[1].filename,
             clock_icon_cid=self._attachments()[2].filename,
-        )
-
-
-class SupportRequestMail(Mailer):
-    def __init__(self, requestee_name, requestee_email, topic, details, *args, **kwargs):
-        """Init Mailer with support specific defaults
-        To: Support
-        Reply-To: Requestee
-        """
-        self.requestee_name = requestee_name
-        self.requestee_email = requestee_email
-        self.topic = topic
-        self.details = details
-        default_kwargs = {'subject': l10n('support-mail-subject', {'topic': topic})}
-        super(SupportRequestMail, self).__init__(
-            os.getenv('SUPPORT_EMAIL', 'help@tb.net'), *args, **default_kwargs, **kwargs
-        )
-        self.reply_to = requestee_email
-
-    def text(self):
-        return l10n(
-            'support-mail-plain',
-            {
-                'requestee_name': self.requestee_name,
-                'requestee_email': self.requestee_email,
-                'topic': self.topic,
-                'details': self.details,
-            },
-        )
-
-    def html(self):
-        return get_template('support.jinja2').render(
-            requestee_name=self.requestee_name,
-            requestee_email=self.requestee_email,
-            topic=self.topic,
-            details=self.details,
-            tbpro_logo_cid=self._attachments()[0].filename,
         )
 
 

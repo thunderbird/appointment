@@ -40,6 +40,7 @@ class AttendeeBase(BaseModel):
     email: str
     name: str | None = None
     timezone: str | None = None
+    language: str | None = None
 
 
 class Attendee(AttendeeBase):

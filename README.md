@@ -24,7 +24,7 @@ cp appointment/frontend/.env.example appointment/frontend/.env
 cd appointment
 ```
 
-Next we need to pull Thunderbird Accounts. If you have a dev copy you can just symlink the folder to accounts. 
+Next we need to pull Thunderbird Accounts. If you have a dev copy you can just symlink the folder to accounts.
 
 Other-wise run:
 
@@ -48,14 +48,13 @@ docker-compose exec accounts uv run manage.py create_client 'Appointment' 'dev c
 
 You should see your Client ID and Client Secret within the output like:
 
-```
-
+```log
 Your client was successfully created with the uuid of f71cf674-228c-4558-b8b2-7780d6a36925
 Your Client Details:
 * Client ID: f71cf674-228c-4558-b8b2-7780d6a36925
 * Client Secret: a5303c654c839d4c8ae8aae7d3b866f581e75280d7f477ee43dcf2200939c6a12ea97fbceda916c50e1136e1615f6e4e523e7a23e2282092b0f88d91c3898b91
-
 ```
+
 (The above are just example values)
 
 Copy the Client ID and Client Secret values to your backend's .env file as `TB_ACCOUNTS_CLIENT_ID` and `TB_ACCOUNTS_SECRET` respectively.
@@ -66,7 +65,7 @@ Copy the Client ID and Client Secret values to your backend's .env file as `TB_A
 * Backend can be accessed via: <http://localhost:5000>
 * OpenAPI docs can be accessed via: <http://localhost:5000/docs> or <http://localhost:5000/redoc>
 
-A PostgreSQL database will be accessible via `localhost:5433` with username and password set to: `tba`
+A PostgreSQL database will be accessible via `localhost:5433` with username and password set to: `tba`: `abcd%efgh`
 
 On first-run the database will initialize, and a first time setup command will be triggered. Going forward database migrations will automatically run on `docker-compose up`.
 

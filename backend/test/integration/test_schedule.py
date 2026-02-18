@@ -1067,6 +1067,170 @@ class TestRequestScheduleAvailability:
             assert email_tasks.send_invite_email in send_invite_email_call[0]
             assert email_tasks.send_new_booking_email in send_new_booking_email_call[0]
 
+    def test_event_title_uses_bookee_language_instead_of_owner(
+        self,
+        monkeypatch,
+        with_db,
+        with_client,
+        make_pro_subscriber,
+        make_caldav_calendar,
+        make_schedule,
+        mock_connector,
+    ):
+        "Test that the event title is in the owner's language, not the bookee's."
+
+        start_date = date(2024, 4, 1)
+        start_time = time(9, tzinfo=UTC)
+        start_datetime = datetime.combine(start_date, start_time, tzinfo=timezone.utc)
+        end_time = time(10, tzinfo=UTC)
+
+        class MockCaldavConnector:
+            @staticmethod
+            def get_busy_time(self, calendar_ids, start, end):
+                return []
+
+        monkeypatch.setattr(CalDavConnector, 'get_busy_time', MockCaldavConnector.get_busy_time)
+
+        subscriber = make_pro_subscriber()
+        with with_db() as db:
+            db.add(subscriber)
+
+            # Owner speaks English
+            subscriber.language = 'en'
+
+            db.commit()
+            db.refresh(subscriber)
+
+        generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
+        make_schedule(
+            calendar_id=generated_calendar.id,
+            active=True,
+            start_date=start_date,
+            start_time=start_time,
+            end_time=end_time,
+            end_date=None,
+            earliest_booking=1440,
+            farthest_booking=20160,
+            slot_duration=30,
+            booking_confirmation=False,
+            use_custom_availabilities=False,
+        )
+
+        signed_url = signed_url_by_subscriber(subscriber)
+
+        slot_availability = schemas.AvailabilitySlotAttendee(
+            slot=schemas.SlotBase(start=start_datetime, duration=30),
+            attendee=schemas.AttendeeBase(email='bookee@example.org', name='Hans', timezone='Europe/Berlin'),
+        ).model_dump(mode='json')
+
+        with patch('fastapi.BackgroundTasks.add_task'):
+            # Bookee's browser sends Accept-Language: de (German)
+            response = with_client.put(
+                '/schedule/public/availability/request',
+                json={
+                    's_a': slot_availability,
+                    'url': signed_url,
+                },
+                headers={**auth_headers, 'accept-language': 'de'},
+            )
+            assert response.status_code == 200, response.text
+            data = response.json()
+
+            slot_id = data.get('id')
+
+            with with_db() as db:
+                slot = repo.slot.get(db, slot_id)
+                assert slot.appointment_id
+
+                appointment = repo.appointment.get(db, slot.appointment_id)
+                # The title must be in the owner's language (English), not the
+                # bookee's language (German), regardless of Accept-Language header.
+                assert 'Appointment' in appointment.title
+                assert 'Termin' not in appointment.title
+
+    def test_hold_prefix_uses_owner_language_not_bookee(
+        self,
+        monkeypatch,
+        with_db,
+        with_client,
+        make_pro_subscriber,
+        make_caldav_calendar,
+        make_schedule,
+        mock_connector,
+    ):
+        "Test that the HOLD: prefix is in the owner's language, not the bookee's."
+        start_date = date(2024, 4, 1)
+        start_time = time(9, tzinfo=UTC)
+        start_datetime = datetime.combine(start_date, start_time, tzinfo=timezone.utc)
+        end_time = time(10, tzinfo=UTC)
+
+        class MockCaldavConnector:
+            @staticmethod
+            def get_busy_time(self, calendar_ids, start, end):
+                return []
+
+        monkeypatch.setattr(CalDavConnector, 'get_busy_time', MockCaldavConnector.get_busy_time)
+
+        subscriber = make_pro_subscriber()
+        with with_db() as db:
+            db.add(subscriber)
+
+            # Owner speaks English
+            subscriber.language = 'en'
+
+            db.commit()
+            db.refresh(subscriber)
+
+        generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
+        make_schedule(
+            calendar_id=generated_calendar.id,
+            active=True,
+            start_date=start_date,
+            start_time=start_time,
+            end_time=end_time,
+            end_date=None,
+            earliest_booking=1440,
+            farthest_booking=20160,
+            slot_duration=30,
+            booking_confirmation=True,
+            use_custom_availabilities=False,
+        )
+
+        signed_url = signed_url_by_subscriber(subscriber)
+
+        slot_availability = schemas.AvailabilitySlotAttendee(
+            slot=schemas.SlotBase(start=start_datetime, duration=30),
+            attendee=schemas.AttendeeBase(email='bookee@example.org', name='Hans', timezone='Europe/Berlin'),
+        ).model_dump(mode='json')
+
+        with patch('fastapi.BackgroundTasks.add_task'):
+            response = with_client.put(
+                '/schedule/public/availability/request',
+                json={
+                    's_a': slot_availability,
+                    'url': signed_url,
+                },
+                # Bookee's browser sends Accept-Language: de (German)
+                headers={**auth_headers, 'accept-language': 'de'},
+            )
+            assert response.status_code == 200, response.text
+            data = response.json()
+
+            slot_id = data.get('id')
+
+            with with_db() as db:
+                slot = repo.slot.get(db, slot_id)
+                assert slot.appointment_id
+
+                appointment = repo.appointment.get(db, slot.appointment_id)
+
+                # Prefix must be in English ("HOLD:"), not German ("UNBESTÄTIGT:")
+                assert 'HOLD:' in appointment.title
+                assert 'UNBESTÄTIGT:' not in appointment.title
+
+                # Title body should also be in English
+                assert 'Appointment' in appointment.title
+
     def test_fail_not_utc(self, with_client, mock_connector, setup_schedule):
         """Ensure we fail validation because we submitted a non-utc booking time"""
         booking_time = datetime.combine(self.start_date, self.start_time, tzinfo=zoneinfo.ZoneInfo('America/Vancouver'))

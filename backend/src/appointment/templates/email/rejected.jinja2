@@ -3,7 +3,7 @@
 {% block introduction %}
   <div style="color: {{ colour_text_base }}; text-align: center; line-height: 16px;">
     <p>
-      {{ l10n('reject-mail-html-heading', {'owner_name': owner_name, 'date': date}) }}
+      {{ l10n('reject-mail-html-heading', {'owner_name': owner_name, 'day': day, 'time_range': time_range, 'timezone': timezone}, lang=lang) }}
     </p>
   </div>
 {% endblock %}

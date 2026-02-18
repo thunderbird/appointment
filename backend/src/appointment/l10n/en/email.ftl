@@ -108,12 +108,16 @@ confirm-mail-html-deny-action = Decline
 cancel-mail-subject = Booking request cancelled
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-cancel-mail-html-heading = { $owner_name } cancelled your booking request for this time slot: { $date }.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "2:00PM - 2:30PM")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+cancel-mail-html-heading = { $owner_name } cancelled your booking request for { $day } at { $time_range } { $timezone }.
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-cancel-mail-plain = { $owner_name } cancelled your booking request for this time slot: { $date }.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "2:00PM - 2:30PM")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+cancel-mail-plain = { $owner_name } cancelled your booking request for { $day } at { $time_range } { $timezone }.
 {-brand-footer}
 
 ## Rejected Appointment
@@ -121,12 +125,16 @@ cancel-mail-plain = { $owner_name } cancelled your booking request for this time
 reject-mail-subject = Booking request declined
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-reject-mail-html-heading = { $owner_name } denied your booking request for this time slot: { $date }.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "2:00PM - 2:30PM")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+reject-mail-html-heading = { $owner_name } denied your booking request for { $day } at { $time_range } { $timezone }.
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-reject-mail-plain = { $owner_name } denied your booking request for this time slot: { $date }.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "2:00PM - 2:30PM")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+reject-mail-plain = { $owner_name } denied your booking request for { $day } at { $time_range } { $timezone }.
                     {-brand-footer}
 
 ## Pending Appointment
@@ -134,12 +142,16 @@ reject-mail-plain = { $owner_name } denied your booking request for this time sl
 pending-mail-subject = Your booking request is pending approval
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-pending-mail-html-heading = { $owner_name } has been notified of your booking request for this time slot: { $date }. You will receive another email once that request has been approved or declined.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "2:00PM - 2:30PM")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+pending-mail-html-heading = { $owner_name } has been notified of your booking request for { $day } at { $time_range } { $timezone }. You will receive another email once that request has been approved or declined.
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-pending-mail-plain = { $owner_name } has been notified of your booking request for this time slot: { $date }.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "2:00PM - 2:30PM")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+pending-mail-plain = { $owner_name } has been notified of your booking request for { $day } at { $time_range } { $timezone }.
                     You will receive another email once that request has been approved or declined.
                     {-brand-footer}
 

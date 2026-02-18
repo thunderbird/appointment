@@ -10,7 +10,6 @@ from appointment.controller.mailer import (
     InvitationMail,
     ZoomMeetingFailedMail,
     RejectionMail,
-    SupportRequestMail,
     InviteAccountMail,
     ConfirmYourEmailMail,
     NewBookingMail,
@@ -19,10 +18,11 @@ from appointment.controller.mailer import (
 from appointment.defines import APP_ENV_DEV
 
 
-def send_invite_email(owner_name, owner_email, date, duration, to, attachment):
+def send_invite_email(owner_name, owner_email, date, duration, to, attachment, lang):
     try:
         mail = InvitationMail(
-            name=owner_name, email=owner_email, date=date, duration=duration, to=to, attachments=[attachment]
+            name=owner_name, email=owner_email, date=date, duration=duration,
+            to=to, attachments=[attachment], lang=lang,
         )
         mail.send()
     except Exception as e:
@@ -61,62 +61,51 @@ def send_new_booking_email(name, email, date, duration, to, schedule_name, lang)
             sentry_sdk.capture_exception(e)
 
 
-def send_pending_email(owner_name, date, to, attachment):
+def send_pending_email(owner_name, date, duration, to, attachment, lang):
     try:
-        mail = PendingRequestMail(owner_name=owner_name, date=date, to=to, attachments=[attachment])
-        mail.send()
-    except Exception as e:
-        if os.getenv('APP_ENV') == APP_ENV_DEV:
-            logging.error('[tasks.emails] An exception has occurred: ', e)
-            traceback.print_exc()
-        if os.getenv('SENTRY_DSN'):
-            sentry_sdk.capture_exception(e)
-
-
-def send_cancel_email(owner_name, date, to, attachment):
-    try:
-        mail = CancelMail(owner_name=owner_name, date=date, to=to, attachments=[attachment])
-        mail.send()
-    except Exception as e:
-        if os.getenv('APP_ENV') == APP_ENV_DEV:
-            logging.error('[tasks.emails] An exception has occurred: ', e)
-            traceback.print_exc()
-        if os.getenv('SENTRY_DSN'):
-            sentry_sdk.capture_exception(e)
-
-
-def send_rejection_email(owner_name, date, to, attachment):
-    try:
-        mail = RejectionMail(owner_name=owner_name, date=date, to=to, attachments=[attachment])
-        mail.send()
-    except Exception as e:
-        if os.getenv('APP_ENV') == APP_ENV_DEV:
-            logging.error('[tasks.emails] An exception has occurred: ', e)
-            traceback.print_exc()
-        if os.getenv('SENTRY_DSN'):
-            sentry_sdk.capture_exception(e)
-
-
-def send_zoom_meeting_failed_email(to, appointment_title):
-    try:
-        mail = ZoomMeetingFailedMail(to=to, appointment_title=appointment_title)
-        mail.send()
-    except Exception as e:
-        if os.getenv('APP_ENV') == APP_ENV_DEV:
-            logging.error('[tasks.emails] An exception has occurred: ', e)
-            traceback.print_exc()
-        if os.getenv('SENTRY_DSN'):
-            sentry_sdk.capture_exception(e)
-
-
-def send_support_email(requestee_name, requestee_email, topic, details):
-    try:
-        mail = SupportRequestMail(
-            requestee_name=requestee_name,
-            requestee_email=requestee_email,
-            topic=topic,
-            details=details,
+        mail = PendingRequestMail(
+            owner_name=owner_name, date=date, duration=duration, to=to, attachments=[attachment], lang=lang,
         )
+        mail.send()
+    except Exception as e:
+        if os.getenv('APP_ENV') == APP_ENV_DEV:
+            logging.error('[tasks.emails] An exception has occurred: ', e)
+            traceback.print_exc()
+        if os.getenv('SENTRY_DSN'):
+            sentry_sdk.capture_exception(e)
+
+
+def send_cancel_email(owner_name, date, duration, to, attachment, lang):
+    try:
+        mail = CancelMail(
+            owner_name=owner_name, date=date, duration=duration, to=to, attachments=[attachment], lang=lang,
+        )
+        mail.send()
+    except Exception as e:
+        if os.getenv('APP_ENV') == APP_ENV_DEV:
+            logging.error('[tasks.emails] An exception has occurred: ', e)
+            traceback.print_exc()
+        if os.getenv('SENTRY_DSN'):
+            sentry_sdk.capture_exception(e)
+
+
+def send_rejection_email(owner_name, date, duration, to, attachment, lang):
+    try:
+        mail = RejectionMail(
+            owner_name=owner_name, date=date, duration=duration, to=to, attachments=[attachment], lang=lang,
+        )
+        mail.send()
+    except Exception as e:
+        if os.getenv('APP_ENV') == APP_ENV_DEV:
+            logging.error('[tasks.emails] An exception has occurred: ', e)
+            traceback.print_exc()
+        if os.getenv('SENTRY_DSN'):
+            sentry_sdk.capture_exception(e)
+
+
+def send_zoom_meeting_failed_email(to, appointment_title, lang):
+    try:
+        mail = ZoomMeetingFailedMail(to=to, appointment_title=appointment_title, lang=lang)
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:

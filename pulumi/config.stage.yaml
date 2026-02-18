@@ -283,8 +283,6 @@ resources:
                 value: "587"
               - name: SMTP_SECURITY
                 value: STARTTLS
-              - name: SUPPORT_EMAIL
-                value: appointment-support@thunderbird.net
               - name: TIER_BASIC_CALENDAR_LIMIT
                 value: "3"
               - name: TIER_PLUS_CALENDAR_LIMIT

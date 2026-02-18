@@ -108,12 +108,16 @@ confirm-mail-html-deny-action = Buchung ablehnen
 cancel-mail-subject = Buchungsanfrage abgesagt
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-cancel-mail-html-heading = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfenster abgesagt: { $date }.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+cancel-mail-html-heading = { $owner_name } hat deine Buchungsanfrage für { $day } um { $time_range } { $timezone } abgesagt.
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-cancel-mail-plain = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfenster abgesagt: { $date }.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+cancel-mail-plain = { $owner_name } hat deine Buchungsanfrage für { $day } um { $time_range } { $timezone } abgesagt.
 {-brand-footer}
 
 ## Rejected Appointment
@@ -121,12 +125,16 @@ cancel-mail-plain = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfe
 reject-mail-subject = Buchungsanfrage abgelehnt
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-reject-mail-html-heading = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfenster abgelehnt: { $date }.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+reject-mail-html-heading = { $owner_name } hat deine Buchungsanfrage für { $day } um { $time_range } { $timezone } abgelehnt.
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-reject-mail-plain = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfenster abgelehnt: { $date }.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+reject-mail-plain = { $owner_name } hat deine Buchungsanfrage für { $day } um { $time_range } { $timezone } abgelehnt.
                     {-brand-footer}
 
 ## Pending Appointment
@@ -134,12 +142,16 @@ reject-mail-plain = { $owner_name } hat deine Buchungsanfrage für dieses Zeitfe
 pending-mail-subject = Deine Buchungsanfrage wartet auf Bestätigung
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-pending-mail-html-heading = { $owner_name } wurde über deine Buchungsanfrage für dieses Zeitfenster informiert: { $date }. Du erhältst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+pending-mail-html-heading = { $owner_name } wurde über deine Buchungsanfrage für { $day } um { $time_range } { $timezone } informiert. Du erhältst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $date (String) - Date of the requested appointment
-pending-mail-plain = { $owner_name } wurde über deine Buchungsanfrage für dieses Zeitfenster informiert: { $date }.
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+pending-mail-plain = { $owner_name } wurde über deine Buchungsanfrage für { $day } um { $time_range } { $timezone } informiert.
                     Du erhältst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
                     {-brand-footer}
 
