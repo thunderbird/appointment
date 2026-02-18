@@ -79,14 +79,6 @@ export enum BookingsSortOptions {
 }
 
 /**
- * Status to indicate if an invite code ist still valid or no longer valid
- */
-export enum InviteStatus {
-  Active = 1,
-  Revoked = 2,
-}
-
-/**
  * Available appointment views
  */
 export enum BookingsViews {
@@ -208,10 +200,7 @@ export enum AlertSchemes {
  * Used as the session storage key for the location the user wanted to go to before logging in.
  */
 export const LOGIN_REDIRECT_KEY = 'loginRedirect';
-/**
- * Used as the session storage key for the registration invite code.
- */
-export const INVITE_CODE_KEY = 'inviteCode';
+
 /**
  * Data types for table row items
  */
@@ -257,14 +246,6 @@ export enum TooltipPosition {
 }
 
 /**
- * This should match the enum in routes/waiting_list.py
- */
-export enum WaitingListAction {
-  Confirm = 1,
-  Leave = 2,
-}
-
-/**
  * Colors used for solor select inputs
  */
 export enum ColorPalette {
@@ -303,8 +284,6 @@ export enum MetricEvents {
   SignUp = 'apmt.signup',
   SignUpAlreadyExists = 'apmt.signup.already-exists',
   Login = 'apmt.login',
-  WaitingListEmailConfirmed = 'apmt.signup.email-confirmed',
-  WaitingListEmailRemoved = 'apmt.signup.email-removed',
 }
 
 export default {
@@ -324,7 +303,6 @@ export default {
   EventLocationType,
   ExternalConnectionProviders,
   FtueStep,
-  InviteStatus,
   LOGIN_REDIRECT_KEY,
   MeetingLinkProviderType,
   MetricEvents,
@@ -335,5 +313,4 @@ export default {
   TableDataButtonType,
   TableDataType,
   TooltipPosition,
-  WaitingListAction,
 };

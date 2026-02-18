@@ -197,10 +197,7 @@
     "addCalDavCalendar": "CalDav hinzufügen",
     "addSlot": "Zeitfenster hinzufügen",
     "addTime": "Zeit hinzufügen",
-    "addToWaitingList": "Der Warteliste beitreten",
-    "admin-invite-codes-panel": "Einladungen",
     "admin-subscriber-panel": "Abonnenten",
-    "admin-waiting-list-panel": "Warteliste",
     "all": "Alle",
     "allAppointments": "Alle Termine",
     "allDay": "Ganzer Tag",
@@ -322,7 +319,6 @@
     "end": "Ende",
     "endDate": "Enddatum",
     "endTime": "Endzeit",
-    "enterEmailToInvite": "Per E-Mail-Adresse zu Thunderbird Appointment einladen:",
     "enterDescriptionToSchedulingPage": "Gib eine Beschreibung ein, die auf der Buchungsseite angezeigt wird",
     "error": "Fehler",
     "exploreThunderbirdPro": "Thunderbird Pro erkunden",
@@ -343,10 +339,6 @@
     "id": "ID",
     "immediately": "Sofort",
     "inPerson": "Vor Ort",
-    "inviteCode": "Einladungscodes | Einladungscode | Einladungscodes",
-    "inviteId": "Einladungs-ID",
-    "inviteStatus": "Einladungsstatus",
-    "invitedSubscriberId": "ID eingeladener Abonnent",
     "language": "Sprache",
     "legal": "Impressum",
     "learnMore": "Mehr erfahren",
@@ -436,10 +428,6 @@
     "selectDateForWeek": "Datum für Woche auswählen",
     "selectWeek": "Woche auswählen",
     "send": "Senden",
-    "sendDMCANotice": "DMCA-Benachrichtigung senden",
-    "sendInvitationToAnotherEmail": "Die Einladung an eine andere E-Mail-Adresse senden",
-    "sendInviteToWaitingList": "Wähle jemanden aus, um eine Einladung zu senden! | Eine Einladung an {count} Person senden | Eine Einladung an {count} Leute senden",
-    "sentCountInvitesSuccessfully": "Alle ausgewählten Benutzer sind bereits eingeladen! | {count} Einladung gesendet! | {count} Einladungen gesendet!",
     "settings": "Einstellungen",
     "shareMyLink": "Meinen Link teilen",
     "shareYourLink": "Deinen Link teilen",
@@ -447,8 +435,6 @@
     "showSecondaryTimeZone": "Zeige sekundäre Zeitzone",
     "signIn": "Anmelden",
     "signInWithGoogle": "Mit Google anmelden",
-    "signUpForBeta": "Registriere dich für die Beta",
-    "signUpWithInviteCode": "Anmeldung mit Einladungscode",
     "slotLength": "Termindauer",
     "sortBy": "Sortieren nach",
     "start": "Start",
@@ -495,9 +481,7 @@
     "virtual": "Virtuell",
     "virtualMeetingLink": "Online-Meeting-Link hinzufügen",
     "virtualMeetingDetails": "Virtuelle Konferenz-Details",
-    "waitingListUser": "Wartelisten-Benutzer | Wartelisten-Benutzer | Wartelisten-Benutzer",
     "warning": "Warnung",
-    "wasInvited": "Wurde eingeladen",
     "whatDoYouWantToDoToday": "Was möchtest du heute tun?",
     "week": "Woche",
     "weekPicker": "Wochenauswahl",
@@ -512,20 +496,8 @@
     "en": "English"
   },
   "login": {
-    "confirm": {
-      "intro": [
-        "Bitte bestätige die Registrierung um der Warteliste beizutreten.",
-        "Check dein Postfach, du erhältst in Kürze weitere Informationen."
-      ],
-      "title": "Vervollständige die Registrierung"
-    },
     "form": {
-      "email": "Gib deine E-Mail-Adresse ein, um dich anzumelden oder ein Konto zu erstellen:",
-      "no-invite-code": "Wenn du keinen Einladungscode hast, setze deine E-Mail-Adresse auf unsere Warteliste.",
-      "privacy": "Datenschutz ist uns wichtig."
-    },
-    "login": {
-      "title": "Log dich ein oder erstelle ein Benutzerkonto"
+      "email": "E-Mail-Adresse"
     },
     "remoteError": {
       "disabled-account": "Dieses Konto ist deaktiviert.",
@@ -533,14 +505,7 @@
       "email-not-in-session": "Es gab ein Problem mit der Anmeldesitzung. Bitte versuch es erneut.",
       "invalid-credentials": "Es gab ein Problem mit Deinen Anmeldedaten.",
       "invalid-state": "Die Anmeldesitzung ist abgelaufen. Bitte versuch es erneut.",
-      "invite-not-valid": "Der eingegebene Einladungscode ist ungültig.",
       "unknown-error": "Ein unbekannter Fehler ist aufgetreten."
-    },
-    "signUp": {
-      "title": "Du hast einen Einladungscode? Gib ihn hier ein"
-    },
-    "waitingListSignUp": {
-      "title": "Gib deine E-Mail-Adresse ein um der Warteliste beizutreten"
     }
   },
   "navBar": {
@@ -648,26 +613,6 @@
     "minutes": "{value} Minuten",
     "minutesShort": "{value} min",
     "none": "{value}"
-  },
-  "waitingList": {
-    "adminInviteNotice": "Hinweis: Der Senden-Button wird bereits akzeptierte Personen nicht erneut einladen, sie können aber dennoch ausgewählt werden. Verwende die Filter für eine bessere Übersicht!",
-    "confirmHeading": "Du bist auf der Warteliste",
-    "confirmInfo": "Du bekommst eine Einladung sobald die Registrierung startet.",
-    "errorHeading": "Es gab ein Problem mit diesem Link",
-    "errorInfo": "Leider ist dieser Link abgelaufen oder ungültig.",
-    "leaveHeading": "Du wurdest von von der Warteliste entfernt",
-    "leaveInfo": "Deine E-Mail-Adresse wurde erfolgreich von unserer Warteliste entfernt. Falls du deine Meinung änderst, kannst du dich jederzeit wieder auf die Warteliste setzen lassen.",
-    "marketing": [
-      "Behalte deinen Kalender, teile deine Zeit.",
-      "Thunderbird Appointment vereinfacht die Art und Weise gemeinsamer Terminfindung, um durch weniger Planen mehr Zeit für die wichtigen Dinge zu haben."
-    ],
-    "signUpAlreadyExists": "Du bist bereits auf der Warteliste.",
-    "signUpCheckYourEmail": "Weitere Informationen findest Du in Deiner E-Mail.",
-    "signUpHeading": "Registrierung abschließen",
-    "signUpInfo": [
-      "Bitte bestätige deine E-Mail-Adresse, um auf die Warteliste zu kommen.",
-      "In Kürze erhätst du weitere Informationen in deinen Posteingang."
-    ]
   },
   "footer": {
     "creativeCommonsLinkText": "Creative-Commons-Lizenz",
