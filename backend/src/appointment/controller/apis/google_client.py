@@ -204,15 +204,34 @@ class GoogleClient:
                 eventTypes=event_types,
                 fields=fields,
             )
+
             while request is not None:
                 try:
                     response = request.execute()
-
                     items += response.get('items', [])
                 except HttpError as e:
                     logging.warning(f'[google_client.list_events] Request Error: {e.status_code}/{e.error_details}')
+                    break
 
-                request = service.events().list_next(request, response)
+                # We need to manually paginate because the Google API's list_next() method
+                # corrupts repeated query params like eventTypes on re-encoding.
+                # See https://github.com/googleapis/google-api-python-client/blob/main/googleapiclient/discovery.py#L1382-L1384
+                # and https://github.com/googleapis/google-api-python-client/blob/main/googleapiclient/_helpers.py#L141-L163
+                page_token = response.get('nextPageToken')
+
+                if page_token:
+                    request = service.events().list(
+                        calendarId=calendar_id,
+                        timeMin=time_min,
+                        timeMax=time_max,
+                        singleEvents=True,
+                        orderBy='startTime',
+                        eventTypes=event_types,
+                        fields=fields,
+                        pageToken=page_token,
+                    )
+                else:
+                    request = None
 
         return items
 
