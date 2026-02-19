@@ -24,7 +24,7 @@ from ..controller.auth import schedule_slugs_by_subscriber, user_links_by_subscr
 from ..database import repo, schemas
 from ..database.models import Subscriber, ExternalConnectionType
 from ..database.schemas import OIDCLogin
-from ..defines import INVITES_TO_GIVE_OUT, AuthScheme, REDIS_USER_SESSION_PROFILE_KEY
+from ..defines import AuthScheme, REDIS_USER_SESSION_PROFILE_KEY
 
 from ..dependencies.database import get_db, get_shared_redis
 from ..dependencies.auth import (
@@ -93,7 +93,7 @@ def can_login(
     elif AuthScheme.is_oidc():
         return utils.is_in_allow_list(db, email)
 
-    # There's no waiting list setting on password login
+    # Allow for password login
     return True
 
 
@@ -102,7 +102,6 @@ def accounts_login(
     request: Request,
     email: str,
     timezone: str | None = None,
-    invite_code: str | None = None,
     db: Session = Depends(get_db),
     accounts_client: AccountsClient = Depends(get_accounts_client),
 ):
@@ -115,26 +114,17 @@ def accounts_login(
     # Normalize email address to lower case
     email = email.lower()
 
-    # Check if they're in the allowed list, but only if they didn't provide an invite code
-    # This checks to see if they're already a user (bypasses allow list) or in the allow list.
+    # Check if they're in the allowed list
     is_in_allow_list = accounts_client.is_in_allow_list(db, email)
 
-    if not is_in_allow_list and not invite_code:
+    if not is_in_allow_list:
         raise HTTPException(status_code=403, detail=l10n('not-in-allow-list'))
-    elif not is_in_allow_list and invite_code:
-        # For slightly nicer error handling do the invite code check now.
-        # Only if they're not in the allow list and have an invite code.
-        if not repo.invite.code_exists(db, invite_code):
-            raise HTTPException(404, l10n('invite-code-not-valid'))
-        if not repo.invite.code_is_available(db, invite_code):
-            raise HTTPException(403, l10n('invite-code-not-valid'))
 
     url, state = accounts_client.get_redirect_url(token_urlsafe(32))
 
     request.session['tb_accounts_state'] = state
     request.session['tb_accounts_user_email'] = email
     request.session['tb_accounts_user_timezone'] = timezone
-    request.session['tb_accounts_user_invite_code'] = invite_code
 
     return {'url': url}
 
@@ -173,14 +163,11 @@ def accounts_callback(
     email = request.session['tb_accounts_user_email']
     # We only use timezone during subscriber creation, or if their timezone is None
     timezone = request.session['tb_accounts_user_timezone']
-    invite_code = request.session.get('tb_accounts_user_invite_code')
 
     # Clear session keys
     request.session.pop('tb_accounts_state')
     request.session.pop('tb_accounts_user_email')
     request.session.pop('tb_accounts_user_timezone')
-    if invite_code:
-        request.session.pop('tb_accounts_user_invite_code')
 
     accounts_client.setup()
 
@@ -204,38 +191,17 @@ def accounts_callback(
     new_subscriber_flow = not accounts_subscriber and not subscriber
 
     if new_subscriber_flow:
-        # Double check:
-        # Ensure the invite code exists and is available
-        # Use some inline-errors for now. We don't have a good error flow!
         is_in_allow_list = accounts_client.is_in_allow_list(db, email)
 
-        if not is_in_allow_list:
-            if not repo.invite.code_exists(db, invite_code):
-                raise HTTPException(404, l10n('invite-code-not-valid'))
-            if not repo.invite.code_is_available(db, invite_code):
-                raise HTTPException(403, l10n('invite-code-not-valid'))
-
-        subscriber = repo.subscriber.create(
-            db,
-            schemas.SubscriberBase(
-                email=email,
-                username=email,
-                timezone=timezone,
-            ),
-        )
-
-        # Give them 10 invites
-        repo.invite.generate_codes(db, INVITES_TO_GIVE_OUT, subscriber.id)
-
-        if not is_in_allow_list:
-            # Use the invite code after we've created the new subscriber
-            used = repo.invite.use_code(db, invite_code, subscriber.id)
-
-            # This shouldn't happen, but just in case!
-            if not used:
-                repo.subscriber.hard_delete(db, subscriber)
-                raise HTTPException(500, l10n('unknown-error'))
-
+        if is_in_allow_list:
+            subscriber = repo.subscriber.create(
+                db,
+                schemas.SubscriberBase(
+                    email=email,
+                    username=email,
+                    timezone=timezone,
+                ),
+            )
     elif not subscriber:
         subscriber = accounts_subscriber
 
@@ -300,7 +266,6 @@ def fxa_login(
     request: Request,
     email: str,
     timezone: str | None = None,
-    invite_code: str | None = None,
     db: Session = Depends(get_db),
     fxa_client: FxaClient = Depends(get_fxa_client),
 ):
@@ -313,26 +278,17 @@ def fxa_login(
     # Normalize email address to lower case
     email = email.lower()
 
-    # Check if they're in the allowed list, but only if they didn't provide an invite code
-    # This checks to see if they're already a user (bypasses allow list) or in the allow list.
+    # Check if they're in the allowed list
     is_in_allow_list = fxa_client.is_in_allow_list(db, email)
 
-    if not is_in_allow_list and not invite_code:
+    if not is_in_allow_list:
         raise HTTPException(status_code=403, detail=l10n('not-in-allow-list'))
-    elif not is_in_allow_list and invite_code:
-        # For slightly nicer error handling do the invite code check now.
-        # Only if they're not in the allow list and have an invite code.
-        if not repo.invite.code_exists(db, invite_code):
-            raise HTTPException(404, l10n('invite-code-not-valid'))
-        if not repo.invite.code_is_available(db, invite_code):
-            raise HTTPException(403, l10n('invite-code-not-valid'))
 
     url, state = fxa_client.get_redirect_url(db, token_urlsafe(32), email)
 
     request.session['fxa_state'] = state
     request.session['fxa_user_email'] = email
     request.session['fxa_user_timezone'] = timezone
-    request.session['fxa_user_invite_code'] = invite_code
 
     return {'url': url}
 
@@ -359,7 +315,6 @@ def fxa_callback(
     # login.remoteError.<id>
     errors = {
         'email-mismatch': 'email-mismatch',
-        'invite-not-valid': 'invite-not-valid',
         'unknown-error': 'unknown-error',
         'disabled-account': 'disabled-account',
         'invalid-credentials': 'invalid-credentials',
@@ -382,14 +337,11 @@ def fxa_callback(
     email = request.session['fxa_user_email'].lower()
     # We only use timezone during subscriber creation, or if their timezone is None
     timezone = request.session['fxa_user_timezone']
-    invite_code = request.session.get('fxa_user_invite_code')
 
     # Clear session keys
     request.session.pop('fxa_state')
     request.session.pop('fxa_user_email')
     request.session.pop('fxa_user_timezone')
-    if invite_code:
-        request.session.pop('fxa_user_invite_code')
 
     fxa_client.setup()
 
@@ -411,43 +363,17 @@ def fxa_callback(
     new_subscriber_flow = not fxa_subscriber and not subscriber
 
     if new_subscriber_flow:
-        # Double check:
-        # Ensure the invite code exists and is available
-        # Use some inline-errors for now. We don't have a good error flow!
         is_in_allow_list = fxa_client.is_in_allow_list(db, email)
 
-        if not is_in_allow_list:
-            if not repo.invite.code_exists(db, invite_code):
-                return RedirectResponse(
-                    f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/login/?error={errors["invite-not-valid"]}'
-                )
-            if not repo.invite.code_is_available(db, invite_code):
-                return RedirectResponse(
-                    f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/login/?error={errors["invite-not-valid"]}'
-                )
-
-        subscriber = repo.subscriber.create(
-            db,
-            schemas.SubscriberBase(
-                email=email,
-                username=email,
-                timezone=timezone,
-            ),
-        )
-
-        # Give them 10 invites
-        repo.invite.generate_codes(db, INVITES_TO_GIVE_OUT, subscriber.id)
-
-        if not is_in_allow_list:
-            # Use the invite code after we've created the new subscriber
-            used = repo.invite.use_code(db, invite_code, subscriber.id)
-
-            # This shouldn't happen, but just in case!
-            if not used:
-                repo.subscriber.hard_delete(db, subscriber)
-                return RedirectResponse(
-                    f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/login/?error={errors["unknown-error"]}'
-                )
+        if is_in_allow_list:
+            subscriber = repo.subscriber.create(
+                db,
+                schemas.SubscriberBase(
+                    email=email,
+                    username=email,
+                    timezone=timezone,
+                ),
+            )
 
     elif not subscriber:
         subscriber = fxa_subscriber
@@ -679,10 +605,6 @@ def oidc_token(
                 timezone=data.timezone,
             ),
         )
-
-        # FIXME: This functionality doesn't work, but we might re-use it later. If not please delete.
-        # Give them 10 invites
-        repo.invite.generate_codes(db, INVITES_TO_GIVE_OUT, subscriber.id)
 
     # FIXME: OIDC should handle this check
     # Only proceed if user account is enabled (which is the default case for new users)

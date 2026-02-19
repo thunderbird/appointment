@@ -45,10 +45,6 @@ def download(db, subscriber: Subscriber):
     external_connections = subscriber.external_connections
     schedules = repo.schedule.get_by_subscriber(db, subscriber.id)
     availability = [repo.schedule.get_availability(db, schedule.id) for schedule in schedules]
-    invite = repo.invite.get_by_subscriber(db, subscriber.id)
-    waiting_list = None
-    if invite:
-        waiting_list = invite.waiting_list
 
     # Convert models to csv
     attendee_buffer = model_to_csv_buffer(attendees)
@@ -58,8 +54,6 @@ def download(db, subscriber: Subscriber):
     slot_buffer = model_to_csv_buffer(slots)
     external_connections_buffer = model_to_csv_buffer(external_connections)
     schedules_buffer = model_to_csv_buffer(schedules)
-    invite_buffer = model_to_csv_buffer([invite])
-    waiting_list_buffer = model_to_csv_buffer([waiting_list])
 
     # Unique behaviour because we can have lists of lists..too annoying to not do it this way.
     availability_buffer = ''
@@ -77,8 +71,6 @@ def download(db, subscriber: Subscriber):
         data_zip.writestr('external_connections.csv', external_connections_buffer.getvalue())
         data_zip.writestr('schedules.csv', schedules_buffer.getvalue())
         data_zip.writestr('availability.csv', availability_buffer)
-        data_zip.writestr('invite.csv', invite_buffer.getvalue())
-        data_zip.writestr('waiting_list.csv', waiting_list_buffer.getvalue())
         data_zip.writestr(
             'readme.txt', l10n('account-data-readme', {'download_time': datetime.datetime.now(datetime.UTC)})
         )
@@ -108,8 +100,6 @@ def delete_account(db, subscriber: Subscriber):
         len(repo.external_connection.get_by_type(db, subscriber.id, models.ExternalConnectionType.fxa)),
         len(repo.external_connection.get_by_type(db, subscriber.id, models.ExternalConnectionType.google)),
         len(repo.external_connection.get_by_type(db, subscriber.id, models.ExternalConnectionType.zoom)),
-        repo.invite.get_by_subscriber(db, subscriber.id),
-        repo.invite.get_waiting_list_entry_by_email(db, subscriber.email),
     ]
 
     # Check if we have any left-over subscriber data

@@ -19,7 +19,7 @@ from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request, Response, Query
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber, schedule_slugs_by_subscriber, user_links_by_subscriber
-from ..database.models import Subscriber, CalendarProvider, InviteStatus, MeetingLinkProviderType
+from ..database.models import Subscriber, CalendarProvider, MeetingLinkProviderType
 from ..database.schemas import ExternalConnection
 from ..defines import DEFAULT_CALENDAR_COLOUR
 from ..dependencies.google import get_google_client
@@ -223,11 +223,6 @@ def refresh_signature(db: Session = Depends(get_db), subscriber: Subscriber = De
             logging.warning('Could not generate unique slug!')
 
     return True
-
-
-@router.get('/me/invites', response_model=list[schemas.InviteOut])
-def get_my_invites(db: Session = Depends(get_db), subscriber: Subscriber = Depends(get_subscriber)):
-    return repo.invite.get_by_owner(db, subscriber.id, status=InviteStatus.active, only_unused=True)
 
 
 @router.get('/cal/{id}', response_model=schemas.CalendarConnectionOut)
@@ -595,4 +590,3 @@ def cancel_my_appointment(
         remote_calendar_connection.delete_event(uid=uuid)
     except EventNotDeletedException:
         raise EventCouldNotBeDeleted
-

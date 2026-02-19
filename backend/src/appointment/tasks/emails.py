@@ -10,8 +10,6 @@ from appointment.controller.mailer import (
     InvitationMail,
     ZoomMeetingFailedMail,
     RejectionMail,
-    InviteAccountMail,
-    ConfirmYourEmailMail,
     NewBookingMail,
     CancelMail,
 )
@@ -106,34 +104,6 @@ def send_rejection_email(owner_name, date, duration, to, attachment, lang):
 def send_zoom_meeting_failed_email(to, appointment_title, lang):
     try:
         mail = ZoomMeetingFailedMail(to=to, appointment_title=appointment_title, lang=lang)
-        mail.send()
-    except Exception as e:
-        if os.getenv('APP_ENV') == APP_ENV_DEV:
-            logging.error('[tasks.emails] An exception has occurred: ', e)
-            traceback.print_exc()
-        if os.getenv('SENTRY_DSN'):
-            sentry_sdk.capture_exception(e)
-
-
-def send_invite_account_email(date, to, lang):
-    try:
-        mail = InviteAccountMail(date=date, to=to, lang=lang)
-        mail.send()
-    except Exception as e:
-        if os.getenv('APP_ENV') == APP_ENV_DEV:
-            logging.error('[tasks.emails] An exception has occurred: ', e)
-            traceback.print_exc()
-        if os.getenv('SENTRY_DSN'):
-            sentry_sdk.capture_exception(e)
-
-
-def send_confirm_email(to, confirm_token, decline_token):
-    try:
-        base_url = f'{os.getenv("FRONTEND_URL")}/waiting-list'
-        confirm_url = f'{base_url}/{confirm_token}'
-        decline_url = f'{base_url}/{decline_token}'
-
-        mail = ConfirmYourEmailMail(to=to, confirm_url=confirm_url, decline_url=decline_url)
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:

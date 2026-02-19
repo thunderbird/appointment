@@ -41,7 +41,6 @@ calendar-not-active = Der Kalender ist nicht verbunden.
 slot-not-found = Es gibt keine freien Zeitfenster zu buchen.
 slot-already-taken = Das gewählte Zeitfenster ist nicht mehr verfügbar. Bitte erneut versuchen.
 slot-invalid-email = Die angegebene E-Mail-Adresse war nicht gültig. Bitte erneut versuchen.
-invite-code-not-valid = Der Einladungscode ist leider nicht gültig.
 not-in-allow-list = Deine E-Mail-Adresse ist nicht in der Liste erlaubter Adressen enthalten.
 schedule-availability-invalid = Die benutzerdefinierte Verfügbarkeit ist nicht gültig. Bitte alle eingegebenen Zeiten prüfen. 
 
@@ -114,10 +113,6 @@ join-online = Online teilnehmen unter: { $url }
 # $phone (String) - An unformatted phone number for the meeting
 join-phone = Per Telefon teilnehmen: { $phone }
 
-# Waiting List Errors
-wl-subscriber-already-exists = { $email } ist bereits Abonnent.
-wl-subscriber-failed-to-create = { $email } konnte nicht eingeladen werden. Bitte den Fehler melden!
-
 ## Account Data Readme
 
 # This is a text file that is generated and bundled along with your account data
@@ -153,9 +148,7 @@ account-data-readme = ===============================================
                        - availability.csv : Daten zu Verfügbarkeiten
                        - calendars.csv : Eine Liste Deiner Kalender
                        - external_connections.csv : Eine Liste eingerichteter Verbindungen zu externen Diensten
-                       - invite.csv : Daten zu Termineinladungen und Einladungscodes
                        - schedules.csv : Die von uns gespeicherten Informationen Deines Zeitplans
                        - slots.csv : Eine Liste generierter Zeitfenster Deines Zeitplans
                        - subscriber.csv : Deine Profil- und Kontoinformationen
-                       - waiting_list.csv : Von uns gespeicherte Informationen zur Warteliste für Termine
                        - readme.txt : Diese Datei

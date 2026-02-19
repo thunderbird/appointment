@@ -2,7 +2,7 @@ import math
 
 from fastapi import APIRouter, Depends
 
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 
 from ..database import repo, schemas, models
 from ..database.models import Subscriber
@@ -22,14 +22,13 @@ These require get_admin_subscriber!
 def get_all_subscriber(
     data: schemas.ListResponseIn, db: Session = Depends(get_db), _: Subscriber = Depends(get_admin_subscriber)
 ):
-    """List all existing invites, needs admin permissions"""
+    """List all existing subscribers, needs admin permissions"""
     page = data.page - 1
     per_page = data.per_page
 
     total_count = db.query(models.Subscriber).count()
     subscribers = (
         db.query(models.Subscriber)
-        .options(joinedload(models.Subscriber.invite))
         .order_by('time_created')
         .offset(page * per_page)
         .limit(per_page)

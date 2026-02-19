@@ -133,12 +133,10 @@ run-command main --help
 ╭─ Commands ─────────────────────────────────────────────────────╮
 │ download-legal                                                 │
 │ update-db                                                      │
-│ create-invite-codes                                            │
 │ setup                                                          │
 ╰────────────────────────────────────────────────────────────────╯
 ```
 
 * `download-legal` is an internal command to process privacy policy and terms of service files that will be served by the frontend.
 * `update-db` runs on docker container entry, and ensures the latest db migration has run, or if it's a new db then to kickstart that.
-* `create-invite-codes n` is an internal command to create invite codes which can be used for user registrations. The `n` argument is an integer that specifies the amount of codes to be generated.
 * `setup` a first run setup that fills in some missing environment variables.

@@ -7,10 +7,10 @@ Create Date: 2024-04-16 12:41:53.550102
 """
 
 import os
+import enum
 
 from alembic import op
 import sqlalchemy as sa
-from database.models import InviteStatus
 from sqlalchemy import func, ForeignKey
 from sqlalchemy_utils import StringEncryptedType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
@@ -21,6 +21,9 @@ down_revision = 'c5b9fc31b555'
 branch_labels = None
 depends_on = None
 
+class InviteStatus(enum.Enum):
+    active = 1  # The code is still valid. It may be already used or is still to be used
+    revoked = 2  # The code is no longer valid and cannot be used for sign up anymore
 
 def secret():
     return os.getenv('DB_SECRET')
