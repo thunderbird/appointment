@@ -17,7 +17,10 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('subscribers', sa.Column('start_of_week', sa.Enum(IsoWeekday), default=IsoWeekday.sunday, nullable=False, index=True))
+    op.add_column(
+        'subscribers',
+        sa.Column('start_of_week', sa.Enum(IsoWeekday), default=IsoWeekday.sunday, nullable=False, index=True)
+    )
 
 
 def downgrade() -> None:

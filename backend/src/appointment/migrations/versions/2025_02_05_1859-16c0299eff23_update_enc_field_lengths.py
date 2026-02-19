@@ -5,10 +5,7 @@ Revises: 645fd31f827d
 Create Date: 2025-02-05 18:59:31.214328
 
 """
-import sqlalchemy_utils
 from alembic import op
-import sqlalchemy as sa
-from sqlalchemy import String
 from sqlalchemy.dialects import mysql
 
 from appointment.database.models import calculate_encrypted_length

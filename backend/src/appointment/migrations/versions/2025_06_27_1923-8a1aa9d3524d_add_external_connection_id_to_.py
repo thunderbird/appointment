@@ -19,7 +19,9 @@ depends_on = None
 def upgrade() -> None:
     # Add the external_connection_id column
     op.add_column('calendars', sa.Column('external_connection_id', sa.Integer(), nullable=True))
-    op.create_foreign_key('fk_calendars_external_connection_id', 'calendars', 'external_connections', ['external_connection_id'], ['id'])
+    op.create_foreign_key(
+        'fk_calendars_external_connection_id', 'calendars', 'external_connections', ['external_connection_id'], ['id']
+    )
 
     # Data migration: Update existing Google calendars with their external connection IDs
     connection = op.get_bind()
@@ -42,7 +44,9 @@ def upgrade() -> None:
             raise Exception(f"Calendar {calendar_id} (owner_id: {owner_id}) has no Google external connection")
 
         if len(external_connections) > 1:
-            raise Exception(f"Calendar {calendar_id} (owner_id: {owner_id}) has {len(external_connections)} Google external connections, expected exactly 1")
+            raise Exception(
+                f"Calendar {calendar_id} (owner_id: {owner_id}) has {len(external_connections)} Google external connections, expected exactly 1"  # noqa: E501
+            )
 
         # Update the calendar with the external connection ID
         external_connection_id = external_connections[0][0]

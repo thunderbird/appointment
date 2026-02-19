@@ -10,7 +10,7 @@ import uuid
 from alembic import op
 from sqlalchemy.orm import Session
 
-from appointment.database import models, repo
+from appointment.database import models
 
 
 # revision identifiers, used by Alembic.

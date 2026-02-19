@@ -11,7 +11,7 @@ import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { TextInput } from '@thunderbirdops/services-ui';
 import { dayjsKey, callKey } from '@/keys';
 import {
-  Subscriber, BooleanResponse, Exception, TableDataRow, TableDataColumn, TableFilter, Alert,
+  Subscriber, BooleanResponse, TableDataRow, TableDataColumn, Alert,
 } from '@/models';
 import { useUserStore } from '@/stores/user-store';
 import { AlertSchemes, TableDataButtonType, TableDataType } from '@/definitions';

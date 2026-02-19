@@ -21,7 +21,10 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.add_column('schedules', sa.Column('use_custom_availabilities', sa.Boolean, nullable=False, server_default=false(), index=True))
+    op.add_column(
+        'schedules',
+        sa.Column('use_custom_availabilities', sa.Boolean, nullable=False, server_default=false(), index=True)
+    )
     op.alter_column('availabilities', 'day_of_week', existing_type=mysql.ENUM(*list(IsoWeekday.__members__.keys())),
                     nullable=False)
 
