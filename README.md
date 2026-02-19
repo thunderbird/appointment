@@ -15,7 +15,9 @@ You can either build preconfigured docker containers (database, backend and fron
 
 ### With Docker
 
-This is the recommended and only supported method of developing Thunderbird Appointment.
+Using Docker is the recommended and for now the only supported method of developing Thunderbird Appointment.
+
+Get the application files and create your `.env` files from the examples:
 
 ```bash
 git clone https://github.com/thunderbird/appointment
@@ -24,29 +26,32 @@ cp appointment/frontend/.env.example appointment/frontend/.env
 cd appointment
 ```
 
-Next we need to pull Thunderbird Accounts. If you have a dev copy you can just symlink the folder to accounts.
-
-Other-wise run:
-
-```bash
-git clone https://github.com/thunderbird/thunderbird-accounts.git accounts
-```
-
-If you're starting fresh with thunderbird-accounts, please review the documentations at that repo about setting it up.
-
-And finally we can run the service in docker:
+Now we can build and run the service in docker:
 
 ```bash
 docker-compose up -d --build
 ```
 
-If you're using Thunderbird Accounts for authentication you'll additionally need to create a Client. You can do so by running the following command:
+### Authentication
+
+Appointment comes with a simple password-based authentication. This is mostly meant for developing and testing Appointment, but can also be used when self-hosting the app.
+
+For Thunderbird Services, we use our own OIDC provider [Thunderbird Accounts](https://github.com/thunderbird/thunderbird-accounts). If you're starting fresh with Thunderbird Accounts, please review [the documentations](https://github.com/thunderbird/thunderbird-accounts?tab=readme-ov-file#before-you-begin) setting it up. The following steps show a short version of making it work with Appointment.
+
+Get the project files (or symlink to them if you already have a local copy):
 
 ```bash
+git clone https://github.com/thunderbird/thunderbird-accounts.git accounts
+```
+
+Now create a Client:
+
+```bash
+# TODO
 docker-compose exec accounts uv run manage.py create_client 'Appointment' 'dev contact' 'noreply@example.org' 'https://example.org' --env_type dev --env_redirect_url 'http://localhost:5000/auth/accounts/callback' --env_allowed_hostnames 'localhost:8080,accounts:8087'
 ```
 
-You should see your Client ID and Client Secret within the output like:
+You should see your Client ID and Client Secret within the output (just example values):
 
 ```log
 Your client was successfully created with the uuid of f71cf674-228c-4558-b8b2-7780d6a36925
@@ -54,8 +59,6 @@ Your Client Details:
 * Client ID: f71cf674-228c-4558-b8b2-7780d6a36925
 * Client Secret: a5303c654c839d4c8ae8aae7d3b866f581e75280d7f477ee43dcf2200939c6a12ea97fbceda916c50e1136e1615f6e4e523e7a23e2282092b0f88d91c3898b91
 ```
-
-(The above are just example values)
 
 Copy the Client ID and Client Secret values to your backend's .env file as `TB_ACCOUNTS_CLIENT_ID` and `TB_ACCOUNTS_SECRET` respectively.
 
