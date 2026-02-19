@@ -9,8 +9,6 @@ import {
 import {
   BooleanResponse, AuthUrlResponse, AuthUrl, Error, PydanticException, Alert,
 } from '@/models';
-import { posthog, usePosthog } from '@/composables/posthog';
-import { INVITE_CODE_KEY, MetricEvents } from '@/definitions';
 import GenericModal from '@/components/GenericModal.vue';
 import WordMark from '@/elements/WordMark.vue';
 import { PrimaryButton, TextInput } from '@thunderbirdops/services-ui';
@@ -26,8 +24,6 @@ const route = useRoute();
 const router = useRouter();
 const user = createUserStore(call);
 
-// Don't show the invite code field, only the "Join the waiting list" part
-const hideInviteField = ref(false);
 const isLoading = ref(false);
 const formRef = ref();
 
@@ -41,7 +37,6 @@ enum LoginSteps {
 // form input and error
 const email = ref('');
 const password = ref('');
-const inviteCode = ref('');
 const loginStep = ref(LoginSteps.Login);
 const loginError = ref<Alert>(null);
 
@@ -51,11 +46,6 @@ onMounted(async () => {
     const queryError = route.query.error as string;
     loginError.value = { title: t(`login.remoteError.${queryError}`) };
     await router.replace(route.path);
-  }
-
-  if (route.name === 'join-the-waiting-list') {
-    hideInviteField.value = true;
-    loginStep.value = LoginSteps.SignUp;
   }
 
   // This route will be used by the TB Pro Appointment landing page
@@ -70,56 +60,11 @@ onMounted(async () => {
   }
 });
 
-/**
- * Sign up for the beta / waiting list
- */
-const signUp = async () => {
-  if (!email.value) {
-    return;
-  }
-
-  isLoading.value = true;
-  loginError.value = null;
-  const { data, error }: BooleanResponse = await call('waiting-list/join').post({
-    email: email.value,
-  }).json();
-
-  if (error?.value) {
-    // Handle error
-    loginError.value = handleFormError(t, formRef, data.value as PydanticException);
-    isLoading.value = false;
-    return;
-  }
-
-  if (!data.value) {
-    loginError.value = { title: t('waitingList.signUpAlreadyExists') };
-
-    if (usePosthog) {
-      posthog.capture(MetricEvents.SignUpAlreadyExists, {
-        waitingList: true,
-        for: 'beta',
-      });
-    }
-  } else {
-    // Advance them to the "Check your email" step
-    loginStep.value = LoginSteps.SignUpConfirm;
-
-    if (usePosthog) {
-      posthog.capture(MetricEvents.SignUp, {
-        waitingList: true,
-        for: 'beta',
-      });
-    }
-  }
-
-  isLoading.value = false;
-};
 
 const login = async () => {
   isLoading.value = true;
 
   // If they come here the first time we check if they're allowed to login
-  // If they come here a second time after not being allowed it's because they have an invite code.
   if (loginStep.value === LoginSteps.Login) {
     const { data: canLogin, error }: BooleanResponse = await call('can-login').post({
       email: email.value,
@@ -131,21 +76,10 @@ const login = async () => {
       isLoading.value = false;
       return;
     }
-
-    if (!canLogin.value) {
-      // Advance them to the SignUp step (waiting list right now!)
-      loginStep.value = LoginSteps.SignUp;
-      isLoading.value = false;
-      return;
-    }
   }
 
 
   if (isOidcAuth) {
-    // Set the invite code if we have it
-    if (inviteCode.value) {
-      window.sessionStorage?.setItem(INVITE_CODE_KEY, inviteCode.value.trim());
-    }
     await userManager.signinRedirect({
       login_hint: email.value,
     });
@@ -156,22 +90,12 @@ const login = async () => {
       timezone: dj.tz.guess(),
     });
 
-    if (inviteCode.value) {
-      params.append('invite_code', inviteCode.value.trim());
-    }
-
     const { error, data }: AuthUrlResponse = await call(`${apiUrl}?${params}`).get().json();
 
     if (error.value) {
       loginError.value = handleFormError(t, formRef, data.value as PydanticException);
       isLoading.value = false;
       return;
-    }
-
-    if (usePosthog) {
-      posthog.capture(MetricEvents.Login, {
-        inviteCodeUsed: !!inviteCode.value,
-      });
     }
 
     const { url } = data.value as AuthUrl;
@@ -207,11 +131,7 @@ const onEnter = () => {
     return;
   }
 
-  if ((loginStep.value === LoginSteps.SignUp || hideInviteField.value) && inviteCode.value === '') {
-    signUp();
-  } else {
-    login();
-  }
+  login();
 };
 </script>
 
@@ -227,23 +147,7 @@ const onEnter = () => {
     <generic-modal :error-message="loginError" @close="() => router.push({name: 'home'})" :closable="false">
       <template v-slot:header>
         <word-mark/>
-        <h2 id="title" v-if="hideInviteField">
-          {{ t('login.waitingListSignUp.title') }}
-        </h2>
-        <h2 id="title" v-else-if="loginStep === LoginSteps.Login">
-          {{ t('login.login.title') }}
-        </h2>
-        <h2 id="title" v-else-if="loginStep === LoginSteps.SignUp">
-          {{ t('login.signUp.title') }}
-        </h2>
-        <h2 id="title" v-else>
-          {{ t('login.confirm.title') }}
-        </h2>
       </template>
-      <div class="intro-text" v-if="loginStep === LoginSteps.SignUpConfirm">
-        <p><strong>{{ t('login.confirm.intro.0') }}</strong></p>
-        <p>{{ t('login.confirm.intro.1') }}</p>
-      </div>
       <div class="form-body">
         <form
           v-if="loginStep !== LoginSteps.SignUpConfirm"
@@ -269,36 +173,17 @@ const onEnter = () => {
             data-testid="login-password-input"
           >{{ t('label.password') }}
           </text-input>
-          <text-input
-            v-if="loginStep === LoginSteps.SignUp && !hideInviteField"
-            name="inviteCode"
-            v-model="inviteCode"
-            :help="t('login.form.no-invite-code')"
-            data-testid="login-invite-code-input"
-          >{{ t('label.inviteCode', { 'count': 1 }) }}
-          </text-input>
         </form>
       </div>
       <template v-slot:actions>
         <primary-button
           class="btn-continue"
-          :title="t('label.continue')"
+          :title="t('label.login')"
           :disabled="isLoading"
           @click="onEnter()"
-          v-if="loginStep !== LoginSteps.SignUpConfirm"
           data-testid="login-continue-btn"
         >
-          {{ t('label.continue') }}
-        </primary-button>
-        <primary-button
-          class="btn-close"
-          :title="t('label.close')"
-          :disabled="isLoading"
-          @click="router.push({name: 'home'})"
-          v-else
-          data-testid="login-close-btn"
-        >
-          {{ t('label.close') }}
+          {{ t('label.logIn') }}
         </primary-button>
       </template>
       <template v-slot:footer>

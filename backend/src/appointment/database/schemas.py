@@ -25,7 +25,6 @@ from .models import (
     SubscriberLevel,
     ExternalConnectionType,
     MeetingLinkProviderType,
-    InviteStatus,
     ColourScheme,
     TimeMode,
     IsoWeekday,
@@ -309,25 +308,6 @@ class CalendarOut(CalendarBase):
     provider: CalendarProvider | None = CalendarProvider.caldav
 
 
-""" INVITE model schemas
-"""
-
-
-class Invite(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    subscriber_id: int | None = None
-    owner_id: Optional[int] = None
-    code: str
-    status: InviteStatus = InviteStatus.active
-    time_created: datetime | None = None
-    time_updated: datetime | None = None
-
-
-class InviteOut(BaseModel):
-    code: str
-    status: InviteStatus = InviteStatus.active
-
 
 """ SUBSCRIBER model schemas
 """
@@ -376,7 +356,6 @@ class SubscriberAdminItem(SubscriberAuth):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    invite: Invite | None = None
     time_created: datetime
     time_deleted: datetime | None
     ftue_level: Optional[int] = Field(json_schema_extra={'gte': 0})
@@ -401,10 +380,6 @@ class SubscriberAdminOut(ListResponse):
 class ListResponseIn(BaseModel):
     page: int = 1
     per_page: int = 50
-
-
-class InviteAdminOut(ListResponse):
-    items: list[Invite]
 
 
 """ other schemas used for requests or data migration
@@ -510,49 +485,8 @@ class TokenData(BaseModel):
     username: str
 
 
-"""Invite"""
-
-
-class SendInviteEmailIn(BaseModel):
-    email: EmailStr = Field(title='Email', min_length=1)
-
-
-class JoinTheWaitingList(BaseModel):
-    email: EmailStr = Field(title='Email', min_length=1)
-
-
-class TokenForWaitingList(BaseModel):
-    token: str = Field(title='Token')
-
-
 class CheckEmail(BaseModel):
     email: EmailStr = Field(title='Email', min_length=1)
-
-
-class WaitingListInviteAdminIn(BaseModel):
-    id_list: list[int]
-
-
-class WaitingListInviteAdminOut(BaseModel):
-    accepted: list[int]
-    errors: list[str]
-
-
-class WaitingListAdminOutItem(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    email: str
-    email_verified: bool
-    invite_id: int | None = None
-    time_created: datetime
-    time_updated: datetime
-
-    invite: Invite | None = None
-
-
-class WaitingListAdminOut(ListResponse):
-    items: list[WaitingListAdminOutItem]
 
 
 class PageLoadIn(BaseModel):
@@ -576,5 +510,4 @@ class FTUEStepIn(BaseModel):
 
 class OIDCLogin(BaseModel):
     access_token: str
-    invite_code: str | None = None
     timezone: str

@@ -190,39 +190,3 @@ support-mail-plain = { $requestee_name } ({ $requestee_email }) hat folgende Sup
                     Thema: { $topic }
                     Inhalt: { $details }
                     {-brand-footer}
-
-## New/Invited Account Email
-new-account-mail-subject = Du wurdest zu Thunderbird Appointment eingeladen
-new-account-mail-action = Registrieren
-new-account-mail-html-heading = Vielen Dank, dass Du dich als einer der ersten Tester von Thunderbird Appointment Beta registrierst.
-                                Wir freuen uns, dass Du dabei bist!
-new-account-mail-html-body = Deine E-Mail-Adresse wurde am { $date } auf unsere Beta-Warteliste gesetzt.
-new-account-mail-html-body-2 = Melde Dich an und beginne mit der Nutzung von Appointment, indem Du auf die Schaltfläche unten klickst oder diesen Link in Deinen Browser einfügst:
-
-# Variables:
-# $homepage_url (String) - URL to Thunderbird Appointment
-new-account-mail-plain = Vielen Dank, dass Du dich als einer der ersten Tester von Thunderbird Appointment Beta registrierst.
-                         Wir freuen uns, dass Du dabei bist!
-                         Deine E-Mail-Adresse wurde am { $date } auf unsere Beta-Warteliste gesetzt.
-                         Melde Dich mit dieser E-Mail-Adresse an und starte mit Appointment, indem Du auf die Schaltfläche unten klickst oder diesen Link in Deinen Browser einfügst:
-                         { $homepage_url }
-                         {-brand-footer}
-
-## Confirm Email for waiting list
-confirm-email-mail-subject = Bestätige deine E-Mail-Adresse um der Warteliste beizutreten!
-confirm-email-mail-confirm-action = Bestätigen
-confirm-email-mail-html-heading = Danke für Dein Interesse an Thunderbird Appointment.
-confirm-email-mail-html-body = Um der Warteliste beizutreten, bestätige bitte deine E-Mail-Adresse, indem du den Button unten klickst oder diesen Link in deinen Browser einfügst:
-confirm-email-mail-html-body-2 = Hast Du diese E-Mail irrtümlich erhalten, oder bist nicht mehr interessiert, dann kannst du
-confirm-email-mail-html-body-2-link-text = deine E-Mail-Adresse entfernen.
-
-# Variables:
-# $confirm_email_url (String) - URL to confirm your email
-# $decline_email_url (String) - URL to remove the email from the waiting list
-confirm-email-mail-plain = Danke für Dein Interesse an Thunderbird Appointment.
-                    Bevor wir Dich auf unsere Warteliste setzen, musst Du Deine E-Mail-Adresse über den unten stehenden Link bestätigen.
-                    { $confirm_email_url }
-
-                    Hast Du diese E-Mail irrtümlich erhalten, oder bist nicht mehr interessiert? Folge einfach diesem Link, um Deine E-Mail-Adresse von der Warteliste zu löschen.
-                    { $decline_email_url }
-                    {-brand-footer}

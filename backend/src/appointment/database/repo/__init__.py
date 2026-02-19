@@ -1,1 +1,1 @@
-from . import appointment, attendee, availability, calendar, external_connection, invite, schedule, slot, subscriber  # noqa: F401
+from . import appointment, attendee, availability, calendar, external_connection, schedule, slot, subscriber  # noqa: F401

@@ -110,25 +110,6 @@ erDiagram
     date time_created "UTC timestamp of connection creation"
     date time_updated "UTC timestamp of last connection modification"
   }
-  SUBSCRIBERS ||--o{ INVITES : hold
-  INVITES {
-    int id PK "Unique invite key"
-    int subscriber_id FK "User created from this invite"
-    string code "Unique invitation code"
-    enum status "Invitation status [active, revoked]"
-    date time_created "UTC timestamp of invite creation"
-    date time_updated "UTC timestamp of last invite modification"
-    int owner_id FK "Used (admin) giving out this invitation"
-  }
-  INVITES ||--o{ WAITING_LIST : manage
-  WAITING_LIST {
-    int id PK "Unique waiting list entry key"
-    string email "Email address invited"
-    date email_verified "UTC timestamp of email verification"
-    int invite_id FK "Invited associated with this waiting list entry"
-    date time_created "UTC timestamp of waiting list entry creation"
-    date time_updated "UTC timestamp of last waiting list entry modification"
-  }
   CALENDARS ||--o{ APPOINTMENTS : create_from
   APPOINTMENTS {
     int id PK "Unique appointment key"

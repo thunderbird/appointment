@@ -18,10 +18,7 @@ const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue')
 const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView/index.vue'));
 const LegalView = defineAsyncComponent(() => import('@/views/LegalView.vue'));
 const DocsView = defineAsyncComponent(() => import('@/views/DocsView.vue'));
-const WaitingListActionView = defineAsyncComponent(() => import('@/views/WaitingListActionView.vue'));
 const SubscriberPanelView = defineAsyncComponent(() => import('@/views/admin/SubscriberPanelView.vue'));
-const InviteCodePanelView = defineAsyncComponent(() => import('@/views/admin/InviteCodePanelView.vue'));
-const WaitingListPanelView = defineAsyncComponent(() => import('@/views/admin/WaitingListPanelView.vue'));
 const FTUEView = defineAsyncComponent(() => import('@/views/FTUEView/index.vue'));
 
 type ApmtRouteMeta = {
@@ -56,14 +53,6 @@ const routes: RouteRecordRaw[] = [
     path: '/logout',
     name: 'logout',
     component: LogoutView,
-  },
-  {
-    path: '/waiting-list',
-    name: 'join-the-waiting-list',
-    component: LoginView,
-    meta: {
-      isPublic: true,
-    },
   },
   {
     path: '/post-login/:token?',
@@ -167,36 +156,11 @@ const routes: RouteRecordRaw[] = [
     name: 'setup',
     component: FTUEView,
   },
-  {
-    path: '/waiting-list/:token',
-    name: 'waiting-list',
-    component: WaitingListActionView,
-    meta: {
-      isPublic: true,
-      maskForMetrics: true,
-    },
-  },
   // Admin
   {
     path: '/admin/subscribers',
     name: 'admin-subscriber-panel',
     component: SubscriberPanelView,
-    meta: {
-      // disableMetrics: true,
-    },
-  },
-  {
-    path: '/admin/invites',
-    name: 'admin-invite-codes-panel',
-    component: InviteCodePanelView,
-    meta: {
-      // disableMetrics: true,
-    },
-  },
-  {
-    path: '/admin/waiting-list',
-    name: 'admin-waiting-list-panel',
-    component: WaitingListPanelView,
     meta: {
       // disableMetrics: true,
     },

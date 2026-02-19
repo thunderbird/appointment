@@ -74,11 +74,6 @@ class MeetingLinkProviderType(enum.StrEnum):
     google_meet = 'google_meet'
 
 
-class InviteStatus(enum.Enum):
-    active = 1  # The code is still valid. It may be already used or is still to be used
-    revoked = 2  # The code is no longer valid and cannot be used for sign up anymore
-
-
 class ColourScheme(enum.Enum):
     system = 'system'
     dark = 'dark'
@@ -176,15 +171,6 @@ class Subscriber(HasSoftDelete, Base):
     calendars = relationship('Calendar', cascade='all,delete', back_populates='owner')
     slots = relationship('Slot', cascade='all,delete', back_populates='subscriber')
     external_connections = relationship('ExternalConnections', cascade='all,delete', back_populates='owner')
-
-    # FIXME: Invite will be deleted if either the owner or the invited subscriber is deleted.
-    invite: Mapped['Invite'] = relationship(
-        'Invite', cascade='all,delete', back_populates='subscriber', uselist=False, foreign_keys='Invite.subscriber_id'
-    )
-
-    owned_invites: Mapped[list['Invite']] = relationship(
-        'Invite', cascade='all,delete', back_populates='owner', foreign_keys='[Invite.owner_id]'
-    )
 
     def get_external_connection(
         self, type: ExternalConnectionType, type_id: str | None = None
@@ -461,61 +447,3 @@ class ExternalConnections(Base):
 
     def __str__(self):
         return f'External Connection: {self.id}'
-
-
-class Invite(Base):
-    """This table holds all invite codes for code based sign-ups."""
-
-    __tablename__ = 'invites'
-
-    id = Column(Integer, primary_key=True, index=True)
-    owner_id = Column(Integer, ForeignKey('subscribers.id'), nullable=True)
-    subscriber_id = Column(Integer, ForeignKey('subscribers.id'))
-    code = Column(encrypted_type(String), index=False)
-    status = Column(Enum(InviteStatus), index=True)
-
-    owner: Mapped['Subscriber'] = relationship(
-        'Subscriber', back_populates='invite', single_parent=True, foreign_keys=[owner_id]
-    )
-
-    subscriber: Mapped['Subscriber'] = relationship(
-        'Subscriber', back_populates='invite', single_parent=True, foreign_keys=[subscriber_id]
-    )
-
-    waiting_list: Mapped['WaitingList'] = relationship(
-        'WaitingList', cascade='all,delete', back_populates='invite', uselist=False
-    )
-
-    @property
-    def is_used(self) -> bool:
-        """True if the invite code is assigned to a subscriber"""
-        return self.subscriber_id is not None
-
-    @property
-    def is_revoked(self) -> bool:
-        """True if the invite code is revoked"""
-        return self.status == InviteStatus.revoked
-
-    @property
-    def is_available(self) -> bool:
-        """True if the invite code is not assigned nor revoked"""
-        return self.subscriber_id is None and self.status == InviteStatus.active
-
-    def __str__(self):
-        return f'Invite {self.id}'
-
-
-class WaitingList(Base):
-    """Holds a list of hopefully future-Appointment users"""
-
-    __tablename__ = 'waiting_list'
-
-    id = Column(Integer, primary_key=True, index=True)
-    email = Column(encrypted_type(String), unique=True, index=True, nullable=False)
-    email_verified = Column(Boolean, nullable=False, index=True, default=False)
-    invite_id = Column(Integer, ForeignKey('invites.id'), nullable=True, index=True)
-
-    invite: Mapped['Invite'] = relationship('Invite', back_populates='waiting_list', single_parent=True)
-
-    def __str__(self):
-        return f'Waiting List: {self.id}'

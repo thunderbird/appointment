@@ -21,7 +21,10 @@ depends_on = None
 
 def upgrade() -> None:
     # Add language column to subscribers table
-    op.add_column('subscribers', sa.Column('language', models.encrypted_type(sa.String), nullable=True, default=FALLBACK_LOCALE, index=True))
+    op.add_column(
+        'subscribers',
+        sa.Column('language', models.encrypted_type(sa.String), nullable=True, default=FALLBACK_LOCALE, index=True)
+    )
 
     # Prefill new column with default value
     session = Session(op.get_bind())

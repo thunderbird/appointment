@@ -7,7 +7,6 @@ from uuid import uuid4
 from unittest.mock import patch
 
 from appointment.dependencies import auth
-from appointment.l10n import l10n
 from appointment.routes.auth import create_access_token
 from defines import FXA_CLIENT_PATCH, auth_headers, TEST_USER_ID
 from appointment.database import repo, models
@@ -198,69 +197,6 @@ class TestFXA:
         assert 'url' in data
         assert data.get('url') == FXA_CLIENT_PATCH.get('authorization_url')
 
-    def test_fxa_with_allowlist_and_without_invite(self, with_client, with_l10n):
-        os.environ['AUTH_SCHEME'] = 'fxa'
-        os.environ['FXA_ALLOW_LIST'] = '@example.org'
-
-        email = 'not-in-allow-list@bad-example.org'
-        response = with_client.get(
-            '/fxa_login',
-            params={
-                'email': email,
-            },
-        )
-        assert response.status_code == 403, response.text
-        data = response.json()
-        assert data.get('detail') == l10n('not-in-allow-list')
-
-    def test_fxa_with_allowlist_and_with_bad_invite_code(self, with_client, with_l10n):
-        os.environ['AUTH_SCHEME'] = 'fxa'
-        os.environ['FXA_ALLOW_LIST'] = '@example.org'
-
-        email = 'not-in-allow-list@bad-example.org'
-        response = with_client.get(
-            '/fxa_login',
-            params={'email': email, 'invite_code': 'absolute nonsense!'},
-        )
-        assert response.status_code == 404, response.text
-        data = response.json()
-        assert data.get('detail') == l10n('invite-code-not-valid')
-
-    def test_fxa_with_allowlist_and_with_used_invite_code(
-        self, with_client, with_l10n, make_invite, make_pro_subscriber
-    ):
-        os.environ['AUTH_SCHEME'] = 'fxa'
-        os.environ['FXA_ALLOW_LIST'] = '@example.org'
-
-        other_guy = make_pro_subscriber()
-        invite = make_invite(subscriber_id=other_guy.id)
-
-        email = 'not-in-allow-list@bad-example.org'
-        response = with_client.get(
-            '/fxa_login',
-            params={'email': email, 'invite_code': invite.code},
-        )
-        assert response.status_code == 403, response.text
-        data = response.json()
-        assert data.get('detail') == l10n('invite-code-not-valid')
-
-    def test_fxa_with_allowlist_and_with_invite(self, with_client, with_l10n, make_invite):
-        os.environ['AUTH_SCHEME'] = 'fxa'
-        os.environ['FXA_ALLOW_LIST'] = '@example.org'
-
-        invite = make_invite()
-        email = 'not-in-allow-list@bad-example.org'
-        response = with_client.get(
-            '/fxa_login',
-            params={
-                'email': email,
-                'invite_code': invite.code,
-            },
-        )
-        assert response.status_code == 200, response.text
-        data = response.json()
-        assert 'url' in data
-        assert data.get('url') == FXA_CLIENT_PATCH.get('authorization_url')
 
     def test_fxa_login_fail_with_invalid_auth_scheme(self, with_client):
         saved_scheme = os.environ['AUTH_SCHEME']
@@ -273,42 +209,6 @@ class TestFXA:
         )
         os.environ['AUTH_SCHEME'] = saved_scheme
         assert response.status_code == 405, response.text
-
-    def test_fxa_callback_with_invite(self, with_db, with_client, monkeypatch, make_invite):
-        """Test that our callback function correctly handles the session states, and creates a new subscriber"""
-        os.environ['AUTH_SCHEME'] = 'fxa'
-
-        state = 'a1234'
-
-        invite = make_invite()
-
-        with with_db() as db:
-            assert not repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
-
-        monkeypatch.setattr(
-            'starlette.requests.HTTPConnection.session',
-            {
-                'fxa_state': state,
-                'fxa_user_email': FXA_CLIENT_PATCH.get('subscriber_email'),
-                'fxa_user_timezone': 'America/Vancouver',
-                'fxa_user_invite_code': invite.code,
-            },
-        )
-
-        response = with_client.get(
-            '/fxa', params={'code': FXA_CLIENT_PATCH.get('credentials_code'), 'state': state}, follow_redirects=False
-        )
-        # This is a redirect request
-        assert response.status_code == 307, response.text
-
-        with with_db() as db:
-            subscriber = repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
-            assert subscriber
-            assert subscriber.avatar_url == FXA_CLIENT_PATCH.get('subscriber_avatar_url')
-            assert subscriber.name == FXA_CLIENT_PATCH.get('subscriber_display_name')
-            fxa = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
-            assert fxa
-            assert fxa.type_id == FXA_CLIENT_PATCH.get('external_connection_type_id')
 
     def test_fxa_callback_with_allowlist(self, with_db, with_client, monkeypatch):
         """Test that our callback function correctly handles the session states, and creates a new subscriber"""
@@ -343,36 +243,6 @@ class TestFXA:
             fxa = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
             assert fxa
             assert fxa.type_id == FXA_CLIENT_PATCH.get('external_connection_type_id')
-
-    def test_fxa_callback_no_invite_or_allowlist(self, with_db, with_client, monkeypatch):
-        """Test that our callback function correctly handles the session states, and creates a new subscriber"""
-        os.environ['AUTH_SCHEME'] = 'fxa'
-        os.environ['FXA_ALLOW_LIST'] = '@notexample.org'
-
-        with with_db() as db:
-            assert not repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
-
-        state = 'a1234'
-
-        monkeypatch.setattr(
-            'starlette.requests.HTTPConnection.session',
-            {
-                'fxa_state': state,
-                'fxa_user_email': FXA_CLIENT_PATCH.get('subscriber_email'),
-                'fxa_user_timezone': 'America/Vancouver',
-            },
-        )
-
-        response = with_client.get(
-            '/fxa', params={'code': FXA_CLIENT_PATCH.get('credentials_code'), 'state': state}, follow_redirects=False
-        )
-        # this could contain the invite not valid error
-        assert response.status_code == 307, response.text
-        assert '?error=invite-not-valid' in response.headers.get('location')
-
-        with with_db() as db:
-            subscriber = repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
-            assert not subscriber
 
     def test_fxa_callback_with_allowlist_again(self, with_db, with_client, monkeypatch):
         """Test that our callback function correctly handles the session states, and creates a new subscriber"""

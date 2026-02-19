@@ -310,16 +310,12 @@ class TestSubscriber:
         make_pro_subscriber,
         make_caldav_calendar,
         make_schedule,
-        make_waiting_list,
-        make_invite,
     ):
         # make our current subscriber admin
         os.environ['APP_ADMIN_ALLOW_LIST'] = '@example.org'
 
         # make up a guy
         steve = make_pro_subscriber(name='steve')
-        steves_invite = make_invite(subscriber_id=steve.id)
-        steves_waiting_list = make_waiting_list(invite_id=steves_invite.id, email_verified=True)
         steves_calendar = make_caldav_calendar(subscriber_id=steve.id)
         steves_schedule = make_schedule(calendar_id=steves_calendar.id)
 
@@ -343,12 +339,6 @@ class TestSubscriber:
         with with_db() as db:
             steve_check = repo.subscriber.get(db, steve.id)
             assert not steve_check
-
-            steves_invite = repo.invite.get_by_code(db, steves_invite.code)
-            assert not steves_invite
-
-            steves_waiting_list = repo.invite.get_waiting_list_entry_by_email(db, steve.email)
-            assert not steves_waiting_list
 
             steves_calendar = repo.calendar.get(db, steves_calendar.id)
             assert not steves_calendar

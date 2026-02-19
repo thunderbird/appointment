@@ -41,7 +41,6 @@ calendar-not-active = The calendar connection is not active.
 slot-not-found = There are no available time slots to book.
 slot-already-taken = The time slot you have selected is no longer available. Please try again.
 slot-invalid-email = The email you have provided was not valid. Please try again.
-invite-code-not-valid = The invite code you used is not valid.
 not-in-allow-list = Your email is not in the allow list.
 schedule-availability-invalid = The custom availability is not valid. Please check all time values. 
 
@@ -114,10 +113,6 @@ join-online = Join online at: { $url }
 # $phone (String) - An unformatted phone number for the meeting
 join-phone = Join by phone: { $phone }
 
-# Waiting List Errors
-wl-subscriber-already-exists = { $email } is already a subscriber...that's weird!
-wl-subscriber-failed-to-create = { $email } was unable to be invited. Please make a bug report!
-
 ## Account Data Readme
 
 # This is a text file that is generated and bundled along with your account data
@@ -153,9 +148,7 @@ account-data-readme = ============================================
                        - availability.csv : Schedule availability data
                        - calendars.csv : A list of your Appointment Calendars
                        - external_connections.csv : A list of your Appointment external connections
-                       - invite.csv : Data pertaining to your Appointment invite and invite codes
                        - schedules.csv : The information we store pertaining to your Appointment schedule
                        - slots.csv : A list of your Appointment meeting slots
                        - subscriber.csv : The personal information we store about you
-                       - waiting_list.csv : Information we store regarding the Appointment waiting list
                        - readme.txt : This file!

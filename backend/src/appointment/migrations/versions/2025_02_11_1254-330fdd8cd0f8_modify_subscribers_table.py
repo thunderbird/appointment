@@ -6,7 +6,6 @@ Create Date: 2025-02-11 12:54:51.256163
 
 """
 from alembic import op
-import sqlalchemy as sa
 from appointment.database.models import TimeMode
 
 

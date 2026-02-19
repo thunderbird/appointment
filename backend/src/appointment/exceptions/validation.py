@@ -245,26 +245,6 @@ class EventCouldNotBeDeleted(APIException):
         return l10n('event-could-not-be-deleted')
 
 
-class InviteCodeNotFoundException(APIException):
-    """Raise when the invite code is not found during route validation"""
-
-    id_code = 'INVITE_CODE_NOT_FOUND'
-    status_code = 404
-
-    def get_msg(self):
-        return l10n('invite-code-not-valid')
-
-
-class InviteCodeNotAvailableException(APIException):
-    """Raise when the invite code is not available anymore during route validation"""
-
-    id_code = 'INVITE_CODE_NOT_AVAILABLE'
-    status_code = 403
-
-    def get_msg(self):
-        return l10n('invite-code-not-valid')
-
-
 class CreateSubscriberFailedException(APIException):
     """Raise when a subscriber failed to be created"""
 
@@ -323,16 +303,6 @@ class SubscriberSelfDeleteException(APIException):
 
     def get_msg(self):
         return l10n('subscriber-self-delete')
-
-
-class WaitingListActionFailed(APIException):
-    """Raise if the waiting list link was valid but failed for some reason"""
-
-    id_code = 'WAITING_LIST_FAIL'
-    status_code = 400
-
-    def get_msg(self):
-        return l10n('unknown-error')
 
 
 class OAuthFlowNotFinished(APIException):

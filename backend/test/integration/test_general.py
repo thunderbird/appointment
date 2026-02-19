@@ -58,14 +58,10 @@ class TestGeneral:
             ('get', '/schedule'),
             ('get', '/schedule/0'),
             ('put', '/schedule/0'),
-            ('post', '/invite'),
-            ('post', '/invite/generate/1'),
-            ('put', '/invite/revoke/1'),
             ('post', '/subscriber'),
             ('put', '/subscriber/enable/someemail@email.com'),
             ('put', '/subscriber/disable/someemail@email.com'),
             ('post', '/subscriber/setup'),
-            ('post', '/waiting-list/invite'),
         ],
     )
     def test_access_without_authentication_token(self, with_client, api_method, api_route):

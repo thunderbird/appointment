@@ -1,8 +1,6 @@
 import { Dayjs } from 'dayjs';
 import { UseFetchReturn } from '@vueuse/core';
 import {
-  InviteStatus,
-  WaitingListAction,
   EventLocationType,
   CalendarProviders,
   TableDataButtonType,
@@ -242,14 +240,6 @@ export type Schedule = {
   use_custom_availabilities: boolean;
 };
 
-export type Invite = {
-  subscriber_id?: number;
-  code: string;
-  status: InviteStatus;
-  time_created: string;
-  time_updated: string;
-};
-
 export type User = {
   id?: number;
   email: string;
@@ -309,30 +299,8 @@ export type Subscriber = {
   user_link?: string;
   schedule_slugs?: object;
   secondary_email?: string;
-  invite?: Invite;
   time_created?: string;
   time_deleted?: string;
-}
-
-export type WaitingListInvite = {
-  accepted: number[];
-  errors: string[]
-}
-
-export type WaitingListEntry = {
-  id: number;
-  email: string;
-  email_verified: boolean;
-  invite_id?: number;
-  invite?: Invite;
-  time_created?: string;
-  time_updated?: string;
-}
-
-export type WaitingListStatus = {
-  action: WaitingListAction;
-  success: boolean;
-  redirectToSettings?: boolean;
 }
 
 export type Signature = {
@@ -403,7 +371,6 @@ export type CalendarResponse = UseFetchReturn<Calendar|Exception>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
 export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
-export type InviteListResponse = UseFetchReturn<Invite[]|Exception>;
 export type Refresh = () => Promise<void>;
 export type RemoteEventListResponse = UseFetchReturn<RemoteEvent[]>;
 export type ScheduleResponse = UseFetchReturn<Schedule|Exception>;
@@ -414,9 +381,6 @@ export type StringResponse = UseFetchReturn<string|Exception>;
 export type StringListResponse = UseFetchReturn<string[]>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
 export type TokenResponse = UseFetchReturn<Token>;
-export type WaitingListInviteResponse = UseFetchReturn<WaitingListInvite|Exception>
-export type WaitingListResponse = UseFetchReturn<WaitingListEntry[]|Exception>;
-export type WaitingListActionResponse = UseFetchReturn<WaitingListStatus>;
 export type ListResponse = UseFetchReturn<{
   page_meta: PageMeta,
   items: any[]
