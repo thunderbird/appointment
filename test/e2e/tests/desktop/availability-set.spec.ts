@@ -12,7 +12,6 @@ import {
   TIMEOUT_3_SECONDS,
   TIMEOUT_10_SECONDS,
   TIMEOUT_60_SECONDS,
-  TB_ACCTS_EMAIL,
  } from '../../const/constants';
 
 let availabilityPage: AvailabilityPage;

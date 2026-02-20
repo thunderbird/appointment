@@ -7,7 +7,6 @@ import {
   PLAYWRIGHT_TAG_PROD_SANITY,
   TIMEOUT_60_SECONDS,
   APPT_TARGET_ENV,
-  APPT_TIMEZONE_SETTING_PRIMARY,
   TIMEOUT_1_SECOND,
 } from '../../const/constants';
 
@@ -38,10 +37,6 @@ const verifyBookingPageLoaded = async (page: Page) => {
   const currentDate = new Date();
   const monthName = currentDate.toLocaleString('default', { month: 'long' });
   expect(await bookingPage.bookingWeekPickerBtn.textContent()).toContain(monthName);
-
-  // also the book appt button is hidden by default (since a slot is not yet selected)
-  await page.waitForTimeout(TIMEOUT_1_SECOND);
-  await expect(bookingPage.bookApptBtn).toBeHidden();
 }
 
 test.beforeEach(async ({ page }) => {

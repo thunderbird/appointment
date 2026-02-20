@@ -34,6 +34,7 @@ test.describe('connected applications settings on desktop browser', {
     await settingsPage.defaultCalendarBadge.scrollIntoViewIfNeeded();
 
     // verify that clicking the 'add caldav' button brings up the caldav connection dialog; just close it
+    await settingsPage.addCaldavBtn.waitFor({ state: 'visible', timeout: TIMEOUT_30_SECONDS });
     await settingsPage.addCaldavBtn.scrollIntoViewIfNeeded();
     await settingsPage.addCaldavBtn.click();
     await page.waitForTimeout(TIMEOUT_1_SECOND);
@@ -44,6 +45,7 @@ test.describe('connected applications settings on desktop browser', {
     await page.waitForTimeout(TIMEOUT_1_SECOND);
 
     // verify clicking the 'add google calendar' button brings up the google sign-in url
+    await settingsPage.addGoogleBtn.waitFor({ state: 'visible', timeout: TIMEOUT_30_SECONDS });
     await settingsPage.addGoogleBtn.click();
     await expect(settingsPage.googleSignInHdr).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     await settingsPage.gotoConnectedAppSettings();
