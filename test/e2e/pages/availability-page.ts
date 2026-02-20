@@ -54,7 +54,8 @@ export class AvailabilityPage {
     this.setAvailabilityText = this.page.getByText('Set Your Availability');
     this.bookableToggle = this.page.getByTestId('availability-set-availability-toggle');
     this.bookableToggleContainer = this.page.getByTitle('Activate schedule');
-    this.timeZoneSelect = this.page.locator('#timezone');
+    //this.timeZoneSelect = this.page.locator('#timezone');
+    this.timeZoneSelect = this.page.locator('select[name="timezone"]');
     this.calendarSelect = this.page.locator('select[name="calendar"]');
     this.autoConfirmBookingsCheckBox = this.page.getByTestId('availability-automatically-confirm-checkbox');
     this.customizePerDayCheckBox = this.page.getByRole('checkbox', { name: 'Set custom times for each day'});
@@ -99,6 +100,9 @@ export class AvailabilityPage {
     if (! await this.bookableToggle.isEnabled()) {
       await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
     }
+
+    // the timezone field also sometimes takes a long time to populate in BrowserStack
+    await this.timeZoneSelect.waitFor({ state: 'visible', timeout: TIMEOUT_30_SECONDS });
 
     await this.bookableToggleContainer.waitFor({ timeout: TIMEOUT_30_SECONDS });
     await this.allStartTimeInput.waitFor({ timeout: TIMEOUT_30_SECONDS });

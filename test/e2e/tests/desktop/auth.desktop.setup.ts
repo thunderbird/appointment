@@ -7,10 +7,10 @@ import { navigateToAppointmentAndSignIn, setDefaultUserSettingsLocalStore } from
 import {
     APPT_DASHBOARD_HOME_PAGE,
     APPT_SETTINGS_PAGE,
-    APPT_DISPLAY_NAME,
     APPT_TIMEZONE_SETTING_PRIMARY,
     TIMEOUT_1_SECOND,
     TIMEOUT_2_SECONDS,
+    TIMEOUT_30_SECONDS,
     TIMEOUT_5_SECONDS,
 } from "../../const/constants";
 
@@ -67,10 +67,9 @@ setup('desktop browser authenticate', async ({ page }) => {
   }
 
   // ensure availability timezone is set to APPT_TIMEZONE_SETTING_PRIMARY
-  if (await availabilityPage.timeZoneSelect.inputValue() != APPT_TIMEZONE_SETTING_PRIMARY) {
-    await availabilityPage.timeZoneSelect.selectOption(APPT_TIMEZONE_SETTING_PRIMARY);
-    await page.waitForTimeout(TIMEOUT_1_SECOND);
-  }
+  await availabilityPage.timeZoneSelect.waitFor({ state: 'visible', timeout: TIMEOUT_30_SECONDS });
+  await availabilityPage.timeZoneSelect.selectOption(APPT_TIMEZONE_SETTING_PRIMARY);
+  await page.waitForTimeout(TIMEOUT_1_SECOND);
 
   // And ensure availability start time is 9am, end time 5pm
   // Sometimes it takes a couple of seconds for the start/end time values to appear
