@@ -112,23 +112,39 @@ class Mailer:
         message.set_content(self.text())
         message.add_alternative(self.html(), subtype='html')
 
-        # add attachment(s) as multimedia parts
+        # Separate calendar and non-calendar attachments so the ICS can be
+        # added as a multipart/alternative part instead of a plain attachment.
+
+        # Gmail only renders its calendar invite UI when text/calendar lives
+        # inside the alternative block alongside text/plain and text/html.
+        calendar_attachment = None
         for a in self._attachments():
-            # Handle ics files differently than inline images
             if a.mime_main == 'text' and a.mime_sub == 'calendar':
-                message.add_attachment(a.data, maintype=a.mime_main, subtype=a.mime_sub, filename=a.filename)
-                # Fix the header of the attachment
-                message.get_payload()[-1].replace_header(
-                    'Content-Type', f'{a.mime_main}/{a.mime_sub}; charset="UTF-8"; method={self.method}'
-                )
+                calendar_attachment = a
             else:
-                # Attach it to the html payload
                 message.get_payload()[1].add_related(
                     a.data,
                     a.mime_main,
                     a.mime_sub,
                     cid=f'<{a.filename}>',
                 )
+
+        if calendar_attachment:
+            ics_data = calendar_attachment.data
+            ics_text = ics_data.decode('utf-8') if isinstance(ics_data, bytes) else ics_data
+
+            # Add as an alternative so Gmail renders the accept/decline UI
+            message.add_alternative(ics_text, subtype='calendar')
+            message.get_payload()[-1].set_param('method', self.method)
+
+            # Also attach as a downloadable file for clients that prefer it
+            message.add_attachment(
+                ics_data,
+                maintype='text',
+                subtype='calendar',
+                filename=calendar_attachment.filename,
+            )
+            message.get_payload()[-1].set_param('method', self.method)
 
         return message
 
