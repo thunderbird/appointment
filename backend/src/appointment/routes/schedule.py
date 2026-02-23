@@ -460,13 +460,19 @@ def request_schedule_availability_slot(
             )
 
             # create HOLD event in owners calender
-            event = save_remote_event(event, calendar, subscriber, slot, db, redis, google_client)
+            use_google_invite = calendar.provider == CalendarProvider.google
+
+            event = save_remote_event(
+                event, calendar, subscriber, slot, db, redis, google_client,
+                send_google_notification=use_google_invite,
+            )
             # Add the external id if available
             if appointment and event.external_id:
                 repo.appointment.update_external_id(db, appointment, event.external_id)
 
-            # Sending confirmation pending information email to attendee with HOLD event attached
-            Tools().send_hold_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
+            # When Google handles the invitation via insert(), skip the branded email.
+            if not use_google_invite:
+                Tools().send_hold_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
 
         # If no confirmation is needed, directly confirm the booking and send invitation mail
         else:
@@ -659,14 +665,30 @@ def handle_schedule_availability_decision(
 
     # Update HOLD event
     appointment = repo.appointment.update_title(db, slot.appointment_id, title)
-    event = save_remote_event(event, appointment_calendar, subscriber, slot, db, redis, google_client)
+
+    use_google_invite = calendar.provider == CalendarProvider.google
+
+    # When using Google insert(), we must delete any existing HOLD event first
+    # because insert() creates a new event (unlike import_() which upserts by iCalUID).
+    if use_google_invite and appointment and appointment.external_id:
+        try:
+            delete_remote_event(appointment.external_id, appointment_calendar, subscriber, db, redis, google_client)
+        except EventCouldNotBeDeleted:
+            logging.warning('[schedule] Failed to delete HOLD event before Google insert, continuing anyway')
+
+    event = save_remote_event(
+        event, appointment_calendar, subscriber, slot, db, redis, google_client,
+        send_google_notification=use_google_invite,
+    )
     if appointment and event.external_id:
         repo.appointment.update_external_id(db, appointment, event.external_id)
 
     # Book the slot at the end
     slot = repo.slot.book(db, slot.id)
 
-    Tools().send_invitation_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
+    # When Google handles the invitation via insert(), skip the branded email.
+    if not use_google_invite:
+        Tools().send_invitation_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
 
     return True
 
@@ -709,13 +731,17 @@ def get_remote_connection(calendar, subscriber, db, redis, google_client):
     return (con, organizer_email)
 
 
-def save_remote_event(event, calendar, subscriber, slot, db, redis, google_client):
+def save_remote_event(event, calendar, subscriber, slot, db, redis, google_client, send_google_notification=False):
     """Create or update a remote event"""
     con, organizer_email = get_remote_connection(calendar, subscriber, db, redis, google_client)
 
     try:
         return con.save_event(
-            event=event, attendee=slot.attendee, organizer=subscriber, organizer_email=organizer_email
+            event=event,
+            attendee=slot.attendee,
+            organizer=subscriber,
+            organizer_email=organizer_email,
+            send_google_notification=send_google_notification,
         )
     except EventNotCreatedException:
         raise EventCouldNotBeAccepted
