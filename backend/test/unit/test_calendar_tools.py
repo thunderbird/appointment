@@ -227,7 +227,9 @@ class TestVCreate:
         assert 'MAILTO:attendee@example.com' in ics_str
         assert 'CN="John Doe"' in ics_str
         assert 'ROLE=REQ-PARTICIPANT' in ics_str
-        assert 'PARTSTAT=ACCEPTED' in ics_str
+        assert 'PARTSTAT=NEEDS-ACTION' in ics_str
+        assert 'RSVP=TRUE' in ics_str
+        assert 'CUTYPE=INDIVIDUAL' in ics_str
 
     def test_attendee_without_name_uses_email(self, make_google_calendar, make_appointment, make_pro_subscriber):
         """Verify attendee is added with email as name when slot has an attendee without a name"""
@@ -247,7 +249,9 @@ class TestVCreate:
         assert 'MAILTO:attendee@example.com' in ics_str
         assert 'CN=attendee@example.com' in ics_str
         assert 'ROLE=REQ-PARTICIPANT' in ics_str
-        assert 'PARTSTAT=ACCEPTED' in ics_str
+        assert 'PARTSTAT=NEEDS-ACTION' in ics_str
+        assert 'RSVP=TRUE' in ics_str
+        assert 'CUTYPE=INDIVIDUAL' in ics_str
 
     def test_no_attendee(self, make_google_calendar, make_appointment, make_pro_subscriber):
         """Verify no attendee is added when slot has no attendee"""
@@ -441,20 +445,20 @@ class TestAvailableSlotsFromSchedule:
         assert len(slots_tuesday) == 0
 
 
-class TestGoogleConnectorSaveEventLanguage:
-    """Verify that GoogleConnector.save_event uses the organizer's language
-    for the event description, not the language from the request context."""
+class TestGoogleConnectorSaveEvent:
+    """Tests for GoogleConnector.save_event with import_() and insert() paths."""
 
-    def test_description_uses_organizer_language_not_context(self):
-        """When the request context is German but the organizer speaks English,
-        the 'join-online' and 'join-phone' strings in the event description
-        must be in English."""
+    def _make_connector(self, mock_google_client):
+        connector = GoogleConnector.__new__(GoogleConnector)
+        connector.google_client = mock_google_client
+        connector.remote_calendar_id = 'cal@example.com'
+        connector.google_token = None
+        connector.subscriber_id = 1
+        connector.calendar_id = 1
+        connector.redis_instance = None
+        return connector
 
-        # Set up starlette context with German (simulating a German-speaking bookee)
-        l10n_plugin = L10n()
-        l10n_fn = l10n_plugin.get_fluent_with_header('de')
-
-        # English-speaking organizer
+    def _make_event_and_organizer(self):
         organizer = Mock(spec=['name', 'email', 'language'])
         organizer.name = 'Owner'
         organizer.email = 'owner@example.com'
@@ -471,17 +475,21 @@ class TestGoogleConnectorSaveEventLanguage:
             uuid=uuid.uuid4(),
         )
 
-        # Mock the GoogleConnector so we can capture the body passed to google_client.save_event
+        return event, attendee, organizer
+
+    def test_description_uses_organizer_language_not_context(self):
+        """When the request context is German but the organizer speaks English,
+        the 'join-online' and 'join-phone' strings in the event description
+        must be in English."""
+
+        l10n_plugin = L10n()
+        l10n_fn = l10n_plugin.get_fluent_with_header('de')
+
+        event, attendee, organizer = self._make_event_and_organizer()
+
         mock_google_client = Mock()
         mock_google_client.save_event.return_value = {'id': 'mock_event_id'}
-
-        connector = GoogleConnector.__new__(GoogleConnector)
-        connector.google_client = mock_google_client
-        connector.remote_calendar_id = 'cal@example.com'
-        connector.google_token = None
-        connector.subscriber_id = 1
-        connector.calendar_id = 1
-        connector.redis_instance = None
+        connector = self._make_connector(mock_google_client)
 
         with request_cycle_context({'l10n': l10n_fn}):
             connector.save_event(
@@ -491,16 +499,104 @@ class TestGoogleConnectorSaveEventLanguage:
                 organizer_email='owner@example.com',
             )
 
-        # Extract the description from the body passed to google_client.save_event
         call_kwargs = mock_google_client.save_event.call_args
         body = call_kwargs.kwargs.get('body') or call_kwargs[1].get('body')
         description = body['description']
 
-        # Must be in English (organizer's language), not German
         assert 'Join online at:' in description
         assert 'Join by phone:' in description
         assert 'Online teilnehmen unter:' not in description
         assert 'Per Telefon teilnehmen:' not in description
+
+    def test_default_uses_import(self):
+        """By default (send_google_notification=False), save_event uses import_()."""
+        event, attendee, organizer = self._make_event_and_organizer()
+
+        mock_google_client = Mock()
+        mock_google_client.save_event.return_value = {'id': 'import_event_id'}
+        connector = self._make_connector(mock_google_client)
+
+        with request_cycle_context({}):
+            result = connector.save_event(
+                event=event,
+                attendee=attendee,
+                organizer=organizer,
+                organizer_email='owner@example.com',
+            )
+
+        mock_google_client.save_event.assert_called_once()
+        mock_google_client.insert_event.assert_not_called()
+
+        body = mock_google_client.save_event.call_args.kwargs.get('body')
+        assert 'iCalUID' in body
+        assert result.external_id == 'import_event_id'
+
+    def test_google_notification_uses_insert(self):
+        """When send_google_notification=True, save_event uses insert_event()."""
+        event, attendee, organizer = self._make_event_and_organizer()
+
+        mock_google_client = Mock()
+        mock_google_client.insert_event.return_value = {'id': 'insert_event_id'}
+        connector = self._make_connector(mock_google_client)
+
+        with request_cycle_context({}):
+            result = connector.save_event(
+                event=event,
+                attendee=attendee,
+                organizer=organizer,
+                organizer_email='owner@example.com',
+                send_google_notification=True,
+            )
+
+        mock_google_client.insert_event.assert_called_once()
+        mock_google_client.save_event.assert_not_called()
+
+        body = mock_google_client.insert_event.call_args.kwargs.get('body')
+        assert 'iCalUID' not in body
+        assert result.external_id == 'insert_event_id'
+
+    def test_insert_body_has_attendee_only(self):
+        """insert() body should only include the bookee, not the organizer."""
+        event, attendee, organizer = self._make_event_and_organizer()
+
+        mock_google_client = Mock()
+        mock_google_client.insert_event.return_value = {'id': 'insert_event_id'}
+        connector = self._make_connector(mock_google_client)
+
+        with request_cycle_context({}):
+            connector.save_event(
+                event=event,
+                attendee=attendee,
+                organizer=organizer,
+                organizer_email='owner@example.com',
+                send_google_notification=True,
+            )
+
+        body = mock_google_client.insert_event.call_args.kwargs.get('body')
+        attendees = body['attendees']
+        assert len(attendees) == 1
+        assert attendees[0]['email'] == 'bookee@example.org'
+        assert attendees[0]['responseStatus'] == 'needsAction'
+
+    def test_insert_body_has_no_organizer_field(self):
+        """insert() body should not include the custom organizer field."""
+        event, attendee, organizer = self._make_event_and_organizer()
+
+        mock_google_client = Mock()
+        mock_google_client.insert_event.return_value = {'id': 'insert_event_id'}
+        connector = self._make_connector(mock_google_client)
+
+        with request_cycle_context({}):
+            connector.save_event(
+                event=event,
+                attendee=attendee,
+                organizer=organizer,
+                organizer_email='owner@example.com',
+                send_google_notification=True,
+            )
+
+        body = mock_google_client.insert_event.call_args.kwargs.get('body')
+        assert 'organizer' not in body
 
 
 class TestVEventTimezoneFallback:
@@ -595,3 +691,4 @@ class TestVEventTimezoneFallback:
         call_kwargs = bg.add_task.call_args
         date_arg = call_kwargs.kwargs.get('date') or call_kwargs[1].get('date')
         assert date_arg.tzinfo is not None
+
