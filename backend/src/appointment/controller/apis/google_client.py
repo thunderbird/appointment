@@ -246,6 +246,19 @@ class GoogleClient:
 
         return response
 
+    def insert_event(self, calendar_id, body, token, send_updates='all'):
+        response = None
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            try:
+                response = service.events().insert(
+                    calendarId=calendar_id, body=body, sendUpdates=send_updates
+                ).execute()
+            except HttpError as e:
+                logging.warning(f'[google_client.insert_event] Request Error: {e.status_code}/{e.error_details}')
+                raise EventNotCreatedException()
+
+        return response
+
     def delete_event(self, calendar_id, event_id, token):
         response = None
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
