@@ -4,7 +4,7 @@ from contextlib import contextmanager
 import os
 
 import typer
-from ..commands import update_db, download_legal, setup, generate_documentation_pages
+from ..commands import update_db, download_legal, setup, generate_documentation_pages, renew_google_channels, backfill_google_channels
 
 router = typer.Typer()
 
@@ -44,3 +44,21 @@ def generate_docs():
 @router.command('setup')
 def setup_app():
     setup.run()
+
+
+@router.command('renew-google-channels')
+def renew_channels():
+    try:
+        with cron_lock('renew_google_channels'):
+            renew_google_channels.run()
+    except FileExistsError:
+        print('renew-google-channels is already running, skipping.')
+
+
+@router.command('backfill-google-channels')
+def backfill_channels():
+    try:
+        with cron_lock('backfill_google_channels'):
+            backfill_google_channels.run()
+    except FileExistsError:
+        print('backfill-google-channels is already running, skipping.')
