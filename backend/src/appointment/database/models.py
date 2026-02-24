@@ -235,6 +235,9 @@ class Calendar(Base):
         'Appointment', cascade='all,delete', back_populates='calendar'
     )
     schedules: Mapped[list['Schedule']] = relationship('Schedule', cascade='all,delete', back_populates='calendar')
+    google_channel: Mapped['GoogleCalendarChannel'] = relationship(
+        'GoogleCalendarChannel', cascade='all,delete', back_populates='calendar', uselist=False
+    )
 
     def __str__(self):
         return f'Calendar: {self.id}'
@@ -454,3 +457,21 @@ class ExternalConnections(Base):
 
     def __str__(self):
         return f'External Connection: {self.id}'
+
+
+class GoogleCalendarChannel(Base):
+    """Tracks Google Calendar push notification channels for real-time RSVP sync."""
+
+    __tablename__ = 'google_calendar_channels'
+
+    id = Column(Integer, primary_key=True, index=True)
+    calendar_id = Column(Integer, ForeignKey('calendars.id'), unique=True)
+    channel_id = Column(String, index=True)
+    resource_id = Column(String)
+    expiration = Column(DateTime)
+    sync_token = Column(String, nullable=True)
+
+    calendar: Mapped[Calendar] = relationship('Calendar', back_populates='google_channel')
+
+    def __str__(self):
+        return f'GoogleCalendarChannel: {self.channel_id}'
