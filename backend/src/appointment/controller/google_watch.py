@@ -13,7 +13,7 @@ from ..database import repo, models
 
 
 def get_webhook_url() -> str | None:
-    """Build the Google Calendar webhook URL from the backend URL."""
+    """Build the Google Calendar webhook URL from the backend URL, requires https."""
     backend_url = os.getenv('BACKEND_URL')
     if not backend_url:
         return None
@@ -152,7 +152,13 @@ def teardown_watch_channels_for_connection(
         except (json.JSONDecodeError, Exception) as e:
             logging.warning(f'[google_watch] Could not parse token for channel teardown: {e}')
 
-    for calendar in google_connection.calendars:
+    calendars = (
+        db.query(models.Calendar)
+        .filter(models.Calendar.external_connection_id == google_connection.id)
+        .all()
+    )
+
+    for calendar in calendars:
         channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
         if not channel:
             continue
