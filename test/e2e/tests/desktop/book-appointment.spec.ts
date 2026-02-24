@@ -47,7 +47,7 @@ test.describe('book an appointment on desktop browser', () => {
     await expect(bookingPage.titleText).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
 
     // record the timezone that the bookee page is using (timezone of selected time slot)
-    const selectedSlotTimeZone = (await bookingPage.bookingPageTimeZoneFooter.innerText()).trim().split(': ')[1];
+    const selectedSlotTimeZone = (await bookingPage.bookingPageTimeZoneFooter.innerText({ timeout: TIMEOUT_30_SECONDS })).trim().split(': ')[1];
     console.log(`bookee page is using timezone: ${selectedSlotTimeZone}`);
 
     // now select an available booking time slot
