@@ -1,13 +1,10 @@
-import json
-import logging
 import os
-from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
-from google.oauth2.credentials import Credentials
 
 from ..controller.apis.google_client import GoogleClient
+from ..controller.google_watch import setup_watch_channels_for_connection, teardown_watch_channels_for_connection
 from ..database import repo, schemas, models
 from sqlalchemy.orm import Session
 
@@ -134,7 +131,7 @@ def google_callback(
     if error_occurred:
         return google_callback_error(is_setup, l10n('google-sync-fail'))
 
-    _setup_watch_channels(db, google_client, creds, subscriber.id, external_connection.id)
+    setup_watch_channels_for_connection(db, google_client, creds, subscriber.id, external_connection.id)
 
     # Redirect non-setup subscribers back to the setup page
     if not is_setup:
@@ -170,7 +167,7 @@ def disconnect_account(
             raise ConnectionContainsDefaultCalendarException()
 
     # Tear down watch channels before deleting calendars
-    _teardown_watch_channels(db, google_client, google_connection)
+    teardown_watch_channels_for_connection(db, google_client, google_connection)
 
     # Remove all of the google calendars on their given google connection
     repo.calendar.delete_by_subscriber_and_provider(
@@ -187,89 +184,3 @@ def disconnect_account(
     repo.external_connection.delete_by_type(db, subscriber.id, google_connection.type, google_connection.type_id)
 
     return True
-
-
-def _get_webhook_url() -> str | None:
-    """Build the Google Calendar webhook URL from the backend URL."""
-    backend_url = os.getenv('BACKEND_URL')
-    if not backend_url:
-        return None
-    return f'{backend_url}/webhooks/google-calendar'
-
-
-def _setup_watch_channels(
-    db: Session,
-    google_client: GoogleClient,
-    creds,
-    subscriber_id: int,
-    external_connection_id: int,
-):
-    """Register push notification channels for all Google calendars under this connection."""
-    webhook_url = _get_webhook_url()
-    if not webhook_url:
-        logging.warning('[google] BACKEND_URL not set, skipping watch channel setup')
-        return
-
-    calendars = repo.calendar.get_by_subscriber(db, subscriber_id)
-    for calendar in calendars:
-        if calendar.provider != models.CalendarProvider.google:
-            continue
-        if calendar.external_connection_id != external_connection_id:
-            continue
-        if not calendar.connected:
-            continue
-
-        existing = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
-        if existing:
-            continue
-
-        try:
-            response = google_client.watch_events(calendar.user, webhook_url, creds)
-            if response:
-                expiration_ms = int(response.get('expiration', 0))
-                expiration_dt = datetime.fromtimestamp(expiration_ms / 1000, tz=timezone.utc)
-
-                sync_token = google_client.get_initial_sync_token(calendar.user, creds)
-
-                repo.google_calendar_channel.create(
-                    db,
-                    calendar_id=calendar.id,
-                    channel_id=response['id'],
-                    resource_id=response['resourceId'],
-                    expiration=expiration_dt,
-                    sync_token=sync_token,
-                )
-        except Exception as e:
-            logging.warning(f'[google] Failed to set up watch channel for calendar {calendar.id}: {e}')
-
-
-def _teardown_watch_channels(
-    db: Session,
-    google_client: GoogleClient,
-    google_connection: models.ExternalConnections,
-):
-    """Stop and remove all watch channels for calendars under this Google connection."""
-    if not google_connection or not google_connection.token:
-        return
-
-    token = None
-    if google_client:
-        try:
-            token = Credentials.from_authorized_user_info(
-                json.loads(google_connection.token), google_client.SCOPES
-            )
-        except (json.JSONDecodeError, Exception) as e:
-            logging.warning(f'[google] Could not parse token for channel teardown: {e}')
-
-    for calendar in google_connection.calendars:
-        channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
-        if not channel:
-            continue
-
-        if google_client and token:
-            try:
-                google_client.stop_channel(channel.channel_id, channel.resource_id, token)
-            except Exception as e:
-                logging.warning(f'[google] Failed to stop channel {channel.channel_id}: {e}')
-
-        repo.google_calendar_channel.delete(db, channel)
