@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from ..controller import auth, data, zoom
 from ..controller.apis.fxa_client import FxaClient
 from ..controller.apis.google_client import GoogleClient
+from ..controller.google_watch import teardown_watch_channel
 from ..database import repo, models, schemas
 from ..dependencies.database import get_db, get_redis
 from ..dependencies.fxa import get_webhook_auth as get_webhook_auth_fxa, get_fxa_client
@@ -142,13 +143,16 @@ def google_calendar_notification(
         return Response(status_code=200)
 
     calendar = channel.calendar
-    if not calendar or not calendar.connected:
-        _teardown_channel(db, channel, google_client)
+    if not calendar:
+        repo.google_calendar_channel.delete(db, channel)
+        return Response(status_code=200)
+    if not calendar.connected:
+        teardown_watch_channel(db, google_client, calendar)
         return Response(status_code=200)
 
     external_connection = calendar.external_connection
     if not external_connection or not external_connection.token:
-        _teardown_channel(db, channel, google_client)
+        teardown_watch_channel(db, google_client, calendar)
         return Response(status_code=200)
 
     token = Credentials.from_authorized_user_info(
@@ -186,19 +190,6 @@ def google_calendar_notification(
 
     return Response(status_code=200)
 
-
-def _teardown_channel(db: Session, channel: models.GoogleCalendarChannel, google_client: GoogleClient):
-    """Stop the Google channel and delete the local record."""
-    if channel.calendar and channel.calendar.external_connection and channel.calendar.external_connection.token:
-        try:
-            token = Credentials.from_authorized_user_info(
-                json.loads(channel.calendar.external_connection.token), google_client.SCOPES
-            )
-            google_client.stop_channel(channel.channel_id, channel.resource_id, token)
-        except Exception as e:
-            logging.warning(f'[webhooks.google_calendar] Failed to stop channel: {e}')
-
-    repo.google_calendar_channel.delete(db, channel)
 
 
 def _process_google_event_changes(
