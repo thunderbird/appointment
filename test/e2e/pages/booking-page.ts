@@ -1,9 +1,10 @@
 import { expect } from '@playwright/test';
 import { type Page, type Locator } from '@playwright/test';
-import { APPT_MY_SHARE_LINK, APPT_SHORT_SHARE_LINK_PREFIX, APPT_LONG_SHARE_LINK_PREFIX, TIMEOUT_30_SECONDS, APPT_TIMEZONE_SETTING_PRIMARY } from '../const/constants';
+import { APPT_MY_SHARE_LINK, APPT_SHORT_SHARE_LINK_PREFIX, APPT_LONG_SHARE_LINK_PREFIX, TIMEOUT_30_SECONDS, APPT_TIMEZONE_SETTING_PRIMARY, TIMEOUT_2_SECONDS } from '../const/constants';
 
 export class BookingPage {
   readonly page: Page;
+  readonly testPlatform: String;
   readonly titleText: Locator;
   readonly bookingPageTimeZoneFooter: Locator;
   readonly bookATimeToMeetText: Locator;
@@ -21,7 +22,7 @@ export class BookingPage {
   readonly availableBookingSlot: Locator;
   readonly bookSelectionNameInput: Locator;
   readonly bookSelectionEmailInput: Locator;
-  readonly bookingConfirmedTitleText: Locator;
+  readonly bookingRequestedTitleText: Locator;
   readonly requestSentAvailabilityText: Locator;
   readonly requestSentCloseBtn: Locator;
   readonly eventBookedTitleText: Locator;
@@ -30,8 +31,9 @@ export class BookingPage {
   readonly bookApptPage630PMSlot: Locator;
   readonly bookApptPage15MinSlot: Locator;
 
-  constructor(page: Page) {
+  constructor(page: Page, testPlatform: string = 'desktop') {
     this.page = page;
+    this.testPlatform = testPlatform;
     this.titleText = this.page.getByTestId('booking-view-title-text');
     this.bookingPageTimeZoneFooter = this.page.locator('div').filter({ hasText: /^Timezone:/ });
     this.bookATimeToMeetText = this.page.getByTestId('booking-view-book-a-time-to-meet-with-text');
@@ -49,7 +51,7 @@ export class BookingPage {
     this.bookSelectionNameInput = this.page.locator('[name="booker-view-user-name"]');
     this.bookSelectionEmailInput = this.page.locator('[name="booker-view-user-email"]');
     this.bookApptBtn = this.page.getByTestId('booking-view-confirm-selection-button');
-    this.bookingConfirmedTitleText = this.page.getByText('Booking Request Sent');
+    this.bookingRequestedTitleText = this.page.getByText('Booking Request Sent');
     this.requestSentAvailabilityText = this.page.getByText("'s Availability");
     this.requestSentCloseBtn = this.page.getByRole('button', { name: 'Close' });
     this.eventBookedTitleText = this.page.getByText('Event booked!');
@@ -107,28 +109,26 @@ export class BookingPage {
    */
   async selectAvailableBookingSlot(userDisplayName: string): Promise<string> {
     // let's check if a non-busy appointment slot exists in the current week view
-    const slotCount: number = await this.availableBookingSlot.count();
-    console.log(`available slot count: ${slotCount}`);
+    // playwrignt doesn't yet support 'count' or 'all' or 'elementHandles' on ios
+    var availableSlot: Locator = this.availableBookingSlot.first();
 
     // if no slots are available in current week view then fast forward to next week
-    if (slotCount === 0) {
+    if (!availableSlot) {
       console.log('no slots available in current week, skipping ahead to the next week');
       await this.goForwardOneWeek();
       // now check again for available slots; if none then fail out the test (safety catch but shouldn't happen)
-      const newSlotCount: number = await this.availableBookingSlot.count();
-      console.log(`available slot count: ${newSlotCount}`);
-      expect(newSlotCount, `no booking slots available, please check availability settings for ${userDisplayName}`).toBeGreaterThan(0);
+      availableSlot = this.availableBookingSlot.first();
+      expect(availableSlot, `no booking slots available, please check availability settings for ${userDisplayName}`).toBeTruthy();
     }
 
-    // slots are available in current week view so get the first one
-    const firstSlot: Locator = this.availableBookingSlot.first();
-    let slotRef = await firstSlot.getAttribute('data-testid'); // ie. 'event-2025-01-08 09:30'
+    // get our slot info for the available slot that we are going to request
+    let slotRef = await availableSlot.getAttribute('data-testid'); // ie. 'event-2025-01-08 09:30'
     if (!slotRef)
       slotRef = 'none';
     expect(slotRef).toContain('event-');
 
     // now that we've found an availalbe slot select it and confirm
-    await firstSlot.click();
+    await availableSlot.click();
     return slotRef;
   }
 
@@ -143,7 +143,16 @@ export class BookingPage {
   async finishBooking(bookerName: string, bookerEmail: string) {
     await this.bookSelectionNameInput.fill(bookerName);
     await this.bookSelectionEmailInput.fill(bookerEmail);
-    await this.bookApptBtn.click();
+
+    // when clicking the book appt button for some reason on android it won't click it unless we force it; but
+    // force doesn't work on ios
+    if (this.testPlatform.includes('android')) { 
+      await this.bookApptBtn.click({ force: true });
+    } else {
+      await this.bookApptBtn.click();
+    }
+    // slight delay so on mobile we can see if any errors show up in BrowserStack test playback videos
+    await this.page.waitForTimeout(TIMEOUT_2_SECONDS);
   }
 
   /**
@@ -174,5 +183,14 @@ export class BookingPage {
     // now startTimeStr looks like this, for example: '04:30 p.m.' but need it to be like '04:30pm'
     startTimeStr = startTimeStr.replace(' ', '').replace('.', '').replace('.', '');
     return startTimeStr
+  }
+
+  /**
+   * Scroll the given element into view. The reason why we do this here is because playright doesn't yet supported this on ios.
+   */
+  async scrollIntoView(targetElement: Locator, timeout: number = 10000) {
+    if (!this.testPlatform.includes('ios')) {
+      await targetElement.scrollIntoViewIfNeeded({ timeout: timeout });
+    }
   }
 }

@@ -79,7 +79,7 @@ idleTimeout: 500 # seeing if this helps rid BROWSERSTACK_IDLE_TIMEOUTs on ios
 # and mobile browsers; and therefore must be the same in all of our browserstack-*.yml config files
 # for playwright ver we need one compatible with our desktop and mobile browsers, see:
 # https://www.browserstack.com/docs/automate/playwright/browsers-and-os?fw-lang=nodejs
-browserstack.playwrightVersion: 1.53.0 # must match ver in package.json
+browserstack.playwrightVersion: 1.56.1 # must match ver in package.json
 browserstack.playwrightLogs: false # disable playwright logs appearing on browserstack builds as may contain sensitive info like credentials
 # CUSTOM_TAG_<INT>: # <string> (Default: parent folder name of the test file) Custom tag for your test suite
 browserstack.maskBasicAuth: true # mask username and passwords from browserstack session logs

@@ -23,9 +23,9 @@
   "license": "ISC",
   "description": "",
   "devDependencies": {
-    "@playwright/test": "1.56.1",
+    "@playwright/test": "1.58.2",
     "@types/node": "^24.1.0",
-    "browserstack-node-sdk": "^1.40.8",
+    "browserstack-node-sdk": "^1.49.12",
     "dotenv": "^17.2.1",
     "date-fns": "4.1.0"
   }
