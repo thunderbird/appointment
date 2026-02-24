@@ -16,6 +16,7 @@ from ..database import repo, schemas, models
 
 # authentication
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
+from ..controller.google_watch import setup_watch_channel, teardown_watch_channel
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request, Response, Query
 from ..controller.apis.google_client import GoogleClient
 from ..controller.auth import signed_url_by_subscriber, schedule_slugs_by_subscriber, user_links_by_subscriber
@@ -270,6 +271,7 @@ def change_my_calendar_connection(
     id: int,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
+    google_client: GoogleClient = Depends(get_google_client),
 ):
     """endpoint to update an existing calendar connection for authenticated subscriber
     note this function handles both disconnect and connect (the double route is not a typo.)"""
@@ -285,6 +287,13 @@ def change_my_calendar_connection(
         cal = repo.calendar.update_connection(db=db, calendar_id=id, is_connected=connect)
     except HTTPException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
+
+    if cal.provider == CalendarProvider.google:
+        if connect:
+            setup_watch_channel(db, google_client, cal)
+        else:
+            teardown_watch_channel(db, google_client, cal)
+
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
