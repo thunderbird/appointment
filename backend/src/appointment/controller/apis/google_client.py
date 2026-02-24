@@ -1,5 +1,6 @@
 import logging
 import os
+import uuid
 from datetime import datetime
 
 import sentry_sdk
@@ -269,6 +270,96 @@ class GoogleClient:
                 raise EventNotDeletedException()
 
         return response
+
+    def watch_events(self, calendar_id, webhook_url, token):
+        """Register a push notification channel for calendar event changes.
+        Ref: https://developers.google.com/calendar/api/v3/reference/events/watch"""
+        channel_id = str(uuid.uuid4())
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            try:
+                response = service.events().watch(
+                    calendarId=calendar_id,
+                    body={
+                        'id': channel_id,
+                        'type': 'web_hook',
+                        'address': webhook_url,
+                    },
+                ).execute()
+            except HttpError as e:
+                logging.error(f'[google_client.watch_events] Request Error: {e.status_code}/{e.error_details}')
+                return None
+
+        return response
+
+    def stop_channel(self, channel_id, resource_id, token):
+        """Stop a push notification channel.
+        Ref: https://developers.google.com/calendar/api/v3/reference/channels/stop"""
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            try:
+                service.channels().stop(
+                    body={
+                        'id': channel_id,
+                        'resourceId': resource_id,
+                    },
+                ).execute()
+            except HttpError as e:
+                logging.warning(f'[google_client.stop_channel] Request Error: {e.status_code}/{e.error_details}')
+
+    def list_events_sync(self, calendar_id, sync_token, token):
+        """Fetch events that changed since the last sync token.
+        Ref: https://developers.google.com/calendar/api/v3/reference/events/list (incremental sync)"""
+        items = []
+        next_sync_token = None
+
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            page_token = None
+            while True:
+                try:
+                    params = {
+                        'calendarId': calendar_id,
+                        'syncToken': sync_token,
+                    }
+                    if page_token:
+                        params['pageToken'] = page_token
+
+                    response = service.events().list(**params).execute()
+                    items += response.get('items', [])
+                    page_token = response.get('nextPageToken')
+                    if not page_token:
+                        next_sync_token = response.get('nextSyncToken')
+                        break
+                except HttpError as e:
+                    if e.status_code == 410:
+                        logging.info('[google_client.list_events_sync] Sync token expired, full sync needed')
+                        return None, None
+                    logging.warning(
+                        f'[google_client.list_events_sync] Request Error: {e.status_code}/{e.error_details}'
+                    )
+                    break
+
+        return items, next_sync_token
+
+    def get_initial_sync_token(self, calendar_id, token):
+        """Perform an initial list to obtain a sync token without fetching all events."""
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            try:
+                page_token = None
+                while True:
+                    params = {
+                        'calendarId': calendar_id,
+                        'maxResults': 250,
+                    }
+                    if page_token:
+                        params['pageToken'] = page_token
+                    response = service.events().list(**params).execute()
+                    page_token = response.get('nextPageToken')
+                    if not page_token:
+                        return response.get('nextSyncToken')
+            except HttpError as e:
+                logging.error(
+                    f'[google_client.get_initial_sync_token] Request Error: {e.status_code}/{e.error_details}'
+                )
+                return None
 
     def sync_calendars(self, db, subscriber_id: int, token, external_connection_id: int | None = None):
         # Grab all the Google calendars
