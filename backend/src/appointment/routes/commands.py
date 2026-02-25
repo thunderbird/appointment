@@ -4,7 +4,14 @@ from contextlib import contextmanager
 import os
 
 import typer
-from ..commands import update_db, download_legal, setup, generate_documentation_pages, renew_google_channels, backfill_google_channels
+from ..commands import (
+    update_db,
+    download_legal,
+    setup,
+    generate_documentation_pages,
+    renew_google_channels,
+    backfill_google_channels,
+)
 
 router = typer.Typer()
 
