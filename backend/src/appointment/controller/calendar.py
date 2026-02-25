@@ -22,7 +22,7 @@ from fastapi import BackgroundTasks
 from google.oauth2.credentials import Credentials
 from icalendar import Calendar, Event, vCalAddress, vText
 from datetime import datetime, timedelta, timezone, UTC
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from enum import Enum
 
 from sqlalchemy.orm import Session
@@ -669,7 +669,13 @@ class Tools:
         )
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
-        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+
+        try:
+            tz = ZoneInfo(attendee.timezone)
+        except (ZoneInfoNotFoundError, KeyError, ValueError):
+            tz = timezone.utc
+
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(tz)
 
         # Emails to attendee should be sent in the attendee's language if available
         lang = attendee.language if attendee.language is not None else FALLBACK_LOCALE
@@ -702,7 +708,13 @@ class Tools:
         )
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
-        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+
+        try:
+            tz = ZoneInfo(attendee.timezone)
+        except (ZoneInfoNotFoundError, KeyError, ValueError):
+            tz = timezone.utc
+
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(tz)
 
         # Emails to attendee should be sent in the attendee's language if available
         lang = attendee.language if attendee.language is not None else FALLBACK_LOCALE
@@ -729,7 +741,13 @@ class Tools:
         )
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
-        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+
+        try:
+            tz = ZoneInfo(attendee.timezone)
+        except (ZoneInfoNotFoundError, KeyError, ValueError):
+            tz = timezone.utc
+
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(tz)
 
         # Emails to attendee should be sent in the attendee's language if available
         lang = attendee.language if attendee.language is not None else FALLBACK_LOCALE
@@ -756,7 +774,13 @@ class Tools:
         )
         if attendee.timezone is None:
             attendee.timezone = 'UTC'
-        date = slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(attendee.timezone))
+
+        try:
+            tz = ZoneInfo(attendee.timezone)
+        except (ZoneInfoNotFoundError, KeyError, ValueError):
+            tz = timezone.utc
+
+        date = slot.start.replace(tzinfo=timezone.utc).astimezone(tz)
 
         # Emails to attendee should be sent in the attendee's language if available
         lang = attendee.language if attendee.language is not None else FALLBACK_LOCALE
