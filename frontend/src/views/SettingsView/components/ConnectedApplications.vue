@@ -203,6 +203,8 @@ async function refreshData() {
         {{ t('label.videoMeeting') }}
       </label>
   
+      <hr class="divider" />
+
       <template v-if="zoomAccount">
         <div class="video-meeting-container">
           <div>
@@ -246,6 +248,8 @@ async function refreshData() {
         {{ t('label.calendar', initialCalendars.length) }}
       </label>
   
+      <hr class="divider" />
+
       <div class="calendars-container">
         <template v-if="initialCalendars.length > 0">
           <template v-for="calendar in initialCalendars" :key="calendar.id">
@@ -381,6 +385,12 @@ h2 {
   font-family: metropolis;
 }
 
+.divider {
+  color: var(--colour-neutral-border);
+  height: 1px;
+  margin-block: 0.5rem;
+}
+
 .form-field-container {
   display: flex;
   flex-direction: column;
@@ -392,11 +402,6 @@ h2 {
     color: var(--colour-ti-secondary);
     letter-spacing: 0.48px;
     font-weight: 600;
-    margin-block-end: 0.5rem;
-  }
-
-  .calendars-label {
-    margin-block-end: 1rem;
   }
 
   .video-meeting-container {
