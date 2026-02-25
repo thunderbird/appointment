@@ -1,7 +1,7 @@
 from appointment.controller.calendar import Tools, GoogleConnector
 from appointment.database import schemas, models
 from datetime import datetime, timedelta, time, date, timezone
-from unittest.mock import Mock, MagicMock, PropertyMock, patch
+from unittest.mock import Mock, MagicMock, PropertyMock
 from starlette_context import request_cycle_context
 from appointment.middleware.l10n import L10n
 
