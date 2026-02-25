@@ -60,7 +60,7 @@ config:
   appointment:fxa-allow-list:
     secure: AAABAM/i0Sg4pkCB4GtXYm6KaS9DzKmv1UjcC3zJxqkhDBPCIXHhr9oqEz4V1XOOqNb126Qay2tZUH90FTHB+v+wBeLmL6DLF9NRuPob8YF5koYK8mlb1RnCgSSsREm/mxgTfGaA7WU13D4dUFhLPzZViBRElEageMXAcba/QvJuMKZhwp7nuSl8af+5hicWyU2seX5LNfBZ7wJXc9sBeW11vvc/asWBHw6QBo4h1w6bcFMFlRmwON4fR2CszQLUIUq323y4T8YHGYTNXm43ZWAn4nvRoen/zqwBCDpj+E+ZOuu6o++2AxbQin0=
   appointment:fxa-admin-list:
-    secure: AAABAMcI1Svz3I0vBeP6tptaRA3MfWXmc1UDUj5MTRj+gAs32al5Uyx35p563AFQAHVjTQ9ry+g15wgXyQRArd5ECKxDRyn1PD8/V5sutyBow+/v2dbWMmdm+qquCdiO52/ApEyJdl2BhpC1Qm2JuOeyBbG7eT4kpN+U/5kJMMISnSafmMM26pc1Rg588ZpjeIw=
+    secure: AAABAHoCkJV/KqV+dJKMkKSxchs7QSEFWMD94iotEMKYSdes95FrOZLFsF/ubgyy9gBoMfuqjqTfW70/6CWuIFdzuQ9m16cKTv8onsf+cm4/52VdoPQUJBgBUiN7koyq4z0TV9Au5DerFADsDNu/nv5Rh96OeyS5lDrM2zlsZlvbbgeRtRZ7p2kKHlm+HtSjBs5vF/FAi06H8Sb3s7dGT7OZcHxgV+cppHM=
   appointment:posthog-project-key:
     secure: AAABAKRmpsbJZh+umkJvjdU/AzH/WDX2FtP0ui+cF6Z7hUF0kvEcLazxtArS57ZUqSW8sJtZLnLdFGJHZA4JBeyS04OvmzG5vAmj0OAV/g==
   appointment:oidc-client-id:
