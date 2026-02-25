@@ -1,10 +1,11 @@
 from appointment.controller.calendar import Tools, GoogleConnector
 from appointment.database import schemas, models
-from datetime import datetime, timedelta, time, date
-from unittest.mock import Mock, PropertyMock
+from datetime import datetime, timedelta, time, date, timezone
+from unittest.mock import Mock, MagicMock, PropertyMock, patch
 from starlette_context import request_cycle_context
 from appointment.middleware.l10n import L10n
 
+import pytest
 import uuid
 import zoneinfo
 
@@ -500,3 +501,97 @@ class TestGoogleConnectorSaveEventLanguage:
         assert 'Join by phone:' in description
         assert 'Online teilnehmen unter:' not in description
         assert 'Per Telefon teilnehmen:' not in description
+
+
+class TestVEventTimezoneFallback:
+    """Tests that send_*_vevent methods fall back to UTC for invalid timezones."""
+
+    def _make_tools(self):
+        tools = Tools.__new__(Tools)
+        return tools
+
+    def _make_slot(self):
+        return schemas.SlotBase(
+            start=datetime(2026, 3, 15, 14, 0, 0),
+            duration=30,
+            booking_status=models.BookingStatus.requested,
+        )
+
+    def _make_organizer(self):
+        organizer = Mock()
+        organizer.name = 'Test Organizer'
+        organizer.email = 'organizer@example.com'
+        return organizer
+
+    def _make_appointment(self):
+        return Mock()
+
+    def _make_attendee(self, tz='America/New_York'):
+        return schemas.AttendeeBase(email='attendee@example.com', name='Attendee', timezone=tz)
+
+    @pytest.mark.parametrize('method_name,email_func_path', [
+        ('send_invitation_vevent', 'appointment.controller.mailer.send_invite_email'),
+        ('send_hold_vevent', 'appointment.controller.mailer.send_pending_email'),
+        ('send_reject_vevent', 'appointment.controller.mailer.send_rejection_email'),
+        ('send_cancel_vevent', 'appointment.controller.mailer.send_cancel_email'),
+    ])
+    def test_valid_timezone_is_applied(self, method_name, email_func_path):
+        tools = self._make_tools()
+        tools.create_vevent = Mock(return_value=b'VCALENDAR')
+        bg = MagicMock()
+        slot = self._make_slot()
+        attendee = self._make_attendee('America/New_York')
+
+        method = getattr(tools, method_name)
+        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee)
+
+        bg.add_task.assert_called_once()
+        call_kwargs = bg.add_task.call_args
+        date_arg = call_kwargs.kwargs.get('date') or call_kwargs[1].get('date')
+        expected = slot.start.replace(tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo('America/New_York'))
+        assert date_arg == expected
+
+    @pytest.mark.parametrize('method_name,email_func_path', [
+        ('send_invitation_vevent', 'appointment.controller.mailer.send_invite_email'),
+        ('send_hold_vevent', 'appointment.controller.mailer.send_pending_email'),
+        ('send_reject_vevent', 'appointment.controller.mailer.send_rejection_email'),
+        ('send_cancel_vevent', 'appointment.controller.mailer.send_cancel_email'),
+    ])
+    @pytest.mark.parametrize('bad_tz', ['Invalid/Timezone', 'Not_A_Zone', ''])
+    def test_invalid_timezone_falls_back_to_utc(self, method_name, email_func_path, bad_tz):
+        tools = self._make_tools()
+        tools.create_vevent = Mock(return_value=b'VCALENDAR')
+        bg = MagicMock()
+        slot = self._make_slot()
+        attendee = self._make_attendee(bad_tz)
+
+        method = getattr(tools, method_name)
+        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee)
+
+        bg.add_task.assert_called_once()
+        call_kwargs = bg.add_task.call_args
+        date_arg = call_kwargs.kwargs.get('date') or call_kwargs[1].get('date')
+        expected = slot.start.replace(tzinfo=timezone.utc)
+        assert date_arg == expected
+        assert date_arg.tzinfo == timezone.utc
+
+    @pytest.mark.parametrize('method_name', [
+        'send_invitation_vevent',
+        'send_hold_vevent',
+        'send_reject_vevent',
+        'send_cancel_vevent',
+    ])
+    def test_none_timezone_defaults_to_utc(self, method_name):
+        tools = self._make_tools()
+        tools.create_vevent = Mock(return_value=b'VCALENDAR')
+        bg = MagicMock()
+        slot = self._make_slot()
+        attendee = self._make_attendee(tz=None)
+
+        method = getattr(tools, method_name)
+        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee)
+
+        bg.add_task.assert_called_once()
+        call_kwargs = bg.add_task.call_args
+        date_arg = call_kwargs.kwargs.get('date') or call_kwargs[1].get('date')
+        assert date_arg.tzinfo is not None
