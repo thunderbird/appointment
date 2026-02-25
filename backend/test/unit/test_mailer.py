@@ -1,4 +1,5 @@
 import datetime
+from unittest.mock import MagicMock
 
 from starlette_context import request_cycle_context
 
@@ -123,6 +124,44 @@ class TestMailer:
         for idx, content in enumerate([mailer.text(), mailer.html()]):
             fault = 'text' if idx == 0 else 'html'
             assert fake_title in content, fault
+
+    def test_send_builds_message_before_smtp_connection(self, with_l10n, monkeypatch):
+        """Message must be fully built before the SMTP connection is opened,
+        otherwise slow template rendering / file I/O can cause the server to
+        timeout waiting for the MAIL FROM command (451 4.4.2)."""
+        call_order = []
+
+        mailer = InvitationMail(
+            to='to@example.org',
+            name='fake',
+            email='fake@example.org',
+            date=datetime.datetime.now(),
+            duration=30,
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+        )
+
+        original_build = mailer.build
+
+        def tracked_build():
+            call_order.append('build')
+            return original_build()
+
+        mailer.build = tracked_build
+
+        mock_smtp_instance = MagicMock()
+
+        def tracked_smtp(*args, **kwargs):
+            call_order.append('smtp_connect')
+            return mock_smtp_instance
+
+        monkeypatch.setenv('SMTP_SECURITY', 'NONE')
+        monkeypatch.setenv('SMTP_URL', 'localhost')
+        monkeypatch.setenv('SMTP_PORT', '25')
+        monkeypatch.setattr('smtplib.SMTP', tracked_smtp)
+
+        mailer.send()
+
+        assert call_order.index('build') < call_order.index('smtp_connect')
 
     def test_booking_emails_use_correct_language(self, faker):
         """Bookee's invite email should be in German (bookee's language from context),

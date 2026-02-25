@@ -147,6 +147,7 @@ class Mailer:
             # url is not valid
             logging.error('[mailer.send] No valid SMTP url configured: ' + url)
 
+        message = self.build()
         server = None
         try:
             # if configured, create a secure SSL context
@@ -161,7 +162,7 @@ class Mailer:
             else:
                 server = smtplib.SMTP(SMTP_URL, SMTP_PORT)
             # now send email
-            server.send_message(self.build(), to_addrs=self.to)
+            server.send_message(message, to_addrs=self.to)
         except Exception as e:
             # sending email was not possible
             logging.error('[mailer.send] An error occurred on sending email: ' + str(e))
