@@ -109,6 +109,11 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
+/* Temporary fix while we don't update this modal to the new ModalDialog */
+.base.link.filled.modal-close {
+  position: absolute;
+}
+
 /* Filter it for dark-mode B^) */
 .dark .modal-close > :deep(.text) {
   filter: invert(0.75)
