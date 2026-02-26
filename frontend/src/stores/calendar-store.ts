@@ -39,7 +39,7 @@ export const useCalendarStore = defineStore('calendars', () => {
   };
 
   const connectOIDCCalendar = async () => {
-    await call.value('caldav/oidc/auth').post();
+    return await call.value('caldav/oidc/auth').post().json();
   };
 
   /**

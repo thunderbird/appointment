@@ -21,6 +21,7 @@ const { errorMessage } = storeToRefs(ftueStore);
 
 type CalendarProvider = 'caldav' | 'google' | 'oidc';
 const calendarProvider = ref<CalendarProvider | null>('oidc');
+const isLoading = ref(false);
 
 const onBackButtonClick = () => {
   ftueStore.moveToStep(FtueStep.SetupProfile, true);
@@ -30,10 +31,25 @@ const onContinueButtonClick = async () => {
   ftueStore.clearMessages();
 
   switch (calendarProvider.value) {
-    case 'oidc':
-      await calendarStore.connectOIDCCalendar();
-      ftueStore.moveToStep(FtueStep.CreateBookingPage);
+    case 'oidc': {
+      isLoading.value = true;
+      try {
+        const { error } = await calendarStore.connectOIDCCalendar();
+
+        if (error.value) {
+          ftueStore.errorMessage = { title: t('error.somethingWentWrong') };
+          return;
+        }
+
+        ftueStore.moveToStep(FtueStep.CreateBookingPage);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : null;
+        ftueStore.errorMessage = { title: message || t('error.somethingWentWrong') };
+      } finally {
+        isLoading.value = false;
+      }
       break;
+    }
     case 'caldav':
       await ftueStore.moveToStep(FtueStep.ConnectCalendarsCalDav);
       break;
@@ -87,11 +103,11 @@ const onContinueButtonClick = async () => {
   </div>
 
   <div class="buttons-container">
-    <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick">
+    <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick" :disabled="isLoading">
       {{ t('label.back') }}
     </primary-button>
-    <primary-button :title="t('label.continue')" @click="onContinueButtonClick" :disabled="!calendarProvider">
-      {{ t('label.continue') }}
+    <primary-button :title="t('label.continue')" @click="onContinueButtonClick" :disabled="!calendarProvider || isLoading">
+      {{ isLoading ? t('label.connecting') : t('label.continue') }}
     </primary-button>
   </div>
 </template>
