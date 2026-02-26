@@ -59,14 +59,14 @@ def download_data(db: Session = Depends(get_db), subscriber: Subscriber = Depend
 
 @router.delete('/delete')
 def delete_account(
-    data: schemas.CheckPassword,
+    form_data: schemas.CheckPassword,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
     posthog: Posthog = Depends(get_posthog),
 ):
     """Delete your account and all the data associated with it forever!"""
     try:
-        utils.verify_password(data.password, subscriber.password)
+        utils.verify_password(form_data.password, subscriber.password)
     except argon2.exceptions.VerifyMismatchError:
         raise HTTPException(status_code=401, detail=l10n('password-mismatch'))
 
