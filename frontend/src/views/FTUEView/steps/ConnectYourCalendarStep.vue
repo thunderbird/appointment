@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
+import { useCalendarStore } from '@/stores/calendar-store';
 import calendarIcon from '@/assets/svg/icons/calendar.svg';
 import googleCalendarLogo from '@/assets/svg/google-calendar-logo.svg';
 import mailIcon from '@/assets/svg/icons/mail.svg';
@@ -14,6 +15,7 @@ import RadioProviderCardButton from '../components/RadioProviderCardButton.vue';
 
 const { t } = useI18n();
 
+const calendarStore = useCalendarStore();
 const ftueStore = useFTUEStore();
 const { errorMessage } = storeToRefs(ftueStore);
 
@@ -29,7 +31,8 @@ const onContinueButtonClick = async () => {
 
   switch (calendarProvider.value) {
     case 'oidc':
-      await ftueStore.moveToStep(FtueStep.ConnectCalendarsThundermail);
+      await calendarStore.connectOIDCCalendar();
+      ftueStore.moveToStep(FtueStep.CreateBookingPage);
       break;
     case 'caldav':
       await ftueStore.moveToStep(FtueStep.ConnectCalendarsCalDav);
