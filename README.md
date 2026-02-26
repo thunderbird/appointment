@@ -1,8 +1,5 @@
 # Thunderbird Appointment
 
-> [!IMPORTANT]  
-> Thunderbird Appointment is in a beta state, so be prepared to encounter bugs
-
 Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets.
 
 ## Feedback and Support
@@ -11,63 +8,45 @@ If you'd like to give feedback or need support, please see our [Topicbox](https:
 
 ## Get started
 
-You can either build preconfigured docker containers (database, backend and frontend) or manually set up the application. A more detailed documentation can be found in the [docs folder](./docs/README.md).
+Using Docker is the recommended and for now the only supported method of building and developing Thunderbird Appointment. A detailed technical documentation of the application architecture can be found in the [docs folder](./docs/README.md) (still work-in-progress).
 
-### With Docker
+### Installation
 
-This is the recommended and only supported method of developing Thunderbird Appointment.
+1. Get the application files and create your `.env` files from the examples:
 
-```bash
-git clone https://github.com/thunderbird/appointment
-cp appointment/backend/.env.example appointment/backend/.env
-cp appointment/frontend/.env.example appointment/frontend/.env
-cd appointment
-```
+    ```bash
+    git clone https://github.com/thunderbird/appointment
+    cd appointment
+    cp backend/.env.example backend/.env
+    cp frontend/.env.example frontend/.env
+    ```
 
-Next we need to pull Thunderbird Accounts. If you have a dev copy you can just symlink the folder to accounts.
+2. Make sure, that the `backend/.env` file contains `APP_ALLOW_FIRST_TIME_REGISTER=True`. This will enable the creation of your first admin user. If you want to be able to access admin-only pages, add your account's email address to the `APP_ADMIN_ALLOW_LIST` env variable.
 
-Other-wise run:
+3. Build and run the service in docker:
 
-```bash
-git clone https://github.com/thunderbird/thunderbird-accounts.git accounts
-```
+    ```bash
+    docker-compose up -d --build
+    ```
 
-If you're starting fresh with thunderbird-accounts, please review the documentations at that repo about setting it up.
+    This will create and start 5 different containers (backend, frontend, postgres, redis and mailpit).
 
-And finally we can run the service in docker:
+    * Frontend can be accessed via: <http://localhost:8080>
+    * Backend can be accessed via: <http://localhost:5000>
+    * The PostgreSQL database will be accessible via `localhost:5433` with username: password set to `tba`: `abcd%efgh`
+    * OpenAPI docs can be accessed via: <http://localhost:5000/docs> or <http://localhost:5000/redoc>
+    * Mailpit docs can be accessed via: <http://localhost:8025>
 
-```bash
-docker-compose up -d --build
-```
+4. Check if all containers are running. On first-run the database will initialize, and a first time setup command will be triggered (going forward database migrations will automatically run on `docker-compose up`). Check if the database contains tables, e.g. the `subscriber` table (still empty at this point).
 
-If you're using Thunderbird Accounts for authentication you'll additionally need to create a Client. You can do so by running the following command:
+### Authentication
 
-```bash
-docker-compose exec accounts uv run manage.py create_client 'Appointment' 'dev contact' 'noreply@example.org' 'https://example.org' --env_type dev --env_redirect_url 'http://localhost:5000/auth/accounts/callback' --env_allowed_hostnames 'localhost:8080,accounts:8087'
-```
+Appointment includes simple password-based authentication. This is meant for developing and testing Appointment, but can also be used when self-hosting the app.
 
-You should see your Client ID and Client Secret within the output like:
+When you access the frontend the first time, you will see a first-time-user login form. Enter the email address you configured in your allow list (see Step 2 in the installation process above) and a password. This login will create the first user (also called 'subscriber' in Appointment) granting you access to the application. Any login attempts with other email addresses after that will check against existing credentials.
 
-```log
-Your client was successfully created with the uuid of f71cf674-228c-4558-b8b2-7780d6a36925
-Your Client Details:
-* Client ID: f71cf674-228c-4558-b8b2-7780d6a36925
-* Client Secret: a5303c654c839d4c8ae8aae7d3b866f581e75280d7f477ee43dcf2200939c6a12ea97fbceda916c50e1136e1615f6e4e523e7a23e2282092b0f88d91c3898b91
-```
-
-(The above are just example values)
-
-Copy the Client ID and Client Secret values to your backend's .env file as `TB_ACCOUNTS_CLIENT_ID` and `TB_ACCOUNTS_SECRET` respectively.
-
----
-
-* Frontend can be accessed via: <http://localhost:8080>
-* Backend can be accessed via: <http://localhost:5000>
-* OpenAPI docs can be accessed via: <http://localhost:5000/docs> or <http://localhost:5000/redoc>
-
-A PostgreSQL database will be accessible via `localhost:5433` with username and password set to: `tba`: `abcd%efgh`
-
-On first-run the database will initialize, and a first time setup command will be triggered. Going forward database migrations will automatically run on `docker-compose up`.
+> [!NOTE]
+> For Thunderbird Services, we use our own OIDC provider [Thunderbird Accounts](https://github.com/thunderbird/thunderbird-accounts). If you're starting fresh with Thunderbird Accounts, please review [the documentations](https://github.com/thunderbird/thunderbird-accounts?tab=readme-ov-file#before-you-begin) setting it up.
 
 ## Contributing
 
@@ -82,10 +61,6 @@ Check out the project's respective readmes:
 ### Localization
 
 This project uses [Fluent](https://projectfluent.org/) for localization. Files are located in their respective `l10n/<locale>/*.ftl`.
-
-### Self-hosting
-
-More information is coming soon! If you're adventurous follow the setup steps in each project. Once the project is running the first login will create a new user, any login attempts with new emails after that will check against existing credentials.
 
 ### Deployment
 
