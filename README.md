@@ -24,7 +24,7 @@ Using Docker is the recommended and for now the only supported method of buildin
     cd appointment
     ```
 
-2. Make sure, that the `backend/.env` file contains `APP_ALLOW_FIRST_TIME_REGISTER=True` and that you added your account's email address to the `APP_ADMIN_ALLOW_LIST` env variable. This will enable the creation of your first admin user.
+2. Make sure, that the `backend/.env` file contains `APP_ALLOW_FIRST_TIME_REGISTER=True`. This will enable the creation of your first admin user. If you want to be able to access admin-only pages, add your account's email address to the `APP_ADMIN_ALLOW_LIST` env variable.
 
 3. Build and run the service in docker:
 
