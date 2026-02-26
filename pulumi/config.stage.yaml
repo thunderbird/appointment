@@ -114,6 +114,7 @@ resources:
         - zoom-client-id
         - zoom-auth-secret
         - zoom-api-secret
+        - appointment-caldav-secret
 
   tb:ec2:SshableInstance: {}
   # Fill out this template to build an SSH bastion
