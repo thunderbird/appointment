@@ -288,7 +288,10 @@ class TestOidcAutodiscoverAuth:
         monkeypatch.setattr(CalDavConnector, 'test_connection', lambda self: True)
         monkeypatch.setattr(CalDavConnector, 'sync_calendars', lambda self, **kw: None)
 
-        with patch('appointment.routes.caldav.requests.post', return_value=self._mock_tb_accounts_success()) as mock_post:
+        with patch(
+            'appointment.routes.caldav.requests.post',
+            return_value=self._mock_tb_accounts_success(),
+        ) as mock_post:
             response = with_client.post('/caldav/oidc/auth', headers=auth_headers)
 
         assert response.status_code == 200, response.text
