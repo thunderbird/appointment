@@ -489,6 +489,10 @@ class CheckEmail(BaseModel):
     email: EmailStr = Field(title='Email', min_length=1)
 
 
+class CheckPassword(BaseModel):
+    password: str = Field(min_length=1)
+
+
 class PageLoadIn(BaseModel):
     browser: Optional[str] = None
     browser_version: Optional[str] = None

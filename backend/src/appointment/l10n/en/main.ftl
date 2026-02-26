@@ -74,6 +74,7 @@ error-minimum-value = {field} should be at least {value}.
 ## Authentication Exceptions
 
 email-mismatch = Email mismatch.
+password-mismatch = Password mismatch.
 invalid-credentials = The provided credentials are not valid.
 disabled-account = Your account has been disabled.
 oauth-error = There was an error with the authentication flow. Please try again.

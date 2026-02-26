@@ -3,6 +3,7 @@ from collections import defaultdict
 
 from fastapi import APIRouter, Depends, HTTPException
 from posthog import Posthog
+import argon2.exceptions
 
 from ..controller import data
 from sqlalchemy.orm import Session
@@ -18,6 +19,10 @@ from fastapi.responses import StreamingResponse
 
 from ..dependencies.metrics import get_posthog
 from ..exceptions.account_api import AccountDeletionException
+
+from ..l10n import l10n
+from .. import utils
+
 
 router = APIRouter()
 
@@ -54,11 +59,17 @@ def download_data(db: Session = Depends(get_db), subscriber: Subscriber = Depend
 
 @router.delete('/delete')
 def delete_account(
+    data: schemas.CheckPassword,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
     posthog: Posthog = Depends(get_posthog),
 ):
     """Delete your account and all the data associated with it forever!"""
+    try:
+        utils.verify_password(data.password, subscriber.password)
+    except argon2.exceptions.VerifyMismatchError:
+        raise HTTPException(status_code=401, detail=l10n('password-mismatch'))
+
     try:
         return data.delete_account(db, subscriber)
     except AccountDeletionException as e:
