@@ -87,6 +87,7 @@ resources:
     pulumi:
       recovery_window_in_days: 0
       secret_names:
+        - appointment-caldav-secret
         - database-encryption-secret
         - database-host
         - database-name
