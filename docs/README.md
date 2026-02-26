@@ -8,9 +8,12 @@ This place holds all additional technical documentation for Thunderbird Appointm
 
 ## API endpoints
 
-After starting the backend container, you can find the API documentation here: <http://localhost:8090/docs>
+After starting the backend container, you can find the API documentation here: <http://localhost:5000/docs>
 
 ## Project architecture
+
+> [!IMPORTANT]  
+> This component chart is slightly outdated and needs to be synced up with the latest changes.
 
 This are the general components, Thunderbird Appointment consists of.
 
