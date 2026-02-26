@@ -70,3 +70,5 @@ config:
     secure: AAABAFDGWcE0W4Dsjg2wBx92Rm7c+2EPad7/CcpVFeuD1BqHEoWz6sE3DeROU/8I
   appointment:posthog-project-key:
     secure: AAABAIgp63a9jq1Ltj8E4Tuk3elknijgAii8Cp/vrLDLxXM5RkHPw0UXoKtQ2WEcNnLg82+X4PlDkEBAfOX81T8yHYDi6Mm4E3Er2wShfQ==
+  appointment:appointment-caldav-secret:
+    secure: AAABAFC02rwx9X/oo6+VLe6OTmlVJ+Y+SvmtLn9ukxjIFkMfDZjEQxThGJq8SXHeQdJtVaQA++nFVqz2s7JoUA==
