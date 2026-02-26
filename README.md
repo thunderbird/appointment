@@ -1,8 +1,5 @@
 # Thunderbird Appointment
 
-> [!IMPORTANT]  
-> Thunderbird Appointment is in a beta state, so be prepared to encounter bugs
-
 Invite others to grab times on your calendar. Choose a date. Make appointments as easy as it gets.
 
 ## Feedback and Support
@@ -19,9 +16,9 @@ Using Docker is the recommended and for now the only supported method of buildin
 
     ```bash
     git clone https://github.com/thunderbird/appointment
-    cp appointment/backend/.env.example appointment/backend/.env
-    cp appointment/frontend/.env.example appointment/frontend/.env
     cd appointment
+    cp backend/.env.example backend/.env
+    cp frontend/.env.example frontend/.env
     ```
 
 2. Make sure, that the `backend/.env` file contains `APP_ALLOW_FIRST_TIME_REGISTER=True`. This will enable the creation of your first admin user. If you want to be able to access admin-only pages, add your account's email address to the `APP_ADMIN_ALLOW_LIST` env variable.
