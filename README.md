@@ -15,38 +15,38 @@ Using Docker is the recommended and for now the only supported method of buildin
 
 ### Installation
 
-Get the application files and create your `.env` files from the examples:
+1. Get the application files and create your `.env` files from the examples:
 
-```bash
-git clone https://github.com/thunderbird/appointment
-cp appointment/backend/.env.example appointment/backend/.env
-cp appointment/frontend/.env.example appointment/frontend/.env
-cd appointment
-```
+    ```bash
+    git clone https://github.com/thunderbird/appointment
+    cp appointment/backend/.env.example appointment/backend/.env
+    cp appointment/frontend/.env.example appointment/frontend/.env
+    cd appointment
+    ```
 
-Make sure, that the `backend/.env` file contains `APP_ALLOW_FIRST_TIME_REGISTER=True` and that you added your account's email address to the `APP_ADMIN_ALLOW_LIST` env variable. This will enable the creation of your first admin user.
+2. Make sure, that the `backend/.env` file contains `APP_ALLOW_FIRST_TIME_REGISTER=True` and that you added your account's email address to the `APP_ADMIN_ALLOW_LIST` env variable. This will enable the creation of your first admin user.
 
-Build and run the service in docker:
+3. Build and run the service in docker:
 
-```bash
-docker-compose up -d --build
-```
+    ```bash
+    docker-compose up -d --build
+    ```
 
-This will create and start 5 different containers (backend, frontend, postgres, redis and mailpit).
+    This will create and start 5 different containers (backend, frontend, postgres, redis and mailpit).
 
-* Frontend can be accessed via: <http://localhost:8080>
-* Backend can be accessed via: <http://localhost:5000>
-* The PostgreSQL database will be accessible via `localhost:5433` with username: password set to `tba`: `abcd%efgh`
-* OpenAPI docs can be accessed via: <http://localhost:5000/docs> or <http://localhost:5000/redoc>
-* Mailpit docs can be accessed via: <http://localhost:8025>
+    * Frontend can be accessed via: <http://localhost:8080>
+    * Backend can be accessed via: <http://localhost:5000>
+    * The PostgreSQL database will be accessible via `localhost:5433` with username: password set to `tba`: `abcd%efgh`
+    * OpenAPI docs can be accessed via: <http://localhost:5000/docs> or <http://localhost:5000/redoc>
+    * Mailpit docs can be accessed via: <http://localhost:8025>
 
-On first-run the database will initialize, and a first time setup command will be triggered. Going forward database migrations will automatically run on `docker-compose up`.
+4. Check if all containers are running. On first-run the database will initialize, and a first time setup command will be triggered (going forward database migrations will automatically run on `docker-compose up`). Check if the database contains tables, e.g. the `subscriber` table (still empty at this point).
 
 ### Authentication
 
 Appointment includes simple password-based authentication. This is meant for developing and testing Appointment, but can also be used when self-hosting the app.
 
-When you access the frontend the first time, you will see a first-time-user login form. Enter the email address you configured in your allow list and a password. This login will create the first user (also called 'subscriber' in Appointment) granting you access to the application. Any login attempts with other email addresses after that will check against existing credentials.
+When you access the frontend the first time, you will see a first-time-user login form. Enter the email address you configured in your allow list (see Step 2 in the installation process above) and a password. This login will create the first user (also called 'subscriber' in Appointment) granting you access to the application. Any login attempts with other email addresses after that will check against existing credentials.
 
 > [!NOTE]
 > For Thunderbird Services, we use our own OIDC provider [Thunderbird Accounts](https://github.com/thunderbird/thunderbird-accounts). If you're starting fresh with Thunderbird Accounts, please review [the documentations](https://github.com/thunderbird/thunderbird-accounts?tab=readme-ov-file#before-you-begin) setting it up.
