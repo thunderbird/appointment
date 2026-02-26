@@ -87,6 +87,7 @@ resources:
     pulumi:
       recovery_window_in_days: 0
       secret_names:
+        - appointment-caldav-secret
         - database-encryption-secret
         - database-host
         - database-name
@@ -114,7 +115,6 @@ resources:
         - zoom-client-id
         - zoom-auth-secret
         - zoom-api-secret
-        - appointment-caldav-secret
 
   tb:ec2:SshableInstance: {}
   # Fill out this template to build an SSH bastion
