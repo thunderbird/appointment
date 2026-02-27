@@ -313,9 +313,14 @@ h2 {
     flex-direction: column;
     gap: 1rem;
     padding-bottom: .25rem;
-  
+    
+    :deep(.checkbox-control) {
+      flex-shrink: 0;
+    }
+
     .password-confirmation {
       display: flex;
+      flex-direction: column;
       gap: 1rem;
 
       label {
@@ -324,7 +329,7 @@ h2 {
   
       button {
         align-self: flex-start;
-        margin-top: 1.75rem;
+        /* margin-top: 1.75rem; */
         line-height: 1.25;
       }
     }
@@ -351,6 +356,18 @@ h2 {
       border: 0;
       border-inline-start: 1px solid var(--colour-neutral-border);
       min-height: 53px;
+    }
+  }
+
+  .delete-modal {
+    .delete-modal-container {
+      .password-confirmation {
+        flex-direction: row;
+    
+        button {
+          margin-top: 1.75rem;
+        }
+      }
     }
   }
 }
