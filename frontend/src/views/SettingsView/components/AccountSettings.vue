@@ -307,22 +307,28 @@ h2 {
   }
 }
 
-.delete-modal-container {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding-bottom: .25rem;
-
-  .password-confirmation {
+.delete-modal {
+  .delete-modal-container {
     display: flex;
+    flex-direction: column;
     gap: 1rem;
-    margin-top: 1.5rem;
-
-    button {
-      align-self: flex-start;
-      margin-top: 1.75rem;
-      line-height: 1.25;
+    padding-bottom: .25rem;
+  
+    .password-confirmation {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+  
+      button {
+        align-self: flex-start;
+        margin-top: 1.75rem;
+        line-height: 1.25;
+      }
     }
+  
+  }
+  .modal-actions .base.cancel-button {
+    color: var(--colour-ti-highlight);
   }
 }
 
