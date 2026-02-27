@@ -254,7 +254,7 @@ async function refreshData() {
               :name="`calendarConnected-${calendar.id}`"
               class="calendar-connected-checkbox"
               v-model="calendarConnected(calendar.id).value"
-              :disabled="calendar.is_default"
+              v-bind="calendar.is_default ? { disabled: true } : {}"
             />
 
             <!-- Calendar title -->

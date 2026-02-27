@@ -103,7 +103,7 @@ export default {
         name="autoGenerateZoomLink"
         :label="t('label.autogenerateZoomLinks')"
         v-model="autoGenerateZoomLink"
-        :disabled="!hasZoom"
+        v-bind="!hasZoom ? { disabled: true } : {}"
       />
       <i18n-t v-if="!hasZoom" keypath="text.generateZoomMeetingHelpDisabled.text" tag="span" scope="global" class="zoom-helper-span">
         <template v-slot:link>
