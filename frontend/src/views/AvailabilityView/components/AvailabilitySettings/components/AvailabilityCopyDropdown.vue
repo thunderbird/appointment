@@ -62,7 +62,7 @@ watch(
           :value="d.iso"
           :name="d.short.toLowerCase()"
           :label="d.long"
-          :disabled="disabledWeekdays.includes(d.iso)"
+          v-bind="disabledWeekdays.includes(d.iso) ? { disabled: true } : {}"
           :data-testid="`availability-copy-to-${d.long.toLowerCase()}-input`"
         />
         <hr>

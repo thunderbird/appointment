@@ -122,7 +122,7 @@ export default {
         :label="t('label.automaticallyConfirmBookingsIfTimeIsAvailable')"
         data-testid="availability-automatically-confirm-checkbox"
         v-model="autoConfirmBookings"
-        :disabled="!currentState.active"
+        v-bind="currentState.active ? {} : { disabled: true }"
       />
     </div>
 
@@ -136,7 +136,7 @@ export default {
             name="customizePerDay"
             :label="t('label.customizePerDay')"
             v-model="useCustomAvailabilities"
-            :disabled="!currentState.active"
+            v-bind="currentState.active ? {} : { disabled: true }"
           />
         </div>
 
