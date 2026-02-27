@@ -317,7 +317,10 @@ h2 {
     .password-confirmation {
       display: flex;
       gap: 1rem;
-      margin-top: 1.5rem;
+
+      label {
+        flex-grow: 0.5;
+      }
   
       button {
         align-self: flex-start;
