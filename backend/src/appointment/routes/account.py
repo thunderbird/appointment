@@ -1,6 +1,7 @@
 import os
 from collections import defaultdict
 
+from appointment.defines import AuthScheme
 from fastapi import APIRouter, Depends, HTTPException
 from posthog import Posthog
 import argon2.exceptions
@@ -65,11 +66,17 @@ def delete_account(
     posthog: Posthog = Depends(get_posthog),
 ):
     """Delete your account and all the data associated with it forever!"""
-    try:
-        utils.verify_password(form_data.password, subscriber.password)
-    except argon2.exceptions.VerifyMismatchError:
-        raise HTTPException(status_code=401, detail=l10n('password-mismatch'))
+    # For the password scheme, we need to verify the password before we can delete the account.
+    # TODO: For the OIDC scheme, we need a re-auth through Keycloak and change the frontend password confirmation flow
+    if AuthScheme.is_password():
+        try:
+            utils.verify_password(form_data.password, subscriber.password)
+        except argon2.exceptions.VerifyMismatchError:
+            raise HTTPException(status_code=401, detail=l10n('password-mismatch'))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
 
+    # Do the deletion and catch any exceptions that might occur
     try:
         return data.delete_account(db, subscriber)
     except AccountDeletionException as e:
