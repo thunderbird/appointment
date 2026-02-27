@@ -533,7 +533,6 @@
     "chooseDateAndTime": "Choose when to meet.",
     "connectZoom": "Connect your Zoom account to generate instant meeting invites for each booking.",
     "contactRequestForm": "Please use the contact form below to send any feedback, questions, or concerns to our support team. If needed we will try and contact you for further information as soon as possible.",
-    "deleteAppointmentDataWarning": "You will no longer have access to TB Appointment. All booking calendars will be set to \"Inactive\" and all upcoming bookings will be cancelled.\nOther appointment data will be retained for 30 days, in accordance with the TB Pro Privacy Policy.",
     "defineDaysAndTimeSlots": "Choose the days and time this event can be booked.",
     "denialSentToAddress": "We've let the booker ({address}) know you can't make this event.",
     "disclaimerGABooking": "Your booking will be confirmed by the calendar owner.",
@@ -601,6 +600,15 @@
       },
       "calendars": {
         "noCalendars": "No calendar accounts connected. Add an account to get started."
+      },
+      "account": {
+        "delete": {
+          "permanenceHint": "This will permanently delete all Appointment data.",
+          "impactHint": "All booking calendars will be set to “Inactive” and all upcoming bookings will be cancelled.",
+          "tbproHint": "Your Thunderbird Pro subscription will not be affected.",
+          "consent": "I understand my appointment data will be permanently deleted.",
+          "confirm": "Enter your password to confirm"
+        }
       }
     },
     "timeHasBeenConfirmed": "Your time has been confirmed. Thunderbird Appointment has sent a calendar invite to {email}.",

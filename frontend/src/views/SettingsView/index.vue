@@ -88,7 +88,7 @@ async function updatePreferences() {
   const { error }: SubscriberResponse = await call('me').put(obj).json();
 
   if (error.value) {
-    validationError.value = { title: (error.value as unknown as Error).message };
+    validationError.value = { title: (error.value as Error).message };
     savingInProgress.value = false;
     window.scrollTo(0, 0);
     return;
@@ -193,7 +193,7 @@ async function onSaveChanges() {
     validationError.value = null;
     window.scrollTo(0, 0);
   } catch (error) {
-    validationError.value = { title: error };
+    validationError.value = { title: error } as Alert;
   } finally {
     savingInProgress.value = false;
   }

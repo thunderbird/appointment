@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { computed, inject, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { callKey } from '@/keys';
@@ -8,13 +7,12 @@ import { TextInput, IconButton } from '@thunderbirdops/services-ui';
 import { PhCopySimple, PhArrowRight, PhDownloadSimple } from '@phosphor-icons/vue';
 import { createUserStore } from '@/stores/user-store';
 import { useSettingsStore } from '@/stores/settings-store';
-import { BlobResponse, BooleanResponse } from '@/models';
+import { BlobResponse } from '@/models';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { MetricEvents } from '@/definitions';
-import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import DeleteAccountModal from './DeleteAccountModal.vue';
 
 const { t } = useI18n();
-const router = useRouter();
 
 const call = inject(callKey);
 const userStore = createUserStore(call);
@@ -22,7 +20,8 @@ const settingsStore = useSettingsStore();
 const { currentState } = storeToRefs(settingsStore);
 
 const copyLinkTooltip = ref(t('label.copyLink'));
-const deleteAppointmentDataModalOpen = ref(false);
+
+const deleteModal = useTemplateRef('deleteModal');
 
 const displayName = computed({
   get: () => currentState.value.displayName,
@@ -40,29 +39,6 @@ const copyLink = async () => {
   setTimeout(() => {
     copyLinkTooltip.value = t('label.copyLink');
   }, 2000);
-};
-
-/**
- * Request an appointment data deletion, and then log out.
- */
-const actuallyDeleteAccount = async () => {
-  deleteAppointmentDataModalOpen.value = false;
-
-  const { error }: BooleanResponse = await call('account/delete').delete();
-
-  if (usePosthog) {
-    posthog.capture(MetricEvents.DeleteAccount);
-  }
-
-  if (error.value) {
-    // TODO: show error
-    // console.warn('ERROR: ', error.value);
-    return;
-  }
-
-  // We can't logout since we've deleted the user by now, so just delete local storage data.
-  userStore.$reset();
-  await router.push('/');
 };
 
 /**
@@ -122,7 +98,7 @@ const actuallyDownloadData = async () => {
     <hr class="account-settings-divider" />
 
     <div class="delete-appointment-data-container">
-      <button @click="deleteAppointmentDataModalOpen = true">
+      <button @click="deleteModal?.show()" data-testid="settings-account-delete-data-btn">
         {{ t('label.deleteAllAppointmentData') }}
       </button>
 
@@ -130,12 +106,7 @@ const actuallyDownloadData = async () => {
     </div>
   </div>
 
-  <!-- Delete Appointment Data modal -->
-  <confirmation-modal :open="deleteAppointmentDataModalOpen" :title="t('heading.deleteAppointmentData')"
-    :message="t('text.deleteAppointmentDataWarning')" :confirm-label="t('heading.deleteAppointmentData')"
-    :cancel-label="t('label.cancel')" :use-caution-button="true" @confirm="actuallyDeleteAccount"
-    @close="deleteAppointmentDataModalOpen = false">
-  </confirmation-modal>
+  <delete-account-modal ref="deleteModal" />
 </template>
 
 <style scoped>

@@ -1,8 +1,10 @@
 import os
 from collections import defaultdict
 
+from appointment.defines import AuthScheme
 from fastapi import APIRouter, Depends, HTTPException
 from posthog import Posthog
+import argon2.exceptions
 
 from ..controller import data
 from sqlalchemy.orm import Session
@@ -18,6 +20,10 @@ from fastapi.responses import StreamingResponse
 
 from ..dependencies.metrics import get_posthog
 from ..exceptions.account_api import AccountDeletionException
+
+from ..l10n import l10n
+from .. import utils
+
 
 router = APIRouter()
 
@@ -54,11 +60,23 @@ def download_data(db: Session = Depends(get_db), subscriber: Subscriber = Depend
 
 @router.delete('/delete')
 def delete_account(
+    form_data: schemas.CheckPassword,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
     posthog: Posthog = Depends(get_posthog),
 ):
     """Delete your account and all the data associated with it forever!"""
+    # For the password scheme, we need to verify the password before we can delete the account.
+    # TODO: For the OIDC scheme, we need a re-auth through Keycloak and change the frontend password confirmation flow
+    if AuthScheme.is_password():
+        try:
+            utils.verify_password(form_data.password, subscriber.password)
+        except argon2.exceptions.VerifyMismatchError:
+            raise HTTPException(status_code=401, detail=l10n('password-mismatch'))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+
+    # Do the deletion and catch any exceptions that might occur
     try:
         return data.delete_account(db, subscriber)
     except AccountDeletionException as e:
