@@ -24,6 +24,7 @@ jobs:
       TB_ACCTS_PWORD: ${{ secrets.E2E_APPT_PROD_TB_ACCTS_PWORD }}
       APPT_DISPLAY_NAME: ${{ secrets.E2E_APPT_PROD_DISPLAY_NAME }}
       APPT_MY_SHARE_LINK: ${{ secrets.E2E_APPT_PROD_MY_SHARE_LINK }}
+      APPT_BOOKEE_NAME: ${{ secrets.E2E_APPT_PROD_BOOKEE_NAME }}
       APPT_BOOKEE_EMAIL: ${{ secrets.E2E_APPT_PROD_BOOKEE_EMAIL }}
     steps:
       - uses: actions/checkout@v4

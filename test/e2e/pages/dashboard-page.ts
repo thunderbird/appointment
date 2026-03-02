@@ -10,6 +10,7 @@ import {
 
 export class DashboardPage {
   readonly page: Page;
+  readonly testPlatform: String;
   readonly navBarDashboardBtn: Locator;
   readonly userMenuAvatar: Locator;
   readonly logOutMenuItem: Locator;
@@ -17,8 +18,9 @@ export class DashboardPage {
   readonly nextMonthArrow: Locator;
   readonly pendingBookingRequestsLink: Locator;
 
-  constructor(page: Page) {
+  constructor(page: Page, testPlatform: string = 'desktop') {
     this.page = page;
+    this.testPlatform = testPlatform;
     this.navBarDashboardBtn = this.page.getByRole('link', { name: 'Dashboard' });
     this.userMenuAvatar = this.page.locator('.avatar regular');
     this.logOutMenuItem = this.page.getByTestId('user-nav-logout-menu');
@@ -56,7 +58,7 @@ export class DashboardPage {
       // now our selected slot is in the same format we can seach for it on the pending bookings list
       console.log(`searching bookings list for event: ${selectedSlotFormattedDate}`);
       const apptLocator = this.page.getByRole('button', { name: selectedSlotFormattedDate });
-      await apptLocator.scrollIntoViewIfNeeded();
+      await this.scrollIntoView(apptLocator);
       await expect(apptLocator).toBeVisible();
     }).toPass({
       // Probe, wait 1s, probe, wait 2s, probe, wait 10s, probe, wait 10s, probe
@@ -72,5 +74,14 @@ export class DashboardPage {
   async gotoToDashboardMonthView() {
     await this.page.goto(APPT_DASHBOARD_MONTH_PAGE);
     await this.page.waitForTimeout(TIMEOUT_3_SECONDS);
+  }
+
+  /**
+   * Scroll the given element into view. The reason why we do this here is because playright doesn't yet supported this on ios.
+   */
+  async scrollIntoView(targetElement: Locator, timeout: number = 10000) {
+    if (!this.testPlatform.includes('ios')) {
+      await targetElement.scrollIntoViewIfNeeded({ timeout: timeout });
+    }
   }
 }

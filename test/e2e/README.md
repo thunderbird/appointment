@@ -48,6 +48,7 @@ TB_ACCTS_EMAIL=<existing-local-account-user-email>
 TB_ACCTS_PWORD=<exisiting-local-user-password>
 APPT_DISPLAY_NAME=<appointment-dev-user-display-name>
 APPT_MY_SHARE_LINK=<apointment-dev-user-share-link>
+APPT_BOOKEE_NAME=<booking-requesters-name>
 APPT_BOOKEE_EMAIL=<booking-requesters-email>
 ```
 
@@ -104,6 +105,7 @@ TB_ACCTS_EMAIL=<existing-stage-tb-accounts-user-email>
 TB_ACCTS_PWORD=<exisiting-stage-tb-accounts-user-password>
 APPT_DISPLAY_NAME=<appointment-stage-user-display-name>
 APPT_MY_SHARE_LINK=<apointment-stage-user-share-link>
+APPT_BOOKEE_NAME=<booking-requesters-name>
 APPT_BOOKEE_EMAIL=<booking-requesters-email>
 ```
 
@@ -134,6 +136,7 @@ TB_ACCTS_EMAIL=<existing-prod-tb-accounts-user-email>
 TB_ACCTS_PWORD=<exisiting-prod-tb-accounts-user-password>
 APPT_DISPLAY_NAME=<appointment-prod-user-display-name>
 APPT_MY_SHARE_LINK=<apointment-prod-user-share-link>
+APPT_BOOKEE_NAME=<booking-requesters-name>
 APPT_BOOKEE_EMAIL=<booking-requesters-email>
 ```
 
@@ -162,6 +165,7 @@ TB_ACCTS_EMAIL=<existing-tb-accounts-user-email>
 TB_ACCTS_PWORD=<exisiting-tb-accounts-user-password>
 APPT_DISPLAY_NAME=<appointment-user-display-name>
 APPT_MY_SHARE_LINK=<apointment-user-share-link>
+APPT_BOOKEE_NAME=<booking-requesters-name>
 APPT_BOOKEE_EMAIL=<booking-requesters-email>
 ```
 

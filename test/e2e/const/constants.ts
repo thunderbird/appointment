@@ -41,7 +41,7 @@ export const APPT_THEME_SETTING_LIGHT = 'Light';
 export const APPT_THEME_SETTING_DARK = 'Dark';
 // set the Appointment time zone setting to the local timezone is where the test is running
 export const APPT_TIMEZONE_SETTING_PRIMARY = 'Europe/Dublin'; // BrowserStack runs in GMT
-console.log(`appt settings timezone: ${APPT_TIMEZONE_SETTING_PRIMARY}`)
+console.log(`appt settings timezone: ${APPT_TIMEZONE_SETTING_PRIMARY}`);
 export const APPT_TIMEZONE_SETTING_HALIFAX = 'America/Halifax'; // settings test changes to this tz temporarily
 export const APPT_START_OF_WEEK_SUN = 'SUN';
 export const APPT_START_OF_WEEK_MON = 'MON';
