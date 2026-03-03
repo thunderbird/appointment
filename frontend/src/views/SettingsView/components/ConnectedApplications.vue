@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { PhDotsThree } from '@phosphor-icons/vue';
 import { PrimaryButton, BaseBadge, CheckboxInput, BaseBadgeTypes } from '@thunderbirdops/services-ui';
@@ -22,6 +22,7 @@ const { t } = useI18n();
 const videoMeetingDropdown = ref();
 const calDavErrorMessage = ref();
 const calendarDropdownRefs = ref({});
+const connectionDropdownRefs = ref({});
 const disconnectTypeId = ref(null);
 const disconnectConnectionName = ref(null);
 
@@ -44,13 +45,10 @@ const calendarConnectedMap = new Map<number, ReturnType<typeof computed<boolean>
 
 const zoomAccount = computed(() => externalConnectionStore.zoom[0]);
 
-// This computed property refers to the calendars from the backend combined
-// with some data from external connections to facilitate connection / disconnection.
-// It should be immutable as it represents the current state of the backend data.
-const initialCalendars = computed(() => {
-  // Find the default calendar's external_connection_id to determine which
-  // calendars share the same connection. Calendars sharing the default's
-  // connection cannot be disconnected without affecting the default calendar.
+// Calendars from the backend, enriched with external connection data and
+// grouped by external connection for display purposes.
+// Should be treated as immutable since it represents the current backend state.
+const groupedCalendars = computed(() => {
   const defaultCalendar = calendars.value?.find(
     (calendar) => calendar.id === currentState.value.defaultCalendarId
   );
@@ -62,8 +60,6 @@ const initialCalendars = computed(() => {
       .connections[connectionProvider]
       .find((ec: ExternalConnection) => ec.id === calendar.external_connection_id)
 
-    // Injecting type_id and connection_name from externalConnectionStore
-    // to facilitate the disconnection logic
     return {
       ...calendar,
       type_id: externalConnection?.type_id,
@@ -74,10 +70,42 @@ const initialCalendars = computed(() => {
     }
   }) || [];
 
-  const sortedCalendars = formattedCalendars.sort((a, b) => a.title.localeCompare(b.title));
+  formattedCalendars.sort((a, b) => a.title.localeCompare(b.title));
 
-  return sortedCalendars;
+  const groups = new Map<number, {
+    connectionId: number;
+    connectionName: string;
+    providerName: string | number;
+    provider: number;
+    typeId: string;
+    sharesDefaultConnection: boolean;
+    calendars: typeof formattedCalendars[number][];
+  }>();
+
+  for (const calendar of formattedCalendars) {
+    const existing = groups.get(calendar.external_connection_id);
+
+    if (existing) {
+      existing.calendars.push(calendar);
+    } else {
+      groups.set(calendar.external_connection_id, {
+        connectionId: calendar.external_connection_id,
+        connectionName: calendar.connection_name ?? '',
+        providerName: calendar.provider_name,
+        provider: calendar.provider,
+        typeId: calendar.type_id,
+        sharesDefaultConnection: calendar.shares_default_connection,
+        calendars: [calendar],
+      });
+    }
+  }
+
+  return Array.from(groups.values());
 });
+
+const calendarCount = computed(() =>
+  groupedCalendars.value.reduce((sum, group) => sum + group.calendars.length, 0)
+);
 
 async function connectGoogleCalendar() {
   await calendarStore.connectGoogleCalendar();
@@ -131,19 +159,22 @@ function calendarConnected(calendarId: number) {
   if (!calendarConnectedMap.has(calendarId)) {
     calendarConnectedMap.set(calendarId, computed({
       get: () => {
-        const calendar = initialCalendars.value.find(c => c.id === calendarId);
+        const calendar = groupedCalendars.value.flatMap(g => g.calendars).find(c => c.id === calendarId);
         return currentState.value.changedCalendars?.[calendarId] !== undefined
           ? currentState.value.changedCalendars[calendarId]
           : calendar?.connected ?? false;
       },
       set: (value: boolean) => {
-        settingsStore.$patch({
-          currentState: {
-            changedCalendars: {
-              ...currentState.value.changedCalendars,
-              [calendarId]: value
-            }
-          }
+        const calendar = groupedCalendars.value.flatMap(g => g.calendars).find(c => c.id === calendarId);
+        const originalValue = calendar?.connected ?? false;
+        const { [calendarId]: _, ...rest } = currentState.value.changedCalendars ?? {};
+
+        // Using the function form of $patch which fully replaces the object instead of merging into it
+        // So that we can actually remove keys when the value is false
+        settingsStore.$patch((state) => {
+          state.currentState.changedCalendars = value === originalValue
+            ? rest
+            : { ...rest, [calendarId]: value };
         })
       }
     }));
@@ -189,6 +220,10 @@ async function refreshData() {
     userStore.profile(),
   ]);
 };
+
+onMounted(async () => {
+  await externalConnectionStore.checkStatus();
+})
 </script>
 
 <template>
@@ -245,86 +280,106 @@ async function refreshData() {
     <!-- Calendars -->
     <div>
       <label for="calendars" class="calendars-label">
-        {{ t('label.calendar', initialCalendars.length) }}
+        {{ t('label.calendar', calendarCount) }}
       </label>
   
       <hr class="divider" />
 
-      <div class="calendars-container">
-        <template v-if="initialCalendars.length > 0">
-          <template v-for="calendar in initialCalendars" :key="calendar.id">
-            <!-- Calendar checkbox -->
-            <checkbox-input
-              :name="`calendarConnected-${calendar.id}`"
-              class="calendar-connected-checkbox"
-              v-model="calendarConnected(calendar.id).value"
-              v-bind="calendar.is_default ? { disabled: true } : {}"
-            />
+      <template v-if="groupedCalendars.length > 0">
+        <template v-for="(group, groupIndex) in groupedCalendars" :key="group.connectionId">
+          <hr v-if="groupIndex > 0" class="divider" />
 
-            <!-- Calendar title -->
-            <p>{{ calendar.title }}</p>
+          <div class="calendars-container">
+            <!-- Connection header row -->
+            <p class="connection-name">{{ group.connectionName }}</p>
 
-            <!-- Default badge -->
-            <template v-if="calendar.is_default">
-              <base-badge :type="BaseBadgeTypes.Default">
-                {{ t('label.default') }}
-              </base-badge>
-            </template>
-            <template v-else>
-              <span />
-            </template>
+            <span />
 
-            <!-- Calendar color -->
-            <div class="calendar-color" :style="{ backgroundColor: calendar.color }">
-              <input
-                type="color"
-                :value="calendar.color"
-                @change="(event) => onCalendarColorChanged(event as HTMLInputElementEvent, calendar.id)"
-              />
-            </div>
+            <p class="calendar-provider">{{ group.providerName }}</p>
 
-            <!-- Calendar provider -->
-            <p class="calendar-provider">{{ calendar.provider_name }}</p>
-
-            <!-- Dropdown actions -->
-            <!-- Hide dropdown for calendars that share the same ExternalConnection as the default calendar,
-                 since disconnecting would affect the default calendar -->
             <drop-down
-              v-if="!calendar.shares_default_connection"
+              v-if="!group.sharesDefaultConnection"
               class="dropdown"
-              :ref="(el) => calendarDropdownRefs[calendar.id] = el"
+              :ref="(el) => connectionDropdownRefs[group.connectionId] = el"
             >
               <template #trigger>
                 <ph-dots-three size="24" />
               </template>
               <template #default>
-                <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id]?.close()">
+                <div class="dropdown-inner" @click="connectionDropdownRefs[group.connectionId]?.close()">
                   <button
-                    v-if="calendar.connected"
-                    @click="() => onSetAsDefaultClicked(calendar.id)"
-                  >
-                    {{ t('text.settings.connectedApplications.setAsDefault') }}
-                  </button>
-                  <!-- TODO: Rename Calendar not implemented -->
-                  <!-- <button>
-                    {{ t('text.settings.connectedApplications.renameCalendar') }}
-                  </button> -->
-                  <button
-                    @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name, true)"
+                    @click="() => displayModal(group.provider, group.typeId, group.connectionName, true)"
                   >
                     {{ t('label.disconnect') }}
                   </button>
                 </div>
               </template>
             </drop-down>
-            <span v-else></span>
-          </template>
-        </template>
+            <span v-else />
 
-        <template v-else>
-          <p class="calendar-accounts-not-connected">{{ t('text.settings.calendars.noCalendars') }}</p>
+            <!-- Calendar rows -->
+            <template v-for="calendar in group.calendars" :key="calendar.id">
+              <checkbox-input
+                :name="`calendarConnected-${calendar.id}`"
+                class="calendar-connected-checkbox"
+                v-model="calendarConnected(calendar.id).value"
+                v-bind="calendar.is_default ? { disabled: true } : {}"
+              />
+
+              <p>{{ calendar.title }}</p>
+
+              <template v-if="calendar.is_default">
+                <base-badge :type="BaseBadgeTypes.Default">
+                  {{ t('label.default') }}
+                </base-badge>
+              </template>
+              <template v-else>
+                <span />
+              </template>
+
+              <div class="calendar-color" :style="{ backgroundColor: calendar.color }">
+                <input
+                  type="color"
+                  :value="calendar.color"
+                  @change="(event) => onCalendarColorChanged(event as HTMLInputElementEvent, calendar.id)"
+                />
+              </div>
+
+              <p class="calendar-provider">{{ calendar.provider_name }}</p>
+
+              <drop-down
+                v-if="!calendar.shares_default_connection"
+                class="dropdown"
+                :ref="(el) => calendarDropdownRefs[calendar.id] = el"
+              >
+                <template #trigger>
+                  <ph-dots-three size="24" />
+                </template>
+                <template #default>
+                  <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id]?.close()">
+                    <button
+                      v-if="calendar.connected"
+                      @click="() => onSetAsDefaultClicked(calendar.id)"
+                    >
+                      {{ t('text.settings.connectedApplications.setAsDefault') }}
+                    </button>
+                    <button
+                      @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name, true)"
+                    >
+                      {{ t('label.disconnect') }}
+                    </button>
+                  </div>
+                </template>
+              </drop-down>
+              <span v-else />
+            </template>
+          </div>
         </template>
-      </div>
+      </template>
+
+      <template v-else>
+        <p class="calendar-accounts-not-connected">{{ t('text.settings.calendars.noCalendars') }}</p>
+      </template>
     </div>
   </div>
 
@@ -418,6 +473,12 @@ h2 {
     grid-gap: 1rem;
     align-items: center;
     overflow-x: auto;
+    padding-block-end: 0.5rem;
+
+    .connection-name {
+      grid-column: 1 / 4;
+      font-weight: 600;
+    }
   }
 
   .video-not-connected {
@@ -425,7 +486,7 @@ h2 {
 
     button {
       text-decoration: underline;
-      color: var(--colour-apmt-primary);
+      color: var(--colour-primary-default);
     }
   }
 
