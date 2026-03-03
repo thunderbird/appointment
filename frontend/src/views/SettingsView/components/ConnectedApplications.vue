@@ -310,7 +310,7 @@ onMounted(async () => {
                   <button
                     @click="() => displayModal(group.provider, group.typeId, group.connectionName, true)"
                   >
-                    {{ t('label.disconnect') }}
+                    {{ t('label.remove') }}
                   </button>
                 </div>
               </template>
@@ -366,7 +366,7 @@ onMounted(async () => {
                     <button
                       @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name, true)"
                     >
-                      {{ t('label.disconnect') }}
+                      {{ t('label.remove') }}
                     </button>
                   </div>
                 </template>
