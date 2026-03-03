@@ -34,7 +34,12 @@ const onContinueButtonClick = async () => {
     case 'oidc': {
       isLoading.value = true;
       try {
-        const { error } = await calendarStore.connectOIDCCalendar();
+        const { data, error } = await calendarStore.connectOIDCCalendar();
+
+        if (data.value?.detail?.message) {
+          ftueStore.errorMessage = { title: data.value?.detail?.message };
+          return;
+        }
 
         if (error.value) {
           ftueStore.errorMessage = { title: t('error.somethingWentWrong') };
