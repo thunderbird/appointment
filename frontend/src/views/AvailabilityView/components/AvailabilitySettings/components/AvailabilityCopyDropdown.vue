@@ -3,7 +3,7 @@ import { inject, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { isoWeekdaysKey } from '@/keys';
 import { CopyTemplate } from '@/models';
-import { PhAsterisk } from '@phosphor-icons/vue';
+import { PhCopy } from '@phosphor-icons/vue';
 import DropDown from '@/elements/DropDown.vue';
 import ContainerBox from '@/elements/ContainerBox.vue';
 import { CheckboxInput, LinkButton, PrimaryButton } from '@thunderbirdops/services-ui';
@@ -46,13 +46,13 @@ watch(
 <template>
   <drop-down class="self-center" ref="copyDropdown">
     <template #trigger>
-      <link-button size="small" class="action-btn action-copy" :title="t('label.copyAvailability')">
-        <ph-asterisk class="w-4" aria-hidden="true"/>
+      <link-button size="large" class="action-btn action-copy" :title="t('label.copyAvailability')">
+        <ph-copy aria-hidden="true"/>
       </link-button>
     </template>
     <template #default>
-      <container-box class="flex flex-col gap-2">
-        {{ t('label.copyTo') }}
+      <container-box class="selection-container">
+        <label>{{ t('label.copyTimesTo') }}</label>
         <checkbox-input name="all" :label="t('label.selectAll')" v-model="allDaysSelected" />
         <hr>
         <checkbox-input
@@ -75,10 +75,36 @@ watch(
 </template>
 
 <style scoped>
-.action-btn {
-  padding: .25rem .125rem;
+.selection-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: max-content;
+
+  label {
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  :deep(.checkbox-wrapper) label{
+    font-size: 0.875rem;
+  }
+
+  :deep(button) {
+    padding-top: .625rem;
+    padding-bottom: .625rem;
+  }
 }
-.action-copy {
-  color: var(--colour-ti-secondary);
+
+.action-copy.base.link.filled {
+  color: var(--colour-ti-base);
+  padding: .25rem .125rem;
+  width: 2rem;
+  height: 2rem;
+
+  svg { 
+    width: 1.5rem;
+    height: 1.5rem;
+  }
 }
 </style>
