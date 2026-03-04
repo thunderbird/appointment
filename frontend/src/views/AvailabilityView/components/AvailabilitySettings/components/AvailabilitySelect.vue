@@ -393,16 +393,9 @@ const removeAvailability = (option: SelectOption, index: number) => {
         height: 1.5rem;
       }
     }
-    .action-add-slot.base {
-      color: var(--colour-ti-base);
-    }
+    .action-add-slot.base,
     .action-remove.base {
-      opacity: 0;
       color: var(--colour-ti-base);
-      transition: var(--transition-opacity);
-    }
-    &:hover .action-remove {
-      opacity: 1;
     }
   }
 }
