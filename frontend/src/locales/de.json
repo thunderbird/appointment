@@ -400,6 +400,7 @@
     "principal": "Basis URL (CalDAV)",
     "privacyPolicy": "Datenschutzerklärung",
     "quickLink": "Kurzlink",
+    "reconnect": "Erneut verbinden",
     "refresh": "Erneuern",
     "refreshLink": "Link ändern",
     "remove": "Entfernen",
@@ -562,6 +563,8 @@
     },
     "settings": {
       "connectedApplications": {
+        "connectionUnreachableDefault": "Die Verbindung zu dem {providerName} Server konnte nicht hergestellt werden. Bitte verbinde es erneut oder setz einen anderen Kalender als Standard, um das Konto zu entfernen.",
+        "connectionUnreachableNonDefault": "Die Verbindung zu dem {providerName} Server konnte nicht hergestellt werden. Bitte verbinde es erneut oder entferne das Konto.",
         "setAsDefault": "Als Standard festlegen",
         "renameCalendar": "Kalender umbenennen",
         "connect": {

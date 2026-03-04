@@ -400,6 +400,7 @@ section {
     display: flex;
     flex-direction: column;
     gap: 1rem;
+    flex-shrink: 0;
 
     button {
       display: flex;

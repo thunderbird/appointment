@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { PhDotsThree } from '@phosphor-icons/vue';
+import { PhDotsThree, PhWarningCircle } from '@phosphor-icons/vue';
 import { PrimaryButton, BaseBadge, CheckboxInput, BaseBadgeTypes } from '@thunderbirdops/services-ui';
 import { storeToRefs } from 'pinia';
 import { CalendarProviders, ExternalConnectionProviders } from '@/definitions';
@@ -10,7 +10,7 @@ import GenericModal from '@/components/GenericModal.vue';
 import CalDavProvider from '@/components/CalDavProvider.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { keyByValue } from '@/utils';
-import { Alert, ExternalConnection, HTMLInputElementEvent } from '@/models';
+import { Alert, ExternalConnection, ExternalConnectionStatus, HTMLInputElementEvent } from '@/models';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useCalendarStore } from '@/stores/calendar-store';
@@ -45,6 +45,11 @@ const calendarConnectedMap = new Map<number, ReturnType<typeof computed<boolean>
 
 const zoomAccount = computed(() => externalConnectionStore.zoom[0]);
 
+const providerDisplayNames: Record<string, string> = {
+  caldav: 'CalDAV',
+  google: 'Google',
+};
+
 // Calendars from the backend, enriched with external connection data and
 // grouped by external connection for display purposes.
 // Should be treated as immutable since it represents the current backend state.
@@ -64,7 +69,8 @@ const groupedCalendars = computed(() => {
       ...calendar,
       type_id: externalConnection?.type_id,
       connection_name: externalConnection?.name,
-      provider_name: connectionProvider,
+      connection_status: externalConnection?.status,
+      provider_name: providerDisplayNames[String(connectionProvider)] ?? String(connectionProvider),
       is_default: currentState.value.defaultCalendarId === calendar.id,
       shares_default_connection: calendar.external_connection_id === defaultExternalConnectionId,
     }
@@ -75,6 +81,7 @@ const groupedCalendars = computed(() => {
   const groups = new Map<number, {
     connectionId: number;
     connectionName: string;
+    connectionStatus: ExternalConnectionStatus | undefined;
     providerName: string | number;
     provider: number;
     typeId: string;
@@ -91,6 +98,7 @@ const groupedCalendars = computed(() => {
       groups.set(calendar.external_connection_id, {
         connectionId: calendar.external_connection_id,
         connectionName: calendar.connection_name ?? '',
+        connectionStatus: calendar.connection_status,
         providerName: calendar.provider_name,
         provider: calendar.provider,
         typeId: calendar.type_id,
@@ -124,7 +132,7 @@ async function disconnectAccount(provider: ExternalConnectionProviders, typeId: 
   await refreshData();
 }
 
-function displayModal(
+function displayDisconnectModal(
   provider: ExternalConnectionProviders | CalendarProviders,
   typeId: string | null = null,
   connectionName: string | null = null,
@@ -242,14 +250,11 @@ onMounted(async () => {
 
       <template v-if="zoomAccount">
         <div class="video-meeting-container">
-          <div>
-            <span>{{ t('label.connectedAs') }} {{ ' ' }}</span>
-            <strong>{{ zoomAccount.name }}</strong>
-          </div>
+          <p class="connection-name">{{ zoomAccount.name }}</p>
 
           <div />
 
-          <p>{{ t('heading.zoom') }}</p>
+          <p class="connection-provider">{{ t('heading.zoom') }}</p>
     
           <drop-down class="dropdown" ref="videoMeetingDropdown">
             <template #trigger>
@@ -257,7 +262,7 @@ onMounted(async () => {
             </template>
             <template #default>
               <div class="dropdown-inner" @click="videoMeetingDropdown.close()">
-                <button @click="() => displayModal(ExternalConnectionProviders.Zoom, zoomAccount.type_id)">
+                <button @click="() => displayDisconnectModal(ExternalConnectionProviders.Zoom, zoomAccount.type_id)">
                   {{ t('label.disconnect') }}
                 </button>
               </div>
@@ -295,10 +300,9 @@ onMounted(async () => {
 
             <span />
 
-            <p class="calendar-provider">{{ group.providerName }}</p>
+            <p class="connection-provider">{{ group.providerName }}</p>
 
             <drop-down
-              v-if="!group.sharesDefaultConnection"
               class="dropdown"
               :ref="(el) => connectionDropdownRefs[group.connectionId] = el"
             >
@@ -308,17 +312,36 @@ onMounted(async () => {
               <template #default>
                 <div class="dropdown-inner" @click="connectionDropdownRefs[group.connectionId]?.close()">
                   <button
-                    @click="() => displayModal(group.provider, group.typeId, group.connectionName, true)"
+                    @click="connectCalDavModalOpen = true"
+                  >
+                    {{ t('label.reconnect') }}
+                  </button>
+                  <button
+                    @click="() => displayDisconnectModal(group.provider, group.typeId, group.connectionName, true)"
                   >
                     {{ t('label.remove') }}
                   </button>
                 </div>
               </template>
             </drop-down>
-            <span v-else />
 
             <!-- Calendar rows -->
-            <template v-for="calendar in group.calendars" :key="calendar.id">
+
+            <!-- If there's a connection error, don't display any calendars, instead display the error message -->
+            <template v-if="group.connectionStatus === ExternalConnectionStatus.error">
+              <p class="connection-error-message">
+                <ph-warning-circle weight="fill" size="24" />
+
+                <template v-if="group.sharesDefaultConnection">
+                  {{ t('text.settings.connectedApplications.connectionUnreachableDefault', { providerName: group.providerName }) }}
+                </template>
+                <template v-else>
+                  {{ t('text.settings.connectedApplications.connectionUnreachableNonDefault', { providerName: group.providerName }) }}
+                </template>
+              </p>
+            </template>
+
+            <template v-else v-for="calendar in group.calendars" :key="calendar.id">
               <checkbox-input
                 :name="`calendarConnected-${calendar.id}`"
                 class="calendar-connected-checkbox"
@@ -345,10 +368,9 @@ onMounted(async () => {
                 />
               </div>
 
-              <p class="calendar-provider">{{ calendar.provider_name }}</p>
+              <p>{{ calendar.provider_name }}</p>
 
               <drop-down
-                v-if="!calendar.shares_default_connection"
                 class="dropdown"
                 :ref="(el) => calendarDropdownRefs[calendar.id] = el"
               >
@@ -358,20 +380,19 @@ onMounted(async () => {
                 <template #default>
                   <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id]?.close()">
                     <button
-                      v-if="calendar.connected"
+                      v-if="calendar.connected && !calendar.is_default"
                       @click="() => onSetAsDefaultClicked(calendar.id)"
                     >
                       {{ t('text.settings.connectedApplications.setAsDefault') }}
                     </button>
                     <button
-                      @click="() => displayModal(calendar.provider, calendar.type_id, calendar.connection_name, true)"
+                      @click="() => displayDisconnectModal(calendar.provider, calendar.type_id, calendar.connection_name, true)"
                     >
                       {{ t('label.remove') }}
                     </button>
                   </div>
                 </template>
               </drop-down>
-              <span v-else />
             </template>
           </div>
         </template>
@@ -459,12 +480,21 @@ h2 {
     font-weight: 600;
   }
 
+  .connection-provider {
+    font-weight: 600; 
+  }
+
   .video-meeting-container {
     display: grid;
     grid-template-columns: 1fr 20px auto 24px;
     grid-gap: 1rem;
     align-items: center;
     overflow-x: auto;
+
+    .connection-name {
+      font-weight: 600;
+      color: var(--colour-ti-base);
+    }
   }
 
   .calendars-container {
@@ -478,6 +508,7 @@ h2 {
     .connection-name {
       grid-column: 1 / 4;
       font-weight: 600;
+      color: var(--colour-ti-base);
     }
   }
 
@@ -494,8 +525,18 @@ h2 {
     grid-column: span 4;
   }
 
-  .calendar-provider {
-    text-transform: capitalize;
+  .connection-error-message {
+    grid-column: 1 / 4;
+    display: flex;
+    align-items: start;
+    gap: 0.5rem;
+    color: var(--colour-ti-base);
+
+    svg {
+      margin-top: 0.125rem;
+      flex-shrink: 0;
+      color: var(--colour-danger-default);
+    }
   }
 
   .dropdown {
@@ -516,6 +557,7 @@ h2 {
       button {
         width: 100%;
         padding: 0.5rem;
+        text-align: start;
 
         &:hover {
           background-color: var(--colour-neutral-lower);
