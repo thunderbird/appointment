@@ -261,12 +261,12 @@ onMounted(async () => {
             </p>
           </template>
           <template v-else>
-          <p class="connection-name">{{ zoomAccount.name }}</p>
+            <p class="connection-name">{{ zoomAccount.name }}</p>
           </template>
 
           <img src="@/assets/images/zoom-mini-logo.png" alt="Zoom" />
           <p class="connection-provider">{{ t('heading.zoom') }}</p>
-    
+
           <drop-down class="dropdown" ref="videoMeetingDropdown">
             <template #trigger>
               <ph-dots-three size="24" />
@@ -311,11 +311,8 @@ onMounted(async () => {
           <div class="calendars-container">
             <!-- Connection header row -->
             <p class="connection-name">{{ group.connectionName }}</p>
-
             <span />
-
             <p class="connection-provider">{{ group.providerName }}</p>
-
             <drop-down
               class="dropdown"
               :ref="(el) => connectionDropdownRefs[group.connectionId] = el"
@@ -331,6 +328,7 @@ onMounted(async () => {
                     {{ t('label.reconnect') }}
                   </button>
                   <button
+                    v-if="!group.sharesDefaultConnection"
                     @click="() => displayDisconnectModal(group.provider, group.typeId, group.connectionName, true)"
                   >
                     {{ t('label.remove') }}
@@ -361,9 +359,8 @@ onMounted(async () => {
                 class="calendar-connected-checkbox"
                 v-model="calendarConnected(calendar.id).value"
                 v-bind="calendar.is_default ? { disabled: true } : {}"
+                :label="calendar.title"
               />
-
-              <p>{{ calendar.title }}</p>
 
               <template v-if="calendar.is_default">
                 <base-badge :type="BaseBadgeTypes.Default">
@@ -491,19 +488,23 @@ h2 {
     display: block;
     color: var(--colour-ti-secondary);
     letter-spacing: 0.48px;
-    font-weight: 600;
+    font-weight: 500;
   }
 
   .connection-provider {
-    font-weight: 600; 
+    font-weight: 500; 
   }
 
   .video-meeting-container {
     display: grid;
-    grid-template-columns: 1fr 20px auto 24px;
+    grid-template-columns: 1fr 26px auto 24px;
     grid-gap: 1rem;
     align-items: center;
     overflow-x: auto;
+
+    img {
+      width: 20px;
+    }
 
     .connection-name {
       font-weight: 600;
@@ -514,15 +515,22 @@ h2 {
   .calendars-container {
     display: grid;
     grid-template-columns: auto 1fr min-content 12px auto 24px;
-    grid-gap: 1rem;
+    grid-row-gap: 0.5rem;
+    grid-column-gap: 1rem;
     align-items: center;
     overflow-x: auto;
     padding-block-end: 0.5rem;
 
+    .calendar-connected-checkbox {
+      grid-column: 1 / 3;
+      font-size: 0.875rem;
+    }
+
     .connection-name {
       grid-column: 1 / 4;
-      font-weight: 600;
+      font-weight: 500;
       color: var(--colour-ti-base);
+      margin-block-end: 0.125rem;
     }
   }
 
@@ -550,6 +558,10 @@ h2 {
       margin-top: 0.125rem;
       flex-shrink: 0;
       color: var(--colour-danger-default);
+    }
+
+    &.zoom-error-message {
+      grid-column: 1 / 2;
     }
   }
 
