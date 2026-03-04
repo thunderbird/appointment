@@ -250,10 +250,21 @@ onMounted(async () => {
 
       <template v-if="zoomAccount">
         <div class="video-meeting-container">
+          <template v-if="zoomAccount.status === ExternalConnectionStatus.error">
+            <p class="connection-error-message zoom-error-message">
+              <ph-warning-circle weight="fill" size="24" />
+              <i18n-t keypath="text.settings.connectedApplications.connectionUnreachableZoom" tag="span">
+                <template v-slot:email>
+                  <strong>{{ zoomAccount.name }}</strong>
+                </template>
+              </i18n-t>
+            </p>
+          </template>
+          <template v-else>
           <p class="connection-name">{{ zoomAccount.name }}</p>
+          </template>
 
-          <div />
-
+          <img src="@/assets/images/zoom-mini-logo.png" alt="Zoom" />
           <p class="connection-provider">{{ t('heading.zoom') }}</p>
     
           <drop-down class="dropdown" ref="videoMeetingDropdown">
@@ -262,8 +273,11 @@ onMounted(async () => {
             </template>
             <template #default>
               <div class="dropdown-inner" @click="videoMeetingDropdown.close()">
+                <button v-if="zoomAccount.status === ExternalConnectionStatus.error" @click="settingsStore.connectZoom">
+                  {{ t('label.reconnect') }}
+                </button>
                 <button @click="() => displayDisconnectModal(ExternalConnectionProviders.Zoom, zoomAccount.type_id)">
-                  {{ t('label.disconnect') }}
+                  {{ t('label.remove') }}
                 </button>
               </div>
             </template>

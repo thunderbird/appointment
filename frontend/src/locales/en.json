@@ -567,6 +567,7 @@
       "connectedApplications": {
         "connectionUnreachableDefault": "The connection to the {providerName} server could not be established. Please reconnect or set the default calendar under a different account to remove this account.",
         "connectionUnreachableNonDefault": "The connection to the {providerName} server could not be established. Please reconnect or remove the account.",
+        "connectionUnreachableZoom": "The connection to the Zoom account {email} failed.",
         "setAsDefault": "Set as default",
         "renameCalendar": "Rename calendar",
         "connect": {
