@@ -216,6 +216,20 @@ function onCalendarColorChanged(event: HTMLInputElementEvent, calendarId: number
   })
 }
 
+function reconnectExternalConnection(provider: ExternalConnectionProviders | CalendarProviders, isCalendar: boolean = false) {
+  if (isCalendar) {
+    if (provider === CalendarProviders.Google) {
+      connectGoogleCalendar();
+    } else if (provider === CalendarProviders.Caldav) {
+      connectCalDavModalOpen.value = true;
+    }
+  } else {
+    if (provider === ExternalConnectionProviders.Zoom) {
+      settingsStore.connectZoom();
+    }
+  }
+}
+
 async function refreshData() {
   // Need to reset calendar store first!
   calendarStore.$reset();
@@ -273,7 +287,10 @@ onMounted(async () => {
             </template>
             <template #default>
               <div class="dropdown-inner" @click="videoMeetingDropdown.close()">
-                <button v-if="zoomAccount.status === ExternalConnectionStatus.error" @click="settingsStore.connectZoom">
+                <button
+                  v-if="zoomAccount.status === ExternalConnectionStatus.error"
+                  @click="reconnectExternalConnection(ExternalConnectionProviders.Zoom)"
+                >
                   {{ t('label.reconnect') }}
                 </button>
                 <button @click="() => displayDisconnectModal(ExternalConnectionProviders.Zoom, zoomAccount.type_id)">
@@ -323,7 +340,7 @@ onMounted(async () => {
               <template #default>
                 <div class="dropdown-inner" @click="connectionDropdownRefs[group.connectionId]?.close()">
                   <button
-                    @click="connectCalDavModalOpen = true"
+                    @click="reconnectExternalConnection(group.provider, true)"
                   >
                     {{ t('label.reconnect') }}
                   </button>
