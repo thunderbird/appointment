@@ -9,7 +9,6 @@ import DropDown from '@/elements/DropDown.vue';
 import GenericModal from '@/components/GenericModal.vue';
 import CalDavProvider from '@/components/CalDavProvider.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
-import { keyByValue } from '@/utils';
 import { Alert, ExternalConnection, ExternalConnectionStatus, HTMLInputElementEvent } from '@/models';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -54,56 +53,28 @@ const groupedCalendars = computed(() => {
   );
   const defaultExternalConnectionId = defaultCalendar?.external_connection_id;
 
-  const formattedCalendars = calendars.value?.map((calendar) => {
-    const connectionProvider = keyByValue(CalendarProviders, calendar.provider, true);
-    const externalConnection: ExternalConnection = externalConnectionStore
-      .connections[connectionProvider]
-      .find((ec: ExternalConnection) => ec.id === calendar.external_connection_id)
+  const calendarProviders = [
+    ['google', CalendarProviders.Google],
+    ['caldav', CalendarProviders.Caldav],
+  ];
 
-    return {
-      ...calendar,
-      type_id: externalConnection?.type_id,
-      connection_name: externalConnection?.name,
-      connection_status: externalConnection?.status,
-      provider_name: ProviderDisplayName[String(connectionProvider)] ?? String(connectionProvider),
-      is_default: currentState.value.defaultCalendarId === calendar.id,
-      shares_default_connection: calendar.external_connection_id === defaultExternalConnectionId,
-    }
-  }) || [];
+  return calendarProviders.flatMap(([providerKey, provider]) => {
+    const connections = externalConnectionStore.connections[providerKey] ?? [];
+    const providerName = ProviderDisplayName[providerKey] ?? providerKey;
 
-  formattedCalendars.sort((a, b) => a.title.localeCompare(b.title));
-
-  const groups = new Map<number, {
-    connectionId: number;
-    connectionName: string;
-    connectionStatus: ExternalConnectionStatus | undefined;
-    providerName: string | number;
-    provider: number;
-    typeId: string;
-    sharesDefaultConnection: boolean;
-    calendars: typeof formattedCalendars[number][];
-  }>();
-
-  for (const calendar of formattedCalendars) {
-    const existing = groups.get(calendar.external_connection_id);
-
-    if (existing) {
-      existing.calendars.push(calendar);
-    } else {
-      groups.set(calendar.external_connection_id, {
-        connectionId: calendar.external_connection_id,
-        connectionName: calendar.connection_name ?? '',
-        connectionStatus: calendar.connection_status,
-        providerName: calendar.provider_name,
-        provider: calendar.provider,
-        typeId: calendar.type_id,
-        sharesDefaultConnection: calendar.shares_default_connection,
-        calendars: [calendar],
-      });
-    }
-  }
-
-  return Array.from(groups.values());
+    return connections.map((connection: ExternalConnection) => ({
+      connectionId: connection.id,
+      connectionName: connection.name ?? '',
+      connectionStatus: connection.status,
+      providerName,
+      provider,
+      typeId: connection.type_id,
+      sharesDefaultConnection: connection.id === defaultExternalConnectionId,
+      calendars: (calendars.value ?? [])
+        .filter((cal) => cal.external_connection_id === connection.id)
+        .sort((a, b) => a.title.localeCompare(b.title)),
+    }));
+  }).filter((group) => group.calendars.length > 0);
 });
 
 const calendarCount = computed(() =>
@@ -364,11 +335,11 @@ onMounted(async () => {
                 :name="`calendarConnected-${calendar.id}`"
                 class="calendar-connected-checkbox"
                 v-model="calendarConnected(calendar.id).value"
-                v-bind="calendar.is_default ? { disabled: true } : {}"
+                v-bind="calendar.id === currentState.defaultCalendarId ? { disabled: true } : {}"
                 :label="calendar.title"
               />
 
-              <template v-if="calendar.is_default">
+              <template v-if="calendar.id === currentState.defaultCalendarId">
                 <base-badge :type="BaseBadgeTypes.Default">
                   {{ t('label.default') }}
                 </base-badge>
@@ -385,7 +356,7 @@ onMounted(async () => {
                 />
               </div>
 
-              <p>{{ calendar.provider_name }}</p>
+              <p>{{ group.providerName }}</p>
 
               <drop-down
                 class="dropdown"
@@ -397,13 +368,13 @@ onMounted(async () => {
                 <template #default>
                   <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id]?.close()">
                     <button
-                      v-if="calendar.connected && !calendar.is_default"
+                      v-if="calendar.connected && calendar.id !== currentState.defaultCalendarId"
                       @click="() => onSetAsDefaultClicked(calendar.id)"
                     >
                       {{ t('text.settings.connectedApplications.setAsDefault') }}
                     </button>
                     <button
-                      @click="() => displayDisconnectModal(calendar.provider, calendar.type_id, calendar.connection_name, true)"
+                      @click="() => displayDisconnectModal(group.provider, group.typeId, group.connectionName, true)"
                     >
                       {{ t('label.remove') }}
                     </button>
