@@ -11,6 +11,8 @@ services:
     environment:
       - IS_LOCAL_DEV=yes
       - RELEASE_VERSION=localdev
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
     depends_on:
       postgresql:
