@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { PhDotsThree, PhWarningCircle } from '@phosphor-icons/vue';
 import { PrimaryButton, BaseBadge, CheckboxInput, BaseBadgeTypes } from '@thunderbirdops/services-ui';
 import { storeToRefs } from 'pinia';
-import { CalendarProviders, ExternalConnectionProviders } from '@/definitions';
+import { CalendarProviders, ExternalConnectionProviders, ProviderDisplayName } from '@/definitions';
 import DropDown from '@/elements/DropDown.vue';
 import GenericModal from '@/components/GenericModal.vue';
 import CalDavProvider from '@/components/CalDavProvider.vue';
@@ -45,11 +45,6 @@ const calendarConnectedMap = new Map<number, ReturnType<typeof computed<boolean>
 
 const zoomAccount = computed(() => externalConnectionStore.zoom[0]);
 
-const providerDisplayNames: Record<string, string> = {
-  caldav: 'CalDAV',
-  google: 'Google',
-};
-
 // Calendars from the backend, enriched with external connection data and
 // grouped by external connection for display purposes.
 // Should be treated as immutable since it represents the current backend state.
@@ -70,7 +65,7 @@ const groupedCalendars = computed(() => {
       type_id: externalConnection?.type_id,
       connection_name: externalConnection?.name,
       connection_status: externalConnection?.status,
-      provider_name: providerDisplayNames[String(connectionProvider)] ?? String(connectionProvider),
+      provider_name: ProviderDisplayName[String(connectionProvider)] ?? String(connectionProvider),
       is_default: currentState.value.defaultCalendarId === calendar.id,
       shares_default_connection: calendar.external_connection_id === defaultExternalConnectionId,
     }
@@ -175,15 +170,7 @@ function calendarConnected(calendarId: number) {
       set: (value: boolean) => {
         const calendar = groupedCalendars.value.flatMap(g => g.calendars).find(c => c.id === calendarId);
         const originalValue = calendar?.connected ?? false;
-        const { [calendarId]: _, ...rest } = currentState.value.changedCalendars ?? {};
-
-        // Using the function form of $patch which fully replaces the object instead of merging into it
-        // So that we can actually remove keys when the value is false
-        settingsStore.$patch((state) => {
-          state.currentState.changedCalendars = value === originalValue
-            ? rest
-            : { ...rest, [calendarId]: value };
-        })
+        settingsStore.updateCalendarConnected(calendarId, value, originalValue);
       }
     }));
   }
@@ -223,10 +210,12 @@ function reconnectExternalConnection(provider: ExternalConnectionProviders | Cal
     } else if (provider === CalendarProviders.Caldav) {
       connectCalDavModalOpen.value = true;
     }
-  } else {
-    if (provider === ExternalConnectionProviders.Zoom) {
-      settingsStore.connectZoom();
-    }
+
+    return;
+  }
+
+  if (provider === ExternalConnectionProviders.Zoom) {
+    settingsStore.connectZoom();
   }
 }
 

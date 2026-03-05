@@ -82,6 +82,13 @@ export const useSettingsStore = defineStore('settings', () => {
     window.location.href = data.value.url;
   }
   
+  const updateCalendarConnected = (calendarId: number, value: boolean, originalValue: boolean) => {
+    const { [calendarId]: _, ...rest } = currentState.value.changedCalendars ?? {};
+    currentState.value.changedCalendars = value === originalValue
+      ? rest
+      : { ...rest, [calendarId]: value };
+  };
+
   const $reset = async () => {
     isLoaded.value = false;
 
@@ -96,6 +103,7 @@ export const useSettingsStore = defineStore('settings', () => {
     currentState,
     connectZoom,
     revertChanges,
+    updateCalendarConnected,
     $reset,
   }
 });

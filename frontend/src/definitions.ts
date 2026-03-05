@@ -286,6 +286,12 @@ export enum MetricEvents {
   Login = 'apmt.login',
 }
 
+export const ProviderDisplayName: Record<string, string> = {
+  caldav: 'CalDAV',
+  google: 'Google',
+  zoom: 'Zoom',
+};
+
 export default {
   AlertSchemes,
   AuthSchemes,
@@ -307,6 +313,7 @@ export default {
   MeetingLinkProviderType,
   MetricEvents,
   ModalStates,
+  ProviderDisplayName,
   SettingsSections,
   SLOT_DURATION_OPTIONS,
   SubscriberLevels,
