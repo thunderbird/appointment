@@ -189,7 +189,7 @@ h2 {
   /* Fix for BubbleSelect component as we can't target .bubble-list */
   & > :last-child {
     justify-content: flex-start;
-    gap: 0.75rem;
+    gap: 0.5rem;
   }
 }
 </style>

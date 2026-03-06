@@ -14,6 +14,7 @@ from pydantic_core import PydanticCustomError
 
 from ..defines import DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE
 from ..l10n import l10n
+from .models import ExternalConnectionStatus
 
 
 from .models import (
@@ -465,6 +466,8 @@ class ExternalConnectionOut(BaseModel):
     name: str
     type: str
     type_id: str
+    status: str = ExternalConnectionStatus.ok.value
+    status_checked_at: str | None = None
 
 
 class SupportRequest(BaseModel):

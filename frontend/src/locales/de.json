@@ -401,6 +401,7 @@
     "principal": "Basis URL (CalDAV)",
     "privacyPolicy": "Datenschutzerklärung",
     "quickLink": "Kurzlink",
+    "reconnect": "Erneut verbinden",
     "refresh": "Erneuern",
     "refreshLink": "Link ändern",
     "remove": "Entfernen",
@@ -562,6 +563,9 @@
     },
     "settings": {
       "connectedApplications": {
+        "connectionUnreachableDefault": "Die Verbindung zum {providerName}-Server konnte nicht hergestellt werden. Bitte stell die Verbindung erneut her oder setz einen anderen Standardkalender, um das Konto zu entfernen.",
+        "connectionUnreachableNonDefault": "Die Verbindung zum {providerName}-Server konnte nicht hergestellt werden. Bitte stell die Verbindung erneut her oder entferne das Konto.",
+        "connectionUnreachableZoom": "Die Authentifizierung für die Verbindung mit der E-Mail-Adresse {email} ist fehlgeschlagen.",
         "setAsDefault": "Als Standard festlegen",
         "renameCalendar": "Kalender umbenennen",
         "connect": {

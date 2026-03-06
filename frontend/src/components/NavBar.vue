@@ -8,10 +8,12 @@ import { TooltipPosition } from '@/definitions';
 import { PhLinkSimple } from '@phosphor-icons/vue';
 import { ToolTip, BaseButton } from '@thunderbirdops/services-ui';
 import UserMenu from '@/components/UserMenu.vue';
+import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 
 // component constants
 const tbProUrl = import.meta.env.VITE_TB_PRO_URL;
 const user = useUserStore();
+const externalConnectionStore = useExternalConnectionsStore();
 const route = useRoute();
 const { t } = useI18n();
 
@@ -64,6 +66,7 @@ const copyLink = async () => {
           :active="isNavEntryActive(item)"
           :label="t(`label.${item}`)"
           :link-name="item"
+          :warning="item === 'settings' && externalConnectionStore.hasUnhealthyConnections"
         />
       </nav>
 
