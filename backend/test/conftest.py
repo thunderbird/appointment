@@ -50,11 +50,11 @@ def _patch_caldav_connector(monkeypatch):
             return [schemas.CalendarConnectionOut(url=TEST_CALDAV_URL, user=TEST_CALDAV_USER)]
 
         @staticmethod
-        def save_event(self, event, attendee, organizer, organizer_email):
+        def save_event(self, event, attendee, organizer, organizer_email, send_google_notification=False):
             return event
 
         @staticmethod
-        def delete_event(self, uid):
+        def delete_event(self, uid, send_updates='none'):
             return True
 
         @staticmethod
