@@ -13,7 +13,12 @@ from ...database import repo
 from ...database.models import CalendarProvider
 from ...database.schemas import CalendarConnection
 from ...defines import DATETIMEFMT
-from ...exceptions.calendar import EventNotCreatedException, EventNotDeletedException, FreeBusyTimeException
+from ...exceptions.calendar import (
+    EventNotCreatedException,
+    EventNotDeletedException,
+    EventNotPatchedException,
+    FreeBusyTimeException
+)
 from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
 
 
@@ -260,11 +265,30 @@ class GoogleClient:
 
         return response
 
-    def delete_event(self, calendar_id, event_id, token):
+    def patch_event(self, calendar_id, event_id, body, token, send_updates='all'):
         response = None
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
-                response = service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
+                response = (
+                    service.events()
+                    .patch(calendarId=calendar_id, eventId=event_id, body=body, sendUpdates=send_updates)
+                    .execute()
+                )
+            except HttpError as e:
+                logging.warning(f'[google_client.patch_event] Request Error: {e.status_code}/{e.error_details}')
+                raise EventNotPatchedException()
+
+        return response
+
+    def delete_event(self, calendar_id, event_id, token, send_updates='none'):
+        response = None
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            try:
+                response = (
+                    service.events()
+                    .delete(calendarId=calendar_id, eventId=event_id, sendUpdates=send_updates)
+                    .execute()
+                )
             except HttpError as e:
                 logging.warning(f'[google_client.delete_event] Request Error: {e.status_code}/{e.error_details}')
                 raise EventNotDeletedException()
