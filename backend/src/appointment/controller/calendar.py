@@ -289,6 +289,7 @@ class GoogleConnector(BaseConnector):
                 'description': '\n'.join(description),
                 'start': {'dateTime': event.start.isoformat()},
                 'end': {'dateTime': event.end.isoformat()},
+                'status': 'tentative',
                 'attendees': [
                     {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'needsAction'},
                 ],
@@ -326,9 +327,21 @@ class GoogleConnector(BaseConnector):
 
         return event
 
-    def delete_event(self, uid: str):
+    def confirm_event(self, event_id: str):
+        """Patch a tentative event to confirmed status, notifying attendees."""
+        self.google_client.patch_event(
+            calendar_id=self.remote_calendar_id,
+            event_id=event_id,
+            body={'status': 'confirmed'},
+            token=self.google_token,
+        )
+        self.bust_cached_events()
+
+    def delete_event(self, uid: str, send_updates: str = 'none'):
         """Delete remote event of given external_id"""
-        self.google_client.delete_event(calendar_id=self.remote_calendar_id, event_id=uid, token=self.google_token)
+        self.google_client.delete_event(
+            calendar_id=self.remote_calendar_id, event_id=uid, token=self.google_token, send_updates=send_updates
+        )
         self.bust_cached_events()
 
     def delete_events(self, start):
@@ -593,7 +606,7 @@ class CalDavConnector(BaseConnector):
 
         return event
 
-    def delete_event(self, uid: str):
+    def delete_event(self, uid: str, send_updates: str = 'none'):
         """Delete remote event of given uid"""
         event = self.client.calendar(url=self.url).event_by_uid(uid)
         event.delete()
