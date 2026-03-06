@@ -286,55 +286,9 @@ def _handle_attendee_rsvp(
             )
 
     elif response_status == 'accepted':
-        if slot.booking_status == models.BookingStatus.requested:
-            repo.slot.book(db, slot.id)
-            repo.appointment.update_status(db, slot.appointment_id, models.AppointmentStatus.closed)
-
-            if appointment.external_id:
-                try:
-                    google_client.delete_event(remote_calendar_id, appointment.external_id, google_token)
-                except Exception:
-                    logging.warning('[webhooks.google_calendar] Failed to delete HOLD event after accept')
-
-            _create_confirmed_google_event(db, appointment, slot, google_client, google_token, remote_calendar_id)
-
-            logging.info(
-                f'[webhooks.google_calendar] Attendee accepted appointment {appointment.id}, '
-                f'slot {slot.id} confirmed'
-            )
-
-
-def _create_confirmed_google_event(
-    db: Session,
-    appointment: models.Appointment,
-    slot: models.Slot,
-    google_client: GoogleClient,
-    google_token,
-    remote_calendar_id: str,
-):
-    """Create a confirmed Google Calendar event after an attendee accepts a HOLD."""
-    from datetime import timedelta, timezone
-
-    description_parts = [appointment.details or '']
-    body = {
-        'summary': appointment.title,
-        'location': appointment.location_url if appointment.location_url else None,
-        'description': '\n'.join(description_parts),
-        'start': {'dateTime': slot.start.replace(tzinfo=timezone.utc).isoformat()},
-        'end': {'dateTime': (slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration)).isoformat()},
-        'attendees': [
-            {
-                'displayName': slot.attendee.name,
-                'email': slot.attendee.email,
-                'responseStatus': 'accepted',
-            },
-        ],
-    }
-
-    try:
-        new_event = google_client.insert_event(
-            calendar_id=remote_calendar_id, body=body, token=google_token
+        # The bookee accepted the tentative invite, but the subscriber must
+        # still confirm via the branded email or app UI. Just log it for now.
+        logging.info(
+            f'[webhooks.google_calendar] Attendee accepted appointment {appointment.id}, '
+            f'slot {slot.id} — awaiting subscriber confirmation'
         )
-        repo.appointment.update_external_id(db, appointment, new_event.get('id'))
-    except Exception as e:
-        logging.error(f'[webhooks.google_calendar] Failed to create confirmed event: {e}')
