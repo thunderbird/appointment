@@ -10,7 +10,7 @@ import { LinkButton, TextInput } from '@thunderbirdops/services-ui';
 import AvailabilityCopyDropdown from './AvailabilityCopyDropdown.vue';
 
 // icons
-import { PhPlus, PhX } from '@phosphor-icons/vue';
+import { PhPlus, PhTrash } from '@phosphor-icons/vue';
 
 const { t } = useI18n();
 const isoWeekdays = inject(isoWeekdaysKey);
@@ -247,7 +247,7 @@ const removeAvailability = (option: SelectOption, index: number) => {
               :data-testid="`availability-start-time-${option.value}-${i}-input`"
               @change="update()"
             />
-            <span>&ndash;</span>
+            <span>{{ t('label.to') }}</span>
             <text-input
               type="time"
               :name="`end_time_${option.value}_${i}`"
@@ -265,7 +265,7 @@ const removeAvailability = (option: SelectOption, index: number) => {
                 @click="addAvailability(option)"
                 :title="t('label.addSlot')"
               >
-                <ph-plus class="w-5" aria-hidden="true"/>
+                <ph-plus aria-hidden="true"/>
               </link-button>
             </span>
             <span>
@@ -282,12 +282,12 @@ const removeAvailability = (option: SelectOption, index: number) => {
                 @click="removeAvailability(option, i)"
                 :title="t('label.removeSlot')"
               >
-                <ph-x class="w-4" aria-hidden="true"/>
+                <ph-trash aria-hidden="true"/>
               </link-button>
             </span>
           </div>
         </div>
-        <div v-else>{{ t('label.unavailable') }}</div>
+        <div v-else class="unavailable">{{ t('label.noAvailability') }}</div>
       </template>
     </div>
   </div>
@@ -311,11 +311,15 @@ const removeAvailability = (option: SelectOption, index: number) => {
 .bubble-list {
   padding: 0;
   display: grid;
-  grid-template-columns: 2rem auto;
-  row-gap: .25rem;
-  column-gap: 1.5rem;
+  grid-template-columns: 2.75rem auto;
+  row-gap: 1rem;
+  column-gap: .5rem;
   align-items: center;
   color: var(--colour-ti-secondary);
+
+  .unavailable {
+    color: var(--colour-ti-muted);
+  }
 }
 
 .label {
@@ -366,27 +370,32 @@ const removeAvailability = (option: SelectOption, index: number) => {
 .bubble-content {
   display: flex;
   flex-direction: column;
-  gap: .25rem;
+  gap: .5rem;
 
   & > div {
     display: grid;
-    grid-template-columns: 1fr auto 1fr repeat(3, 20px);
+    grid-template-columns: minmax(10rem, 1fr) auto minmax(10rem, 1fr) repeat(3, 2rem);
     align-items: center;
-    gap: .5rem;
+    gap: 1rem;
+
+    :deep(label) .tbpro-input .tbpro-input-wrapper .tbpro-input-element {
+      padding-top: .5rem;
+      padding-bottom: .5rem;
+    }
   
     .action-btn {
       padding: .25rem .125rem;
+      width: 2rem;
+      height: 2rem;
+
+      svg { 
+        width: 1.5rem;
+        height: 1.5rem;
+      }
     }
-    .action-add-slot {
-      color: var(--colour-primary-default);
-    }
-    .action-remove {
-      opacity: 0;
-      color: var(--colour-danger-default);
-      transition: var(--transition-opacity);
-    }
-    &:hover .action-remove {
-      opacity: 1;
+    .action-add-slot.base,
+    .action-remove.base {
+      color: var(--colour-ti-base);
     }
   }
 }
