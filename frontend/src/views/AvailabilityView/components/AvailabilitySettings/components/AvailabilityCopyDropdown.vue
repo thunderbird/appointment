@@ -84,6 +84,7 @@ watch(
   label {
     font-size: 1rem;
     font-weight: 600;
+    color: var(--colour-ti-secondary);
   }
 
   :deep(.checkbox-wrapper) label{
