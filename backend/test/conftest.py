@@ -54,7 +54,7 @@ def _patch_caldav_connector(monkeypatch):
             return event
 
         @staticmethod
-        def delete_event(self, uid):
+        def delete_event(self, uid, send_updates='none'):
             return True
 
         @staticmethod
