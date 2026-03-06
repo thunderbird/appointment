@@ -96,16 +96,16 @@ class TestHandleAttendeeRsvp:
             assert db_slot.booking_status == models.BookingStatus.declined
             mock_client.delete_event.assert_called_once()
 
-    def test_accept_confirms_requested_slot(
+    def test_accept_does_not_auto_book(
         self, with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot
     ):
+        """Bookee accepting the tentative invite should not auto-book;
+        the subscriber must still confirm via the branded email or app UI."""
         calendar, appointment_id, slot_id, attendee = self._make_test_objects(
             with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot
         )
 
         mock_client = Mock()
-        mock_client.delete_event = Mock()
-        mock_client.insert_event = Mock(return_value={'id': 'new-confirmed-event-id'})
         mock_token = Mock()
 
         with with_db() as db:
@@ -117,11 +117,10 @@ class TestHandleAttendeeRsvp:
             )
 
             db.refresh(db_slot)
-            assert db_slot.booking_status == models.BookingStatus.booked
+            assert db_slot.booking_status == models.BookingStatus.requested
 
             db.refresh(db_appointment)
-            assert db_appointment.status == models.AppointmentStatus.closed
-            assert db_appointment.external_id == 'new-confirmed-event-id'
+            assert db_appointment.status == models.AppointmentStatus.opened
 
     def test_accept_noop_for_already_booked(
         self, with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot
