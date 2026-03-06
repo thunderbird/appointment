@@ -67,7 +67,6 @@
     "connectCalendarTBProInfo": "Synchronisiere deinen Appointment Kalender mit deinem Thundermail Kalender (CalDAV).",
     "connectWithCalDav": "Mit CalDAV verbinden",
     "connectWithCalDavInfo": "CalDAV ist eine Verbindungsart für Kalender zur Synchronisierung von Events auf verschiedenen Geräten.",
-    "connectWithThundermail": "Mit Thundermail verbinden",
     "calDavAppPasswordInfo": "App-Passwort benötigt (nicht dein Konto-Passwort). Appointment speichert App-Passwörter verschlüsselt, um die Verbindung mit deinen Kalender aktiv zu halten.",
     "calDavLearnMoreAppPassword": "Mehr über App Passwörter erfahren",
     "calendarUrl": "Kalender URL",

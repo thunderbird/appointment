@@ -230,7 +230,6 @@ export enum FtueStep {
   ConnectCalendars = 20,
   ConnectCalendarsCalDav = 21,
   ConnectCalendarsGoogle = 22,
-  ConnectCalendarsThundermail = 23,
   CreateBookingPage = 30,
   SetAvailability = 40,
   VideoMeetingLink = 50,

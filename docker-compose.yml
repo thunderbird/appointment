@@ -24,7 +24,7 @@ services:
       - './frontend:/app'
       - '/app/node_modules'
     ports:
-      - 8080:8080
+      - 8090:8080
     environment:
       - WATCHPACK_POLLING=true
 
@@ -33,7 +33,7 @@ services:
     volumes:
       - apmt_db:/var/lib/postgresql/data
     ports:
-      - 5433:5432
+      - 5435:5432
     environment:
       - POSTGRES_DB=appointment
       - POSTGRES_USER=tba
@@ -59,8 +59,8 @@ services:
     environment:
       - MP_SMTP_AUTH_ALLOW_INSECURE=true
     ports:
-      - 8025:8025 # Web UI
-      - 1025:1024 # SMTP
+      - 8026:8025 # Web UI
+      - 1026:1024 # SMTP
 
 volumes:
   apmt_db: {}

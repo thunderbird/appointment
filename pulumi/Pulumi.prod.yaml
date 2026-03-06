@@ -67,3 +67,5 @@ config:
     secure: AAABALLDZz2Q04wpdd9fR9sEqpcqQCpQIiZuJd6yZuGmB4cDayNzSCSBxyD5UdfUnpZa3V24khxyoszAQbV6
   appointment:oidc-client-secret:
     secure: AAABADBA6IumCfksQ8T1sh3bpAhd7odMASdieI+MvrjnXOSGA1pIWYO6rvimaDNd/P79oAH842JArGq7pg8HXw==
+  appointment:appointment-caldav-secret:
+    secure: AAABAFB6pqlbaA8GDHQLb+MBX4zrepLyUcN6GDUBT5LO66M6+LmqrO5EBvL1s3jfaMMXOf3t1voCC5N+2kIqqA==
