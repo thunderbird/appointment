@@ -654,14 +654,9 @@ class Tools:
         org.params['role'] = vText('CHAIR')
 
         now = datetime.now(UTC)
-        organizer_domain = (
-            organizer.preferred_email.rsplit('@', 1)[-1]
-            if '@' in organizer.preferred_email
-            else 'thunderbird.net'
-        )
 
         event = Event()
-        event.add('uid', f'{appointment.uuid.hex}@{organizer_domain}')
+        event.add('uid', appointment.uuid.hex)
         event.add('summary', appointment.title)
         event.add('dtstart', slot.start.replace(tzinfo=timezone.utc))
         event.add(
