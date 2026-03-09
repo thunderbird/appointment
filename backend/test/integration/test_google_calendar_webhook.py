@@ -1,7 +1,6 @@
 """Integration tests for the Google Calendar webhook endpoint and watch channel lifecycle."""
 
 import json
-import os
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock
 
@@ -140,25 +139,14 @@ class TestGoogleCalendarWebhook:
 
 
 class TestCalendarConnectWatchChannel:
-    """Tests that connecting/disconnecting a Google calendar sets up/tears down watch channels."""
+    """Watch channels are managed at the schedule level, not on connect/disconnect.
+    These tests verify that connecting/disconnecting a calendar does NOT touch watch channels."""
 
-    def _make_mock_google_client(self):
-        mock = MagicMock(spec=GoogleClient)
-        mock.SCOPES = GoogleClient.SCOPES
-        mock.watch_events.return_value = {
-            'id': 'auto-channel-id',
-            'resourceId': 'auto-resource-id',
-            'expiration': str(int((datetime.now(tz=timezone.utc) + timedelta(days=7)).timestamp() * 1000)),
-        }
-        mock.get_initial_sync_token.return_value = 'auto-sync-token'
-        return mock
-
-    def test_connect_google_calendar_creates_channel(
+    def test_connect_google_calendar_does_not_create_channel(
         self, with_db, with_client, make_google_calendar, make_external_connections
     ):
-        mock_gc = self._make_mock_google_client()
-        with_client.app.dependency_overrides[google_dep.get_google_client] = lambda: mock_gc
-
+        """Connecting a Google calendar alone should not create a watch channel.
+        Channels are created when the calendar is set as default in a schedule."""
         google_creds = json.dumps({
             'token': 'fake-token',
             'refresh_token': 'fake-refresh',
@@ -172,24 +160,18 @@ class TestCalendarConnectWatchChannel:
             subscriber_id=TEST_USER_ID, connected=False, external_connection_id=ext_conn.id,
         )
 
-        os.environ['BACKEND_URL'] = 'http://localhost:5000'
-
         response = with_client.post(f'/cal/{calendar.id}/connect', headers=auth_headers)
         assert response.status_code == 200, response.text
         assert response.json()['connected'] is True
 
         with with_db() as db:
-            channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
-            assert channel is not None
-            assert channel.channel_id == 'auto-channel-id'
-            assert channel.sync_token == 'auto-sync-token'
+            assert repo.google_calendar_channel.get_by_calendar_id(db, calendar.id) is None
 
-    def test_disconnect_google_calendar_removes_channel(
+    def test_disconnect_google_calendar_does_not_remove_channel(
         self, with_db, with_client, make_google_calendar, make_external_connections
     ):
-        mock_gc = self._make_mock_google_client()
-        with_client.app.dependency_overrides[google_dep.get_google_client] = lambda: mock_gc
-
+        """Disconnecting a Google calendar should not tear down its watch channel.
+        Channels are managed when the schedule's default calendar changes."""
         google_creds = json.dumps({
             'token': 'fake-token',
             'refresh_token': 'fake-refresh',
@@ -207,8 +189,8 @@ class TestCalendarConnectWatchChannel:
             repo.google_calendar_channel.create(
                 db,
                 calendar_id=calendar.id,
-                channel_id='to-be-torn-down',
-                resource_id='res-teardown',
+                channel_id='should-remain',
+                resource_id='res-remain',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(days=7),
             )
 
@@ -217,8 +199,9 @@ class TestCalendarConnectWatchChannel:
         assert response.json()['connected'] is False
 
         with with_db() as db:
-            assert repo.google_calendar_channel.get_by_calendar_id(db, calendar.id) is None
-            mock_gc.stop_channel.assert_called_once()
+            channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
+            assert channel is not None
+            assert channel.channel_id == 'should-remain'
 
     def test_connect_caldav_calendar_no_channel(self, with_db, with_client, make_caldav_calendar):
         """Connecting a CalDAV calendar should not create a watch channel."""
