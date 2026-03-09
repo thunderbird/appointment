@@ -82,10 +82,7 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
     booking_slot_end = booking_slot_start + timedelta(minutes=schedule.slot_duration)
 
     if schedule.use_custom_availabilities:
-        custom_availabilities = [
-            a for a in schedule.availabilities
-            if a.day_of_week.value == iso_weekday
-        ]
+        custom_availabilities = [a for a in schedule.availabilities if a.day_of_week.value == iso_weekday]
 
         if not custom_availabilities:
             return False
@@ -96,8 +93,7 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
             add_day = 1 if availability.end_time <= availability.start_time else 0
 
             start_datetime = (
-                datetime.combine(today, availability.start_time, tzinfo=schedule_tzinfo)
-                + schedule.timezone_offset
+                datetime.combine(today, availability.start_time, tzinfo=schedule_tzinfo) + schedule.timezone_offset
             )
             end_datetime = (
                 datetime.combine(today, availability.end_time, tzinfo=schedule_tzinfo)
@@ -485,8 +481,15 @@ def request_schedule_availability_slot(
             )
 
             event = save_remote_event(
-                event, calendar, subscriber, slot, db, redis, google_client,
+                event,
+                calendar,
+                subscriber,
+                slot,
+                db,
+                redis,
+                google_client,
                 send_google_notification=use_google_invite,
+                booking_confirmation=schedule.booking_confirmation,
             )
             # Add the external id if available
             if appointment and event.external_id:
@@ -701,7 +704,13 @@ def handle_schedule_availability_decision(
             con.confirm_event(appointment.external_id)
     else:
         event = save_remote_event(
-            event, appointment_calendar, subscriber, slot, db, redis, google_client,
+            event,
+            appointment_calendar,
+            subscriber,
+            slot,
+            db,
+            redis,
+            google_client,
         )
         if appointment and event.external_id:
             repo.appointment.update_external_id(db, appointment, event.external_id)
@@ -753,7 +762,17 @@ def get_remote_connection(calendar, subscriber, db, redis, google_client):
     return (con, organizer_email)
 
 
-def save_remote_event(event, calendar, subscriber, slot, db, redis, google_client, send_google_notification=False):
+def save_remote_event(
+    event,
+    calendar,
+    subscriber,
+    slot,
+    db,
+    redis,
+    google_client,
+    send_google_notification=False,
+    booking_confirmation=False,
+):
     """Create or update a remote event"""
     con, organizer_email = get_remote_connection(calendar, subscriber, db, redis, google_client)
 
@@ -764,6 +783,7 @@ def save_remote_event(event, calendar, subscriber, slot, db, redis, google_clien
             organizer=subscriber,
             organizer_email=organizer_email,
             send_google_notification=send_google_notification,
+            booking_confirmation=booking_confirmation,
         )
     except EventNotCreatedException:
         raise EventCouldNotBeAccepted
