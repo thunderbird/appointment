@@ -269,6 +269,7 @@ class GoogleConnector(BaseConnector):
         organizer: schemas.Subscriber,
         organizer_email: str,
         send_google_notification: bool = False,
+        booking_confirmation: bool = False,
     ) -> schemas.Event:
         """add a new event to the connected calendar"""
 
@@ -283,16 +284,22 @@ class GoogleConnector(BaseConnector):
             description.append(l10n('join-phone', {'phone': event.location.phone}, lang=organizer_language))
 
         if send_google_notification:
+            attendees = [
+                {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'needsAction'},
+            ]
+            if booking_confirmation:
+                attendees.insert(0, {
+                    'displayName': organizer.name, 'email': organizer_email, 'responseStatus': 'needsAction',
+                })
+
             body = {
                 'summary': event.title,
                 'location': event.location.url if event.location.url else None,
                 'description': '\n'.join(description),
                 'start': {'dateTime': event.start.isoformat()},
                 'end': {'dateTime': event.end.isoformat()},
-                'status': 'tentative',
-                'attendees': [
-                    {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'needsAction'},
-                ],
+                'status': 'tentative' if booking_confirmation else 'confirmed',
+                'attendees': attendees,
             }
 
             new_event = self.google_client.insert_event(
@@ -329,10 +336,24 @@ class GoogleConnector(BaseConnector):
 
     def confirm_event(self, event_id: str):
         """Patch a tentative event to confirmed status, notifying attendees."""
+        body = {'status': 'confirmed'}
+
+        event = self.google_client.get_event(
+            calendar_id=self.remote_calendar_id,
+            event_id=event_id,
+            token=self.google_token,
+        )
+        if event and event.get('attendees'):
+            attendees = event['attendees']
+            for att in attendees:
+                if att.get('self'):
+                    att['responseStatus'] = 'accepted'
+            body['attendees'] = attendees
+
         self.google_client.patch_event(
             calendar_id=self.remote_calendar_id,
             event_id=event_id,
-            body={'status': 'confirmed'},
+            body=body,
             token=self.google_token,
         )
         self.bust_cached_events()
@@ -585,6 +606,7 @@ class CalDavConnector(BaseConnector):
         organizer: schemas.Subscriber,
         organizer_email: str,
         send_google_notification: bool = False,
+        booking_confirmation: bool = False,
     ):
         """add a new event to the connected calendar"""
         calendar = self.client.calendar(url=self.url)
