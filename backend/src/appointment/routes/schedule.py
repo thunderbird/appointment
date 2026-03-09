@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.apis.google_client import GoogleClient
+from ..controller.google_watch import setup_watch_channel, teardown_watch_channel
 from ..controller.auth import signed_url_by_subscriber
 from ..database import repo, schemas, models
 from ..database.models import (
@@ -137,6 +138,7 @@ def create_calendar_schedule(
     schedule: schemas.ScheduleValidationIn,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
+    google_client: GoogleClient = Depends(get_google_client),
 ):
     """endpoint to add a new schedule for a given calendar"""
     if not repo.calendar.exists(db, calendar_id=schedule.calendar_id):
@@ -156,6 +158,8 @@ def create_calendar_schedule(
             # A little extra, but things are a little out of place right now..
             repo.schedule.hard_delete(db, db_schedule.id)
             raise validation.ScheduleCreationException()
+
+    _sync_watch_channels(db, google_client, subscriber, schedule.calendar_id)
 
     return db_schedule
 
@@ -188,6 +192,7 @@ def update_schedule(
     schedule: schemas.ScheduleValidationIn,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
+    google_client: GoogleClient = Depends(get_google_client),
 ):
     """endpoint to update an existing schedule for authenticated subscriber"""
     if not repo.schedule.exists(db, schedule_id=id):
@@ -210,7 +215,24 @@ def update_schedule(
     if schedule.use_custom_availabilities and not repo.schedule.all_availability_is_valid(schedule):
         raise validation.InvalidAvailabilityException()
 
-    return repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
+    result = repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
+
+    _sync_watch_channels(db, google_client, subscriber, schedule.calendar_id)
+
+    return result
+
+
+def _sync_watch_channels(db: Session, google_client: GoogleClient, subscriber: Subscriber, default_calendar_id: int):
+    """Ensure a watch channel exists only for the schedule's default Google calendar.
+    Tears down channels on any other Google calendars for this subscriber."""
+    calendars = repo.calendar.get_by_subscriber(db, subscriber.id)
+    for cal in calendars:
+        if cal.provider != CalendarProvider.google:
+            continue
+        if cal.id == default_calendar_id:
+            setup_watch_channel(db, google_client, cal)
+        else:
+            teardown_watch_channel(db, google_client, cal)
 
 
 @router.post('/public/availability', response_model=schemas.AppointmentOut, tags=['no-cache'])
