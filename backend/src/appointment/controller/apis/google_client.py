@@ -241,6 +241,16 @@ class GoogleClient:
 
         return items
 
+    def get_event(self, calendar_id, event_id, token):
+        """Retrieve a single event by ID.
+        Ref: https://developers.google.com/calendar/api/v3/reference/events/get"""
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            try:
+                return service.events().get(calendarId=calendar_id, eventId=event_id).execute()
+            except HttpError as e:
+                logging.warning(f'[google_client.get_event] Request Error: {e.status_code}/{e.error_details}')
+                return None
+
     def save_event(self, calendar_id, body, token):
         response = None
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
