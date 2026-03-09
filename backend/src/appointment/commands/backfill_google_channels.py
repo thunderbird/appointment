@@ -26,10 +26,18 @@ def run():
         db.close()
         return
 
-    # Find all connected Google calendars that don't yet have a watch channel
+    # Find connected Google calendars that are the default in a schedule
+    # and don't yet have a watch channel
+    schedule_calendar_ids = {
+        s.calendar_id
+        for s in db.query(models.Schedule).all()
+        if s.calendar_id is not None
+    }
+
     all_calendars = db.query(models.Calendar).filter(
         models.Calendar.provider == models.CalendarProvider.google,
         models.Calendar.connected == True,  # noqa: E712
+        models.Calendar.id.in_(schedule_calendar_ids),
     ).all()
 
     candidates = []
