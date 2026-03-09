@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 
 from ..controller.apis.google_client import GoogleClient
-from ..controller.google_watch import setup_watch_channels_for_connection, teardown_watch_channels_for_connection
+from ..controller.google_watch import teardown_watch_channels_for_connection
 from ..database import repo, schemas, models
 from sqlalchemy.orm import Session
 
@@ -130,8 +130,6 @@ def google_callback(
     # And then redirect back to frontend
     if error_occurred:
         return google_callback_error(is_setup, l10n('google-sync-fail'))
-
-    setup_watch_channels_for_connection(db, google_client, creds, subscriber.id, external_connection.id)
 
     # Redirect non-setup subscribers back to the setup page
     if not is_setup:
