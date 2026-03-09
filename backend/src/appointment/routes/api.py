@@ -285,7 +285,6 @@ def change_my_calendar_connection(
         cal = repo.calendar.update_connection(db=db, calendar_id=id, is_connected=connect)
     except HTTPException as e:
         raise HTTPException(status_code=e.status_code, detail=e.detail)
-
     return schemas.CalendarOut(id=cal.id, title=cal.title, color=cal.color, connected=cal.connected)
 
 
