@@ -9,6 +9,7 @@ import DropDown from '@/elements/DropDown.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import CaldavConnectModal from './CaldavConnectModal.vue';
 import CaldavDisconnectModal from './CaldavDisconnectModal.vue';
+import GoogleDisconnectModal from './GoogleDisconnectModal.vue';
 import { ExternalConnection, ExternalConnectionStatus, HTMLInputElementEvent } from '@/models';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -27,8 +28,8 @@ const disconnectConnectionName = ref(null);
 // Modals
 const connectCaldavModal = useTemplateRef('connectCaldavModal');
 const disconnectCaldavModal = useTemplateRef('disconnectCaldavModal');
+const disconnectGoogleModal = useTemplateRef('disconnectGoogleModal');
 const disconnectZoomModalOpen = ref(false);
-const disconnectGoogleModalOpen = ref(false);
 
 const userStore = useUserStore();
 const externalConnectionStore = useExternalConnectionsStore();
@@ -102,7 +103,7 @@ function displayDisconnectModal(
 
   if (isCalendar) {
     if (provider === CalendarProviders.Google) {
-      disconnectGoogleModalOpen.value = true;
+      disconnectGoogleModal.value.show();
     } else if (provider === CalendarProviders.Caldav) {
       disconnectCaldavModal.value.show();
     }
@@ -116,7 +117,7 @@ function displayDisconnectModal(
 function closeModals() {
   connectCaldavModal.value.hide();
   disconnectZoomModalOpen.value = false;
-  disconnectGoogleModalOpen.value = false;
+  disconnectGoogleModal.value.hide();
   disconnectCaldavModal.value.hide();
   disconnectTypeId.value = null;
   disconnectConnectionName.value = null;
@@ -398,22 +399,28 @@ onMounted(async () => {
   <caldav-connect-modal ref="connectCaldavModal" @connected="refreshData" />
 
   <!-- Disconnect Google Modal -->
-  <confirmation-modal :open="disconnectGoogleModalOpen"
-    :title="t('text.settings.connectedApplications.disconnect.google.title')"
-    :message="t('text.settings.connectedApplications.disconnect.google.message', { googleAccountName: disconnectConnectionName })"
-    :confirm-label="t('text.settings.connectedApplications.disconnect.google.confirm')"
-    :cancel-label="t('text.settings.connectedApplications.disconnect.google.cancel')" :use-caution-button="true"
-    @confirm="() => disconnectAccount(ExternalConnectionProviders.Google, disconnectTypeId)" @close="closeModals" />
+  <google-disconnect-modal
+    ref="disconnectGoogleModal"
+    :type-id="disconnectTypeId"
+    :connection-name="disconnectConnectionName"
+    @disconnected="refreshData"
+  />
 
   <!-- Disconnect CalDav Modal -->
-  <caldav-disconnect-modal ref="disconnectCaldavModal" :type-id="disconnectTypeId" @disconnected="refreshData" />
+  <caldav-disconnect-modal
+    ref="disconnectCaldavModal"
+    :type-id="disconnectTypeId"
+    @disconnected="refreshData"
+  />
 
   <!-- Disconnect Zoom Modal -->
-  <confirmation-modal :open="disconnectZoomModalOpen"
+  <confirmation-modal
+    :open="disconnectZoomModalOpen"
     :title="t('text.settings.connectedApplications.disconnect.zoom.title')"
     :message="t('text.settings.connectedApplications.disconnect.zoom.message')"
     :confirm-label="t('text.settings.connectedApplications.disconnect.zoom.confirm')"
-    :cancel-label="t('text.settings.connectedApplications.disconnect.zoom.cancel')" :use-caution-button="true"
+    :cancel-label="t('text.settings.connectedApplications.disconnect.zoom.cancel')"
+    :use-caution-button="true"
     @confirm="() => disconnectAccount(ExternalConnectionProviders.Zoom, zoomAccount.type_id)"
     @close="disconnectZoomModalOpen = false"></confirmation-modal>
 </template>

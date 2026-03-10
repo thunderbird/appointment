@@ -16,6 +16,7 @@ const errorMessage = ref<Alert>(null);
 
 const props = defineProps<{
   typeId: string|null,
+  connectionName: string|null,
 }>();
 
 /**
@@ -29,7 +30,7 @@ const hide = () => {
 };
 
 async function disconnect() {
-  await externalConnectionStore.disconnect(ExternalConnectionProviders.Caldav, props.typeId);
+  await externalConnectionStore.disconnect(ExternalConnectionProviders.Google, props.typeId);
   externalConnectionStore.$reset();
   modal.value.hide();
   emit('disconnected');
@@ -39,13 +40,13 @@ defineExpose({ show, hide })
 </script>
 
 <template>
-  <!-- Connect CalDAV modal -->
-  <modal-dialog ref="modal" class="caldav-disconnect-modal">
+  <!-- Connect Google modal -->
+  <modal-dialog ref="modal" class="google-disconnect-modal">
     <template #header>
-      {{ t('text.settings.connectedApplications.disconnect.caldav.title') }}
+      {{ t('text.settings.connectedApplications.disconnect.google.title') }}
     </template>
 
-    <div class="caldav-disconnect-modal-container">
+    <div class="google-disconnect-modal-container">
       <notice-bar v-if="errorMessage" class="notice-bar" :type="NoticeBarTypes.Critical">
         {{ errorMessage.title }}
         <template #cta>
@@ -55,7 +56,7 @@ defineExpose({ show, hide })
         </template>
       </notice-bar>
 
-      {{ t('text.settings.connectedApplications.disconnect.caldav.message') }}
+      {{ t('text.settings.connectedApplications.disconnect.google.message', { googleAccountName: connectionName }) }}
     </div>
 
     <template #actions>
@@ -64,17 +65,17 @@ defineExpose({ show, hide })
         variant="outline"
         @click="modal?.hide()"
         class="cancel-button"
-        data-testid="caldav-disconnect-cancel-btn"
+        data-testid="google-disconnect-cancel-btn"
       >
-        {{ t('text.settings.connectedApplications.disconnect.caldav.cancel') }}
+        {{ t('text.settings.connectedApplications.disconnect.google.cancel') }}
       </primary-button>
       <danger-button
         name="disconnect"
         @click="disconnect()"
         class="disconnect-button"
-        data-testid="caldav-disconnect-confirm-btn"
+        data-testid="google-disconnect-confirm-btn"
       >
-        {{ t('text.settings.connectedApplications.disconnect.caldav.confirm') }}
+        {{ t('text.settings.connectedApplications.disconnect.google.confirm') }}
       </danger-button>
     </template>
   </modal-dialog>
