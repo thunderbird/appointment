@@ -701,7 +701,8 @@ def handle_schedule_availability_decision(
         if appointment and appointment.external_id:
             # Patch the tentative hold event to confirmed; Google notifies the bookee.
             con, _ = get_remote_connection(appointment_calendar, subscriber, db, redis, google_client)
-            con.confirm_event(appointment.external_id)
+            owner_language = subscriber.language if subscriber.language is not None else FALLBACK_LOCALE
+            con.confirm_event(appointment.external_id, event=event, organizer_language=owner_language)
         else:
             # No hold event exists (booking_confirmation was false); create a confirmed event directly.
             event = save_remote_event(
