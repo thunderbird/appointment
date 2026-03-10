@@ -89,7 +89,13 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
             db.refresh(slot)
             assert slot.booking_status == models.BookingStatus.booked
 
-        mock_connector.confirm_event.assert_called_once_with('google-event-123')
+        mock_connector.confirm_event.assert_called_once()
+        call_args = mock_connector.confirm_event.call_args
+        assert call_args.args[0] == 'google-event-123'
+        event_arg = call_args.kwargs.get('event')
+        assert isinstance(event_arg, schemas.Event)
+        assert event_arg.location.url == 'https://meet.example.com'
+        assert call_args.kwargs.get('organizer_language') == 'en'
 
     @patch('appointment.routes.schedule.save_remote_event')
     def test_confirm_creates_event_when_no_hold_exists(

@@ -263,8 +263,15 @@ class TestGoogleCalendarEventRsvp:
 
     def test_subscriber_accepts_confirms_booking(self, with_db, rsvp_setup):
         """When the subscriber accepts a tentative event via Google Calendar,
-        the appointment should be closed and the slot booked."""
+        the appointment should be closed, the slot booked, and the event
+        patched with status, summary, location, and description."""
         mock_google_client, mock_token, appointment = rsvp_setup
+        mock_google_client.get_event.return_value = {
+            'attendees': [
+                {'email': 'owner@example.com', 'self': True, 'responseStatus': 'needsAction'},
+                {'email': self.BOOKEE_EMAIL, 'responseStatus': 'needsAction'},
+            ]
+        }
 
         with with_db() as db:
             appt = repo.appointment.get(db, appointment.id)
@@ -278,10 +285,16 @@ class TestGoogleCalendarEventRsvp:
         assert appt.status == models.AppointmentStatus.closed
         assert slot.booking_status == models.BookingStatus.booked
 
-        mock_google_client.patch_event.assert_called_once_with(
-            self.REMOTE_CALENDAR_ID, self.GOOGLE_EVENT_ID,
-            {'status': 'confirmed'}, mock_token,
-        )
+        mock_google_client.patch_event.assert_called_once()
+        call_args = mock_google_client.patch_event.call_args
+        assert call_args.args[0] == self.REMOTE_CALENDAR_ID
+        assert call_args.args[1] == self.GOOGLE_EVENT_ID
+        body = call_args.args[2]
+        assert body['status'] == 'confirmed'
+        assert 'summary' in body
+        assert 'description' in body
+        owner_att = next(a for a in body['attendees'] if a.get('self'))
+        assert owner_att['responseStatus'] == 'accepted'
 
     def test_subscriber_accepts_already_closed_is_noop(self, with_db, rsvp_setup):
         """If the appointment is already closed, a subscriber accept should not change anything."""
