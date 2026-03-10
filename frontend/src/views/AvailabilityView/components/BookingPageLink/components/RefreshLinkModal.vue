@@ -22,8 +22,8 @@ defineExpose({ show, hide })
 </script>
 
 <template>
-  <!-- Connect Zoom modal -->
-  <modal-dialog ref="modal" class="zoom-disconnect-modal">
+  <!-- Refresh link modal -->
+  <modal-dialog ref="modal" class="refresh-link-modal">
     <template #header>
       {{ t('label.refreshLink') }}
     </template>
