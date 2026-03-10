@@ -7,7 +7,7 @@ from unittest.mock import Mock
 
 from appointment.controller.google_watch import setup_watch_channel, teardown_watch_channel
 from appointment.database import models, repo
-from appointment.routes.webhooks import _find_appointment_by_external_id, _handle_attendee_rsvp
+from appointment.routes.webhooks import _find_appointment_by_external_id, _handle_bookee_rsvp
 
 
 class TestFindAppointmentByExternalId:
@@ -48,7 +48,7 @@ class TestFindAppointmentByExternalId:
             assert _find_appointment_by_external_id(db, cal2.id, 'event-on-cal1') is None
 
 
-class TestHandleAttendeeRsvp:
+class TestHandleBookeeRsvp:
     def _make_test_objects(self, with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot):
         calendar = make_google_calendar(connected=True)
         attendee = make_attendee(email='bookee@example.com', name='Bookee')
@@ -88,7 +88,7 @@ class TestHandleAttendeeRsvp:
             db_appointment = repo.appointment.get(db, appointment_id)
             db_slot = repo.slot.get(db, slot_id)
 
-            _handle_attendee_rsvp(
+            _handle_bookee_rsvp(
                 db, db_appointment, db_slot, 'declined', mock_client, mock_token, calendar.user
             )
 
@@ -112,7 +112,7 @@ class TestHandleAttendeeRsvp:
             db_appointment = repo.appointment.get(db, appointment_id)
             db_slot = repo.slot.get(db, slot_id)
 
-            _handle_attendee_rsvp(
+            _handle_bookee_rsvp(
                 db, db_appointment, db_slot, 'accepted', mock_client, mock_token, calendar.user
             )
 
@@ -145,7 +145,7 @@ class TestHandleAttendeeRsvp:
             db_appointment = repo.appointment.get(db, appointment.id)
             db_slot = db_appointment.slots[0]
 
-            _handle_attendee_rsvp(
+            _handle_bookee_rsvp(
                 db, db_appointment, db_slot, 'accepted', mock_client, mock_token, calendar.user
             )
 
@@ -167,7 +167,7 @@ class TestHandleAttendeeRsvp:
             db_appointment = repo.appointment.get(db, appointment_id)
             db_slot = repo.slot.get(db, slot_id)
 
-            _handle_attendee_rsvp(
+            _handle_bookee_rsvp(
                 db, db_appointment, db_slot, 'needsAction', mock_client, mock_token, calendar.user
             )
 
