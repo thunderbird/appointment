@@ -35,6 +35,16 @@ GOOGLE_CALDAV_DOMAINS = ['googleusercontent.com', 'google.com', 'gmail.com']
 BASE_PATH = f'{sys.modules["appointment"].__path__[0]}'
 
 
+def google_invite_enabled() -> bool:
+    """Check if Google Calendar native invites are enabled.
+    Explicit env var takes precedence; otherwise enabled for all envs except prod."""
+    explicit = os.getenv('GOOGLE_INVITE_ENABLED')
+    if explicit is not None:
+        return explicit.lower() in ('true', '1', 'yes')
+    app_env = os.getenv('APP_ENV', APP_ENV_DEV)
+    return app_env != APP_ENV_PROD
+
+
 # This has to be lazy loaded because the env vars are not available at import time in main.py
 @cache
 def get_long_base_sign_url():
