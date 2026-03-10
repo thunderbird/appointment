@@ -698,10 +698,18 @@ def handle_schedule_availability_decision(
     appointment = repo.appointment.update_title(db, slot.appointment_id, title)
 
     if use_google_invite:
-        # Patch the tentative event to confirmed; Google notifies the bookee.
         if appointment and appointment.external_id:
+            # Patch the tentative hold event to confirmed; Google notifies the bookee.
             con, _ = get_remote_connection(appointment_calendar, subscriber, db, redis, google_client)
             con.confirm_event(appointment.external_id)
+        else:
+            # No hold event exists (booking_confirmation was false); create a confirmed event directly.
+            event = save_remote_event(
+                event, appointment_calendar, subscriber, slot, db, redis, google_client,
+                send_google_notification=True, booking_confirmation=False,
+            )
+            if appointment and event.external_id:
+                repo.appointment.update_external_id(db, appointment, event.external_id)
     else:
         event = save_remote_event(
             event,
