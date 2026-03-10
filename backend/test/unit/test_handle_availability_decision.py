@@ -181,3 +181,50 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
         for call in background_tasks.add_task.call_args_list:
             func = call[0][0] if call[0] else call.kwargs.get('func')
             assert 'send_invitation' not in getattr(func, '__name__', '')
+
+    @patch('appointment.routes.schedule.save_remote_event')
+    @patch.dict('os.environ', {'GOOGLE_INVITE_ENABLED': 'False'})
+    def test_flag_disabled_uses_non_google_path(
+        self, mock_save_remote_event,
+        with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,
+    ):
+        """When GOOGLE_INVITE_ENABLED is False, a Google calendar should fall back
+        to the import/branded-email path (send_google_notification defaults to False)."""
+        calendar, appointment = self._setup(
+            with_db, make_google_calendar, make_appointment,
+            make_attendee, make_appointment_slot, has_external_id=False,
+        )
+
+        mock_event = schemas.Event(
+            title='Test',
+            start=datetime.now(tz=timezone.utc),
+            end=datetime.now(tz=timezone.utc) + timedelta(minutes=30),
+            description='',
+            location=schemas.EventLocation(url=None),
+            external_id='import-event-789',
+        )
+        mock_save_remote_event.return_value = mock_event
+
+        google_calendar = self._make_google_calendar()
+        schedule = self._make_schedule()
+        subscriber = self._make_subscriber()
+        background_tasks = MagicMock()
+
+        with with_db() as db:
+            db_appointment = repo.appointment.get(db, appointment.id)
+            slot = db_appointment.slots[0]
+            db.add(slot)
+            db.add(slot.attendee)
+
+            handle_schedule_availability_decision(
+                True, google_calendar, schedule, subscriber, slot,
+                db, None, None, background_tasks,
+            )
+
+            db.refresh(slot)
+            assert slot.booking_status == models.BookingStatus.booked
+
+        mock_save_remote_event.assert_called_once()
+        call_kwargs = mock_save_remote_event.call_args
+        assert call_kwargs.kwargs.get('send_google_notification', False) is False
+        assert call_kwargs.kwargs.get('booking_confirmation', False) is False
