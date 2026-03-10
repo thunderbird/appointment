@@ -555,29 +555,6 @@ class TestGoogleConnectorSaveEvent:
         assert 'iCalUID' not in body
         assert result.external_id == 'insert_event_id'
 
-    def test_insert_body_has_attendee_only(self):
-        """insert() body should only include the bookee, not the organizer."""
-        event, attendee, organizer = self._make_event_and_organizer()
-
-        mock_google_client = Mock()
-        mock_google_client.insert_event.return_value = {'id': 'insert_event_id'}
-        connector = self._make_connector(mock_google_client)
-
-        with request_cycle_context({}):
-            connector.save_event(
-                event=event,
-                attendee=attendee,
-                organizer=organizer,
-                organizer_email='owner@example.com',
-                send_google_notification=True,
-            )
-
-        body = mock_google_client.insert_event.call_args.kwargs.get('body')
-        attendees = body['attendees']
-        assert len(attendees) == 1
-        assert attendees[0]['email'] == 'bookee@example.org'
-        assert attendees[0]['responseStatus'] == 'needsAction'
-
     def test_insert_body_has_no_organizer_field(self):
         """insert() body should not include the custom organizer field."""
         event, attendee, organizer = self._make_event_and_organizer()
@@ -597,6 +574,64 @@ class TestGoogleConnectorSaveEvent:
 
         body = mock_google_client.insert_event.call_args.kwargs.get('body')
         assert 'organizer' not in body
+
+    def test_booking_confirmation_true_creates_tentative_with_both_needsaction(self):
+        """With booking_confirmation=True, event is tentative and both
+        organizer and bookee are listed as needsAction."""
+        event, attendee, organizer = self._make_event_and_organizer()
+
+        mock_google_client = Mock()
+        mock_google_client.insert_event.return_value = {'id': 'tentative_id'}
+        connector = self._make_connector(mock_google_client)
+
+        with request_cycle_context({}):
+            connector.save_event(
+                event=event,
+                attendee=attendee,
+                organizer=organizer,
+                organizer_email='owner@example.com',
+                send_google_notification=True,
+                booking_confirmation=True,
+            )
+
+        body = mock_google_client.insert_event.call_args.kwargs.get('body')
+        assert body['status'] == 'tentative'
+
+        attendees = body['attendees']
+        assert len(attendees) == 2
+        assert attendees[0]['email'] == 'owner@example.com'
+        assert attendees[0]['responseStatus'] == 'needsAction'
+        assert attendees[1]['email'] == 'bookee@example.org'
+        assert attendees[1]['responseStatus'] == 'needsAction'
+
+    def test_booking_confirmation_false_creates_confirmed_with_organizer_accepted(self):
+        """With booking_confirmation=False, event is confirmed and the
+        organizer is accepted while the bookee is needsAction."""
+        event, attendee, organizer = self._make_event_and_organizer()
+
+        mock_google_client = Mock()
+        mock_google_client.insert_event.return_value = {'id': 'confirmed_id'}
+        connector = self._make_connector(mock_google_client)
+
+        with request_cycle_context({}):
+            connector.save_event(
+                event=event,
+                attendee=attendee,
+                organizer=organizer,
+                organizer_email='owner@example.com',
+                send_google_notification=True,
+                booking_confirmation=False,
+            )
+
+        body = mock_google_client.insert_event.call_args.kwargs.get('body')
+        assert body['status'] == 'confirmed'
+
+        attendees = body['attendees']
+        assert len(attendees) == 2
+        assert attendees[0]['email'] == 'owner@example.com'
+        assert attendees[0]['responseStatus'] == 'accepted'
+        assert attendees[1]['email'] == 'bookee@example.org'
+        assert attendees[1]['responseStatus'] == 'needsAction'
 
 
 class TestVEventTimezoneFallback:
