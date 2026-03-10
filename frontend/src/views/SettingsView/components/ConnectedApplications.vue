@@ -6,10 +6,10 @@ import { PrimaryButton, BaseBadge, CheckboxInput, BaseBadgeTypes } from '@thunde
 import { storeToRefs } from 'pinia';
 import { CalendarProviders, ExternalConnectionProviders, ProviderDisplayName } from '@/definitions';
 import DropDown from '@/elements/DropDown.vue';
-import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import CaldavConnectModal from './CaldavConnectModal.vue';
 import CaldavDisconnectModal from './CaldavDisconnectModal.vue';
 import GoogleDisconnectModal from './GoogleDisconnectModal.vue';
+import ZoomDisconnectModal from './ZoomDisconnectModal.vue';
 import { ExternalConnection, ExternalConnectionStatus, HTMLInputElementEvent } from '@/models';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -29,7 +29,7 @@ const disconnectConnectionName = ref(null);
 const connectCaldavModal = useTemplateRef('connectCaldavModal');
 const disconnectCaldavModal = useTemplateRef('disconnectCaldavModal');
 const disconnectGoogleModal = useTemplateRef('disconnectGoogleModal');
-const disconnectZoomModalOpen = ref(false);
+const disconnectZoomModal = useTemplateRef('disconnectZoomModal');
 
 const userStore = useUserStore();
 const externalConnectionStore = useExternalConnectionsStore();
@@ -85,13 +85,6 @@ async function connectGoogleCalendar() {
   await calendarStore.connectGoogleCalendar();
 }
 
-async function disconnectAccount(provider: ExternalConnectionProviders, typeId: string | null = null) {
-  await externalConnectionStore.disconnect(provider, typeId);
-  closeModals();
-  externalConnectionStore.$reset();
-  await refreshData();
-}
-
 function displayDisconnectModal(
   provider: ExternalConnectionProviders | CalendarProviders,
   typeId: string | null = null,
@@ -109,19 +102,10 @@ function displayDisconnectModal(
     }
   } else {
     if (provider === ExternalConnectionProviders.Zoom) {
-      disconnectZoomModalOpen.value = true;
+      disconnectZoomModal.value.show();
     }
   }
 };
-
-function closeModals() {
-  connectCaldavModal.value.hide();
-  disconnectZoomModalOpen.value = false;
-  disconnectGoogleModal.value.hide();
-  disconnectCaldavModal.value.hide();
-  disconnectTypeId.value = null;
-  disconnectConnectionName.value = null;
-}
 
 function calendarConnected(calendarId: number) {
   if (!calendarConnectedMap.has(calendarId)) {
@@ -414,15 +398,11 @@ onMounted(async () => {
   />
 
   <!-- Disconnect Zoom Modal -->
-  <confirmation-modal
-    :open="disconnectZoomModalOpen"
-    :title="t('text.settings.connectedApplications.disconnect.zoom.title')"
-    :message="t('text.settings.connectedApplications.disconnect.zoom.message')"
-    :confirm-label="t('text.settings.connectedApplications.disconnect.zoom.confirm')"
-    :cancel-label="t('text.settings.connectedApplications.disconnect.zoom.cancel')"
-    :use-caution-button="true"
-    @confirm="() => disconnectAccount(ExternalConnectionProviders.Zoom, zoomAccount.type_id)"
-    @close="disconnectZoomModalOpen = false"></confirmation-modal>
+  <zoom-disconnect-modal
+    ref="disconnectZoomModal"
+    :type-id="disconnectTypeId"
+    @disconnected="refreshData"
+  />
 </template>
 
 <style scoped>
