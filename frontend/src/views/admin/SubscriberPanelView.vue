@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import {
-  computed, inject, onMounted, ref,
-} from 'vue';
+import { computed, inject, onMounted, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import AlertBox from '@/elements/AlertBox.vue';
 import DataTable from '@/components/DataTable.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
-import ConfirmationModal from '@/components/ConfirmationModal.vue';
+import DeleteSubscriberModal from './components/DeleteSubscriberModal.vue';
 import { TextInput } from '@thunderbirdops/services-ui';
 import { dayjsKey, callKey } from '@/keys';
 import {
@@ -30,9 +28,11 @@ const displayPage = ref(false);
 const loading = ref(true);
 const pageError = ref<Alert>(null);
 const pageNotification = ref<Alert>(null);
-const hardDeleteModalOpen = ref<boolean>(false);
-const hardDeleteModalContext = ref<Subscriber>(null);
-const emailFilter = ref<string>(null);
+
+const deleteSubscriberModal = useTemplateRef('subscriberDeleteModalRef');
+const hardDeleteModalContext = ref<number>(null);
+
+  const emailFilter = ref<string>(null);
 const subscriberList = computed(() => {
   if (emailFilter.value) {
     /** @ts-expect-error escape has no baseline support yet */
@@ -164,31 +164,12 @@ const amIAdmin = async () => {
   return !error.value;
 };
 
-const hardDeleteConfirm = async () => {
-  if (!hardDeleteModalContext.value) {
-    hardDeleteModalOpen.value = false;
-    hardDeleteModalContext.value = null;
-    return;
-  }
-
-  // Use ids here
-  const response: BooleanResponse = await call(`subscriber/hard-delete/${hardDeleteModalContext.value}`).put().json();
-  const { data } = response;
-
-  if (data.value) {
-    await refresh();
-  }
-
-  hardDeleteModalOpen.value = false;
-  hardDeleteModalContext.value = null;
-};
-
 const onFieldClick = (_key: string, field: any) => {
   if (_key === 'disable') {
     toggleSubscriberState(field.id.value, field.timeDeleted.value === '');
   } else if (_key === 'hardDelete') {
-    hardDeleteModalOpen.value = true;
     hardDeleteModalContext.value = field.id.value;
+    deleteSubscriberModal.value.show();
   }
 };
 
@@ -244,15 +225,11 @@ onMounted(async () => {
   <div v-else class="flex size-full min-h-[75vh] items-center justify-center">
     <loading-spinner/>
   </div>
+
   <!-- Refresh link confirmation modal -->
-  <confirmation-modal
-    :open="hardDeleteModalOpen"
-    :title="t('label.warning').toUpperCase()"
-    :message="t('text.admin.completelyRemoveUser')"
-    :confirm-label="t('label.delete')"
-    :cancel-label="t('label.cancel')"
-    :use-caution-button="true"
-    @confirm="() => hardDeleteConfirm()"
-    @close="hardDeleteModalOpen = false"
-  ></confirmation-modal>
+  <delete-subscriber-modal
+    ref="subscriberDeleteModalRef"
+    :subscriber-id="hardDeleteModalContext"
+    @deleted="refresh"
+  />
 </template>
