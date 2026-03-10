@@ -212,10 +212,6 @@ def _process_google_event_changes(
             if not google_event_id:
                 continue
 
-            attendees = event.get('attendees', [])
-            if not attendees:
-                continue
-
             appointment = _find_appointment_by_external_id(db, calendar_id, google_event_id)
             if not appointment:
                 continue
@@ -224,6 +220,24 @@ def _process_google_event_changes(
             if not slot or not slot.attendee:
                 continue
 
+            # Subscriber deleted/cancelled the event from Google Calendar
+            if event.get('status') == 'cancelled':
+                _handle_event_cancelled(db, appointment, slot)
+                continue
+
+            attendees = event.get('attendees', [])
+            if not attendees:
+                continue
+
+            # Check if the subscriber (calendar owner) responded via Google Calendar
+            self_attendee = next((a for a in attendees if a.get('self')), None)
+            if self_attendee:
+                _handle_subscriber_rsvp(
+                    db, appointment, slot, self_attendee.get('responseStatus'),
+                    google_client, google_token, remote_calendar_id,
+                )
+
+            # Check if the bookee responded via Google Calendar
             attendee_email = slot.attendee.email.lower()
             google_attendee = next(
                 (a for a in attendees if a.get('email', '').lower() == attendee_email),
@@ -233,7 +247,7 @@ def _process_google_event_changes(
                 continue
 
             response_status = google_attendee.get('responseStatus')
-            _handle_attendee_rsvp(
+            _handle_bookee_rsvp(
                 db, appointment, slot, response_status, google_client, google_token, remote_calendar_id
             )
     except Exception as e:
@@ -259,7 +273,25 @@ def _find_appointment_by_external_id(
     return None
 
 
-def _handle_attendee_rsvp(
+def _handle_event_cancelled(
+    db: Session,
+    appointment: models.Appointment,
+    slot: models.Slot,
+):
+    """Handle a Google Calendar event that was deleted/cancelled by the subscriber."""
+    if slot.booking_status not in (models.BookingStatus.requested, models.BookingStatus.booked):
+        return
+
+    slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.cancelled)
+    repo.slot.update(db, slot.id, slot_update)
+
+    logging.info(
+        f'[webhooks.google_calendar] Event cancelled for appointment {appointment.id}, '
+        f'slot {slot.id} marked as cancelled'
+    )
+
+
+def _handle_subscriber_rsvp(
     db: Session,
     appointment: models.Appointment,
     slot: models.Slot,
@@ -268,7 +300,61 @@ def _handle_attendee_rsvp(
     google_token,
     remote_calendar_id: str,
 ):
-    """React to an attendee's RSVP status change from Google Calendar."""
+    """React to the subscriber (calendar owner) accepting/declining via Google Calendar."""
+    if response_status == 'accepted':
+        if (
+            appointment.status != models.AppointmentStatus.opened
+            or slot.booking_status != models.BookingStatus.requested
+        ):
+            return
+
+        repo.appointment.update_status(db, appointment.id, models.AppointmentStatus.closed)
+        repo.slot.book(db, slot.id)
+
+        if appointment.external_id:
+            try:
+                google_client.patch_event(
+                    remote_calendar_id, appointment.external_id,
+                    {'status': 'confirmed'}, google_token,
+                )
+            except Exception:
+                logging.warning('[webhooks.google_calendar] Failed to confirm event in Google')
+
+        logging.info(
+            f'[webhooks.google_calendar] Subscriber confirmed appointment {appointment.id} '
+            f'via Google Calendar, slot {slot.id} booked'
+        )
+
+    elif response_status == 'declined':
+        if slot.booking_status in (models.BookingStatus.requested, models.BookingStatus.booked):
+            slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.declined)
+            repo.slot.update(db, slot.id, slot_update)
+
+            if appointment.external_id:
+                try:
+                    google_client.delete_event(
+                        remote_calendar_id, appointment.external_id, google_token,
+                        send_updates='all',
+                    )
+                except Exception:
+                    logging.warning('[webhooks.google_calendar] Failed to delete declined event from Google')
+
+            logging.info(
+                f'[webhooks.google_calendar] Subscriber declined appointment {appointment.id} '
+                f'via Google Calendar, slot {slot.id} marked as declined'
+            )
+
+
+def _handle_bookee_rsvp(
+    db: Session,
+    appointment: models.Appointment,
+    slot: models.Slot,
+    response_status: str,
+    google_client: GoogleClient,
+    google_token,
+    remote_calendar_id: str,
+):
+    """React to the bookee's RSVP status change from Google Calendar."""
     if response_status == 'declined':
         if slot.booking_status in (models.BookingStatus.requested, models.BookingStatus.booked):
             slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.declined)
@@ -281,14 +367,12 @@ def _handle_attendee_rsvp(
                     logging.warning('[webhooks.google_calendar] Failed to delete declined event from Google')
 
             logging.info(
-                f'[webhooks.google_calendar] Attendee declined appointment {appointment.id}, '
+                f'[webhooks.google_calendar] Bookee declined appointment {appointment.id}, '
                 f'slot {slot.id} marked as declined'
             )
 
     elif response_status == 'accepted':
-        # The bookee accepted the tentative invite, but the subscriber must
-        # still confirm via the branded email or app UI. Just log it for now.
         logging.info(
-            f'[webhooks.google_calendar] Attendee accepted appointment {appointment.id}, '
-            f'slot {slot.id} — awaiting subscriber confirmation'
+            f'[webhooks.google_calendar] Bookee accepted appointment {appointment.id}, '
+            f'slot {slot.id}'
         )
