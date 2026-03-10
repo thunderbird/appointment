@@ -241,7 +241,9 @@ class TestHandleSubscriberRsvp:
         assert patch_body['status'] == 'confirmed'
         assert 'summary' in patch_body
         assert patch_body.get('location') == 'https://meet.example.com'
-        assert 'https://meet.example.com' in patch_body.get('description', '')
+
+        desc_lines = patch_body.get('description', '').split('\n')
+        assert any(line.endswith('https://meet.example.com') for line in desc_lines)
 
     @patch('appointment.routes.webhooks._create_zoom_meeting_link')
     def test_accept_creates_zoom_link_when_configured(
