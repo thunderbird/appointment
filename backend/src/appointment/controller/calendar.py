@@ -284,13 +284,16 @@ class GoogleConnector(BaseConnector):
             description.append(l10n('join-phone', {'phone': event.location.phone}, lang=organizer_language))
 
         if send_google_notification:
-            attendees = [
-                {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'needsAction'},
-            ]
             if booking_confirmation:
-                attendees.insert(0, {
-                    'displayName': organizer.name, 'email': organizer_email, 'responseStatus': 'needsAction',
-                })
+                attendees = [
+                    {'displayName': organizer.name, 'email': organizer_email, 'responseStatus': 'needsAction'},
+                    {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'needsAction'},
+                ]
+            else:
+                attendees = [
+                    {'displayName': organizer.name, 'email': organizer_email, 'responseStatus': 'accepted'},
+                    {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'needsAction'},
+                ]
 
             body = {
                 'summary': event.title,
