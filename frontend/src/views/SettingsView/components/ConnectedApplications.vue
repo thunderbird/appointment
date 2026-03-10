@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { PhDotsThree, PhWarningCircle } from '@phosphor-icons/vue';
 import { PrimaryButton, BaseBadge, CheckboxInput, BaseBadgeTypes } from '@thunderbirdops/services-ui';
 import { storeToRefs } from 'pinia';
 import { CalendarProviders, ExternalConnectionProviders, ProviderDisplayName } from '@/definitions';
 import DropDown from '@/elements/DropDown.vue';
-import GenericModal from '@/components/GenericModal.vue';
-import CalDavProvider from '@/components/CalDavProvider.vue';
 import ConfirmationModal from '@/components/ConfirmationModal.vue';
-import { Alert, ExternalConnection, ExternalConnectionStatus, HTMLInputElementEvent } from '@/models';
+import CaldavConnectModal from './CaldavConnectModal.vue';
+import { ExternalConnection, ExternalConnectionStatus, HTMLInputElementEvent } from '@/models';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useCalendarStore } from '@/stores/calendar-store';
@@ -19,14 +18,13 @@ import { useAvailabilityStore } from '@/stores/availability-store';
 const { t } = useI18n();
 
 const videoMeetingDropdown = ref();
-const calDavErrorMessage = ref();
 const calendarDropdownRefs = ref({});
 const connectionDropdownRefs = ref({});
 const disconnectTypeId = ref(null);
 const disconnectConnectionName = ref(null);
 
 // Modals
-const connectCalDavModalOpen = ref(false);
+const connectCaldavModal = useTemplateRef('connectCaldavModal');
 const disconnectCalDavModalOpen = ref(false);
 const disconnectZoomModalOpen = ref(false);
 const disconnectGoogleModalOpen = ref(false);
@@ -85,12 +83,6 @@ async function connectGoogleCalendar() {
   await calendarStore.connectGoogleCalendar();
 }
 
-async function afterCalDavConnect() {
-  connectCalDavModalOpen.value = false;
-  externalConnectionStore.$reset();
-  await refreshData();
-}
-
 async function disconnectAccount(provider: ExternalConnectionProviders, typeId: string | null = null) {
   await externalConnectionStore.disconnect(provider, typeId);
   closeModals();
@@ -121,7 +113,7 @@ function displayDisconnectModal(
 };
 
 function closeModals() {
-  connectCalDavModalOpen.value = false;
+  connectCaldavModal.value.hide();
   disconnectZoomModalOpen.value = false;
   disconnectGoogleModalOpen.value = false;
   disconnectCalDavModalOpen.value = false;
@@ -179,7 +171,7 @@ function reconnectExternalConnection(provider: ExternalConnectionProviders | Cal
     if (provider === CalendarProviders.Google) {
       connectGoogleCalendar();
     } else if (provider === CalendarProviders.Caldav) {
-      connectCalDavModalOpen.value = true;
+      connectCaldavModal.value.show();
     }
 
     return;
@@ -396,21 +388,13 @@ onMounted(async () => {
     <primary-button variant="outline" size="small" @click="connectGoogleCalendar">
       {{ t('label.addGoogleCalendar') }}
     </primary-button>
-    <primary-button variant="outline" size="small" @click="connectCalDavModalOpen = true">
+    <primary-button variant="outline" size="small" @click="connectCaldavModal.show()">
       {{ t('label.addCalDavCalendar') }}
     </primary-button>
   </div>
 
   <!-- Connect CalDav Modal Flow -->
-  <generic-modal v-if="connectCalDavModalOpen" @close="connectCalDavModalOpen = false"
-    :error-message="calDavErrorMessage">
-    <template v-slot:header>
-      <h2 class="modal-title">
-        {{ t('heading.settings.connectedApplications.caldav') }}
-      </h2>
-    </template>
-    <cal-dav-provider @next="afterCalDavConnect()" @error="(alert: Alert) => calDavErrorMessage = alert" />
-  </generic-modal>
+  <caldav-connect-modal ref="connectCaldavModal" @connected="refreshData" />
 
   <!-- Disconnect Google Modal -->
   <confirmation-modal :open="disconnectGoogleModalOpen"
