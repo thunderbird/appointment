@@ -337,17 +337,36 @@ class GoogleConnector(BaseConnector):
 
         return event
 
-    def confirm_event(self, event_id: str):
-        """Patch a tentative event to confirmed status, notifying attendees."""
+    def confirm_event(
+        self, event_id: str, event: schemas.Event = None, organizer_language: str = None,
+    ):
+        """Patch a tentative event to confirmed status, notifying attendees.
+
+        When *event* is provided the patch also updates summary, location,
+        and description so that a newly-created meeting link is visible on
+        the Google Calendar event.
+        """
         body = {'status': 'confirmed'}
 
-        event = self.google_client.get_event(
+        if event:
+            body['summary'] = event.title
+            if event.location and event.location.url:
+                body['location'] = event.location.url
+
+            lang = organizer_language or FALLBACK_LOCALE
+            description = [event.description] if event.description else []
+            if event.location and event.location.url:
+                description.append(l10n('join-online', {'url': event.location.url}, lang=lang))
+            if description:
+                body['description'] = '\n'.join(description)
+
+        remote_event = self.google_client.get_event(
             calendar_id=self.remote_calendar_id,
             event_id=event_id,
             token=self.google_token,
         )
-        if event and event.get('attendees'):
-            attendees = event['attendees']
+        if remote_event and remote_event.get('attendees'):
+            attendees = remote_event['attendees']
             for att in attendees:
                 if att.get('self'):
                     att['responseStatus'] = 'accepted'

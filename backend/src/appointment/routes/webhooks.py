@@ -10,14 +10,18 @@ from sqlalchemy.orm import Session
 from ..controller import auth, data, zoom
 from ..controller.apis.fxa_client import FxaClient
 from ..controller.apis.google_client import GoogleClient
+from ..controller.calendar import Tools
 from ..controller.google_watch import teardown_watch_channel
 from ..database import repo, models, schemas
+from ..database.models import MeetingLinkProviderType
+from ..defines import FALLBACK_LOCALE
 from ..dependencies.database import get_db, get_redis
 from ..dependencies.fxa import get_webhook_auth as get_webhook_auth_fxa, get_fxa_client
 from ..dependencies.google import get_google_client
-from ..dependencies.zoom import get_webhook_auth as get_webhook_auth_zoom
+from ..dependencies.zoom import get_zoom_client, get_webhook_auth as get_webhook_auth_zoom
 from ..exceptions.account_api import AccountDeletionSubscriberFail
 from ..exceptions.fxa_api import MissingRefreshTokenException
+from ..l10n import l10n
 
 router = APIRouter()
 
@@ -291,6 +295,33 @@ def _handle_event_cancelled(
     )
 
 
+def _create_zoom_meeting_link(
+    db: Session,
+    slot: models.Slot,
+    subscriber: models.Subscriber,
+    title: str,
+) -> str | None:
+    """Try to create a Zoom meeting link and persist it on the slot.
+
+    Returns the join URL on success, or ``None`` on any failure.
+    """
+    try:
+        zoom_client = get_zoom_client(subscriber)
+        response = zoom_client.create_meeting(title, slot.start.isoformat(), slot.duration, subscriber.timezone)
+        if 'id' in response:
+            join_url = zoom_client.get_meeting(response['id'])['join_url']
+            slot.meeting_link_id = response['id']
+            slot.meeting_link_url = join_url
+            db.add(slot)
+            db.commit()
+            return join_url
+    except Exception as err:
+        logging.error(f'[webhooks.google_calendar] Zoom meeting creation error: {err}')
+        if sentry_sdk.is_initialized():
+            sentry_sdk.capture_exception(err)
+    return None
+
+
 def _handle_subscriber_rsvp(
     db: Session,
     appointment: models.Appointment,
@@ -312,10 +343,36 @@ def _handle_subscriber_rsvp(
         repo.slot.book(db, slot.id)
 
         if appointment.external_id:
+            subscriber = appointment.calendar.owner
+            title = Tools.default_event_title(slot, subscriber)
+            repo.appointment.update_title(db, appointment.id, title)
+
+            location_url = appointment.location_url
+            if appointment.meeting_link_provider == MeetingLinkProviderType.zoom:
+                location_url = _create_zoom_meeting_link(db, slot, subscriber, title) or location_url
+
+            owner_lang = subscriber.language if subscriber.language else FALLBACK_LOCALE
+            body = {'status': 'confirmed', 'summary': title}
+
+            if location_url:
+                body['location'] = location_url
+
+            description = [appointment.details or '']
+            if location_url:
+                description.append(l10n('join-online', {'url': location_url}, lang=owner_lang))
+
+            body['description'] = '\n'.join(description)
+
             try:
+                remote_event = google_client.get_event(remote_calendar_id, appointment.external_id, google_token)
+                if remote_event and remote_event.get('attendees'):
+                    for att in remote_event['attendees']:
+                        if att.get('self'):
+                            att['responseStatus'] = 'accepted'
+                    body['attendees'] = remote_event['attendees']
+
                 google_client.patch_event(
-                    remote_calendar_id, appointment.external_id,
-                    {'status': 'confirmed'}, google_token,
+                    remote_calendar_id, appointment.external_id, body, google_token,
                 )
             except Exception:
                 logging.warning('[webhooks.google_calendar] Failed to confirm event in Google')
