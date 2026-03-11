@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import RedirectResponse
 
 from ..controller.apis.google_client import GoogleClient
+from ..controller.google_watch import teardown_watch_channels_for_connection
 from ..database import repo, schemas, models
 from sqlalchemy.orm import Session
 
@@ -151,6 +152,7 @@ def disconnect_account(
     request_body: schemas.DisconnectGoogleAccountRequest,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
+    google_client: GoogleClient = Depends(get_google_client),
 ):
     """Disconnects a google account. Removes associated data from our services and deletes the connection details."""
     google_connection = subscriber.get_external_connection(ExternalConnectionType.google, request_body.type_id)
@@ -161,6 +163,9 @@ def disconnect_account(
     for schedule in schedules:
         if schedule.calendar and schedule.calendar.external_connection_id == google_connection.id:
             raise ConnectionContainsDefaultCalendarException()
+
+    # Tear down watch channels before deleting calendars
+    teardown_watch_channels_for_connection(db, google_client, google_connection)
 
     # Remove all of the google calendars on their given google connection
     repo.calendar.delete_by_subscriber_and_provider(

@@ -541,10 +541,13 @@ class TestSchedule:
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
         signed_url = signed_url_by_subscriber(subscriber)
 
+        # Explicitly set time_updated to a known PST date so start_time_local is deterministic.
+        # freeze_time does NOT affect SQLAlchemy's func.now() (evaluated by the database engine),
+        # so we must pass time_updated directly to avoid the result depending on the real clock.
+        schedule_time_updated = datetime(2024, 3, 1)
+
         # Check availability at the start of the schedule
         with freeze_time(start_date):
-            # We create the schedule inside the freeze_time block to ensure the time_updated
-            # is set to a known date (PST) so start_time_local calculation is deterministic.
             make_schedule(
                 calendar_id=generated_calendar.id,
                 active=True,
@@ -555,6 +558,7 @@ class TestSchedule:
                 earliest_booking=1440,
                 farthest_booking=20160,
                 slot_duration=30,
+                time_updated=schedule_time_updated,
             )
 
             response = with_client.post(
@@ -567,11 +571,10 @@ class TestSchedule:
             slots = data['slots']
 
             # Based off the earliest_booking our earliest slot is tomorrow at 9:00am
-            # Note: this should be in PDT (Pacific Daylight Time)
+            # 2024-03-04 is before spring-forward (Mar 10), so offset is PST (-08:00)
             assert slots[0]['start'] == '2024-03-04T09:00:00-08:00'
-            # Based off the farthest_booking our latest slot is 4:30pm
-            # Note: This should be in PDT (Pacific Daylight Time)
-            # Note2: The schedule ends at 0 UTC (or 16-07:00) so the last slot is 30 mins before that.
+            # 2024-03-15 is after spring-forward, so offset is PDT (-07:00)
+            # The schedule ends at 01:00 UTC (= 17:00 local) so the last slot starts at 16:30
             assert slots[-1]['start'] == '2024-03-15T16:30:00-07:00'
 
         # Check availability over a year from now
