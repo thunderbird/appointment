@@ -29,10 +29,10 @@ const loading = ref(true);
 const pageError = ref<Alert>(null);
 const pageNotification = ref<Alert>(null);
 
-const deleteSubscriberModal = useTemplateRef('subscriberDeleteModalRef');
+const deleteSubscriberModalRef = useTemplateRef('subscriberDeleteModalRef');
 const hardDeleteModalContext = ref<number>(null);
 
-  const emailFilter = ref<string>(null);
+const emailFilter = ref<string>(null);
 const subscriberList = computed(() => {
   if (emailFilter.value) {
     /** @ts-expect-error escape has no baseline support yet */
@@ -169,7 +169,7 @@ const onFieldClick = (_key: string, field: any) => {
     toggleSubscriberState(field.id.value, field.timeDeleted.value === '');
   } else if (_key === 'hardDelete') {
     hardDeleteModalContext.value = field.id.value;
-    deleteSubscriberModal.value.show();
+    deleteSubscriberModalRef.value.show();
   }
 };
 
