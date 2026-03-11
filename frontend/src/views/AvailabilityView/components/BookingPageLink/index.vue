@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { PhCopy, PhArrowClockwise } from '@phosphor-icons/vue';
@@ -7,8 +7,8 @@ import { TextInput, LinkButton } from '@thunderbirdops/services-ui';
 import { MetricEvents } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import { useAvailabilityStore } from '@/stores/availability-store';
-import ConfirmationModal from '@/components/ConfirmationModal.vue';
 import { posthog, usePosthog } from '@/composables/posthog';
+import RefreshLinkModal from './components/RefreshLinkModal.vue';
 
 const { t } = useI18n();
 
@@ -16,7 +16,7 @@ const userStore = useUserStore();
 const availabilityStore = useAvailabilityStore();
 const { currentState } = storeToRefs(availabilityStore);
 
-const refreshLinkModalOpen = ref(false);
+const refreshLinkModalRef = useTemplateRef('refreshLinkModalRef');
 const copyButtonLabel = ref(t('label.copy'));
 
 const linkSlug = computed({
@@ -27,14 +27,6 @@ const linkSlug = computed({
 })
 
 const shortUrlWithoutProtocol = computed(() => userStore.data.userLink.replace(/https?:\/\//g, ''))
-
-function openRefreshLinkModal() {
-  refreshLinkModalOpen.value = true;
-}
-
-function closeRefreshLinkModal() {
-  refreshLinkModalOpen.value = false;
-}
 
 async function refreshLinkConfirm() {
   await userStore.changeSignedUrl();
@@ -47,7 +39,7 @@ async function refreshLinkConfirm() {
     currentState: { slug: userStore.mySlug }
   })
 
-  closeRefreshLinkModal();
+  refreshLinkModalRef.value.hide();
 
   if (usePosthog) {
     posthog.capture(MetricEvents.RefreshLink);
@@ -84,7 +76,7 @@ export default {
     v-model="linkSlug"
   >
     {{ t('label.customizeYourLink') }}:
-    <button @click="openRefreshLinkModal">
+    <button @click="refreshLinkModalRef.show()">
       <ph-arrow-clockwise size="24" :aria-label="t('label.refreshLink')" />
     </button>
   </text-input>
@@ -107,15 +99,7 @@ export default {
   </text-input>
 
   <!-- Refresh link confirmation modal -->
-  <confirmation-modal
-    :open="refreshLinkModalOpen"
-    :title="t('label.refreshLink')"
-    :message="t('text.refreshLinkNotice')"
-    :confirm-label="t('label.save')"
-    :cancel-label="t('label.cancel')"
-    @confirm="() => refreshLinkConfirm()"
-    @close="closeRefreshLinkModal"
-  ></confirmation-modal>
+  <refresh-link-modal ref="refreshLinkModalRef" @confirmed="refreshLinkConfirm()" />
 </template>
 
 <style scoped>
