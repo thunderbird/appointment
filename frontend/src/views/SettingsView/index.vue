@@ -14,7 +14,7 @@ import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { createSettingsStore } from '@/stores/settings-store';
-import { PhX, PhWarningCircle } from '@phosphor-icons/vue';
+import { PhArrowRight, PhX, PhWarningCircle } from '@phosphor-icons/vue';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 
 // Page sections
@@ -33,9 +33,6 @@ const sections = ref(enumToObject(SettingsSections));
 const savingInProgress = ref(false);
 const validationError = ref<Alert>(null);
 const saveSuccess = ref<Alert>(null);
-
-// Note: Use direct variables in computed, otherwise it won't be updated if transformed (like by typing)
-const activeView = computed<number>(() => (route.hash && sections.value[route.hash.slice(1) as string] ? sections.value[route.hash.slice(1) as string] : SettingsSections.AccountSettings));
 
 const userStore = useUserStore();
 const calendarStore = useCalendarStore();
@@ -302,9 +299,8 @@ export default {
       <!-- sidebar navigation -->
       <aside>
         <button
-          v-for="(view, key) in sections"
+          v-for="(_, key) in sections"
           :key="key"
-          :class="{ 'active': view === activeView }"
           @click="scrollToSection(key)"
           :data-testid="'settings-' + key + '-settings-btn'"
         >
@@ -313,7 +309,8 @@ export default {
             class="warning-icon"
             weight="fill"
           />
-          <span>{{ t('heading.' + key) }}</span>
+          <span class="label">{{ t('heading.' + key) }}</span>
+          <ph-arrow-right class="arrow-icon" size="16" />
         </button>
       </aside>
 
@@ -404,34 +401,88 @@ section {
 
     button {
       display: flex;
-      padding: 1rem;
-      border-radius: 8px;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      border-radius: 0.5rem;
       background-color: var(--colour-neutral-base);
       border: 1px solid transparent;
-      box-shadow: 3px 3px 16px 0 rgba(0, 0, 0, 0.04);
+      box-shadow: 0.1875rem 0.1875rem 1rem 0 var(--shadow-surface-default);
       height: 3rem;
       font-size: 0.875rem;
-      line-height: 17.2px;
+      line-height: 1.23;
       font-weight: 400;
+      color: var(--colour-ti-secondary);
+      text-align: start;
 
-      &.active {
-        color: var(--colour-neutral-lower);
-        background-color: var(--colour-primary-default);
+      &:hover {
+        background-color: var(--colour-primary-soft);
+        border-color: var(--colour-neutral-border);
+        box-shadow:
+          0.0625rem 0.0625rem 0 0 var(--shadow-surface-interactive-outer),
+          inset 0.125rem 0.125rem 0.25rem 0 var(--shadow-surface-interactive-inset);
+        color: var(--colour-ti-base);
+
+        .arrow-icon {
+          color: var(--colour-ti-base);
+        }
 
         .warning-icon {
-          color: var(--colour-neutral-lower);
+          color: var(--colour-danger-default);
         }
       }
 
-      &:hover {
-        border-color: var(--colour-primary-hover);
+      &:focus-visible {
+        background-color: var(--colour-primary-soft);
+        border-color: var(--colour-neutral-border);
+        box-shadow:
+          0.0625rem 0.0625rem 0 0 var(--shadow-surface-interactive-outer),
+          inset 0.125rem 0.125rem 0.25rem 0 var(--shadow-surface-interactive-inset);
+        color: var(--colour-ti-base);
+        outline: 0.125rem solid var(--colour-primary-default);
+        outline-offset: 0.125rem;
+
+        .arrow-icon {
+          color: var(--colour-ti-base);
+        }
+
+        .warning-icon {
+          color: var(--colour-danger-default);
+        }
+      }
+
+      &:active {
+        background-color: color-mix(in srgb, var(--colour-primary-default) 20%, transparent);
+        border-color: var(--colour-neutral-border);
+        box-shadow:
+          0.0625rem 0.0625rem 0 0 var(--shadow-surface-interactive-outer),
+          inset 0.125rem 0.125rem 0.25rem 0 var(--shadow-surface-interactive-inset);
+        color: var(--colour-ti-base);
+
+        .arrow-icon {
+          color: var(--colour-ti-base);
+        }
+
+        .warning-icon {
+          color: var(--colour-danger-default);
+        }
+      }
+
+      .label {
+        flex: 1 1 0;
+        min-width: 0;
       }
 
       .warning-icon {
         color: var(--colour-danger-default);
         width: 1.5rem;
         height: 1.5rem;
-        margin-inline-end: 0.5rem;
+        flex-shrink: 0;
+      }
+
+      .arrow-icon {
+        flex-shrink: 0;
+        color: inherit;
       }
     }
   }
@@ -462,12 +513,6 @@ section {
       flex-direction: column;
       gap: 1rem;
       width: 268px;
-
-      button {
-        display: flex;
-        align-items: center;
-        text-align: start;
-      }
     }
 
     .page-content {

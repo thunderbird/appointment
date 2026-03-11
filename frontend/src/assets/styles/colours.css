@@ -88,6 +88,14 @@ html {
   --colour-ti-success: #1D783B;
 
   /*
+   * Shadow colours (for surfaces / buttons)
+   * Light mode: visible shadows; dark mode: transparent so shadows are omitted.
+   */
+  --shadow-surface-default: rgba(0, 0, 0, 0.04);
+  --shadow-surface-interactive-outer: rgba(255, 255, 255, 0.6);
+  --shadow-surface-interactive-inset: rgba(0, 0, 0, 0.05);
+
+  /*
    * Accent Colours
    * Used for accents, gradients, highlights.
    * *Do not use with text
@@ -195,6 +203,13 @@ html {
     --colour-ti-warning: #FEE78A;
     --colour-ti-critical: #EF4444;
     --colour-ti-success: #55D37E;
+
+    /*
+     * Shadow colours (dark mode: no visible shadows)
+     */
+    --shadow-surface-default: transparent;
+    --shadow-surface-interactive-outer: transparent;
+    --shadow-surface-interactive-inset: transparent;
 
     /*
     * Form elements
