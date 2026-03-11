@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { PhDotsThree, PhWarningCircle } from '@phosphor-icons/vue';
 import { PrimaryButton, BaseBadge, CheckboxInput, BaseBadgeTypes } from '@thunderbirdops/services-ui';
 import { storeToRefs } from 'pinia';
 import { CalendarProviders, ExternalConnectionProviders, ProviderDisplayName } from '@/definitions';
 import DropDown from '@/elements/DropDown.vue';
-import GenericModal from '@/components/GenericModal.vue';
-import CalDavProvider from '@/components/CalDavProvider.vue';
-import ConfirmationModal from '@/components/ConfirmationModal.vue';
-import { Alert, ExternalConnection, ExternalConnectionStatus, HTMLInputElementEvent } from '@/models';
+import CaldavConnectModal from './CaldavConnectModal.vue';
+import CaldavDisconnectModal from './CaldavDisconnectModal.vue';
+import GoogleDisconnectModal from './GoogleDisconnectModal.vue';
+import ZoomDisconnectModal from './ZoomDisconnectModal.vue';
+import { ExternalConnection, ExternalConnectionStatus, HTMLInputElementEvent } from '@/models';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useCalendarStore } from '@/stores/calendar-store';
@@ -19,17 +20,16 @@ import { useAvailabilityStore } from '@/stores/availability-store';
 const { t } = useI18n();
 
 const videoMeetingDropdown = ref();
-const calDavErrorMessage = ref();
 const calendarDropdownRefs = ref({});
 const connectionDropdownRefs = ref({});
 const disconnectTypeId = ref(null);
 const disconnectConnectionName = ref(null);
 
 // Modals
-const connectCalDavModalOpen = ref(false);
-const disconnectCalDavModalOpen = ref(false);
-const disconnectZoomModalOpen = ref(false);
-const disconnectGoogleModalOpen = ref(false);
+const connectCaldavModal = useTemplateRef('connectCaldavModal');
+const disconnectCaldavModal = useTemplateRef('disconnectCaldavModal');
+const disconnectGoogleModal = useTemplateRef('disconnectGoogleModal');
+const disconnectZoomModal = useTemplateRef('disconnectZoomModal');
 
 const userStore = useUserStore();
 const externalConnectionStore = useExternalConnectionsStore();
@@ -85,19 +85,6 @@ async function connectGoogleCalendar() {
   await calendarStore.connectGoogleCalendar();
 }
 
-async function afterCalDavConnect() {
-  connectCalDavModalOpen.value = false;
-  externalConnectionStore.$reset();
-  await refreshData();
-}
-
-async function disconnectAccount(provider: ExternalConnectionProviders, typeId: string | null = null) {
-  await externalConnectionStore.disconnect(provider, typeId);
-  closeModals();
-  externalConnectionStore.$reset();
-  await refreshData();
-}
-
 function displayDisconnectModal(
   provider: ExternalConnectionProviders | CalendarProviders,
   typeId: string | null = null,
@@ -109,25 +96,16 @@ function displayDisconnectModal(
 
   if (isCalendar) {
     if (provider === CalendarProviders.Google) {
-      disconnectGoogleModalOpen.value = true;
+      disconnectGoogleModal.value.show();
     } else if (provider === CalendarProviders.Caldav) {
-      disconnectCalDavModalOpen.value = true;
+      disconnectCaldavModal.value.show();
     }
   } else {
     if (provider === ExternalConnectionProviders.Zoom) {
-      disconnectZoomModalOpen.value = true;
+      disconnectZoomModal.value.show();
     }
   }
 };
-
-function closeModals() {
-  connectCalDavModalOpen.value = false;
-  disconnectZoomModalOpen.value = false;
-  disconnectGoogleModalOpen.value = false;
-  disconnectCalDavModalOpen.value = false;
-  disconnectTypeId.value = null;
-  disconnectConnectionName.value = null;
-}
 
 function calendarConnected(calendarId: number) {
   if (!calendarConnectedMap.has(calendarId)) {
@@ -179,7 +157,7 @@ function reconnectExternalConnection(provider: ExternalConnectionProviders | Cal
     if (provider === CalendarProviders.Google) {
       connectGoogleCalendar();
     } else if (provider === CalendarProviders.Caldav) {
-      connectCalDavModalOpen.value = true;
+      connectCaldavModal.value.show();
     }
 
     return;
@@ -396,44 +374,35 @@ onMounted(async () => {
     <primary-button variant="outline" size="small" @click="connectGoogleCalendar">
       {{ t('label.addGoogleCalendar') }}
     </primary-button>
-    <primary-button variant="outline" size="small" @click="connectCalDavModalOpen = true">
+    <primary-button variant="outline" size="small" @click="connectCaldavModal.show()">
       {{ t('label.addCalDavCalendar') }}
     </primary-button>
   </div>
 
-  <!-- Connect CalDav Modal Flow -->
-  <generic-modal v-if="connectCalDavModalOpen" @close="connectCalDavModalOpen = false"
-    :error-message="calDavErrorMessage">
-    <template v-slot:header>
-      <h2 class="modal-title">
-        {{ t('heading.settings.connectedApplications.caldav') }}
-      </h2>
-    </template>
-    <cal-dav-provider @next="afterCalDavConnect()" @error="(alert: Alert) => calDavErrorMessage = alert" />
-  </generic-modal>
+  <!-- Connect CalDav Modal -->
+  <caldav-connect-modal ref="connectCaldavModal" @connected="refreshData" />
 
   <!-- Disconnect Google Modal -->
-  <confirmation-modal :open="disconnectGoogleModalOpen"
-    :title="t('text.settings.connectedApplications.disconnect.google.title')"
-    :message="t('text.settings.connectedApplications.disconnect.google.message', { googleAccountName: disconnectConnectionName })"
-    :confirm-label="t('text.settings.connectedApplications.disconnect.google.confirm')"
-    :cancel-label="t('text.settings.connectedApplications.disconnect.google.cancel')" :use-caution-button="true"
-    @confirm="() => disconnectAccount(ExternalConnectionProviders.Google, disconnectTypeId)" @close="closeModals" />
+  <google-disconnect-modal
+    ref="disconnectGoogleModal"
+    :type-id="disconnectTypeId"
+    :connection-name="disconnectConnectionName"
+    @disconnected="refreshData"
+  />
+
   <!-- Disconnect CalDav Modal -->
-  <confirmation-modal :open="disconnectCalDavModalOpen"
-    :title="t('text.settings.connectedApplications.disconnect.caldav.title')"
-    :message="t('text.settings.connectedApplications.disconnect.caldav.message')"
-    :confirm-label="t('text.settings.connectedApplications.disconnect.caldav.confirm')"
-    :cancel-label="t('text.settings.connectedApplications.disconnect.caldav.cancel')" :use-caution-button="true"
-    @confirm="() => disconnectAccount(ExternalConnectionProviders.Caldav, disconnectTypeId)" @close="closeModals" />
+  <caldav-disconnect-modal
+    ref="disconnectCaldavModal"
+    :type-id="disconnectTypeId"
+    @disconnected="refreshData"
+  />
+
   <!-- Disconnect Zoom Modal -->
-  <confirmation-modal :open="disconnectZoomModalOpen"
-    :title="t('text.settings.connectedApplications.disconnect.zoom.title')"
-    :message="t('text.settings.connectedApplications.disconnect.zoom.message')"
-    :confirm-label="t('text.settings.connectedApplications.disconnect.zoom.confirm')"
-    :cancel-label="t('text.settings.connectedApplications.disconnect.zoom.cancel')" :use-caution-button="true"
-    @confirm="() => disconnectAccount(ExternalConnectionProviders.Zoom, zoomAccount.type_id)"
-    @close="disconnectZoomModalOpen = false"></confirmation-modal>
+  <zoom-disconnect-modal
+    ref="disconnectZoomModal"
+    :type-id="disconnectTypeId"
+    @disconnected="refreshData"
+  />
 </template>
 
 <style scoped>

@@ -1,0 +1,82 @@
+<script setup lang="ts">
+import { Alert } from '@/models';
+import { IconButton, ModalDialog, NoticeBar, NoticeBarTypes, PrimaryButton, DangerButton } from '@thunderbirdops/services-ui';
+import { PhX } from '@phosphor-icons/vue';
+import { ref, useTemplateRef } from 'vue';
+import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import { useI18n } from 'vue-i18n';
+import { ExternalConnectionProviders } from '@/definitions';
+
+const externalConnectionStore = useExternalConnectionsStore();
+const { t } = useI18n();
+const emit = defineEmits(['disconnected']);
+
+const modal = useTemplateRef('modal');
+const errorMessage = ref<Alert>(null);
+
+const props = defineProps<{
+  typeId: string|null,
+  connectionName: string|null,
+}>();
+
+/**
+ * Trigger the modal to show up or hide.
+ */
+const show = () => {
+  modal.value?.show();
+};
+const hide = () => {
+  modal.value?.hide();
+};
+
+async function disconnect() {
+  await externalConnectionStore.disconnect(ExternalConnectionProviders.Google, props.typeId);
+  externalConnectionStore.$reset();
+  modal.value.hide();
+  emit('disconnected');
+}
+
+defineExpose({ show, hide })
+</script>
+
+<template>
+  <!-- Connect Google modal -->
+  <modal-dialog ref="modal" class="google-disconnect-modal">
+    <template #header>
+      {{ t('text.settings.connectedApplications.disconnect.google.title') }}
+    </template>
+
+    <div class="google-disconnect-modal-container">
+      <notice-bar v-if="errorMessage" class="notice-bar" :type="NoticeBarTypes.Critical">
+        {{ errorMessage.title }}
+        <template #cta>
+          <icon-button @click="errorMessage = null" :title="t('label.close')">
+            <ph-x />
+          </icon-button>
+        </template>
+      </notice-bar>
+
+      {{ t('text.settings.connectedApplications.disconnect.google.message', { googleAccountName: connectionName }) }}
+    </div>
+
+    <template #actions>
+      <primary-button
+        name="cancel"
+        variant="outline"
+        @click="modal?.hide()"
+        class="cancel-button"
+        data-testid="google-disconnect-cancel-btn"
+      >
+        {{ t('text.settings.connectedApplications.disconnect.google.cancel') }}
+      </primary-button>
+      <danger-button
+        name="disconnect"
+        @click="disconnect()"
+        class="disconnect-button"
+        data-testid="google-disconnect-confirm-btn"
+      >
+        {{ t('text.settings.connectedApplications.disconnect.google.confirm') }}
+      </danger-button>
+    </template>
+  </modal-dialog>
+</template>
