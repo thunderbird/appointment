@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import {
-  computed, inject, onMounted, ref, watch,
-} from 'vue';
+import { inject, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
@@ -14,8 +12,9 @@ import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { createSettingsStore } from '@/stores/settings-store';
-import { PhArrowRight, PhX, PhWarningCircle } from '@phosphor-icons/vue';
+import { PhX } from '@phosphor-icons/vue';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import AsideNavButton from '@/components/AsideNavButton.vue';
 
 // Page sections
 import AccountSettings from './components/AccountSettings.vue';
@@ -298,20 +297,14 @@ export default {
     <div class="main-container">
       <!-- sidebar navigation -->
       <aside>
-        <button
+        <aside-nav-button
           v-for="(_, key) in sections"
           :key="key"
+          :label="t('heading.' + key)"
+          :show-warning="key === 'connectedApplications' && externalConnectionsStore.hasUnhealthyConnections"
+          :test-id="'settings-' + key + '-settings-btn'"
           @click="scrollToSection(key)"
-          :data-testid="'settings-' + key + '-settings-btn'"
-        >
-          <ph-warning-circle
-            v-if="key === 'connectedApplications' && externalConnectionsStore.hasUnhealthyConnections"
-            class="warning-icon"
-            weight="fill"
-          />
-          <span class="label">{{ t('heading.' + key) }}</span>
-          <ph-arrow-right class="arrow-icon" size="16" />
-        </button>
+        />
       </aside>
 
       <!-- content -->
@@ -398,93 +391,6 @@ section {
     flex-direction: column;
     gap: 1rem;
     flex-shrink: 0;
-
-    button {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.75rem 1rem;
-      border-radius: 0.5rem;
-      background-color: var(--colour-neutral-base);
-      border: 1px solid transparent;
-      box-shadow: 0.1875rem 0.1875rem 1rem 0 var(--shadow-surface-default);
-      height: 3rem;
-      font-size: 0.875rem;
-      line-height: 1.23;
-      font-weight: 400;
-      color: var(--colour-ti-secondary);
-      text-align: start;
-
-      &:hover {
-        background-color: var(--colour-primary-soft);
-        border-color: var(--colour-neutral-border);
-        box-shadow:
-          0.0625rem 0.0625rem 0 0 var(--shadow-surface-interactive-outer),
-          inset 0.125rem 0.125rem 0.25rem 0 var(--shadow-surface-interactive-inset);
-        color: var(--colour-ti-base);
-
-        .arrow-icon {
-          color: var(--colour-ti-base);
-        }
-
-        .warning-icon {
-          color: var(--colour-danger-default);
-        }
-      }
-
-      &:focus-visible {
-        background-color: var(--colour-primary-soft);
-        border-color: var(--colour-neutral-border);
-        box-shadow:
-          0.0625rem 0.0625rem 0 0 var(--shadow-surface-interactive-outer),
-          inset 0.125rem 0.125rem 0.25rem 0 var(--shadow-surface-interactive-inset);
-        color: var(--colour-ti-base);
-        outline: 0.125rem solid var(--colour-primary-default);
-        outline-offset: 0.125rem;
-
-        .arrow-icon {
-          color: var(--colour-ti-base);
-        }
-
-        .warning-icon {
-          color: var(--colour-danger-default);
-        }
-      }
-
-      &:active {
-        background-color: color-mix(in srgb, var(--colour-primary-default) 20%, transparent);
-        border-color: var(--colour-neutral-border);
-        box-shadow:
-          0.0625rem 0.0625rem 0 0 var(--shadow-surface-interactive-outer),
-          inset 0.125rem 0.125rem 0.25rem 0 var(--shadow-surface-interactive-inset);
-        color: var(--colour-ti-base);
-
-        .arrow-icon {
-          color: var(--colour-ti-base);
-        }
-
-        .warning-icon {
-          color: var(--colour-danger-default);
-        }
-      }
-
-      .label {
-        flex: 1 1 0;
-        min-width: 0;
-      }
-
-      .warning-icon {
-        color: var(--colour-danger-default);
-        width: 1.5rem;
-        height: 1.5rem;
-        flex-shrink: 0;
-      }
-
-      .arrow-icon {
-        flex-shrink: 0;
-        color: inherit;
-      }
-    }
   }
 }
 

@@ -1,26 +1,27 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { PhLinkSimple, PhClockUser, PhPencil, PhArrowRight } from '@phosphor-icons/vue';
+import { PhLinkSimple, PhClockUser, PhPencil } from '@phosphor-icons/vue';
 import { useUserStore } from '@/stores/user-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
+import AsideNavButton from '@/components/AsideNavButton.vue';
 
 const { t } = useI18n();
 const user = useUserStore();
 const appointmentStore = useAppointmentStore();
 
-const copyBookingUrlLabel = ref(t('label.copyBookingUrl'));
+const copyBookingLinkLabel = ref(t('label.copyBookingLink'));
 const hasCopied = ref(false);
 const pendingAppointmentsCount = ref<number>();
 
 const copyLink = async () => {
   await navigator.clipboard.writeText(user.myLink);
 
-  copyBookingUrlLabel.value = t('info.copiedToClipboard');
+  copyBookingLinkLabel.value = t('info.copiedToClipboard');
   hasCopied.value = true
 
   setTimeout(() => {
-    copyBookingUrlLabel.value = t('label.copyBookingUrl');
+    copyBookingLinkLabel.value = t('label.copyBookingLink');
     hasCopied.value = false
   }, 2000);
 };
@@ -36,16 +37,19 @@ onMounted(async () => {
 
 <template>
   <aside>
-    <router-link v-if="pendingAppointmentsCount" data-testid="link-pending-requests" class="link-button"
+    <aside-nav-button
+      v-if="pendingAppointmentsCount"
+      :label="t('label.pendingRequests', pendingAppointmentsCount)"
       :to="{
         name: 'bookings',
-        query: {
-          unconfirmed: 'true'
-        }
-      }">
-      <span class="count-badge">{{ pendingAppointmentsCount }}</span>
-      {{ t('label.pendingRequests', pendingAppointmentsCount) }}
-    </router-link>
+        query: { unconfirmed: 'true' }
+      }"
+      test-id="link-pending-requests"
+    >
+      <template #icon>
+        <span class="count-badge">{{ pendingAppointmentsCount }}</span>
+      </template>
+    </aside-nav-button>
 
     <h2
       :class="{ 'has-pending-requests': pendingAppointmentsCount }"
@@ -54,20 +58,38 @@ onMounted(async () => {
     </h2>
 
     <div class="quick-actions-container">
-      <button class="link-button with-icon" :class="{ 'copied': hasCopied }" @click="copyLink" data-testid="button-copy-booking-url">
-        <ph-link-simple class="icon-left" :size="24" />
-        {{ copyBookingUrlLabel }}
-      </button>
-      <router-link class="link-button with-icon with-right-icon" to="availability" data-testid="link-change-availability">
-        <ph-clock-user class="icon-left" :size="24" />
-        {{ t('label.changeMyAvailability') }}
-        <ph-arrow-right class="icon-right" :size="16" />
-      </router-link>
-      <router-link class="link-button with-icon with-right-icon" to="bookings" data-testid="link-modify-booking-page">
-        <ph-pencil class="icon-left" :size="24" />
-        {{ t('label.modifyMyBookings') }}
-        <ph-arrow-right class="icon-right" :size="16" />
-      </router-link>
+      <aside-nav-button
+        :label="copyBookingLinkLabel"
+        :show-arrow="false"
+        test-id="button-copy-booking-url"
+        @click="copyLink"
+      >
+        <template #icon>
+          <ph-link-simple class="icon-left" :size="24" />
+        </template>
+      </aside-nav-button>
+
+      <aside-nav-button
+        :label="t('label.changeMyAvailability')"
+        to="availability"
+        test-id="link-change-availability"
+        :show-arrow="true"
+      >
+        <template #icon>
+          <ph-clock-user class="icon-left" :size="24" />
+        </template>
+      </aside-nav-button>
+
+      <aside-nav-button
+        :label="t('label.modifyMyBookings')"
+        to="bookings"
+        test-id="link-modify-booking-page"
+        :show-arrow="true"
+      >
+        <template #icon>
+          <ph-pencil class="icon-left" :size="24" />
+        </template>
+      </aside-nav-button>
     </div>
   </aside>
 </template>
@@ -103,71 +125,14 @@ h2 {
   height: 1.5rem;
   font-size: 0.75rem;
   font-weight: 600;
-  margin-right: 0.5rem;
-}
-
-.link-button {
-  display: block;
-  position: relative;
-  cursor: pointer;
-  padding: 0.75rem 1rem;
-  background-color: var(--colour-neutral-base);
-  border-radius: 0.5rem;
-  box-shadow: 3px 3px 16px 0 rgba(0, 0, 0, 0.04);
-  font-size: 0.875rem;
-  text-align: left;
-  text-transform: capitalize;
-  color: var(--colour-ti-secondary);
-
-  .icon-left {
-    color: var(--colour-ti-highlight);
-  }
-
-  &.with-icon {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-
-  &.with-right-icon {
-    gap: 0;
-  }
-
-  &.copied {
-    background-color: var(--colour-neutral-lower);
-
-    &:hover {
-      text-decoration-line: none;
-      background-color: var(--colour-neutral-raised);
-    }
-  }
-
-  &:hover {
-    text-decoration-line: underline;
-    background-color: var(--colour-primary-soft);
-  }
-}
-
-.with-right-icon .icon-left {
-  margin-right: 0.5rem;
-}
-
-.with-right-icon .icon-right {
-  margin-left: auto;
-}
-
-.dark .link-button {
-  background-color: var(--colour-neutral-raised);
-
-  &:hover {
-    text-decoration-line: underline;
-    background-color: var(--colour-neutral-base);
-  }
+  flex-shrink: 0;
 }
 
 @media (--md) {
   aside {
     min-width: 268px;
+    padding-inline-start: 0.25rem;
+    padding-block-start: 0.25rem;
   }
 }
 </style>
