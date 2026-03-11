@@ -42,7 +42,7 @@ defineExpose({ show, hide })
 
     <div class="caldav-connect-modal-container">
       <notice-bar v-if="errorMessage" class="notice-bar" :type="NoticeBarTypes.Critical">
-        {{ errorMessage.title }}
+        {{ errorMessage.details || errorMessage.title }}
         <template #cta>
           <icon-button @click="errorMessage = null" :title="t('label.close')">
             <ph-x />

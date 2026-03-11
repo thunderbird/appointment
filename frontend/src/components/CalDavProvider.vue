@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n';
 import {
   computed, inject, ref,
+  useTemplateRef,
 } from 'vue';
 import { callKey } from '@/keys';
 import {
@@ -40,7 +41,7 @@ withDefaults(defineProps<Props>(), {
   showSwitch: false,
 });
 const emits = defineEmits(['next', 'error', 'previous', 'switch']);
-const formRef = ref();
+const formRef = useTemplateRef<HTMLFormElement>('formRef');
 
 /**
  * Submit the credentials, this will perform a dns check to see if there's any
@@ -81,13 +82,32 @@ const onSubmit = async () => {
 <template>
   <div class="content">
     <form class="form" ref="formRef" @submit.prevent @keyup.enter="() => onSubmit()">
-      <text-input :disabled="isLoading" name="user" v-model="principal.user" :help="t('calDAVForm.help.user')" :required="true">
+      <text-input
+        name="user"
+        v-model="principal.user"
+        :help="t('calDAVForm.help.user')"
+        :disabled="isLoading"
+        :required="true"
+      >
         {{ t('label.username') }}
       </text-input>
-      <text-input :disabled="isLoading" :placeholder="locationPreview" name="url" :help="t('calDAVForm.help.location')" v-model="principal.url">
+      <text-input
+        name="url"
+        v-model="principal.url"
+        :help="t('calDAVForm.help.location')"
+        :disabled="isLoading"
+        :placeholder="locationPreview"
+        :required="true"
+      >
         {{ t('label.location') }}
       </text-input>
-      <text-input :disabled="isLoading" type="password" name="password" :help="t('calDAVForm.help.password')" v-model="principal.password">
+      <text-input
+        name="password"
+        type="password"
+        v-model="principal.password"
+        :help="t('calDAVForm.help.password')"
+        :disabled="isLoading"
+      >
         {{ t('label.password') }}
       </text-input>
     </form>

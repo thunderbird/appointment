@@ -330,9 +330,6 @@ export const hexToRgba = (hexcolor: string, alpha: number = 1): string => {
 /**
  * Handles Pydantic errors, returns a form-level error message
  * or null if the error has to do with individual fields
- * @param i18n - i18n instance
- * @param formRef
- * @param errObj
  */
 export const handleFormError = (i18n: i18nType, formRef: Ref, errObj: PydanticException): Alert => {
   const unknownError = i18n('error.somethingWentWrong');
