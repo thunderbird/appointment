@@ -98,7 +98,7 @@ export class SettingsPage {
     this.addCaldavUsernameInput = this.page.getByLabel('Username');
     this.addCaldavLocationInput = this.page.getByLabel('Location');
     this.addCaldavPasswordInput = this.page.getByLabel('Password');
-    this.addCaldavCloseModalBtn = this.page.getByRole('img', { name: 'Close' });
+    this.addCaldavCloseModalBtn = this.page.locator('button.modal-close');
     this.addGoogleBtn = this.page.getByRole('button', { name: 'Add Google Calendar' });
     this.defaultCalendarBadge = this.page.getByTestId('badge');
     this.calendarDropdownTriggers = this.page.locator('.calendars-container .dropdown');

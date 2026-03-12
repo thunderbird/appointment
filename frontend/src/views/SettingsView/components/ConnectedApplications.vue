@@ -37,7 +37,7 @@ const calendarStore = useCalendarStore();
 const settingsStore = useSettingsStore();
 const availabilityStore = useAvailabilityStore();
 
-const { currentState } = storeToRefs(settingsStore);
+const { currentState, initialState } = storeToRefs(settingsStore);
 const { calendars } = storeToRefs(calendarStore);
 
 const calendarConnectedMap = new Map<number, ReturnType<typeof computed<boolean>>>();
@@ -49,7 +49,7 @@ const zoomAccount = computed(() => externalConnectionStore.zoom[0]);
 // Should be treated as immutable since it represents the current backend state.
 const groupedCalendars = computed(() => {
   const defaultCalendar = calendars.value?.find(
-    (calendar) => calendar.id === currentState.value.defaultCalendarId
+    (calendar) => calendar.id === initialState.value.defaultCalendarId
   );
   const defaultExternalConnectionId = defaultCalendar?.external_connection_id;
 
@@ -271,6 +271,7 @@ onMounted(async () => {
             <drop-down
               class="dropdown"
               :ref="(el) => connectionDropdownRefs[group.connectionId] = el"
+              v-if="!group.sharesDefaultConnection || group.connectionStatus === ExternalConnectionStatus.error"
             >
               <template #trigger>
                 <ph-dots-three size="24" />
@@ -278,6 +279,7 @@ onMounted(async () => {
               <template #default>
                 <div class="dropdown-inner" @click="connectionDropdownRefs[group.connectionId]?.close()">
                   <button
+                    v-if="group.connectionStatus === ExternalConnectionStatus.error"
                     @click="reconnectExternalConnection(group.provider, true)"
                   >
                     {{ t('label.reconnect') }}
@@ -313,7 +315,7 @@ onMounted(async () => {
                 :name="`calendarConnected-${calendar.id}`"
                 class="calendar-connected-checkbox"
                 v-model="calendarConnected(calendar.id).value"
-                v-bind="calendar.id === currentState.defaultCalendarId ? { disabled: true } : {}"
+                v-bind="calendar.id === initialState.defaultCalendarId ? { disabled: true } : {}"
                 :label="calendar.title"
               />
 
@@ -339,6 +341,7 @@ onMounted(async () => {
               <drop-down
                 class="dropdown"
                 :ref="(el) => calendarDropdownRefs[calendar.id] = el"
+                v-if="calendar.id !== initialState.defaultCalendarId && (calendar.connected || !group.sharesDefaultConnection)"
               >
                 <template #trigger>
                   <ph-dots-three size="24" />
@@ -346,12 +349,13 @@ onMounted(async () => {
                 <template #default>
                   <div class="dropdown-inner" @click="calendarDropdownRefs[calendar.id]?.close()">
                     <button
-                      v-if="calendar.connected && calendar.id !== currentState.defaultCalendarId"
+                      v-if="calendar.connected && calendar.id !== initialState.defaultCalendarId"
                       @click="() => onSetAsDefaultClicked(calendar.id)"
                     >
                       {{ t('text.settings.connectedApplications.setAsDefault') }}
                     </button>
                     <button
+                      v-if="!group.sharesDefaultConnection"
                       @click="() => displayDisconnectModal(group.provider, group.typeId, group.connectionName, true)"
                     >
                       {{ t('label.remove') }}

@@ -76,7 +76,6 @@ test.describe('connected applications settings on desktop browser', {
 
       // Verify dropdown menu options are visible for non-default-connection calendars
       await expect(settingsPage.calendarDropdownSetAsDefault).toBeVisible();
-      await expect(settingsPage.calendarDropdownDisconnect).toBeVisible();
 
       // Close the dropdown by pressing Escape
       await page.keyboard.press('Escape');
