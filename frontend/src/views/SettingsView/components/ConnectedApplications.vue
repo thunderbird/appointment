@@ -271,7 +271,7 @@ onMounted(async () => {
             <drop-down
               class="dropdown"
               :ref="(el) => connectionDropdownRefs[group.connectionId] = el"
-              v-if="!group.sharesDefaultConnection"
+              v-if="!group.sharesDefaultConnection || group.connectionStatus === ExternalConnectionStatus.error"
             >
               <template #trigger>
                 <ph-dots-three size="24" />
@@ -279,6 +279,7 @@ onMounted(async () => {
               <template #default>
                 <div class="dropdown-inner" @click="connectionDropdownRefs[group.connectionId]?.close()">
                   <button
+                    v-if="group.connectionStatus === ExternalConnectionStatus.error"
                     @click="reconnectExternalConnection(group.provider, true)"
                   >
                     {{ t('label.reconnect') }}
