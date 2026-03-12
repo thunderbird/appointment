@@ -543,8 +543,9 @@ class TestSchedule:
 
         # Check availability at the start of the schedule
         with freeze_time(start_date):
-            # We create the schedule inside the freeze_time block to ensure the time_updated
-            # is set to a known date (PST) so start_time_local calculation is deterministic.
+            # We create the schedule inside the freeze_time block and set time_updated explicitly,
+            # because the DB server_default=func.now() is not frozen by freezegun. start_time_local
+            # uses time_updated for UTC->local conversion; a date in early March 2024 (PST) yields 09:00.
             make_schedule(
                 calendar_id=generated_calendar.id,
                 active=True,
@@ -555,6 +556,7 @@ class TestSchedule:
                 earliest_booking=1440,
                 farthest_booking=20160,
                 slot_duration=30,
+                time_updated=datetime(2024, 3, 1),
             )
 
             response = with_client.post(
