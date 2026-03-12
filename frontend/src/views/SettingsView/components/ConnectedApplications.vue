@@ -49,7 +49,7 @@ const zoomAccount = computed(() => externalConnectionStore.zoom[0]);
 // Should be treated as immutable since it represents the current backend state.
 const groupedCalendars = computed(() => {
   const defaultCalendar = calendars.value?.find(
-    (calendar) => calendar.id === currentState.value.defaultCalendarId
+    (calendar) => calendar.id === initialState.value.defaultCalendarId
   );
   const defaultExternalConnectionId = defaultCalendar?.external_connection_id;
 
@@ -271,6 +271,7 @@ onMounted(async () => {
             <drop-down
               class="dropdown"
               :ref="(el) => connectionDropdownRefs[group.connectionId] = el"
+              v-if="!group.sharesDefaultConnection"
             >
               <template #trigger>
                 <ph-dots-three size="24" />
@@ -339,7 +340,7 @@ onMounted(async () => {
               <drop-down
                 class="dropdown"
                 :ref="(el) => calendarDropdownRefs[calendar.id] = el"
-                v-if="calendar.id !== initialState.defaultCalendarId"
+                v-if="calendar.id !== initialState.defaultCalendarId && (calendar.connected || !group.sharesDefaultConnection)"
               >
                 <template #trigger>
                   <ph-dots-three size="24" />
@@ -353,6 +354,7 @@ onMounted(async () => {
                       {{ t('text.settings.connectedApplications.setAsDefault') }}
                     </button>
                     <button
+                      v-if="!group.sharesDefaultConnection"
                       @click="() => displayDisconnectModal(group.provider, group.typeId, group.connectionName, true)"
                     >
                       {{ t('label.remove') }}
