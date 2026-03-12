@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import {
-  computed, inject, onMounted, ref, watch,
-} from 'vue';
+import { inject, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
@@ -14,8 +12,9 @@ import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { createSettingsStore } from '@/stores/settings-store';
-import { PhX, PhWarningCircle } from '@phosphor-icons/vue';
+import { PhX } from '@phosphor-icons/vue';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import AsideNavButton from '@/components/AsideNavButton.vue';
 
 // Page sections
 import AccountSettings from './components/AccountSettings.vue';
@@ -33,9 +32,6 @@ const sections = ref(enumToObject(SettingsSections));
 const savingInProgress = ref(false);
 const validationError = ref<Alert>(null);
 const saveSuccess = ref<Alert>(null);
-
-// Note: Use direct variables in computed, otherwise it won't be updated if transformed (like by typing)
-const activeView = computed<number>(() => (route.hash && sections.value[route.hash.slice(1) as string] ? sections.value[route.hash.slice(1) as string] : SettingsSections.AccountSettings));
 
 const userStore = useUserStore();
 const calendarStore = useCalendarStore();
@@ -301,20 +297,14 @@ export default {
     <div class="main-container">
       <!-- sidebar navigation -->
       <aside>
-        <button
-          v-for="(view, key) in sections"
+        <aside-nav-button
+          v-for="(_, key) in sections"
           :key="key"
-          :class="{ 'active': view === activeView }"
+          :label="t('heading.' + key)"
+          :show-warning="key === 'connectedApplications' && externalConnectionsStore.hasUnhealthyConnections"
+          :test-id="'settings-' + key + '-settings-btn'"
           @click="scrollToSection(key)"
-          :data-testid="'settings-' + key + '-settings-btn'"
-        >
-          <ph-warning-circle
-            v-if="key === 'connectedApplications' && externalConnectionsStore.hasUnhealthyConnections"
-            class="warning-icon"
-            weight="fill"
-          />
-          <span>{{ t('heading.' + key) }}</span>
-        </button>
+        />
       </aside>
 
       <!-- content -->
@@ -401,39 +391,6 @@ section {
     flex-direction: column;
     gap: 1rem;
     flex-shrink: 0;
-
-    button {
-      display: flex;
-      padding: 1rem;
-      border-radius: 8px;
-      background-color: var(--colour-neutral-base);
-      border: 1px solid transparent;
-      box-shadow: 3px 3px 16px 0 rgba(0, 0, 0, 0.04);
-      height: 3rem;
-      font-size: 0.875rem;
-      line-height: 17.2px;
-      font-weight: 400;
-
-      &.active {
-        color: var(--colour-neutral-lower);
-        background-color: var(--colour-primary-default);
-
-        .warning-icon {
-          color: var(--colour-neutral-lower);
-        }
-      }
-
-      &:hover {
-        border-color: var(--colour-primary-hover);
-      }
-
-      .warning-icon {
-        color: var(--colour-danger-default);
-        width: 1.5rem;
-        height: 1.5rem;
-        margin-inline-end: 0.5rem;
-      }
-    }
   }
 }
 
@@ -462,12 +419,6 @@ section {
       flex-direction: column;
       gap: 1rem;
       width: 268px;
-
-      button {
-        display: flex;
-        align-items: center;
-        text-align: start;
-      }
     }
 
     .page-content {
