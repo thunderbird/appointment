@@ -44,7 +44,7 @@ watch(
 </script>
 
 <template>
-  <drop-down class="self-center" ref="copyDropdown">
+  <drop-down class="drop-down-wrapper" ref="copyDropdown">
     <template #trigger>
       <link-button size="large" class="action-btn action-copy" :title="t('label.copyAvailability')">
         <ph-copy aria-hidden="true"/>
@@ -75,6 +75,10 @@ watch(
 </template>
 
 <style scoped>
+.drop-down-wrapper {
+  align-self: center;
+}
+
 .selection-container {
   display: flex;
   flex-direction: column;
