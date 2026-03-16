@@ -305,7 +305,6 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
 
     td.loading div {
       display: flex;
-      width: 100%;
       justify-content: center;
     }
   }
