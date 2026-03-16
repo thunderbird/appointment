@@ -1,22 +1,32 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
+import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 </script>
 
 <template>
-  <div class="flex-center h-full flex-col gap-12 p-4">
-    <div class="flex-center flex-col gap-8 px-4">
-      <art-invalid-link class="my-6 h-auto max-w-sm"/>
-      <div class="text-xl font-semibold text-sky-600">
-        {{ t('error.routeNotFound') }}
-      </div>
-      <primary-button class="btn-back" @click="$router.go(-1)" :title="t('label.goBack')">
-        {{ t('label.goBack') }}
-      </primary-button>
-    </div>
+  <div class="wrapper">
+    <art-invalid-link />
+    <h1>
+      {{ t('error.routeNotFound') }}
+    </h1>
+    <primary-button class="btn-back" @click="$router.go(-1)" :title="t('label.goBack')">
+      {{ t('label.goBack') }}
+    </primary-button>
   </div>
-
 </template>
+
+<style scoped>
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 1rem;
+
+  height: 100%;
+}
+</style>

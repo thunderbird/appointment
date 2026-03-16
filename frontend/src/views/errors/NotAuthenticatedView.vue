@@ -3,7 +3,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { LOGIN_REDIRECT_KEY } from '@/definitions';
 import ArtInvalidLink from '@/elements/arts/ArtInvalidLink.vue';
-import PrimaryButton from '@/elements/PrimaryButton.vue';
+import { PrimaryButton } from '@thunderbirdops/services-ui';
 
 const { t } = useI18n();
 const route = useRoute();
@@ -18,16 +18,26 @@ const goToLogin = () => {
 </script>
 
 <template>
-  <div class="flex-center h-full flex-col gap-12 p-4">
-    <div class="flex-center flex-col gap-8 px-4">
-      <art-invalid-link class="my-6 h-auto max-w-sm"/>
-      <div class="text-xl font-semibold text-sky-600">
-        {{ t('error.authenticationRequired') }}
-      </div>
-      <primary-button class="btn-login" @click="goToLogin" :title="t('label.logIn')">
-        {{ t('label.logIn') }}
-      </primary-button>
-    </div>
+  <div class="wrapper">
+    <art-invalid-link />
+    <h1>
+      {{ t('error.authenticationRequired') }}
+    </h1>
+    <primary-button class="btn-login" @click="goToLogin" :title="t('label.logIn')">
+      {{ t('label.logIn') }}
+    </primary-button>
   </div>
-
 </template>
+
+<style scoped>
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 2rem;
+  padding: 1rem;
+
+  height: 100%;
+}
+</style>
