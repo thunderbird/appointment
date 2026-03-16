@@ -186,7 +186,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="flex w-full justify-center">
+  <div class="panel-alerts">
     <alert-box
       v-if="pageNotification"
       :alert="pageNotification"
@@ -212,7 +212,7 @@ onMounted(async () => {
       <template v-slot:footer>
         <text-input
           name="search"
-          class="w-60"
+          class="input-search"
           type="text"
           v-model="emailFilter"
           :disabled="loading"
@@ -222,9 +222,6 @@ onMounted(async () => {
 
     </data-table>
   </div>
-  <div v-else class="flex size-full min-h-[75vh] items-center justify-center">
-    <loading-spinner/>
-  </div>
 
   <!-- Refresh link confirmation modal -->
   <delete-subscriber-modal
@@ -233,3 +230,15 @@ onMounted(async () => {
     @deleted="refresh"
   />
 </template>
+
+<style scoped>
+.panel-alerts {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.input-search {
+  width: 15rem;
+}
+</style>
