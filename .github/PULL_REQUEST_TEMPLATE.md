@@ -11,6 +11,14 @@
 
 <!-- What benefits will be realized by the code change? -->
 
-## Applicable Issues
+## Screenshots
+
+<!-- Share visuals of the change if there are any -->
+
+## Known issues / things to improve
+
+<!-- What things are intentionally left as is? -->
+
+## Related tickets
 
 <!-- Enter any applicable issues here -->
