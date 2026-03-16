@@ -14,7 +14,7 @@ import router from '@/router';
 import useDayJS from '@/composables/dayjs';
 import i18ninstance from '@/composables/i18n';
 
-// init basic css with tailwind imports and services-ui styles
+// init basic css with services-ui styles
 import '@/assets/styles/main.css';
 import "@thunderbirdops/services-ui/style.css";
 

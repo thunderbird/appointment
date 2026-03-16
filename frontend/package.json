@@ -16,7 +16,6 @@
     "@rushstack/eslint-patch": "^1.11.0",
     "@sentry/vite-plugin": "^4.0.2",
     "@sentry/vue": "^10.38.0",
-    "@tailwindcss/forms": "^0.5.3",
     "@thunderbirdops/services-ui": "^1.5.0",
     "@types/ua-parser-js": "^0.7.39",
     "@vitejs/plugin-vue": "^6.0.1",
@@ -27,7 +26,6 @@
     "oidc-client-ts": "^3.3.0",
     "pinia": "^3.0.1",
     "posthog-js": "^1.174.3",
-    "tailwindcss": "^3.4.3",
     "ua-parser-js": "^2.0.3",
     "vite": "^7.1.12",
     "vue": "^3.5.12",
@@ -46,7 +44,6 @@
     "eslint": "^9.23.0",
     "eslint-import-resolver-typescript": "^4.3.1",
     "eslint-plugin-import": "^2.25.2",
-    "eslint-plugin-tailwindcss": "^3.14.3",
     "eslint-plugin-vue": "^10.0.0",
     "globals": "^17.3.0",
     "jsdom": "^28.0.0",
@@ -62,7 +59,6 @@
   },
   "postcss": {
     "plugins": {
-      "tailwindcss": {},
       "autoprefixer": {},
       "postcss-mixins": {},
       "postcss-nesting": {},

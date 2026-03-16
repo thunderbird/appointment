@@ -286,6 +286,49 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
 
   .data-table {
     overflow-x: auto;
+    border-radius: 0.75rem;
+    width: 100%;
+    border: 1px solid var(--colour-neutral-border);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    background-color: var(--colour-neutral-lower);
+    margin: 0 0 1rem auto;
+
+    table {
+      width: 100%;
+      table-layout: auto;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+
+    thead, tfoot {
+      color: var(--colour-ti-muted);
+    }
+
+    th {
+      padding: 0 1rem;
+      font-weight: 600;
+      text-align: left;
+    }
+    thead th {
+      padding-bottom: 1rem;
+      padding-top: .5rem;
+    }
+    tfoot th {
+      padding-bottom: .5rem;
+      padding-top: 1rem;
+    }
+    td {
+      border-top-width: 1px;
+      border-bottom-width: 1px;
+      border-style: solid;
+      border-color: var(--colour-neutral-border);
+      padding: 1rem;
+    }
+    tbody td {
+      background-color: var(--colour-neutral-base);
+    }
 
     .multi-select-header {
       input {
