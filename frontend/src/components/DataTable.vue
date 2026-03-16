@@ -142,19 +142,19 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center gap-4">
-    <div class="flex w-full flex-col items-center justify-between gap-4 md:flex-row md:gap-0">
+  <div class="table-wrapper">
+    <div class="table-filter">
       <div>
-        <span class="font-bold">{{ totalDataLength }}</span> {{ dataName }}
+        <strong>{{ totalDataLength }}</strong> {{ dataName }}
       </div>
       <div v-for="filter in filters" :key="filter.name">
-        <label class="flex items-center gap-4 whitespace-nowrap">
-        {{ filter.name }} {{ t('label.filter') }}:
-        <select class="rounded-md" @change="(evt) => onColumnFilter(evt, filter, filters)">
-          <option :value="option.key" v-for="option in filter.options" :key="option.key">
-            {{ option.name }}
-          </option>
-        </select>
+        <label class="filter-item">
+          {{ filter.name }} {{ t('label.filter') }}:
+          <select @change="(evt) => onColumnFilter(evt, filter, filters)">
+            <option :value="option.key" v-for="option in filter.options" :key="option.key">
+              {{ option.name }}
+            </option>
+          </select>
         </label>
       </div>
       <list-pagination
@@ -164,14 +164,19 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
         @update="updatePage"
       />
     </div>
-    <div class="data-table overflow-x-auto">
+    <div class="data-table">
       <table>
         <thead>
           <tr>
-            <th v-if="allowMultiSelect">
-              <input :checked="paginatedDataList.every((row) => selectedRows.includes(row))" @change="(evt) => onPageSelect(evt, paginatedDataList)" id="select-page-input" class="mr-2" type="checkbox"/>
-              <label class="cursor-pointer select-none" for="select-page-input">
-              Select Page
+            <th v-if="allowMultiSelect" class="multi-select-header">
+              <input
+                :checked="paginatedDataList.every((row) => selectedRows.includes(row))"
+                @change="(evt) => onPageSelect(evt, paginatedDataList)"
+                id="select-page-input"
+                type="checkbox"
+              />
+              <label for="select-page-input">
+                Select Page
               </label>
             </th>
             <th v-for="column in columns" :key="column.key">{{ column.name }}</th>
@@ -186,7 +191,7 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
               <span v-if="fieldData.type === TableDataType.Text">
                 {{ fieldData.value }}
               </span>
-              <span v-else-if="fieldData.type === TableDataType.Code" class="flex items-center gap-4">
+              <span v-else-if="fieldData.type === TableDataType.Code">
                 <code>{{ fieldData.value }}</code>
               </span>
               <span v-else-if="fieldData.type === TableDataType.Bool">
@@ -226,8 +231,8 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
             </td>
           </tr>
           <tr v-if="loading">
-            <td :colspan="columnSpan">
-              <div class="flex w-full justify-center">
+            <td :colspan="columnSpan" class="loading">
+              <div>
                 <loading-spinner/>
               </div>
             </td>
@@ -247,3 +252,71 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
     </div>
   </div>
 </template>
+
+<style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
+.table-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+
+  .table-filter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    width: 100%;
+
+    .filter-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      white-space: nowrap;
+
+      select {
+        border-radius: 0.375rem
+      }
+    }
+  }
+
+  .data-table {
+    overflow-x: auto;
+
+    .multi-select-header {
+      input {
+        margin-right: 0.5rem;
+      }
+      label {
+        cursor: pointer;
+        user-select: none;
+      }
+    }
+
+    td.column-code span {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    td.loading div {
+      display: flex;
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+@media (--md) {
+  .table-wrapper {
+    .table-filter {
+      flex-direction: row;
+      gap: 0;
+    }
+  }
+}
+</style>
