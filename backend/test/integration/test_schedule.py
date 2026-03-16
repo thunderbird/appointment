@@ -11,7 +11,7 @@ from appointment.controller.auth import signed_url_by_subscriber
 from appointment.controller.calendar import CalDavConnector
 from appointment.database import schemas, models, repo
 from appointment.exceptions import validation
-from defines import DAY1, DAY5, DAY14, auth_headers, DAY2
+from defines import DAY1, DAY5, DAY14, DAY2, TEST_USER_ID, auth_headers
 
 
 class TestSchedule:
@@ -1469,14 +1469,14 @@ class TestDecideScheduleAvailabilitySlot:
         self,
         with_db,
         with_client,
-        make_pro_subscriber,
         make_caldav_calendar,
         make_schedule,
         make_appointment,
         make_appointment_slot,
         make_attendee,
     ):
-        subscriber = make_pro_subscriber()
+        with with_db() as db:
+            subscriber = repo.subscriber.get(db, TEST_USER_ID)
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
         schedule = make_schedule(
             calendar_id=generated_calendar.id,
@@ -1545,14 +1545,14 @@ class TestDecideScheduleAvailabilitySlot:
         self,
         with_db,
         with_client,
-        make_pro_subscriber,
         make_caldav_calendar,
         make_schedule,
         make_appointment,
         make_appointment_slot,
         make_attendee,
     ):
-        subscriber = make_pro_subscriber()
+        with with_db() as db:
+            subscriber = repo.subscriber.get(db, TEST_USER_ID)
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
         schedule = make_schedule(
             calendar_id=generated_calendar.id,
