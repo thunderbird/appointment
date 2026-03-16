@@ -38,7 +38,7 @@ onMounted(async () => {
 /* Needed for v-html */
 :deep {
   h1, h2, h3, h4 {
-    color: var(--colour-service-primary);
+    color: var(--colour-ti-highlight);
   }
   h1 {
     padding-top: 2rem;
