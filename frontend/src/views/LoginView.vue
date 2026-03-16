@@ -3,18 +3,13 @@ import { inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { createUserStore } from '@/stores/user-store';
-import {
-  dayjsKey, callKey
-} from '@/keys';
-import {
-  BooleanResponse, AuthUrlResponse, AuthUrl, Error, PydanticException, Alert,
-} from '@/models';
-import GenericModal from '@/components/GenericModal.vue';
-import WordMark from '@/elements/WordMark.vue';
-import { PrimaryButton, TextInput } from '@thunderbirdops/services-ui';
+import { dayjsKey, callKey } from '@/keys';
+import { BooleanResponse, AuthUrlResponse, AuthUrl, Error, PydanticException, Alert } from '@/models';
+import { PrimaryButton, TextInput, NoticeBar, NoticeBarTypes, IconButton } from '@thunderbirdops/services-ui';
 import { handleFormError } from '@/utils';
 import { userManager } from "@/composables/oidcUserManager";
 import { isFxaAuth, isOidcAuth, isPasswordAuth } from "@/composables/authSchemes";
+import { PhX } from '@phosphor-icons/vue';
 
 // component constants
 const { t } = useI18n();
@@ -136,88 +131,72 @@ const onEnter = () => {
 </script>
 
 <template>
-  <!-- If the user is coming from the TB Pro Appointment landing page,
-      and the auth scheme is OIDC we don't need to show anything here since we are redirecting. -->
-  <template v-if="isOidcAuth">
-    <div class="full-height-placeholder" />
-  </template>
+  <!--
+    If the user is coming from the TB Pro Appointment landing page, and the auth scheme is OIDC
+    we don't need to show anything here since we are redirecting.
+  -->
+  <div v-if="!isOidcAuth" class="login-wrapper">
+    <notice-bar v-if="loginError" class="notice-bar" :type="NoticeBarTypes.Critical">
+      {{ loginError.title }}
+      <template #cta>
+        <icon-button @click="loginError = null" :title="t('label.close')">
+          <ph-x />
+        </icon-button>
+      </template>
+    </notice-bar>
 
-  <template v-else>
-    <div class="full-height-placeholder" />
-    <generic-modal :error-message="loginError" @close="() => router.push({name: 'home'})" :closable="false">
-      <template v-slot:header>
-        <word-mark/>
-      </template>
-      <div class="form-body">
-        <form
-          v-if="loginStep !== LoginSteps.SignUpConfirm"
-          class="form"
-          ref="formRef"
-          autocomplete="off"
-          @submit.prevent
-          @keyup.enter="() => onEnter()"
-        >
-          <text-input
-            name="email"
-            v-model="email"
-            :required="true"
-            data-testid="login-email-input"
-          >{{ t('login.form.email') }}
-          </text-input>
-          <text-input
-            v-if="isPasswordAuth"
-            name="password"
-            v-model="password"
-            :required="true"
-            type="password"
-            data-testid="login-password-input"
-          >{{ t('label.password') }}
-          </text-input>
-        </form>
-      </div>
-      <template v-slot:actions>
-        <primary-button
-          class="btn-continue"
-          :title="t('label.login')"
-          :disabled="isLoading"
-          @click="onEnter()"
-          data-testid="login-continue-btn"
-        >
-          {{ t('label.logIn') }}
-        </primary-button>
-      </template>
-      <template v-slot:footer>
-        <router-link :to="{name: 'home'}">{{ t('app.tagline') }}</router-link>
-      </template>
-    </generic-modal>
-  </template>
+    <form
+      v-if="loginStep !== LoginSteps.SignUpConfirm"
+      class="form"
+      ref="formRef"
+      autocomplete="off"
+      @submit.prevent
+      @keyup.enter="() => onEnter()"
+    >
+      <text-input
+        name="email"
+        v-model="email"
+        :required="true"
+        data-testid="login-email-input"
+      >
+        {{ t('login.form.email') }}
+      </text-input>
+
+      <text-input
+        v-if="isPasswordAuth"
+        name="password"
+        v-model="password"
+        :required="true"
+        type="password"
+        data-testid="login-password-input"
+      >
+        {{ t('label.password') }}
+      </text-input>
+      
+      <primary-button
+        class="btn-continue"
+        :title="t('label.login')"
+        :disabled="isLoading"
+        @click="onEnter()"
+        data-testid="login-continue-btn"
+      >
+        {{ t('label.logIn') }}
+      </primary-button>
+    </form>
+
+  </div>
 </template>
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
-.full-height-placeholder {
-  /* 68px is the height of the navbar, 365px is the height of the modal */
-  height: calc(100dvh - 68px - 365px);
+.login-wrapper {
+  max-width: 24rem;
+  margin: 0 auto;
+  padding: 2rem 1rem;
 }
 
-.intro-text {
-  display: flex;
-  flex-direction: column;
-  text-align: center;
-  gap: 0.983125rem;
-  margin-bottom: 1.5625rem;
-}
-
-/* Tweak the generic-modal's modal-body style */
-:deep(.modal-body) {
-  margin-top: 1rem;
-}
-
-.form-body {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  width: 100%;
+.notice-bar {
+  margin-bottom: 1rem;
 }
 
 .form {
@@ -227,13 +206,7 @@ const onEnter = () => {
 }
 
 @media (--md) {
-  .form-body {
-    max-width: 23.75rem;
-  }
-
-  .btn-continue, .btn-close {
-    /* Right align */
-    margin-right: 2rem;
+  .btn-continue {
     margin-left: auto;
   }
 }
