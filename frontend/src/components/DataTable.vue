@@ -10,7 +10,6 @@ import {
 } from '@/models';
 import ListPagination from '@/elements/ListPagination.vue';
 import { PrimaryButton, DangerButton } from '@thunderbirdops/services-ui';
-import TextButton from '@/elements/TextButton.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 
 // component properties
@@ -189,7 +188,6 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
               </span>
               <span v-else-if="fieldData.type === TableDataType.Code" class="flex items-center gap-4">
                 <code>{{ fieldData.value }}</code>
-                <text-button :uid="fieldKey as string" class="btn-copy" :copy="String(fieldData.value)" :title="t('label.copy')" />
               </span>
               <span v-else-if="fieldData.type === TableDataType.Bool">
                 <span v-if="fieldData.value">{{ t('label.yes') }}</span>
