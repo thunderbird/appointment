@@ -1737,3 +1737,20 @@ class TestDecideScheduleAvailabilitySlot:
         with with_db() as db:
             slot = db.get(models.Slot, slot_id)
             assert slot.booking_status == models.BookingStatus.requested
+
+    def test_fails_when_unauthenticated(self, with_client):
+        """Unauthenticated requests are rejected with 401 before any body validation."""
+        availability = schemas.AvailabilitySlotConfirmation(
+            slot_id=1,
+            slot_token='token',
+            owner_url='https://example.com/owner/',
+            confirmed=True,
+        ).model_dump()
+
+        response = with_client.put(
+            '/schedule/public/availability/booking',
+            json=availability,
+        )
+
+        assert response.status_code == 401, response.text
+        assert response.json()['detail']['id'] == 'INVALID_TOKEN'

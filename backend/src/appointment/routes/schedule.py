@@ -516,7 +516,7 @@ def decide_on_schedule_availability_slot(
     """endpoint to react to owners decision to a request of a time slot of his public link"""
     subscriber_from_url = repo.subscriber.verify_link(db, data.owner_url)
 
-    if not subscriber or not subscriber_from_url or subscriber_from_url.id != subscriber.id:
+    if not subscriber_from_url or subscriber_from_url.id != subscriber.id:
         raise validation.InvalidLinkException()
 
     # Raise a schedule not found exception if the schedule owner does not have a timezone set.
