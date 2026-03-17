@@ -205,7 +205,7 @@ def server():
         CORSMiddleware,
         # Work around for now :)
         allow_origins=[
-            os.getenv('FRONTEND_URL', 'http://localhost:8080'),
+            os.getenv('FRONTEND_URL', 'http://localhost:8090'),
             'https://stage.appointment.day',  # Temp for now!
             'https://accounts.google.com',
             'https://www.googleapis.com/auth/calendar',

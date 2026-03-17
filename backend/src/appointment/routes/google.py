@@ -132,18 +132,18 @@ def google_callback(
 
     # Redirect non-setup subscribers back to the setup page
     if not is_setup:
-        return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/setup')
+        return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8090")}/setup')
 
-    return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/settings/calendar')
+    return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8090")}/settings/calendar')
 
 
 def google_callback_error(is_setup: bool, error: str):
     """Call if you encounter an unrecoverable error with the Google callback function"""
     # Redirect non-setup subscribers back to the setup page
     if not is_setup:
-        return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/setup')
+        return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8090")}/setup')
 
-    return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8080")}/settings/calendar?error={error}')
+    return RedirectResponse(f'{os.getenv("FRONTEND_URL", "http://localhost:8090")}/settings/calendar?error={error}')
 
 
 @router.post('/disconnect')

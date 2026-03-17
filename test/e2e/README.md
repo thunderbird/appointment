@@ -35,7 +35,7 @@ The tests expect the following Appointment application settings:
 
 ## Running the E2E tests against your local dev environment
 
-First ensure that you have a local Appointment account created and you can sign in to Appointment at <http://localhost:8080/>.
+First ensure that you have a local Appointment account created and you can sign in to Appointment at <http://localhost:8090/>.
 
 Then copy over the provided `.env.dev.example` to a local `.env`:
 

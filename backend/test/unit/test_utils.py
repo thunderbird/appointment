@@ -102,7 +102,7 @@ class TestIsAValidBookingTime:
                 'slot': {'start': '2024-11-17T22:00:00.000Z', 'duration': 30},
                 'attendee': {'name': 'melissa', 'email': 'melissa@example.org', 'timezone': 'Australia/Sydney'},
             },
-            'url': 'http://localhost:8080/user/username/example/',
+            'url': 'http://localhost:8090/user/username/example/',
         }
 
         s_a = schemas.AvailabilitySlotAttendee(**request_data['s_a'])
@@ -131,7 +131,7 @@ class TestIsAValidBookingTime:
                 'slot': {'start': '2025-03-11T16:00:00.000Z', 'duration': 30},
                 'attendee': {'name': 'melissa', 'email': 'melissa@example.org', 'timezone': 'America/Vancouver'},
             },
-            'url': 'http://localhost:8080/user/username/example/',
+            'url': 'http://localhost:8090/user/username/example/',
         }
 
         s_a = schemas.AvailabilitySlotAttendee(**request_data['s_a'])
