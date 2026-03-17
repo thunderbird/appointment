@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import AlertBox from '@/elements/AlertBox.vue';
 import DataTable from '@/components/DataTable.vue';
-import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import DeleteSubscriberModal from './components/DeleteSubscriberModal.vue';
 import { TextInput } from '@thunderbirdops/services-ui';
 import { dayjsKey, callKey } from '@/keys';
