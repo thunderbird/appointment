@@ -230,7 +230,6 @@ class InvitationMail(BaseBookingMail):
     def __init__(self, *args, **kwargs):
         """Init Mailer with invitation/booking-accepted specific defaults
         To: Bookee
-        Reply-To: Event owner
         """
         lang = kwargs.get('lang')
         default_kwargs = {
@@ -238,7 +237,6 @@ class InvitationMail(BaseBookingMail):
             'plain': l10n('invite-mail-plain', lang=lang),
         }
         super().__init__(*args, **default_kwargs, **kwargs)
-        self.reply_to = self.email
 
     def html(self):
         return get_template('invite.jinja2').render(
@@ -458,14 +456,12 @@ class NewBookingMail(BaseBookingMail):
     def __init__(self, name, email, date, duration, schedule_name, *args, **kwargs):
         """Init Mailer with new-booking specific defaults
         To: Event owner
-        Reply-To: Bookee
         """
         self.schedule_name = schedule_name
         default_kwargs = {'subject': l10n('new-booking-subject', {'name': name}, lang=kwargs.get('lang'))}
         super(NewBookingMail, self).__init__(
             name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs
         )
-        self.reply_to = email
 
     def text(self):
         return l10n(

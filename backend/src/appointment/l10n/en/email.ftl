@@ -14,7 +14,6 @@
 mail-brand-contact-form = contact form
 mail-brand-support-hint = Got questions? We're here to help! Simply reply to this email for support.
 mail-brand-reply-hint = Got questions? We're here to help! Reach out to us via our { $contact_form_link }.
-mail-brand-reply-hint-attendee-info = Need to get in touch with { $name }? Simply reply to this email.
 
 mail-brand-footer = You are receiving this email because you signed up on our website for the Thunderbird Appointment Beta.
 

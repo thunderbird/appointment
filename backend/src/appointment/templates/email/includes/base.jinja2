@@ -50,10 +50,6 @@
 </div>
 {% endif %}
 <div style="text-align: center; margin-left: auto; margin-right: auto; margin-bottom: 24px; padding: 12px; max-width: 310px;">
-{% if show_contact_form_reply_hint %}
-  {{ l10n('mail-brand-reply-hint-attendee-info', { 'name': name }, lang if lang else None)|safe }}
-  <br/><br/>
-{% endif %}
 {# Negative because it's on every email except for one. #}
 {% if not hide_contact_form_url_hint %}
 {% set link = '<a href="%(url)s">%(label)s</a>'|format(url=homepage_url + '/contact', label=l10n('mail-brand-contact-form', lang=lang if lang else None)) %}
