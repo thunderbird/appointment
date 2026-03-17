@@ -13,7 +13,7 @@ from sqlalchemy.orm import Session
 from appointment import utils
 from appointment.controller.calendar import CalDavConnector, Tools
 from appointment.database import models, schemas, repo
-from appointment.dependencies.auth import get_subscriber, oauth2_scheme
+from appointment.dependencies.auth import get_subscriber, get_bearer_token
 from appointment.dependencies.database import get_db, get_redis
 from appointment.exceptions.calendar import TestConnectionFailed, RemoteCalendarAuthenticationError
 from appointment.exceptions.misc import UnexpectedBehaviourWarning
@@ -156,7 +156,7 @@ def oidc_autodiscover_auth(
     db: Session = Depends(get_db),
     subscriber: models.Subscriber = Depends(get_subscriber),
     redis_client: Redis = Depends(get_redis),
-    token: str = Depends(oauth2_scheme),
+    token: str = Depends(get_bearer_token),
 ):
     """Connects a principal caldav server through oidc token auth"""
 
@@ -209,9 +209,7 @@ def oidc_autodiscover_auth(
     except TestConnectionFailed as ex:
         raise RemoteCalendarConnectionError(reason=ex.reason)
 
-    external_connection = _upsert_external_connection(
-        db, subscriber.id, subscriber.email, connection_url, app_password
-    )
+    external_connection = _upsert_external_connection(db, subscriber.id, subscriber.email, connection_url, app_password)
 
     con.sync_calendars(external_connection_id=external_connection.id)
     return True
