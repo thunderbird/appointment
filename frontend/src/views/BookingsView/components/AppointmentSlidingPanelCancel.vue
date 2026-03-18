@@ -158,6 +158,7 @@ async function cancelAppointment() {
   margin: 1.5rem 0;
   height: auto;
   max-width: 24rem;
+  color: var(--colour-primary-default);
 }
 
 .error-title,
