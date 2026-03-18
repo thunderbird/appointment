@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import AlertBox from '@/elements/AlertBox.vue';
 import DataTable from '@/components/DataTable.vue';
+import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import DeleteSubscriberModal from './components/DeleteSubscriberModal.vue';
 import { TextInput } from '@thunderbirdops/services-ui';
 import { dayjsKey, callKey } from '@/keys';
@@ -221,6 +222,9 @@ onMounted(async () => {
 
     </data-table>
   </div>
+  <div v-else class="panel-loading">
+    <loading-spinner/>
+  </div>
 
   <!-- Refresh link confirmation modal -->
   <delete-subscriber-modal
@@ -231,7 +235,8 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.panel-alerts {
+.panel-alerts,
+.panel-loading {
   display: flex;
   justify-content: center;
   width: 100%;
