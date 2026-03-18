@@ -21,7 +21,7 @@ This are the general components, Thunderbird Appointment consists of.
 C4Component
 
   ContainerDb(c4, "Database", "PostgreSQL", "Subscribers, calendars,<br>appointments, attendees, ...")
-  Container(c1, "Frontend", "Vue3 / Tailwind", "Provides all Appointment<br>functionality to customers<br>via their web browser")
+  Container(c1, "Frontend", "Vue3", "Provides all Appointment<br>functionality to customers<br>via their web browser")
   Container_Boundary(b1, "Backend") {
     Component(c3, "Subscriber Area", "FastAPI, JWT auth", "Provides functionality related<br>to calendar connections,<br>appointments, general availability")
     Component(c2, "Auth Controller", "FastAPI", "Redirects to FxA service,<br>authenticates subscriber,<br>gets subscription level")

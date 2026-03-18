@@ -1,6 +1,16 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { PhProhibit } from '@phosphor-icons/vue';
+</script>
 
 <template>
-  <!-- Pending new illustration -->
-  <div class="w-full text-center text-[10rem]">⛔</div>
+  <div>
+    <ph-prohibit class="art-invalid-icon" weight="thin" />
+  </div>
 </template>
+
+<style scoped>
+.art-invalid-icon {
+  width: 10rem;
+  height: 10rem;
+}
+</style>

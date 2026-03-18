@@ -50,9 +50,9 @@ const showLastEllipsis = (p: number) => pageCount.value >= 6 && currentPage.valu
 </script>
 
 <template>
-  <nav class="flex flex-nowrap items-center gap-2">
-    <button @click="prev" :disabled="isFirstPage" class="btn-back" :class="{ 'text-gray-500': isFirstPage }">
-      <ph-caret-left class="stroke-1.5 size-5" />
+  <nav class="pagination">
+    <button @click="prev" :disabled="isFirstPage" class="btn-back" :class="{ 'disabled': isFirstPage }">
+      <ph-caret-left :size="20" />
     </button>
     <div
       v-for="(p, i) in pageCount" :key="i"
@@ -60,8 +60,8 @@ const showLastEllipsis = (p: number) => pageCount.value >= 6 && currentPage.valu
     >
       <div v-show="showFirstEllipsis(p)">&hellip;</div>
       <button
-        class="btn-jump cursor-pointer px-2 py-1"
-        :class="{ 'text-gray-500': (p-1) === currentPage }"
+        class="btn-jump"
+        :class="{ 'disabled': (p-1) === currentPage }"
         v-show="showPageItemLink(p)"
         @click="goto(p-1)"
       >
@@ -69,8 +69,30 @@ const showLastEllipsis = (p: number) => pageCount.value >= 6 && currentPage.valu
       </button>
       <div v-show="showLastEllipsis(p)">&hellip;</div>
     </div>
-    <button @click="next" :disabled="isLastPage" class="btn-forward" :class="{ 'text-gray-500': isLastPage }">
-      <ph-caret-right class="stroke-1.5 size-5" />
+    <button @click="next" :disabled="isLastPage" class="btn-forward" :class="{ 'disabled': isLastPage }">
+      <ph-caret-right :size="20" />
     </button>
   </nav>
 </template>
+
+<style scoped>
+.pagination {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: .5rem;
+
+  button {
+    cursor: pointer;
+
+    &.btn-jump {
+      padding: .25rem .5rem;
+    }
+
+    &.disabled {
+      cursor: default;
+      color: var(--colour-ti-muted);
+    }
+  }
+}
+</style>

@@ -13,13 +13,18 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="page-contents px-4 md:px-20" v-html="pageContents"></div>
+  <div class="page-contents" v-html="pageContents"></div>
 </template>
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
 .page-contents {
+  padding: 0 1rem;
+
+  @media (--md) {
+    padding: 0 5rem;
+  }
 
   @media (--lg) {
     display: flex;
@@ -32,28 +37,45 @@ onMounted(async () => {
 
 /* Needed for v-html */
 :deep {
+  h1, h2, h3, h4 {
+    color: var(--colour-ti-highlight);
+  }
   h1 {
-    @apply py-8 text-3xl text-teal-600 dark:text-teal-400;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    font-size: 1.875rem;
+    line-height: 2.25rem;
   }
 
   h2 {
-    @apply py-8 text-2xl text-teal-600 dark:text-teal-400;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
   }
 
   h3 {
-    @apply py-4 text-xl text-teal-600 dark:text-teal-400;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
   }
 
   h4 {
-    @apply py-4 text-lg text-teal-600 dark:text-teal-400;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
   }
 
   p {
-    @apply py-2 leading-relaxed;
+    padding-top: .5rem;
+    padding-bottom: .5rem;
+    line-height: 1.625;
   }
 
   a {
-    @apply underline;
+    text-decoration-line: underline;
   }
 
   .toc {

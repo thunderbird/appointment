@@ -10,7 +10,6 @@ import {
 } from '@/models';
 import ListPagination from '@/elements/ListPagination.vue';
 import { PrimaryButton, DangerButton } from '@thunderbirdops/services-ui';
-import TextButton from '@/elements/TextButton.vue';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 
 // component properties
@@ -143,19 +142,19 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center gap-4">
-    <div class="flex w-full flex-col items-center justify-between gap-4 md:flex-row md:gap-0">
+  <div class="table-wrapper">
+    <div class="table-filter">
       <div>
-        <span class="font-bold">{{ totalDataLength }}</span> {{ dataName }}
+        <strong>{{ totalDataLength }}</strong> {{ dataName }}
       </div>
       <div v-for="filter in filters" :key="filter.name">
-        <label class="flex items-center gap-4 whitespace-nowrap">
-        {{ filter.name }} {{ t('label.filter') }}:
-        <select class="rounded-md" @change="(evt) => onColumnFilter(evt, filter, filters)">
-          <option :value="option.key" v-for="option in filter.options" :key="option.key">
-            {{ option.name }}
-          </option>
-        </select>
+        <label class="filter-item">
+          {{ filter.name }} {{ t('label.filter') }}:
+          <select @change="(evt) => onColumnFilter(evt, filter, filters)">
+            <option :value="option.key" v-for="option in filter.options" :key="option.key">
+              {{ option.name }}
+            </option>
+          </select>
         </label>
       </div>
       <list-pagination
@@ -165,14 +164,19 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
         @update="updatePage"
       />
     </div>
-    <div class="data-table overflow-x-auto">
+    <div class="data-table">
       <table>
         <thead>
           <tr>
-            <th v-if="allowMultiSelect">
-              <input :checked="paginatedDataList.every((row) => selectedRows.includes(row))" @change="(evt) => onPageSelect(evt, paginatedDataList)" id="select-page-input" class="mr-2" type="checkbox"/>
-              <label class="cursor-pointer select-none" for="select-page-input">
-              Select Page
+            <th v-if="allowMultiSelect" class="multi-select-header">
+              <input
+                :checked="paginatedDataList.every((row) => selectedRows.includes(row))"
+                @change="(evt) => onPageSelect(evt, paginatedDataList)"
+                id="select-page-input"
+                type="checkbox"
+              />
+              <label for="select-page-input">
+                Select Page
               </label>
             </th>
             <th v-for="column in columns" :key="column.key">{{ column.name }}</th>
@@ -187,9 +191,8 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
               <span v-if="fieldData.type === TableDataType.Text">
                 {{ fieldData.value }}
               </span>
-              <span v-else-if="fieldData.type === TableDataType.Code" class="flex items-center gap-4">
+              <span v-else-if="fieldData.type === TableDataType.Code">
                 <code>{{ fieldData.value }}</code>
-                <text-button :uid="fieldKey as string" class="btn-copy" :copy="String(fieldData.value)" :title="t('label.copy')" />
               </span>
               <span v-else-if="fieldData.type === TableDataType.Bool">
                 <span v-if="fieldData.value">{{ t('label.yes') }}</span>
@@ -228,8 +231,8 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
             </td>
           </tr>
           <tr v-if="loading">
-            <td :colspan="columnSpan">
-              <div class="flex w-full justify-center">
+            <td :colspan="columnSpan" class="loading">
+              <div>
                 <loading-spinner/>
               </div>
             </td>
@@ -249,3 +252,113 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
     </div>
   </div>
 </template>
+
+<style scoped>
+@import '@/assets/styles/custom-media.pcss';
+
+.table-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+
+  .table-filter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+
+    width: 100%;
+
+    .filter-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      white-space: nowrap;
+
+      select {
+        border-radius: 0.375rem
+      }
+    }
+  }
+
+  .data-table {
+    overflow-x: auto;
+    border-radius: 0.75rem;
+    width: 100%;
+    border: 1px solid var(--colour-neutral-border);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    background-color: var(--colour-neutral-lower);
+    margin: 0 0 1rem auto;
+
+    table {
+      width: 100%;
+      table-layout: auto;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+      line-height: 1.25rem;
+    }
+
+    thead, tfoot {
+      color: var(--colour-ti-muted);
+    }
+
+    th {
+      padding: 0 1rem;
+      font-weight: 600;
+      text-align: left;
+    }
+    thead th {
+      padding-bottom: 1rem;
+      padding-top: .5rem;
+    }
+    tfoot th {
+      padding-bottom: .5rem;
+      padding-top: 1rem;
+    }
+    td {
+      border-top-width: 1px;
+      border-bottom-width: 1px;
+      border-style: solid;
+      border-color: var(--colour-neutral-border);
+      padding: 1rem;
+    }
+    tbody td {
+      background-color: var(--colour-neutral-base);
+    }
+
+    .multi-select-header {
+      input {
+        margin-right: 0.5rem;
+      }
+      label {
+        cursor: pointer;
+        user-select: none;
+      }
+    }
+
+    td.column-code span {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    td.loading div {
+      display: flex;
+      justify-content: center;
+    }
+  }
+}
+
+@media (--md) {
+  .table-wrapper {
+    .table-filter {
+      flex-direction: row;
+      gap: 0;
+    }
+  }
+}
+</style>

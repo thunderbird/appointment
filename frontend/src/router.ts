@@ -14,7 +14,6 @@ import { userManager } from '@/composables/oidcUserManager';
 // lazy loaded components
 const AvailabilityView = defineAsyncComponent(() => import('@/views/AvailabilityView/index.vue'));
 const BookingsView = defineAsyncComponent(() => import('@/views/BookingsView/index.vue'));
-const ContactView = defineAsyncComponent(() => import('@/views/ContactView.vue'));
 const SettingsView = defineAsyncComponent(() => import('@/views/SettingsView/index.vue'));
 const LegalView = defineAsyncComponent(() => import('@/views/LegalView.vue'));
 const DocsView = defineAsyncComponent(() => import('@/views/DocsView.vue'));
@@ -26,6 +25,8 @@ type ApmtRouteMeta = {
   maskForMetrics?: boolean; // Mask url parameters before sending information to metrics
   disableMetrics?: boolean; // Disable all metric capturing for this page. FIXME: Not Impl
 };
+
+const redirectUrl = import.meta.env?.VITE_SUPPORT_URL;
 
 /**
  * Defined routes for Thunderbird Appointment
@@ -122,9 +123,8 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/contact',
     name: 'contact',
-    component: ContactView,
-    meta: {
-      isPublic: true,
+    component: () => {
+      window.location.href = redirectUrl;
     },
   },
   {

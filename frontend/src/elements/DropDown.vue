@@ -10,14 +10,30 @@ defineExpose({ close });
 </script>
 
 <template>
-  <div class="relative" v-on-click-outside="close">
-    <div class="cursor-pointer select-none" @click="toggle">
+  <div class="drop-down-wrapper" v-on-click-outside="close">
+    <div class="trigger" @click="toggle">
       <slot name="trigger"></slot>
     </div>
     <transition>
-      <div v-show="open" class="absolute right-0">
+      <div v-show="open" class="drop-down">
         <slot></slot>
       </div>
     </transition>
   </div>
 </template>
+
+<style scoped>
+.drop-down-wrapper {
+  position: relative;
+
+  .trigger {
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .drop-down {
+    position: absolute;
+    right: 0;
+  }
+}
+</style>
