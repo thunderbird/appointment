@@ -256,10 +256,21 @@ If you notice an email from Github actions indicating that the Nightly E2E Tests
   - Click on the `View workflow run` link in the email - or -
   - Go into the Github repo, and
     - Choose `Actions` at the top
-    - On the list of Actions on the left side choose `nightly-tests-desktop`
+    - On the list of Actions on the left side i.e. `nightly-tests-desktop-<platform>` or `nightly-tests-mobile-<platform>`
     - In the corresponding list of completed nightly test action jobs, click on the failing one
   - Then click on the failed E2E test step to open the console view
   - In the console view, expand the E2E tests job and read the test failure details
   - The nightly tests run in BrowserStack which records a video playback of all of the tests
     - In the console view search the logs for the string `View build on BrowserStack dashboard` and retrieve the associated BrowserStack session link
     - Click on the link and sign into BrowserStack with your credentials and view the video replay of the failing test
+
+### Manually re-run/re-trigger a Nightly E2E Tests CI Job
+
+If a nightly test job failed on a specific platform you can manually trigger the nightly test job to run on a specific platform only. For example maybe one single test failed on one of the browsers, and you want to rerun the tests only on that specific browser to determine if the test failure was just a one-off intermittent failure. To manually trigger the nightly E2E tests on a specific platform:
+
+- Open the failing Github nightly-tests action job:
+  - Go into the Github repo, and
+    - Choose `Actions` at the top
+    - On the list of Actions on the left side find the one for the desired platform; for example to run the tests on Firefox desktop on OSX select the `nightly-test-desktop-firefox` action
+    - Once the desired action's page is opened, click on the `Run workflow` button on the top-right, leave the branch as main, and click the green `Run workflow` button
+    - The E2E tests will start running on the selected platform in BrowserStack; when finished you can go into the `Browserstack Automate` dashboard and find your job (or open the gitflow action workflow console and find the BrowserStack link)
