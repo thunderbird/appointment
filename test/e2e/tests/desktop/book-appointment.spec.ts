@@ -6,6 +6,7 @@ import { navigateToAppointmentAndSignIn, setDefaultUserSettingsLocalStore } from
 import {
   APPT_DISPLAY_NAME,
   PLAYWRIGHT_TAG_PROD_SANITY,
+  PLAYWRIGHT_TAG_STAGE_SANITY,
   PLAYWRIGHT_TAG_PROD_NIGHTLY,
   PLAYWRIGHT_TAG_E2E_SUITE,
   TIMEOUT_30_SECONDS,
@@ -38,7 +39,7 @@ test.beforeEach(async ({ page }) => {
 test.describe('book an appointment on desktop browser', () => {
 
   test('able to request a booking on desktop browser', {
-    tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY],
+    tag: [PLAYWRIGHT_TAG_PROD_SANITY, PLAYWRIGHT_TAG_E2E_SUITE, PLAYWRIGHT_TAG_PROD_NIGHTLY, PLAYWRIGHT_TAG_STAGE_SANITY],
   }, async ({ page }) => {
     // in order to ensure we find an available slot we can click on, first switch to week view URL
     await bookingPage.gotoBookingPageWeekView();
