@@ -19,7 +19,9 @@ permissions:
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
-    environment: staging
+    environment:
+      name: staging
+      deployment: false
     outputs:
       validate-iac: ${{ steps.check.outputs.validate-iac }}
       validate-backend: ${{ steps.check.outputs.validate-backend }}
@@ -45,7 +47,9 @@ jobs:
   validate-backend:
     needs: detect-changes
     runs-on: ubuntu-latest
-    environment: staging
+    environment:
+      name: staging
+      deployment: false
     if: needs.detect-changes.outputs.validate-backend == 'true'
 
     steps:
@@ -86,7 +90,9 @@ jobs:
   validate-frontend:
     needs: detect-changes
     runs-on: ubuntu-latest
-    environment: staging
+    environment:
+      name: staging
+      deployment: false
     if: needs.detect-changes.outputs.validate-frontend == 'true'
     steps:
       - uses: actions/checkout@v4
@@ -117,7 +123,9 @@ jobs:
   validate-pulumi:
     needs: detect-changes
     runs-on: ubuntu-latest
-    environment: staging
+    environment:
+      name: staging
+      deployment: false
     if: needs.detect-changes.outputs.validate-pulumi == 'true'
     steps:
       - uses: actions/checkout@v4
