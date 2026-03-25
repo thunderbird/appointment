@@ -31,11 +31,11 @@ Using Docker is the recommended and for now the only supported method of buildin
 
     This will create and start 5 different containers (backend, frontend, postgres, redis and mailpit).
 
-    * Frontend can be accessed via: <http://localhost:8080>
+    * Frontend can be accessed via: <http://localhost:8090>
     * Backend can be accessed via: <http://localhost:5000>
-    * The PostgreSQL database will be accessible via `localhost:5433` with username: password set to `tba`: `abcd%efgh`
+    * The PostgreSQL database will be accessible via `localhost:5435` with username: password set to `tba`: `abcd%efgh`
     * OpenAPI docs can be accessed via: <http://localhost:5000/docs> or <http://localhost:5000/redoc>
-    * Mailpit docs can be accessed via: <http://localhost:8025>
+    * Mailpit docs can be accessed via: <http://localhost:8026>
 
 4. Check if all containers are running. On first-run the database will initialize, and a first time setup command will be triggered (going forward database migrations will automatically run on `docker-compose up`). Check if the database contains tables, e.g. the `subscriber` table (still empty at this point).
 

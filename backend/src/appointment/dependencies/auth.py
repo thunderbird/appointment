@@ -6,7 +6,6 @@ from typing import Annotated
 import sentry_sdk
 from fastapi import Depends, Body, Request, HTTPException
 from fastapi.params import Depends as DependsClass
-from fastapi.security import OAuth2PasswordBearer
 import jwt
 
 from sqlalchemy.orm import Session
@@ -20,7 +19,25 @@ from ..exceptions import validation
 from ..exceptions.validation import InvalidTokenException, InvalidPermissionLevelException
 from ..utils import encrypt, decrypt, get_expiry_time_with_grace_period
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='token', auto_error=False)
+
+async def get_bearer_token(request: Request) -> str | None:
+    """Extracts the Bearer token from the Authorization header.
+
+    Replaces FastAPI's OAuth2PasswordBearer so we don't inherit OAuth2-specific
+    behaviour we don't use (tokenUrl, OpenAPI password-flow metadata, etc.).
+    """
+
+    authorization = request.headers.get('Authorization')
+
+    if not authorization:
+        return None
+
+    scheme, _, param = authorization.partition(' ')
+
+    if scheme.lower() != 'bearer' or not param:
+        return None
+
+    return param
 
 
 def get_user_from_oidc_token_introspection(db, token: str, redis_instance):
@@ -119,7 +136,7 @@ def get_user_from_token(db, token: str, require_jti=False):
 
 def get_subscriber(
     request: Request,
-    token: Annotated[str, Depends(oauth2_scheme)],
+    token: Annotated[str, Depends(get_bearer_token)],
     db: Session = Depends(get_db),
     redis_instance=Depends(get_redis),
     require_jti=False,
@@ -159,7 +176,7 @@ async def get_subscriber_from_onetime_token(
     redis_instance=Depends(get_redis),
 ):
     """Retrieve the subscriber via a one-time token only!"""
-    token: str = await oauth2_scheme(request)
+    token: str = await get_bearer_token(request)
     return get_subscriber(request, token, db, redis_instance, require_jti=True)
 
 
@@ -170,7 +187,7 @@ async def get_subscriber_or_none(
 ):
     """Retrieve the subscriber or return None. This does not automatically error out like the other deps"""
     try:
-        token: str = await oauth2_scheme(request)
+        token: str = await get_bearer_token(request)
         subscriber = get_subscriber(request, token, db, redis_instance)
     except InvalidTokenException:
         return None

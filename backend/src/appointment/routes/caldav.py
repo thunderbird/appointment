@@ -1,8 +1,10 @@
+import os
 import json
 import urllib
 from typing import Optional
 from urllib.parse import urlparse
 
+import requests
 import sentry_sdk
 from fastapi import APIRouter, Depends, HTTPException
 from redis import Redis
@@ -11,7 +13,7 @@ from sqlalchemy.orm import Session
 from appointment import utils
 from appointment.controller.calendar import CalDavConnector, Tools
 from appointment.database import models, schemas, repo
-from appointment.dependencies.auth import get_subscriber
+from appointment.dependencies.auth import get_subscriber, get_bearer_token
 from appointment.dependencies.database import get_db, get_redis
 from appointment.exceptions.calendar import TestConnectionFailed, RemoteCalendarAuthenticationError
 from appointment.exceptions.misc import UnexpectedBehaviourWarning
@@ -27,28 +29,10 @@ from appointment.defines import GOOGLE_CALDAV_DOMAINS
 router = APIRouter()
 
 
-@router.post('/auth')
-def caldav_autodiscover_auth(
-    connection: schemas.CalendarConnectionIn,
-    db: Session = Depends(get_db),
-    subscriber: models.Subscriber = Depends(get_subscriber),
-    redis_client: Redis = Depends(get_redis),
-):
-    """Connects a principal caldav server"""
-
-    # Does url need a protocol?
-    if '://' not in connection.url:
-        connection.url = f'https://{connection.url}'
-
-    secure_protocol = 'https://' in connection.url
-
-    dns_lookup_cache_key = f'dns:{utils.encrypt(connection.url)}'
-
-    # Check for an attempt to use Google CalDAV API
-    # which we don't support because we use their API directly
-    basename = urlparse(connection.url).netloc
-    if any([(g in basename) for g in GOOGLE_CALDAV_DOMAINS]):
-        raise GoogleCaldavNotSupported()
+def _resolve_caldav_url(connection_url: str, redis_client: Redis) -> str:
+    """Resolves a CalDAV server URL via DNS SRV lookup, cache, and well-known fallback."""
+    secure_protocol = 'https://' in connection_url
+    dns_lookup_cache_key = f'dns:{utils.encrypt(connection_url)}'
 
     lookup_url = None
     if redis_client:
@@ -71,7 +55,7 @@ def caldav_autodiscover_auth(
 
     # Do a dns lookup first
     if lookup_url is None:
-        parsed_url = urlparse(connection.url)
+        parsed_url = urlparse(connection_url)
         lookup_url, ttl = Tools.dns_caldav_lookup(parsed_url.hostname, secure=secure_protocol)
         # set the cached lookup for the remainder of the dns ttl
         if redis_client and lookup_url:
@@ -82,13 +66,62 @@ def caldav_autodiscover_auth(
 
     # Check for well-known
     if lookup_url is None:
-        lookup_url = Tools.well_known_caldav_lookup(connection.url)
+        lookup_url = Tools.well_known_caldav_lookup(connection_url)
 
     # If we have a lookup_url then apply it
     if lookup_url and 'http' not in lookup_url:
-        connection.url = urllib.parse.urljoin(connection.url, lookup_url)
+        return urllib.parse.urljoin(connection_url, lookup_url)
     elif lookup_url:
-        connection.url = lookup_url
+        return lookup_url
+
+    return connection_url
+
+
+def _upsert_external_connection(
+    db: Session, subscriber_id: int, caldav_name: str, caldav_url: str, password: str
+) -> models.ExternalConnections:
+    """Creates or updates a CalDAV external connection and returns it."""
+    caldav_id = json.dumps([caldav_url, caldav_name])
+
+    external_connection = repo.external_connection.get_by_type(
+        db, subscriber_id, models.ExternalConnectionType.caldav, caldav_id
+    )
+
+    if not external_connection:
+        external_connection_schema = schemas.ExternalConnection(
+            name=caldav_name,
+            type=models.ExternalConnectionType.caldav,
+            type_id=caldav_id,
+            owner_id=subscriber_id,
+            token=password,
+        )
+        return repo.external_connection.create(db, external_connection_schema)
+
+    return repo.external_connection.update_token(
+        db, password, subscriber_id, models.ExternalConnectionType.caldav, caldav_id
+    )
+
+
+@router.post('/auth')
+def caldav_autodiscover_auth(
+    connection: schemas.CalendarConnectionIn,
+    db: Session = Depends(get_db),
+    subscriber: models.Subscriber = Depends(get_subscriber),
+    redis_client: Redis = Depends(get_redis),
+):
+    """Connects a principal caldav server"""
+
+    # Does url need a protocol?
+    if '://' not in connection.url:
+        connection.url = f'https://{connection.url}'
+
+    # Check for an attempt to use Google CalDAV API
+    # which we don't support because we use their API directly
+    basename = urlparse(connection.url).netloc
+    if any([(g in basename) for g in GOOGLE_CALDAV_DOMAINS]):
+        raise GoogleCaldavNotSupported()
+
+    connection.url = _resolve_caldav_url(connection.url, redis_client)
 
     con = CalDavConnector(
         db=db,
@@ -110,26 +143,73 @@ def caldav_autodiscover_auth(
     except TestConnectionFailed as ex:
         raise RemoteCalendarConnectionError(reason=ex.reason)
 
-    caldav_id = json.dumps([connection.url, connection.user])
-    external_connection = repo.external_connection.get_by_type(
-        db, subscriber.id, models.ExternalConnectionType.caldav, caldav_id
+    external_connection = _upsert_external_connection(
+        db, subscriber.id, connection.user, connection.url, connection.password
     )
 
-    # Create or update the external connection
-    if not external_connection:
-        external_connection_schema = schemas.ExternalConnection(
-            name=connection.user,
-            type=models.ExternalConnectionType.caldav,
-            type_id=caldav_id,
-            owner_id=subscriber.id,
-            token=connection.password,
+    con.sync_calendars(external_connection_id=external_connection.id)
+    return True
+
+
+@router.post('/oidc/auth')
+def oidc_autodiscover_auth(
+    db: Session = Depends(get_db),
+    subscriber: models.Subscriber = Depends(get_subscriber),
+    redis_client: Redis = Depends(get_redis),
+    token: str = Depends(get_bearer_token),
+):
+    """Connects a principal caldav server through oidc token auth"""
+
+    connection_url = _resolve_caldav_url(os.getenv('TB_ACCOUNTS_CALDAV_URL'), redis_client)
+
+    # Request or retrieve an app password from Thunderbird Accounts for CalDAV authentication
+    tb_accounts_host = os.getenv('TB_ACCOUNTS_HOST')
+    appointment_caldav_secret = os.getenv('APPOINTMENT_CALDAV_SECRET')
+
+    if not tb_accounts_host or not appointment_caldav_secret:
+        raise RemoteCalendarConnectionError()
+
+    try:
+        response = requests.post(
+            f'{tb_accounts_host}/appointment/caldav/setup/',
+            json={
+                'appointment-secret': appointment_caldav_secret,
+                'oidc-access-token': token,
+            },
+            timeout=10,
         )
 
-        external_connection = repo.external_connection.create(db, external_connection_schema)
-    else:
-        external_connection = repo.external_connection.update_token(
-            db, connection.password, subscriber.id, models.ExternalConnectionType.caldav, caldav_id
-        )
+        response.raise_for_status()
+        result = response.json()
+
+        if not result.get('success'):
+            raise RemoteCalendarConnectionError()
+
+        app_password = result.get('app_password')
+
+        if not app_password:
+            raise RemoteCalendarConnectionError()
+    except requests.RequestException as ex:
+        sentry_sdk.capture_exception(ex)
+        raise RemoteCalendarConnectionError()
+
+    con = CalDavConnector(
+        db=db,
+        redis_instance=None,
+        url=connection_url,
+        subscriber_id=subscriber.id,
+        calendar_id=None,
+        user=subscriber.email,
+        password=app_password,
+    )
+
+    try:
+        if not con.test_connection():
+            raise RemoteCalendarConnectionError()
+    except TestConnectionFailed as ex:
+        raise RemoteCalendarConnectionError(reason=ex.reason)
+
+    external_connection = _upsert_external_connection(db, subscriber.id, subscriber.email, connection_url, app_password)
 
     con.sync_calendars(external_connection_id=external_connection.id)
     return True

@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { PrimaryButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
+import { useCalendarStore } from '@/stores/calendar-store';
 import calendarIcon from '@/assets/svg/icons/calendar.svg';
 import googleCalendarLogo from '@/assets/svg/google-calendar-logo.svg';
 import mailIcon from '@/assets/svg/icons/mail.svg';
@@ -14,11 +15,13 @@ import RadioProviderCardButton from '../components/RadioProviderCardButton.vue';
 
 const { t } = useI18n();
 
+const calendarStore = useCalendarStore();
 const ftueStore = useFTUEStore();
 const { errorMessage } = storeToRefs(ftueStore);
 
 type CalendarProvider = 'caldav' | 'google' | 'oidc';
 const calendarProvider = ref<CalendarProvider | null>('oidc');
+const isLoading = ref(false);
 
 const onBackButtonClick = () => {
   ftueStore.moveToStep(FtueStep.SetupProfile, true);
@@ -28,9 +31,30 @@ const onContinueButtonClick = async () => {
   ftueStore.clearMessages();
 
   switch (calendarProvider.value) {
-    case 'oidc':
-      await ftueStore.moveToStep(FtueStep.ConnectCalendarsThundermail);
+    case 'oidc': {
+      isLoading.value = true;
+      try {
+        const { data, error } = await calendarStore.connectOIDCCalendar();
+
+        if (data.value?.detail?.message) {
+          ftueStore.errorMessage = { title: data.value?.detail?.message };
+          return;
+        }
+
+        if (error.value) {
+          ftueStore.errorMessage = { title: t('error.somethingWentWrong') };
+          return;
+        }
+
+        ftueStore.moveToStep(FtueStep.CreateBookingPage);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : null;
+        ftueStore.errorMessage = { title: message || t('error.somethingWentWrong') };
+      } finally {
+        isLoading.value = false;
+      }
       break;
+    }
     case 'caldav':
       await ftueStore.moveToStep(FtueStep.ConnectCalendarsCalDav);
       break;
@@ -84,11 +108,11 @@ const onContinueButtonClick = async () => {
   </div>
 
   <div class="buttons-container">
-    <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick">
+    <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick" :disabled="isLoading">
       {{ t('label.back') }}
     </primary-button>
-    <primary-button :title="t('label.continue')" @click="onContinueButtonClick" :disabled="!calendarProvider">
-      {{ t('label.continue') }}
+    <primary-button :title="t('label.continue')" @click="onContinueButtonClick" :disabled="!calendarProvider || isLoading">
+      {{ isLoading ? t('label.connecting') : t('label.continue') }}
     </primary-button>
   </div>
 </template>
