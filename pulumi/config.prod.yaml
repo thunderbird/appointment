@@ -223,6 +223,8 @@ resources:
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/zoom-api-secret-5JqmI2
 
               # Various encryption secrets
+              - name: APPOINTMENT_CALDAV_SECRET
+                valueFrom: ?????
               - name: DB_SECRET
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-encryption-secret-Ozx7B2
               - name: SIGNED_SECRET
