@@ -297,6 +297,8 @@ resources:
                 value: "False"
               - name: TB_ACCOUNTS_CALDAV_URL
                 value: https://thundermail.com
+              - name: TB_ACCOUNTS_HOST
+                value: https://accounts.tb.pro
 
   tb:autoscale:EcsServiceAutoscaler:
     backend:
