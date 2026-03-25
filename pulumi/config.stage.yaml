@@ -298,6 +298,8 @@ resources:
                 value: https://appointment-stage.tb.pro/api/v1/zoom/callback
               - name: TB_ACCOUNTS_CALDAV_URL
                 value: https://stage-thundermail.com
+              - name: TB_ACCOUNTS_HOST
+                value: https://accounts-stage.tb.pro
 
   tb:autoscale:EcsServiceAutoscaler:
     backend:
