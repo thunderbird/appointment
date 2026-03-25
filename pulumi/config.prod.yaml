@@ -158,7 +158,7 @@ resources:
           - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:5b88df955e78edca86b9de0a277ac0bd4bd8ed7d
+            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:26ca6d3d427f109a85d9d980e3850001d27647b5
             portMappings:
               - name: backend
                 containerPort: 5000
@@ -224,7 +224,7 @@ resources:
 
               # Various encryption secrets
               - name: APPOINTMENT_CALDAV_SECRET
-                valueFrom: ?????
+                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/appointment-caldav-secret-ru26Wg
               - name: DB_SECRET
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/prod/database-encryption-secret-Ozx7B2
               - name: SIGNED_SECRET
