@@ -11,7 +11,7 @@ from appointment.controller.auth import signed_url_by_subscriber
 from appointment.controller.calendar import CalDavConnector
 from appointment.database import schemas, models, repo
 from appointment.exceptions import validation
-from defines import DAY1, DAY5, DAY14, auth_headers, DAY2
+from defines import DAY1, DAY5, DAY14, DAY2, TEST_USER_ID, auth_headers
 
 
 class TestSchedule:
@@ -1469,14 +1469,14 @@ class TestDecideScheduleAvailabilitySlot:
         self,
         with_db,
         with_client,
-        make_pro_subscriber,
         make_caldav_calendar,
         make_schedule,
         make_appointment,
         make_appointment_slot,
         make_attendee,
     ):
-        subscriber = make_pro_subscriber()
+        with with_db() as db:
+            subscriber = repo.subscriber.get(db, TEST_USER_ID)
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
         schedule = make_schedule(
             calendar_id=generated_calendar.id,
@@ -1545,14 +1545,14 @@ class TestDecideScheduleAvailabilitySlot:
         self,
         with_db,
         with_client,
-        make_pro_subscriber,
         make_caldav_calendar,
         make_schedule,
         make_appointment,
         make_appointment_slot,
         make_attendee,
     ):
-        subscriber = make_pro_subscriber()
+        with with_db() as db:
+            subscriber = repo.subscriber.get(db, TEST_USER_ID)
         generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
         schedule = make_schedule(
             calendar_id=generated_calendar.id,
@@ -1617,3 +1617,140 @@ class TestDecideScheduleAvailabilitySlot:
         )
 
         assert response.status_code == 404, response.text
+
+    def test_confirm_fails_when_logged_in_user_is_not_owner(
+        self,
+        with_db,
+        with_client,
+        make_pro_subscriber,
+        make_caldav_calendar,
+        make_schedule,
+        make_appointment,
+        make_appointment_slot,
+        make_attendee,
+    ):
+        # Owner is a different subscriber; logged-in user (auth_headers) is TEST_USER_ID
+        owner = make_pro_subscriber()
+        generated_calendar = make_caldav_calendar(owner.id, connected=True)
+        schedule = make_schedule(
+            calendar_id=generated_calendar.id,
+            active=True,
+            start_date=self.start_date,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            end_date=None,
+            earliest_booking=1440,
+            farthest_booking=20160,
+            slot_duration=30,
+        )
+        signed_url = signed_url_by_subscriber(owner)
+
+        attendee = make_attendee()
+        appointment = make_appointment(generated_calendar.id, status=models.AppointmentStatus.draft, slots=[])
+        slot: models.Slot = make_appointment_slot(
+            appointment_id=appointment.id,
+            attendee_id=attendee.id,
+            booking_status=models.BookingStatus.requested,
+            booking_tkn='abcd',
+        )[0]
+
+        with with_db() as db:
+            db.add(slot)
+            db.add(appointment)
+            slot.schedule_id = schedule.id
+            db.commit()
+            slot_id = slot.id
+
+        availability = schemas.AvailabilitySlotConfirmation(
+            slot_id=slot_id, slot_token=slot.booking_tkn, owner_url=signed_url, confirmed=True
+        ).model_dump()
+
+        response = with_client.put(
+            '/schedule/public/availability/booking',
+            json=availability,
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 400, response.text
+        assert response.json()['detail']['id'] == 'INVALID_LINK'
+
+        with with_db() as db:
+            slot = db.get(models.Slot, slot_id)
+            assert slot.booking_status == models.BookingStatus.requested
+
+    def test_deny_fails_when_logged_in_user_is_not_owner(
+        self,
+        with_db,
+        with_client,
+        make_pro_subscriber,
+        make_caldav_calendar,
+        make_schedule,
+        make_appointment,
+        make_appointment_slot,
+        make_attendee,
+    ):
+        # Owner is a different subscriber; logged-in user (auth_headers) is TEST_USER_ID
+        owner = make_pro_subscriber()
+        generated_calendar = make_caldav_calendar(owner.id, connected=True)
+        schedule = make_schedule(
+            calendar_id=generated_calendar.id,
+            active=True,
+            start_date=self.start_date,
+            start_time=self.start_time,
+            end_time=self.end_time,
+            end_date=None,
+            earliest_booking=1440,
+            farthest_booking=20160,
+            slot_duration=30,
+        )
+        signed_url = signed_url_by_subscriber(owner)
+
+        attendee = make_attendee()
+        appointment = make_appointment(generated_calendar.id, status=models.AppointmentStatus.draft, slots=[])
+        slot: models.Slot = make_appointment_slot(
+            appointment_id=appointment.id,
+            attendee_id=attendee.id,
+            booking_status=models.BookingStatus.requested,
+            booking_tkn='abcd',
+        )[0]
+
+        with with_db() as db:
+            db.add(slot)
+            db.add(appointment)
+            slot.schedule_id = schedule.id
+            db.commit()
+            slot_id = slot.id
+
+        availability = schemas.AvailabilitySlotConfirmation(
+            slot_id=slot_id, slot_token=slot.booking_tkn, owner_url=signed_url, confirmed=False
+        ).model_dump()
+
+        response = with_client.put(
+            '/schedule/public/availability/booking',
+            json=availability,
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 400, response.text
+        assert response.json()['detail']['id'] == 'INVALID_LINK'
+
+        with with_db() as db:
+            slot = db.get(models.Slot, slot_id)
+            assert slot.booking_status == models.BookingStatus.requested
+
+    def test_fails_when_unauthenticated(self, with_client):
+        """Unauthenticated requests are rejected with 401 before any body validation."""
+        availability = schemas.AvailabilitySlotConfirmation(
+            slot_id=1,
+            slot_token='token',
+            owner_url='https://example.com/owner/',
+            confirmed=True,
+        ).model_dump()
+
+        response = with_client.put(
+            '/schedule/public/availability/booking',
+            json=availability,
+        )
+
+        assert response.status_code == 401, response.text
+        assert response.json()['detail']['id'] == 'INVALID_TOKEN'

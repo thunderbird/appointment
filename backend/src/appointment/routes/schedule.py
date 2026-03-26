@@ -508,13 +508,15 @@ def request_schedule_availability_slot(
 def decide_on_schedule_availability_slot(
     data: schemas.AvailabilitySlotConfirmation,
     background_tasks: BackgroundTasks,
+    subscriber: Subscriber = Depends(get_subscriber),
     db: Session = Depends(get_db),
     redis=Depends(get_redis),
     google_client: GoogleClient = Depends(get_google_client),
 ):
     """endpoint to react to owners decision to a request of a time slot of his public link"""
-    subscriber = repo.subscriber.verify_link(db, data.owner_url)
-    if not subscriber:
+    subscriber_from_url = repo.subscriber.verify_link(db, data.owner_url)
+
+    if not subscriber_from_url or subscriber_from_url.id != subscriber.id:
         raise validation.InvalidLinkException()
 
     # Raise a schedule not found exception if the schedule owner does not have a timezone set.

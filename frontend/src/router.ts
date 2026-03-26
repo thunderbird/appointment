@@ -10,6 +10,7 @@ import LogoutView from '@/views/LogoutView.vue';
 import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
 import { isOidcAuth } from '@/composables/authSchemes';
 import { userManager } from '@/composables/oidcUserManager';
+import { LOGIN_REDIRECT_KEY } from '@/definitions';
 
 // lazy loaded components
 const AvailabilityView = defineAsyncComponent(() => import('@/views/AvailabilityView/index.vue'));
@@ -78,7 +79,6 @@ const routes: RouteRecordRaw[] = [
     name: 'confirmation',
     component: BookingConfirmationView,
     meta: {
-      isPublic: true,
       maskForMetrics: true,
     },
   },
@@ -198,6 +198,9 @@ router.beforeEach(async (to, _from) => {
 
   // If the route is not public and the user is not authenticated, redirect to the OIDC login
   if (!toMeta?.isPublic && !user.authenticated && isOidcAuth) {
+    // Save their intended destination!
+    window.sessionStorage?.setItem(LOGIN_REDIRECT_KEY, to.fullPath);
+
     await userManager.signinRedirect({});
 
     return false;

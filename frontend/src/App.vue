@@ -135,7 +135,7 @@ const scheduleStore = createScheduleStore(call);
 
 // true if route can be accessed without authentication
 const routeIsPublic = computed(
-  () => route.meta?.isPublic,
+  () => !!route.meta?.isPublic,
 );
 const routeIsHome = computed(
   () => ['home'].includes(typeof route.name === 'string' ? route.name : ''),
@@ -154,6 +154,11 @@ const routeIsPostLogin = computed(
 );
 const routeIsLogout = computed(
   () => ['logout'].includes(typeof route.name === 'string' ? route.name : ''),
+);
+// The router.ts file has a beforeEach guard that redirects to the OIDC login
+// but we are flashing a NotFoundView briefly which is uh... not ideal 
+const routeNameUndefinedDueToAbortedNav = computed(
+  () => !route.name && !user?.authenticated && isOidcAuth,
 );
 
 // retrieve calendars and appointments after checking login and persisting user to db
@@ -355,6 +360,9 @@ onMounted(async () => {
   </template>
   <template v-else-if="router.hasRoute(route.name) && !routeIsPublic">
     <not-authenticated-view/>
+  </template>
+  <template v-else-if="routeNameUndefinedDueToAbortedNav">
+    <div />
   </template>
   <template v-else>
     <route-not-found-view/>
