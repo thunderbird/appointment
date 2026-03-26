@@ -18,7 +18,7 @@ from ..defines import FALLBACK_LOCALE
 from ..dependencies.database import get_db, get_redis
 from ..dependencies.fxa import get_webhook_auth as get_webhook_auth_fxa, get_fxa_client
 from ..dependencies.google import get_google_client
-from ..dependencies.zoom import get_zoom_client, get_webhook_auth as get_webhook_auth_zoom
+from ..dependencies.zoom import get_webhook_auth as get_webhook_auth_zoom
 from ..exceptions.account_api import AccountDeletionSubscriberFail
 from ..exceptions.fxa_api import MissingRefreshTokenException
 from ..l10n import l10n
@@ -293,32 +293,6 @@ def _handle_event_cancelled(
     )
 
 
-def _create_zoom_meeting_link(
-    db: Session,
-    slot: models.Slot,
-    subscriber: models.Subscriber,
-    title: str,
-) -> str | None:
-    """Try to create a Zoom meeting link and persist it on the slot.
-
-    Returns the join URL on success, or ``None`` on any failure.
-    """
-    try:
-        zoom_client = get_zoom_client(subscriber)
-        response = zoom_client.create_meeting(title, slot.start.isoformat(), slot.duration, subscriber.timezone)
-        if 'id' in response:
-            join_url = zoom_client.get_meeting(response['id'])['join_url']
-            slot.meeting_link_id = response['id']
-            slot.meeting_link_url = join_url
-            db.add(slot)
-            db.commit()
-            return join_url
-    except Exception as err:
-        logging.error(f'[webhooks.google_calendar] Zoom meeting creation error: {err}')
-        if sentry_sdk.is_initialized():
-            sentry_sdk.capture_exception(err)
-    return None
-
 
 def _handle_subscriber_rsvp(
     db: Session,
@@ -347,7 +321,7 @@ def _handle_subscriber_rsvp(
 
             location_url = appointment.location_url
             if appointment.meeting_link_provider == MeetingLinkProviderType.zoom:
-                location_url = _create_zoom_meeting_link(db, slot, subscriber, title) or location_url
+                location_url = zoom.create_meeting_link(db, slot, subscriber, title) or location_url
 
             owner_lang = subscriber.language if subscriber.language else FALLBACK_LOCALE
             body = {'status': 'confirmed', 'summary': title}

@@ -1,7 +1,11 @@
+import logging
+
+import sentry_sdk
 from sqlalchemy.orm import Session
 
-from appointment.database import repo, models
-from appointment.database.models import ExternalConnectionType
+from ..database import repo, models
+from ..database.models import ExternalConnectionType
+from ..dependencies.zoom import get_zoom_client
 
 
 def update_schedules_meeting_link_provider(db: Session, subscriber_id: int) -> bool:
@@ -12,6 +16,33 @@ def update_schedules_meeting_link_provider(db: Session, subscriber_id: int) -> b
         db.add(schedule)
     db.commit()
     return True
+
+
+def create_meeting_link(
+    db: Session,
+    slot: models.Slot,
+    subscriber: models.Subscriber,
+    title: str,
+) -> str | None:
+    """Create a Zoom meeting and persist the link on the slot.
+
+    Returns the join URL on success, or ``None`` on any failure.
+    """
+    try:
+        zoom_client = get_zoom_client(subscriber)
+        response = zoom_client.create_meeting(title, slot.start.isoformat(), slot.duration, subscriber.timezone)
+        if 'id' in response:
+            join_url = zoom_client.get_meeting(response['id'])['join_url']
+            slot.meeting_link_id = response['id']
+            slot.meeting_link_url = join_url
+            db.add(slot)
+            db.commit()
+            return join_url
+    except Exception as err:
+        logging.error(f'[zoom] Zoom meeting creation error: {err}')
+        if sentry_sdk.is_initialized():
+            sentry_sdk.capture_exception(err)
+    return None
 
 
 def disconnect(db: Session, subscriber_id: int, type_id: str) -> bool:
