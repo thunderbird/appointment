@@ -134,30 +134,29 @@ def google_calendar_notification(
     channel_id = request.headers.get('X-Goog-Channel-Id')
     resource_state = request.headers.get('X-Goog-Resource-State')
 
-    if not channel_id:
-        return Response(status_code=200)
+    success_response = Response(status_code=200)
 
     # Google sends a 'sync' notification when the channel is first created; just acknowledge it
-    if resource_state == 'sync':
-        return Response(status_code=200)
+    if not channel_id or resource_state == 'sync':
+        return success_response
 
     channel = repo.google_calendar_channel.get_by_channel_id(db, channel_id)
     if not channel:
         logging.warning(f'[webhooks.google_calendar] Unknown channel_id: {channel_id}')
-        return Response(status_code=200)
+        return success_response
 
     calendar = channel.calendar
     if not calendar:
         repo.google_calendar_channel.delete(db, channel)
-        return Response(status_code=200)
+        return success_response
     if not calendar.connected:
         teardown_watch_channel(db, google_client, calendar)
-        return Response(status_code=200)
+        return success_response
 
     external_connection = calendar.external_connection
     if not external_connection or not external_connection.token:
         teardown_watch_channel(db, google_client, calendar)
-        return Response(status_code=200)
+        return success_response
 
     token = Credentials.from_authorized_user_info(
         json.loads(external_connection.token), google_client.SCOPES
@@ -167,7 +166,7 @@ def google_calendar_notification(
         sync_token = google_client.get_initial_sync_token(calendar.user, token)
         if sync_token:
             repo.google_calendar_channel.update_sync_token(db, channel, sync_token)
-        return Response(status_code=200)
+        return success_response
 
     changed_events, new_sync_token = google_client.list_events_sync(
         calendar.user, channel.sync_token, token
@@ -178,7 +177,7 @@ def google_calendar_notification(
         fresh_token = google_client.get_initial_sync_token(calendar.user, token)
         if fresh_token:
             repo.google_calendar_channel.update_sync_token(db, channel, fresh_token)
-        return Response(status_code=200)
+        return success_response
 
     if new_sync_token:
         repo.google_calendar_channel.update_sync_token(db, channel, new_sync_token)
@@ -192,7 +191,7 @@ def google_calendar_notification(
         remote_calendar_id=calendar.user,
     )
 
-    return Response(status_code=200)
+    return success_response
 
 
 
