@@ -29,7 +29,7 @@ from ..dependencies.google import get_google_client
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
-from ..defines import FALLBACK_LOCALE, google_invite_enabled
+from ..defines import FALLBACK_LOCALE
 from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
 from ..exceptions.calendar import EventNotCreatedException, EventNotDeletedException
@@ -416,7 +416,9 @@ def request_schedule_availability_slot(
 
         # Create a pending appointment
         owner_language = subscriber.language if subscriber.language is not None else FALLBACK_LOCALE
-        use_google_invite = calendar.provider == CalendarProvider.google and google_invite_enabled()
+        use_google_invite = (
+            calendar.provider == CalendarProvider.google and os.getenv('GOOGLE_INVITE_ENABLED') == 'True'
+        )
 
         # Google invites skip the HOLD step — the event is created directly and
         # Google sends the invite to the subscriber for accept/decline.
@@ -606,7 +608,7 @@ def handle_schedule_availability_decision(
         db.add(appointment)
         appointment_calendar = appointment.calendar
 
-    use_google_invite = calendar.provider == CalendarProvider.google and google_invite_enabled()
+    use_google_invite = calendar.provider == CalendarProvider.google and os.getenv('GOOGLE_INVITE_ENABLED') == 'True'
 
     # TODO: Check booking expiration date
     # check if request was denied
