@@ -245,7 +245,7 @@ class TestHandleSubscriberRsvp:
         desc_lines = patch_body.get('description', '').split('\n')
         assert any(line.endswith('https://meet.example.com') for line in desc_lines)
 
-    @patch('appointment.routes.webhooks._create_zoom_meeting_link')
+    @patch('appointment.controller.zoom.create_meeting_link')
     def test_accept_creates_zoom_link_when_configured(
         self, mock_create_zoom,
         with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,
