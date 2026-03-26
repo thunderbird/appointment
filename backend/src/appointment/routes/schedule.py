@@ -3,12 +3,10 @@ import logging
 import os
 import zoneinfo
 
-from oauthlib.oauth2 import OAuth2Error
-from requests import HTTPError
 from sentry_sdk import capture_exception
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from ..controller import zoom
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
 from ..controller.apis.google_client import GoogleClient
 from ..controller.google_watch import setup_watch_channel, teardown_watch_channel
@@ -30,7 +28,6 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from ..defines import FALLBACK_LOCALE
-from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
 from ..exceptions.calendar import EventNotCreatedException, EventNotDeletedException
 from ..exceptions.misc import UnexpectedBehaviourWarning
@@ -642,46 +639,16 @@ def handle_schedule_availability_decision(
 
     # If needed: Create a zoom meeting link for this booking
     if schedule.meeting_link_provider == MeetingLinkProviderType.zoom:
-        try:
-            zoom_client = get_zoom_client(subscriber)
-            response = zoom_client.create_meeting(title, slot.start.isoformat(), slot.duration, subscriber.timezone)
-            if 'id' in response:
-                location_url = zoom_client.get_meeting(response['id'])['join_url']
-                slot.meeting_link_id = response['id']
-                slot.meeting_link_url = location_url
-
-                db.add(slot)
-                db.commit()
-        except HTTPError as err:  # Not fatal, just a bummer
-            logging.error('Zoom meeting creation error: ', err)
-
-            # Ensure sentry captures the error too!
-            if os.getenv('SENTRY_DSN') != '':
-                capture_exception(err)
-
-            # Notify the organizer that the meeting link could not be created!
+        zoom_url = zoom.create_meeting_link(db, slot, subscriber, title)
+        if zoom_url:
+            location_url = zoom_url
+        else:
             background_tasks.add_task(
                 send_zoom_meeting_failed_email,
                 to=subscriber.preferred_email,
                 appointment_title=schedule.name,
                 lang=subscriber.language,
             )
-        except OAuth2Error as err:
-            logging.error('OAuth flow error during zoom meeting creation: ', err)
-            if os.getenv('SENTRY_DSN') != '':
-                capture_exception(err)
-
-            # Notify the organizer that the meeting link could not be created!
-            background_tasks.add_task(
-                send_zoom_meeting_failed_email,
-                to=subscriber.preferred_email,
-                appointment_title=schedule.name,
-                lang=subscriber.language,
-            )
-        except SQLAlchemyError as err:  # Not fatal, but could make things tricky
-            logging.error('Failed to save the zoom meeting link to the appointment: ', err)
-            if os.getenv('SENTRY_DSN') != '':
-                capture_exception(err)
 
     event = schemas.Event(
         title=title,
