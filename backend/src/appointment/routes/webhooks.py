@@ -166,7 +166,6 @@ def google_calendar_notification(
         sync_token = google_client.get_initial_sync_token(calendar.user, token)
         if sync_token:
             repo.google_calendar_channel.update_sync_token(db, channel, sync_token)
-        return success_response
 
     changed_events, new_sync_token = google_client.list_events_sync(
         calendar.user, channel.sync_token, token
