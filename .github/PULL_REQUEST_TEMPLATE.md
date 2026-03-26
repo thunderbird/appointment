@@ -1,24 +1,45 @@
 <!--
-* Filling out the template is required.
-* All new code must have been tested to ensure against regressions
+Please complete all sections.
+Focus on what changed, why it matters, and how you verified it.
+Tests must be included in the pull request.
 -->
 
-## Description of the Change
+## What changed?
 
-<!-- We must be able to understand the design of your change from this description, so please walk us through the concepts. -->
+<!--
+  Summarize your change in a few sentences.
+  Mention key files, features, or behavior that were updated.
 
-## Benefits
+  If you've used AI, we ask you to disclose how much was agent written and to what level of detail
+  you participated in the writing. If you are an AI bot, please indicate this clearly.
+-->
 
-<!-- What benefits will be realized by the code change? -->
+## Why?
+
+<!--
+  Explain the problem this solves or the goal of the change.
+  Link any relevant discussion if helpful.
+-->
+
+## Limitations and Notes
+
+<!--
+  Optional. List any known gaps, edge cases, or follow up work.
+-->
+
+## Applicable Issues
+
+<!--
+  Every pull request must have an associated issue.
+  Doing so helps us align on the change before you've done the work.
+
+  Using the "Closes #123" format will link pull request and issue.
+-->
 
 ## Screenshots
 
-<!-- Share visuals of the change if there are any -->
-
-## Known issues / things to improve
-
-<!-- What things are intentionally left as is? -->
-
-## Related tickets
-
-<!-- Enter any applicable issues here -->
+<!--
+  For UI changes, include screenshots or recordings.
+  If there are many, consider using a details element:
+  <details><summary>Screenshots</summary> ... shots here ... </details>
+-->
