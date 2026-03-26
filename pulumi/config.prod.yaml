@@ -301,6 +301,8 @@ resources:
                 value: https://thundermail.com
               - name: TB_ACCOUNTS_HOST
                 value: https://accounts.tb.pro
+              - name: GOOGLE_INVITE_ENABLED
+                value: "False"
 
   tb:autoscale:EcsServiceAutoscaler:
     backend:

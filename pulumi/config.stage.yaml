@@ -302,6 +302,8 @@ resources:
                 value: https://stage-thundermail.com
               - name: TB_ACCOUNTS_HOST
                 value: https://accounts-stage.tb.pro
+              - name: GOOGLE_INVITE_ENABLED
+                value: "True"
 
   tb:autoscale:EcsServiceAutoscaler:
     backend:
