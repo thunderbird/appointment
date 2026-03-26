@@ -819,7 +819,7 @@ class TestSchedule:
         def mock_get_zoom_client(*args, **kwargs):
             return mock_zoom_client
 
-        monkeypatch.setattr('appointment.routes.schedule.get_zoom_client', mock_get_zoom_client)
+        monkeypatch.setattr('appointment.controller.zoom.get_zoom_client', mock_get_zoom_client)
 
         response = with_client.put(
             '/schedule/public/availability/request',
