@@ -1,8 +1,7 @@
 ---
 name: Bug report
-labels: bug
+type: Bug
 about: Create a report to help us improve
-
 ---
 
 **Describe the bug**
@@ -20,7 +19,7 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen.
 
 **Actual behavior**
-A clear and concise description of what happened instead.
+A clear and concise description of what happened instead. Exact text of any warnings or errors.
 
 **Screenshots**
 If applicable, add screenshots to help explain your problem.

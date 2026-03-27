@@ -1,0 +1,40 @@
+---
+name: PR - Merged
+
+# Warning, this job is running on pull_request_target and therefore has access to issue content.
+# Don't add any steps that act on external code.
+on:
+  pull_request_target:
+    branches: [main, beta, release]
+    types: [closed]
+
+permissions:
+  pull-requests: write
+  issues: write
+
+jobs:
+  pr-merged:
+    if: github.event.pull_request.merged
+    runs-on: ubuntu-latest
+    steps:
+      - name: Thank you
+        if: |
+          github.base_ref == 'main' &&
+          github.event.pull_request.author_association != 'OWNER' &&
+          github.event.pull_request.author_association != 'MEMBER' &&
+          github.event.pull_request.author_association != 'COLLABORATOR' &&
+          github.event.pull_request.author_association != 'CONTRIBUTOR'
+        env:
+          PR_NUMBER: ${{  github.event.pull_request.number  }}
+          GH_TOKEN: ${{ github.token }}
+          MESSAGE: >-
+            Thanks for your contribution! Your pull request has been merged and is being deployed to
+            our staging instance. If all goes well we'll include it in the next production
+            deployment. We appreciate the time and effort you put into improving Thunderbird Pro. If
+            you haven't already, you're welcome to join our Matrix chat for contributors. It's where
+            we discuss development and help each other out.
+            https://matrix.to/#/#tb-services:mozilla.org
+
+            Hope to see you there! 🌩️🐦🚀
+        run: |
+          gh pr comment $PR_NUMBER --repo $GITHUB_REPOSITORY --body "$MESSAGE"
