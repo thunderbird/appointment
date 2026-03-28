@@ -230,8 +230,7 @@ jobs:
   e2e-tests-browserstack-stage:
     name: e2e-tests-browserstack-stage
     needs: create-release
-    if: false
-    # if: ${{ !failure() || !cancelled() }}
+    if: ${{ success() && !cancelled() }} # only proceed if last steps passed and job hasn't been cancelled
     runs-on: ubuntu-latest
     environment: staging
     env:
