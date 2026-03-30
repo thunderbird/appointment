@@ -1,35 +1,117 @@
-@import './preflight.css';
-
 @import './colours.css';
 @import './fonts.css';
 @import './variables.css';
 
-[type='time'],
-[type='time']:is(.dark *),
-[type='password'],
-[type='password']:is(.dark *),
-[type='text'],
-[type='text']:is(.dark *),
-[type='email'],
-[type='email']:is(.dark *) {
-  border: none;
-  background: none;
+/* Prevent padding and border from affecting element width. */
+*,
+::after,
+::before,
+::backdrop,
+::file-selector-button {
+  box-sizing: border-box;
+  margin: 0;
   padding: 0;
+  border: 0 solid;
 }
 
-select {
-  background-image: none; /* services-ui select already has a custom caret */
+/* Use a consistent sensible line-height in all browsers. */
+html, :host {
+  line-height: 1.5;
+  tab-size: 4;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
-select {
-  background-image: none; /* services-ui select already has a custom caret */
+/* Reset headings */
+h1, h2, h3, h4, h5, h6 {
+  font-size: inherit;
+  font-weight: inherit;
 }
 
+/* Reset links to optimize for opt-in styling instead of opt-out. */
+a {
+  color: inherit;
+  -webkit-text-decoration: inherit;
+  text-decoration: inherit;
+}
+
+/* Add the correct font weight in Edge and Safari. */
+b, strong {
+  font-weight: bolder;
+}
+
+/* Correct the odd `em` font sizing in all browsers. */
+code, kbd, samp, pre {
+  font-size: 1em;
+}
+
+/* Reset table */
+table {
+  text-indent: 0;
+  border-color: inherit;
+  border-collapse: collapse;
+}
+
+/* Reset lists */
+ol, ul, menu {
+  list-style: none;
+}
+
+/* Reset and default horizontal line */
 hr {
+  height: 0;
   border-top: 1px solid var(--colour-neutral-border);
 }
 
-/* vue specific classes */
+/* Reset display for media elements */
+img, svg, video, canvas, audio, iframe, embed, object {
+  display: block;
+}
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Reset form input elements */
+button, input, select, optgroup, textarea, ::file-selector-button {
+  font: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  border-radius: 0;
+  background-color: transparent;
+  opacity: 1;
+
+  &:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
+::placeholder {
+  opacity: 1; /* Reset the default placeholder opacity in Firefox. */
+}
+
+:-moz-ui-invalid {
+  box-shadow: none; /* Remove the additional `:invalid` styles in Firefox. */
+}
+
+/* Correct the inability to style the border radius in iOS Safari. */
+button,
+input:where([type='button'], [type='reset'], [type='submit']),
+::file-selector-button {
+  appearance: button;
+}
+
+/* Correct the cursor style of increment and decrement buttons in Safari. */
+::-webkit-inner-spin-button,
+::-webkit-outer-spin-button {
+  height: auto;
+}
+
+
+
+/* Vue specific classes */
 .v-enter-active,
 .v-leave-active {
   transition-property: opacity;
@@ -42,36 +124,7 @@ hr {
   opacity: 0;
 }
 
-
-/* Force First Time User Experience to be different from the rest of the site */
-.page-ftue, .new-design {
-  font-family: 'Inter', 'sans-serif';
-  font-size: 0.8125rem;
-}
-
-
-.is-light-mode {
-  display: block;
-}
-
-.is-dark-mode {
-  display: none;
-}
-
-.dark {
-  .is-light-mode {
-    display: none;
-  }
-
-  .is-dark-mode {
-    display: block;
-  }
-}
-
-.modal-active {
-  overflow: hidden;
-}
-
+/* Custom content for screen readers */
 .screen-reader-only {
   position: absolute;
   width: 1px;
