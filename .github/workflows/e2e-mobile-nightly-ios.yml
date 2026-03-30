@@ -1,7 +1,7 @@
-name: e2e-desktop-nightly-ios
+name: e2e-mobile-nightly-ios
 
 concurrency:
-  group: e2e-desktop-nightly-ios
+  group: e2e-moible-nightly-ios
   cancel-in-progress: true
 
 on:
@@ -15,8 +15,8 @@ permissions:
   contents: read    # This is required for actions/checkout
 
 jobs:
-  desktop-nightly-ios:
-    name: prod-desktop-nightly-ios
+  mobile-nightly-ios:
+    name: prod-mobile-nightly-ios
     runs-on: ubuntu-latest
     environment:
       name: production

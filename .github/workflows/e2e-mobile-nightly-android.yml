@@ -1,7 +1,7 @@
-name: e2e-desktop-nightly-android
+name: e2e-mobile-nightly-android
 
 concurrency:
-  group: e2e-desktop-nightly-android
+  group: e2e-mobile-nightly-android
   cancel-in-progress: true
 
 on:
@@ -15,8 +15,8 @@ permissions:
   contents: read    # This is required for actions/checkout
 
 jobs:
-  desktop-nightly-android:
-    name: prod-desktop-nightly-android
+  mobile-nightly-android:
+    name: prod-mobile-nightly-android
     runs-on: ubuntu-latest
     environment:
       name: production
