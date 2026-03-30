@@ -29,11 +29,11 @@ jobs:
       APPT_BOOKEE_NAME: ${{ secrets.E2E_APPT_PROD_BOOKEE_NAME }}
       APPT_BOOKEE_EMAIL: ${{ secrets.E2E_APPT_PROD_BOOKEE_EMAIL }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           cache: 'npm'
           cache-dependency-path: 'test/e2e/package-lock.json'
 
