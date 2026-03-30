@@ -46,7 +46,6 @@ export default [
       // Disable full warning, and customize the typescript one
       // Warn about unused vars unless they start with an underscore
       'no-unused-vars': 'off',
-      '@typescript-eslint/no-require-imports': 'off', // can be removed when we got rid of Tailwind or updated to v4
       '@typescript-eslint/no-unused-vars': [
         'warn',
         {

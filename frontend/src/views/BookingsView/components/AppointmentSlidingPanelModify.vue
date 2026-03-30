@@ -10,7 +10,7 @@ import { useI18n } from 'vue-i18n';
 import { Appointment, SelectOption } from '@/models';
 import { dayjsKey } from '@/keys';
 import { timeFormat } from '@/utils';
-import { PrimaryButton, SelectInput } from '@thunderbirdops/services-ui';
+import { PrimaryButton, SelectInput, TextArea } from '@thunderbirdops/services-ui';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useUserStore } from '@/stores/user-store';
 
@@ -158,7 +158,7 @@ defineExpose({
         <div class="attendees-header">
           {{ t('label.attendees') }}:
         </div>
-        <template v-for="s in attendeesSlots" :key="s.start">
+        <template v-for="s in attendeesSlots" :key="String(s.start)">
           <div class="attendee-item">
             {{ s.attendee.email }}
           </div>
@@ -166,13 +166,13 @@ defineExpose({
       </div>
   
       <form id="appointment-modify-form" class="notes-form" @submit.prevent="handleModifyFormSubmit">
-        <label for="notes" class="notes-label">
-          {{ t('label.notes') }}
-          <textarea name="notes" v-model="form.notes"
-            :placeholder="t('placeholder.bookingNotesPlaceholder')" class="notes-textarea"
-            data-testid="appointment-modal-modify-notes-input">
-          </textarea>
-        </label>
+        <text-area
+          name="notes"
+          :label="t('label.notes')"
+          v-model="form.notes"
+          :placeholder="t('placeholder.bookingNotesPlaceholder')"
+          data-testid="appointment-modal-modify-notes-input"
+        />
       </form>
     </div>
   </template>
@@ -269,30 +269,6 @@ defineExpose({
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.notes-textarea {
-  width: 100%;
-  height: 6rem;
-  margin-top: 0.5rem;
-  margin-bottom: 2rem;
-  border-radius: 0.375rem;
-  resize: none;
-  border: 1px solid var(--colour-neutral-border);
-  padding: 0.5rem;
-  font-family: inherit;
-
-  &:focus {
-    outline: none;
-    border-color: var(--colour-primary-default);
-    box-shadow: 0 0 0 3px var(--colour-primary-soft);
-  }
-}
-
-.dark .notes-textarea {
-  border-color: var(--colour-neutral-border);
-  background-color: var(--colour-neutral-lower);
-  color: var(--colour-ti-base);
 }
 
 /* Confirmation container */
