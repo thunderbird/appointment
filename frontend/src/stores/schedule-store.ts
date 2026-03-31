@@ -16,7 +16,7 @@ import {
 } from '@/models';
 import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
-import { arrayRotate, getEndOfWeek, getStartOfWeek, timeFormat } from '@/utils';
+import { arrayRotate, getStartOfWeek, timeFormat } from '@/utils';
 import { Dayjs } from 'dayjs';
 
  

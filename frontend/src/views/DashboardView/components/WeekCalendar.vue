@@ -118,7 +118,7 @@ function onRemoteEventMouseLeave() {
  * Calculates grid positioning for calendar events
  * Returns position info including calculated height based on duration
  */
-function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots: Object[], gap = 2, topOffset = 0) {
+function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots: object[], gap = 2, topOffset = 0) {
   if (!slots.length) return null;
 
   // 1. Calculate grid column based on the event's position within the week
