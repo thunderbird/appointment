@@ -16,7 +16,7 @@ import {
 } from '@/models';
 import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
-import { getEndOfWeek, getStartOfWeek, timeFormat } from '@/utils';
+import { arrayRotate, getEndOfWeek, getStartOfWeek, timeFormat } from '@/utils';
 import { Dayjs } from 'dayjs';
 
  
@@ -227,7 +227,8 @@ export const useScheduleStore = defineStore('schedules', () => {
   };
 
   /**
-   * Takes the current configuration and generates an array of time slots that are available for selection
+   * Takes the current configuration and generates an array of time slots that are available for selection.
+   * This is the client-side implementation of controller/calendar::available_slots_from_schedule
    */
   const availableTimeSlots = (date: Dayjs) => {
     const s = firstSchedule.value;
@@ -261,14 +262,16 @@ export const useScheduleStore = defineStore('schedules', () => {
     // Handle custom start of week setting
     const user = useUserStore();
     const startOfWeek = user.data.settings.startOfWeek ?? 7;
-  
+
     const d = date.minute(0).second(0).millisecond(0);
 
     const slots = [];
 
-    // Iterate over each day of week in order of the users preference
-    // TODO
-    [1,2,3,4,5,6,7].forEach((day, index) => {
+    // Iterate over each day of week ordered by users preference
+    const defaultWeekdays = [1,2,3,4,5,6,7];
+    const orderedWeekdays = arrayRotate(defaultWeekdays, -defaultWeekdays.indexOf(startOfWeek));
+
+    orderedWeekdays.forEach((day, index) => {
       // Iterate over each available time slot
       weeklyTimes[day]?.forEach((slot) => {
         const start = getStartOfWeek(d, startOfWeek).add(index, 'days').hour(slot.startHour);
