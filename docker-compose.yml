@@ -1,5 +1,5 @@
 services:
-  backend:
+  backend: &backend
     build:
       context: ./backend
       dockerfile: ./Dockerfile
@@ -17,6 +17,24 @@ services:
     depends_on:
       postgresql:
         condition: service_healthy
+
+  celery-worker:
+    <<: *backend
+    ports: []
+    environment:
+      - CONTAINER_ROLE=worker
+    depends_on:
+      - backend
+      - redis
+
+  celery-beat:
+    <<: *backend
+    ports: []
+    environment:
+      - CONTAINER_ROLE=beat
+    depends_on:
+      - backend
+      - redis
 
   frontend:
     build: ./frontend
