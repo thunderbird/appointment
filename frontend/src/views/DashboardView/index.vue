@@ -16,6 +16,7 @@ import WeekCalendar from './components/WeekCalendar.vue';
 import { useCalendarStore } from '@/stores/calendar-store';
 import { useAppointmentStore } from '@/stores/appointment-store';
 import { useUserStore } from '@/stores/user-store';
+import { useScheduleStore } from '@/stores/schedule-store';
 
 const route = useRoute();
 const dj = inject(dayjsKey);
@@ -26,6 +27,7 @@ const appointmentStore = useAppointmentStore();
 const userStore = useUserStore();
 const { remoteEvents } = storeToRefs(calendarStore);
 const { pendingAppointments } = storeToRefs(appointmentStore);
+const { availableTimeSlots } = useScheduleStore();
 
 const isLoading = ref(false);
 
@@ -38,6 +40,8 @@ const activeDateRange = computed(() => {
     end: getEndOfWeek(activeDate.value, startOfWeek).format('YYYY-MM-DD'),
   };
 });
+
+const selectableSlots = computed(() => availableTimeSlots(activeDate.value));
 
 async function onDateChange(dateObj: TimeFormatted) {
   isLoading.value = true;
@@ -92,6 +96,7 @@ export default {
           :active-date-range="activeDateRange"
           :events="remoteEvents"
           :pending-appointments="pendingAppointments"
+          :selectable-slots="selectableSlots"
           :is-loading="isLoading"
         />
       </div>
