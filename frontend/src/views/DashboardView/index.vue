@@ -98,6 +98,7 @@ export default {
           :pending-appointments="pendingAppointments"
           :selectable-slots="selectableSlots"
           :is-loading="isLoading"
+          :disabled="true"
         />
       </div>
     </div>

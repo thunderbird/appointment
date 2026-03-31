@@ -28,6 +28,7 @@ interface Props {
   pendingAppointments?: Appointment[],
   selectableSlots?: Slot[],
   isLoading?: boolean,
+  disabled?: boolean,
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -35,6 +36,7 @@ const props = withDefaults(defineProps<Props>(), {
   pendingAppointments: () => [] as Appointment[],
   selectableSlots: () => [] as Slot[],
   isLoading: false,
+  disabled: false,
 });
 
 const emit = defineEmits(['event-selected'])
@@ -356,7 +358,7 @@ const blockerPlaceholderForGrid = computed(() => {
 
       // Otherwise add a blocker
       slots.push({
-        id: i*j,
+        id: `${i}-${j}`,
         gridColumn: j,
         gridRowStart: i,
         topOffset: '1px',
@@ -401,7 +403,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="calendar-wrapper" :class="{ 'loading': isLoading }">
+  <div class="calendar-wrapper" :class="{ 'loading': isLoading, 'disabled': disabled }">
     <div class="calendar-loading" v-if="isLoading">
       <loading-spinner />
     </div>
@@ -506,7 +508,7 @@ onMounted(() => {
           marginTop: slot?.topOffset,
           height: slot?.height,
         }"
-        @click="emit('event-selected', slot.start)"
+        @click="!disabled ? emit('event-selected', slot.start) : null"
         :data-testid="`event-${dj(slot.start).format(DateFormatStrings.Qalendar)}`"
       >
         {{ slot?.title }}
@@ -710,16 +712,18 @@ onMounted(() => {
   border: none;
   color: transparent;
   
-  &:hover {
-    background-color: color-mix(in srgb, var(--colour-ti-highlight) 10%, transparent);
-    border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 66%, transparent);
-  }
-
   &.selected {
     background-color: var(--colour-accent-blue);
     border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 80%, transparent);
     color: var(--colour-neutral-base);
   }
+}
+.calendar-wrapper.disabled .selectable-slot {
+  cursor: default;
+}
+.calendar-wrapper:not(.disabled) .selectable-slot:not(.selected):hover {
+  background-color: color-mix(in srgb, var(--colour-ti-highlight) 10%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 66%, transparent);
 }
 
 .blocker-slot {

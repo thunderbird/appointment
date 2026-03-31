@@ -234,13 +234,11 @@ export const useScheduleStore = defineStore('schedules', () => {
 
     if (!s) return [];
 
-    const slots = [];
-
     // Get general start and end hour from the schedule config
     const startHour = parseInt(timeToFrontendTime(s.start_time, s.time_updated).slice(0, 2));
     const endHour = parseInt(timeToFrontendTime(s.end_time, s.time_updated).slice(0, 2));
 
-    // Prepare a list of weekdays with their general time window or, if set, custom availability
+    // Normalise availability to a list of weekdays with their general time window or, if set, custom availability
     // Format: {[weekday]: [{startHour, endHour}, ...]}
     const weeklyTimes = {};
     s.weekdays.forEach((weekday) => {
@@ -266,16 +264,19 @@ export const useScheduleStore = defineStore('schedules', () => {
   
     const d = date.minute(0).second(0).millisecond(0);
 
+    const slots = [];
+
     // Iterate over each day of week in order of the users preference
+    // TODO
     [1,2,3,4,5,6,7].forEach((day, index) => {
       // Iterate over each available time slot
       weeklyTimes[day]?.forEach((slot) => {
         const start = getStartOfWeek(d, startOfWeek).add(index, 'days').hour(slot.startHour);
         const end = start.hour(slot.endHour);
-    
+
         // Init date pointer with first time slot start
         let pointer = start;
-        
+
         while (pointer.isBefore(end)) {
           slots.push({
             start: pointer,
@@ -286,6 +287,7 @@ export const useScheduleStore = defineStore('schedules', () => {
         }
       });
     });
+
     return slots;
   };
 
