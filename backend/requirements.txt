@@ -3,6 +3,7 @@ argon2-cffi==25.*
 argon2-cffi-bindings==25.*
 Babel==2.*
 caldav==1.6.0
+celery[redis]==5.*
 cryptography==46.*
 dnspython==2.*
 fastapi[standard]==0.*
