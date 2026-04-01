@@ -152,7 +152,8 @@ def create_calendar_schedule(
             repo.schedule.hard_delete(db, db_schedule.id)
             raise validation.ScheduleCreationException()
 
-    _sync_watch_channels(db, google_client, subscriber, schedule.calendar_id)
+    if os.getenv('GOOGLE_INVITE_ENABLED') == 'True':
+        _sync_watch_channels(db, google_client, subscriber, schedule.calendar_id)
 
     return db_schedule
 
@@ -210,7 +211,8 @@ def update_schedule(
 
     result = repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
 
-    _sync_watch_channels(db, google_client, subscriber, schedule.calendar_id)
+    if os.getenv('GOOGLE_INVITE_ENABLED') == 'True':
+        _sync_watch_channels(db, google_client, subscriber, schedule.calendar_id)
 
     return result
 
