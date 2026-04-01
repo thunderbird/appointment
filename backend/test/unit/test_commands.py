@@ -126,6 +126,7 @@ class TestBackfillGoogleChannels:
             assert channel.channel_id == 'channel-123'
             assert channel.resource_id == 'resource-456'
             assert channel.sync_token == 'sync-token-abc'
+            assert channel.state is not None
 
     def test_skips_calendar_with_existing_channel(
         self, with_db, make_google_calendar, make_schedule, make_external_connections
@@ -146,6 +147,7 @@ class TestBackfillGoogleChannels:
                 channel_id='existing-channel',
                 resource_id='existing-resource',
                 expiration=datetime(2030, 1, 1, tzinfo=timezone.utc),
+                state='existing-state',
                 sync_token='existing-sync',
             )
 
@@ -228,6 +230,7 @@ class TestRenewGoogleChannels:
                 channel_id='old-channel-id',
                 resource_id='old-resource-id',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(hours=hours_until_expiry),
+                state='old-state',
                 sync_token='old-sync-token',
             )
 
@@ -264,6 +267,8 @@ class TestRenewGoogleChannels:
             assert updated.resource_id == 'new-resource-id'
             expected = datetime.fromtimestamp(new_expiration_ms / 1000, tz=timezone.utc)
             assert updated.expiration.replace(tzinfo=None) == expected.replace(tzinfo=None)
+            assert updated.state is not None
+            assert updated.state != 'old-state'
 
     def test_skips_channel_not_yet_expiring(
         self, with_db, make_google_calendar, make_external_connections
@@ -283,6 +288,7 @@ class TestRenewGoogleChannels:
                 channel_id='healthy-channel',
                 resource_id='healthy-resource',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(days=5),
+                state='healthy-state',
                 sync_token='healthy-sync',
             )
 
@@ -389,3 +395,5 @@ class TestRenewGoogleChannels:
             updated = repo.google_calendar_channel.get_by_calendar_id(db, cal.id)
             assert updated is not None
             assert updated.channel_id == 'new-channel-id'
+            assert updated.state is not None
+            assert updated.state != 'old-state'

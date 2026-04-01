@@ -353,6 +353,7 @@ class TestGoogleCalendarChannelRepo:
                 channel_id='test-channel-abc',
                 resource_id='test-resource-xyz',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(days=7),
+                state='test-state-abc',
             )
             assert channel.id is not None
 
@@ -370,6 +371,7 @@ class TestGoogleCalendarChannelRepo:
                 channel_id='channel-for-cal',
                 resource_id='resource-for-cal',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(days=7),
+                state='state-for-cal',
             )
 
             found = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
@@ -386,6 +388,7 @@ class TestGoogleCalendarChannelRepo:
                 channel_id='ch-sync-test',
                 resource_id='res-sync-test',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(days=7),
+                state='state-sync-test',
             )
             assert channel.sync_token is None
 
@@ -405,6 +408,7 @@ class TestGoogleCalendarChannelRepo:
                 channel_id='expiring-soon',
                 resource_id='res-1',
                 expiration=now + timedelta(hours=12),
+                state='state-expiring',
             )
             repo.google_calendar_channel.create(
                 db,
@@ -412,6 +416,7 @@ class TestGoogleCalendarChannelRepo:
                 channel_id='not-expiring',
                 resource_id='res-2',
                 expiration=now + timedelta(days=5),
+                state='state-not-expiring',
             )
 
             threshold = now + timedelta(hours=24)
@@ -429,6 +434,7 @@ class TestGoogleCalendarChannelRepo:
                 channel_id='to-delete',
                 resource_id='res-del',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(days=7),
+                state='state-del',
             )
 
             repo.google_calendar_channel.delete(db, channel)
@@ -446,6 +452,7 @@ class TestGoogleCalendarChannelRepo:
                 channel_id='cascade-test',
                 resource_id='res-cascade',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(days=7),
+                state='state-cascade',
             )
 
             repo.calendar.delete(db, calendar.id)
@@ -484,12 +491,14 @@ class TestSetupWatchChannel:
 
         with with_db() as db:
             db_cal = repo.calendar.get(db, calendar.id)
-            setup_watch_channel(db, mock_client, db_cal)
+            result = setup_watch_channel(db, mock_client, db_cal)
 
+            assert result is True
             channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
             assert channel is not None
             assert channel.channel_id == 'new-channel-id'
             assert channel.sync_token == 'initial-sync-token'
+            assert channel.state is not None
 
     def test_noop_if_channel_already_exists(
         self, with_db, make_google_calendar, make_external_connections, make_pro_subscriber
@@ -515,14 +524,16 @@ class TestSetupWatchChannel:
                 channel_id='existing-channel',
                 resource_id='existing-resource',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(days=7),
+                state='existing-state',
             )
 
         mock_client = Mock()
 
         with with_db() as db:
             db_cal = repo.calendar.get(db, calendar.id)
-            setup_watch_channel(db, mock_client, db_cal)
+            result = setup_watch_channel(db, mock_client, db_cal)
 
+            assert result is True
             mock_client.watch_events.assert_not_called()
 
     def test_noop_for_caldav_calendar(self, with_db, make_caldav_calendar):
@@ -531,8 +542,9 @@ class TestSetupWatchChannel:
 
         with with_db() as db:
             db_cal = repo.calendar.get(db, calendar.id)
-            setup_watch_channel(db, mock_client, db_cal)
+            result = setup_watch_channel(db, mock_client, db_cal)
 
+            assert result is False
             mock_client.watch_events.assert_not_called()
 
     def test_noop_if_no_google_client(self, with_db, make_google_calendar):
@@ -540,8 +552,9 @@ class TestSetupWatchChannel:
 
         with with_db() as db:
             db_cal = repo.calendar.get(db, calendar.id)
-            setup_watch_channel(db, None, db_cal)
+            result = setup_watch_channel(db, None, db_cal)
 
+            assert result is False
             assert repo.google_calendar_channel.get_by_calendar_id(db, calendar.id) is None
 
 
@@ -570,6 +583,7 @@ class TestTeardownWatchChannel:
                 channel_id='teardown-channel',
                 resource_id='teardown-resource',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(days=7),
+                state='teardown-state',
             )
 
         mock_client = Mock()
@@ -577,8 +591,9 @@ class TestTeardownWatchChannel:
 
         with with_db() as db:
             db_cal = repo.calendar.get(db, calendar.id)
-            teardown_watch_channel(db, mock_client, db_cal)
+            result = teardown_watch_channel(db, mock_client, db_cal)
 
+            assert result is True
             mock_client.stop_channel.assert_called_once()
             assert repo.google_calendar_channel.get_by_calendar_id(db, calendar.id) is None
 
@@ -588,8 +603,9 @@ class TestTeardownWatchChannel:
 
         with with_db() as db:
             db_cal = repo.calendar.get(db, calendar.id)
-            teardown_watch_channel(db, mock_client, db_cal)
+            result = teardown_watch_channel(db, mock_client, db_cal)
 
+            assert result is False
             mock_client.stop_channel.assert_not_called()
 
     def test_deletes_record_even_without_google_client(self, with_db, make_google_calendar):
@@ -602,10 +618,12 @@ class TestTeardownWatchChannel:
                 channel_id='orphan-channel',
                 resource_id='orphan-resource',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(days=7),
+                state='orphan-state',
             )
 
         with with_db() as db:
             db_cal = repo.calendar.get(db, calendar.id)
-            teardown_watch_channel(db, None, db_cal)
+            result = teardown_watch_channel(db, None, db_cal)
 
+            assert result is True
             assert repo.google_calendar_channel.get_by_calendar_id(db, calendar.id) is None
