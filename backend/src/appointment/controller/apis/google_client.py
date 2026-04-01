@@ -309,6 +309,8 @@ class GoogleClient:
         """Register a push notification channel for calendar event changes.
         Ref: https://developers.google.com/calendar/api/v3/reference/events/watch"""
         channel_id = str(uuid.uuid4())
+        ttl = os.getenv('GOOGLE_CHANNEL_TTL_IN_SECONDS', 604800) # 7 days
+
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
                 response = service.events().watch(
@@ -317,10 +319,16 @@ class GoogleClient:
                         'id': channel_id,
                         'type': 'web_hook',
                         'address': webhook_url,
+                        'params': {
+                            'ttl': str(ttl)
+                        }
                     },
                 ).execute()
             except HttpError as e:
                 logging.error(f'[google_client.watch_events] Request Error: {e.status_code}/{e.error_details}')
+                return None
+            except Exception as e:
+                logging.error(f'[google_client.watch_events] Error: {e}')
                 return None
 
         return response
