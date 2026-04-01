@@ -2,6 +2,7 @@
 
 import json
 import logging
+import uuid
 from datetime import datetime, timezone
 
 from google.oauth2.credentials import Credentials
@@ -65,7 +66,8 @@ def run():
             continue
 
         try:
-            response = google_client.watch_events(calendar.user, webhook_url, token)
+            state = str(uuid.uuid4())
+            response = google_client.watch_events(calendar.user, webhook_url, token, state=state)
             if not response:
                 print(f'  Calendar {calendar.id}: watch_events returned no response.')
                 failed += 1
@@ -82,6 +84,7 @@ def run():
                 channel_id=response['id'],
                 resource_id=response['resourceId'],
                 expiration=expiration_dt,
+                state=state,
                 sync_token=sync_token,
             )
             created += 1

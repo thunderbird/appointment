@@ -3,6 +3,7 @@
 import json
 import logging
 import os
+import uuid
 from datetime import datetime, timezone
 
 from google.oauth2.credentials import Credentials
@@ -53,7 +54,8 @@ def setup_watch_channel(db: Session, google_client: GoogleClient, calendar: mode
         return
 
     try:
-        response = google_client.watch_events(calendar.user, webhook_url, token)
+        state = str(uuid.uuid4())
+        response = google_client.watch_events(calendar.user, webhook_url, token, state=state)
         if response:
             expiration_ms = int(response.get('expiration', 0))
             expiration_dt = datetime.fromtimestamp(expiration_ms / 1000, tz=timezone.utc)
@@ -66,6 +68,7 @@ def setup_watch_channel(db: Session, google_client: GoogleClient, calendar: mode
                 channel_id=response['id'],
                 resource_id=response['resourceId'],
                 expiration=expiration_dt,
+                state=state,
                 sync_token=sync_token,
             )
     except Exception as e:

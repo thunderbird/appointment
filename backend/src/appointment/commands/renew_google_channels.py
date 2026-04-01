@@ -6,6 +6,7 @@ Google channels typically last ~7 days, so daily renewal keeps a buffer.
 
 import json
 import logging
+import uuid
 from datetime import datetime, timedelta, timezone
 
 from google.oauth2.credentials import Credentials
@@ -60,7 +61,8 @@ def run():
 
         # Create a new channel
         try:
-            response = google_client.watch_events(calendar.user, webhook_url, token)
+            new_state = str(uuid.uuid4())
+            response = google_client.watch_events(calendar.user, webhook_url, token, state=new_state)
             if response:
                 expiration_ms = int(response.get('expiration', 0))
                 expiration_dt = datetime.fromtimestamp(expiration_ms / 1000, tz=timezone.utc)
@@ -71,6 +73,7 @@ def run():
                     new_channel_id=response['id'],
                     new_resource_id=response['resourceId'],
                     new_expiration=expiration_dt,
+                    new_state=new_state,
                 )
                 renewed += 1
             else:

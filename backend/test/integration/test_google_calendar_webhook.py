@@ -45,6 +45,54 @@ class TestGoogleCalendarWebhook:
         )
         assert response.status_code == 200
 
+    def test_state_mismatch_is_rejected(
+        self, with_db, with_client, make_pro_subscriber, make_google_calendar, make_external_connections
+    ):
+        """A notification with a mismatched state token should be silently ignored."""
+        subscriber = make_pro_subscriber()
+        google_creds = json.dumps({
+            'token': 'fake-token',
+            'refresh_token': 'fake-refresh',
+            'client_id': 'fake-client-id',
+            'client_secret': 'fake-secret',
+        })
+        ext_conn = make_external_connections(
+            subscriber.id,
+            type=models.ExternalConnectionType.google,
+            token=google_creds,
+        )
+        calendar = make_google_calendar(
+            subscriber_id=subscriber.id,
+            connected=True,
+            external_connection_id=ext_conn.id,
+        )
+
+        with with_db() as db:
+            repo.google_calendar_channel.create(
+                db,
+                calendar_id=calendar.id,
+                channel_id='state-channel',
+                resource_id='res-state',
+                expiration=datetime.now(tz=timezone.utc) + timedelta(days=7),
+                state='correct-state-token',
+                sync_token='some-sync-token',
+            )
+
+        response = with_client.post(
+            '/webhooks/google-calendar',
+            headers={
+                'X-Goog-Channel-Id': 'state-channel',
+                'X-Goog-Resource-State': 'exists',
+                'X-Goog-Channel-Token': 'wrong-state-token',
+            },
+        )
+        assert response.status_code == 200
+
+        with with_db() as db:
+            channel = repo.google_calendar_channel.get_by_channel_id(db, 'state-channel')
+            assert channel is not None
+            assert channel.sync_token == 'some-sync-token'
+
     def test_disconnected_calendar_triggers_teardown(
         self, with_db, with_client, make_pro_subscriber, make_google_calendar, make_external_connections
     ):
@@ -67,6 +115,7 @@ class TestGoogleCalendarWebhook:
             external_connection_id=ext_conn.id,
         )
 
+        channel_state = 'disconnected-state'
         with with_db() as db:
             repo.google_calendar_channel.create(
                 db,
@@ -74,6 +123,7 @@ class TestGoogleCalendarWebhook:
                 channel_id='disconnected-cal-channel',
                 resource_id='res-disconnected',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(days=7),
+                state=channel_state,
                 sync_token='some-sync-token',
             )
 
@@ -82,6 +132,7 @@ class TestGoogleCalendarWebhook:
             headers={
                 'X-Goog-Channel-Id': 'disconnected-cal-channel',
                 'X-Goog-Resource-State': 'exists',
+                'X-Goog-Channel-Token': channel_state,
             },
         )
         assert response.status_code == 200
@@ -116,6 +167,7 @@ class TestGoogleCalendarWebhook:
             external_connection_id=ext_conn.id,
         )
 
+        channel_state = 'test-state-token'
         with with_db() as db:
             repo.google_calendar_channel.create(
                 db,
@@ -123,6 +175,7 @@ class TestGoogleCalendarWebhook:
                 channel_id='valid-channel',
                 resource_id='res-valid',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(days=7),
+                state=channel_state,
                 sync_token='initial-sync-token',
             )
 
@@ -131,6 +184,7 @@ class TestGoogleCalendarWebhook:
             headers={
                 'X-Goog-Channel-Id': 'valid-channel',
                 'X-Goog-Resource-State': 'exists',
+                'X-Goog-Channel-Token': channel_state,
             },
         )
         assert response.status_code == 200
@@ -195,6 +249,7 @@ class TestCalendarConnectWatchChannel:
                 channel_id='should-remain',
                 resource_id='res-remain',
                 expiration=datetime.now(tz=timezone.utc) + timedelta(days=7),
+                state='remain-state',
             )
 
         response = with_client.post(f'/cal/{calendar.id}/disconnect', headers=auth_headers)

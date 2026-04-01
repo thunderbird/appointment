@@ -145,6 +145,11 @@ def google_calendar_notification(
         logging.warning(f'[webhooks.google_calendar] Unknown channel_id: {channel_id}')
         return success_response
 
+    incoming_state = request.headers.get('X-Goog-Channel-Token')
+    if incoming_state != channel.state:
+        logging.warning(f'[webhooks.google_calendar] State mismatch for channel {channel_id}')
+        return success_response
+
     calendar = channel.calendar
     if not calendar:
         repo.google_calendar_channel.delete(db, channel)

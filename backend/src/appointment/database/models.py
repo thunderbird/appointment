@@ -470,6 +470,7 @@ class GoogleCalendarChannel(Base):
     resource_id = Column(String)
     expiration = Column(DateTime)
     sync_token = Column(String, nullable=True)
+    state = Column(encrypted_type(String, length=36), nullable=True)
 
     calendar: Mapped[Calendar] = relationship('Calendar', back_populates='google_channel')
 
