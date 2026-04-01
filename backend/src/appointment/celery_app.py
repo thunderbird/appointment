@@ -40,6 +40,9 @@ def create_celery_app() -> Celery:
     sentry_sdk.set_extra('CELERY_RESULT_EXPIRES', result_expires)
     sentry_sdk.set_extra('CELERY_TASK_ALWAYS_EAGER', task_always_eager)
 
+    google_channel_ttl = float(os.getenv('GOOGLE_CHANNEL_TTL_IN_SECONDS', 604800))
+    google_channel_renew_interval = google_channel_ttl - 86400  # 1 day buffer
+
     app = Celery('appointment')
 
     app.config_from_object({
@@ -58,6 +61,10 @@ def create_celery_app() -> Celery:
             'heartbeat-every-60s': {
                 'task': 'appointment.tasks.health.heartbeat',
                 'schedule': 60.0,
+            },
+            'renew-google-channels': {
+                'task': 'appointment.tasks.google.renew_google_channels',
+                'schedule': google_channel_renew_interval,
             },
         },
         'beat_schedule_filename': 'celerybeat-appointment-schedule',
