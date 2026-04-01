@@ -680,7 +680,11 @@ onMounted(() => {
   font-size: 0.6875rem;
   border-left: solid 3px var(--colour-primary-default);
   border-radius: 3px;
-  background-image: linear-gradient(159deg, #1373D935 13%, #58c9ff35 99%);
+  background-image: linear-gradient(
+    159deg,
+    color-mix(in srgb, var(--colour-primary-default) 20%, transparent) 13%,
+    color-mix(in srgb, var(--colour-accent-blue) 20%, transparent) 99%
+  );
   cursor: pointer;
   z-index: 1;
   min-width: 200px;
@@ -745,6 +749,11 @@ onMounted(() => {
     transparent 8px
   );
   cursor: default;
+
+  &.dark {
+    --stripe: var(--colour-neutral-base);
+    background-color:  color-mix(in srgb, var(--colour-neutral-lower) 66%, transparent);
+  }
 }
 
 .vertical-line {
