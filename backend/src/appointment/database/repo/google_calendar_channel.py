@@ -39,6 +39,7 @@ def create(
     channel_id: str,
     resource_id: str,
     expiration: datetime,
+    state: str,
     sync_token: str | None = None,
 ) -> models.GoogleCalendarChannel:
     channel = models.GoogleCalendarChannel(
@@ -47,6 +48,7 @@ def create(
         resource_id=resource_id,
         expiration=expiration,
         sync_token=sync_token,
+        state=state,
     )
     db.add(channel)
     db.commit()
@@ -67,10 +69,12 @@ def update_expiration(
     new_channel_id: str,
     new_resource_id: str,
     new_expiration: datetime,
+    new_state: str,
 ):
     channel.channel_id = new_channel_id
     channel.resource_id = new_resource_id
     channel.expiration = new_expiration
+    channel.state = new_state
     db.commit()
     db.refresh(channel)
     return channel
