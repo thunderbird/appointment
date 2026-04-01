@@ -269,15 +269,14 @@ def _find_appointment_by_external_id(
     db: Session, calendar_id: int, external_id: str
 ) -> models.Appointment | None:
     """Find an appointment on the given calendar matching the Google event ID."""
-    appointments = (
+    return (
         db.query(models.Appointment)
-        .filter(models.Appointment.calendar_id == calendar_id)
-        .all()
+        .filter(
+            models.Appointment.calendar_id == calendar_id,
+            models.Appointment.external_id == external_id,
+        )
+        .first()
     )
-    for appointment in appointments:
-        if appointment.external_id == external_id:
-            return appointment
-    return None
 
 
 def _handle_event_cancelled(
