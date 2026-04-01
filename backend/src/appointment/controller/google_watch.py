@@ -23,35 +23,42 @@ def get_webhook_url() -> str | None:
 
 def get_google_token(google_client: GoogleClient, external_connection: models.ExternalConnections):
     """Build Google Credentials from an external connection's stored token."""
+    if not external_connection.token:
+        return None
+
     return Credentials.from_authorized_user_info(
         json.loads(external_connection.token), google_client.SCOPES
     )
 
 
-def setup_watch_channel(db: Session, google_client: GoogleClient, calendar: models.Calendar):
+def setup_watch_channel(db: Session, google_client: GoogleClient, calendar: models.Calendar) -> bool:
     """Register a push notification channel for a single Google calendar.
-    No-ops if a channel already exists or prerequisites are missing."""
+    Returns True if a channel exists (or was created), False on failure."""
     if not google_client or calendar.provider != models.CalendarProvider.google:
-        return
+        return False
 
     webhook_url = get_webhook_url()
     if not webhook_url:
         logging.warning('[google_watch] BACKEND_URL not set, skipping watch channel setup')
-        return
+        return False
 
     existing = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
     if existing:
-        return
+        return True
 
     external_connection = calendar.external_connection
     if not external_connection or not external_connection.token:
-        return
+        return False
 
     try:
         token = get_google_token(google_client, external_connection)
     except (json.JSONDecodeError, Exception) as e:
-        logging.warning(f'[google_watch] Could not parse token for calendar {calendar.id}: {e}')
-        return
+        logging.error(f'[google_watch] Could not parse token for calendar {calendar.id}: {e}')
+        return False
+
+    if not token:
+        logging.error(f'[google_watch] Missing token for calendar {calendar.id}')
+        return False
 
     try:
         state = str(uuid.uuid4())
@@ -73,22 +80,31 @@ def setup_watch_channel(db: Session, google_client: GoogleClient, calendar: mode
             )
     except Exception as e:
         logging.warning(f'[google_watch] Failed to set up watch channel for calendar {calendar.id}: {e}')
+        return False
+
+    return True
 
 
-def teardown_watch_channel(db: Session, google_client: GoogleClient | None, calendar: models.Calendar):
-    """Stop and delete the watch channel for a single Google calendar."""
+def teardown_watch_channel(db: Session, google_client: GoogleClient | None, calendar: models.Calendar) -> bool:
+    """Stop and delete the watch channel for a single Google calendar.
+    Returns True if the channel was deleted, False if there was nothing to remove."""
     channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
     if not channel:
-        return
+        return False
 
     if google_client and calendar.external_connection and calendar.external_connection.token:
         try:
             token = get_google_token(google_client, calendar.external_connection)
-            google_client.stop_channel(channel.channel_id, channel.resource_id, token)
+
+            if not token:
+                logging.error(f'[google_watch] Missing token for channel {channel.channel_id}')
+            else:
+                google_client.stop_channel(channel.channel_id, channel.resource_id, token)
         except Exception as e:
             logging.warning(f'[google_watch] Failed to stop channel {channel.channel_id}: {e}')
 
     repo.google_calendar_channel.delete(db, channel)
+    return True
 
 
 def teardown_watch_channels_for_connection(
@@ -103,11 +119,9 @@ def teardown_watch_channels_for_connection(
     token = None
     if google_client:
         try:
-            token = Credentials.from_authorized_user_info(
-                json.loads(google_connection.token), google_client.SCOPES
-            )
+            token = get_google_token(google_client, google_connection)
         except (json.JSONDecodeError, Exception) as e:
-            logging.warning(f'[google_watch] Could not parse token for channel teardown: {e}')
+            logging.error(f'[google_watch] Could not parse token for channel teardown: {e}')
 
     calendars = (
         db.query(models.Calendar)
