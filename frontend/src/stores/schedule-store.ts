@@ -12,7 +12,7 @@ import {
   MeetingLinkProviderType,
 } from '@/definitions';
 import {
-  Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse, Exception, ExceptionDetail,
+  Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse, Exception, ExceptionDetail, HourPeriod, Slot,
 } from '@/models';
 import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
@@ -227,8 +227,11 @@ export const useScheduleStore = defineStore('schedules', () => {
   };
 
   /**
-   * Takes the current configuration and generates an array of time slots that are available for selection.
-   * This is the client-side implementation of controller/calendar::available_slots_from_schedule
+   * Takes the current schedule configuration and generates an array of time slots that are available, meaning they are
+   * within the time slots the user defined with their availability settings.
+   * This is the client-side implementation of controller/calendar.py::available_slots_from_schedule
+   * 
+   * @param date The date object indicating the week to calculate available time slots for
    */
   const availableTimeSlots = (date: Dayjs) => {
     const s = firstSchedule.value;
@@ -241,7 +244,7 @@ export const useScheduleStore = defineStore('schedules', () => {
 
     // Normalise availability to a list of weekdays with their general time window or, if set, custom availability
     // Format: {[weekday]: [{startHour, endHour}, ...]}
-    const weeklyTimes = {};
+    const weeklyTimes = {} as {[key:number]: HourPeriod[]};
     s.weekdays.forEach((weekday) => {
       if (s.use_custom_availabilities) {
         s.availabilities.filter((a) => a.day_of_week === weekday).forEach((a) => {
@@ -265,7 +268,7 @@ export const useScheduleStore = defineStore('schedules', () => {
 
     const d = date.minute(0).second(0).millisecond(0);
 
-    const slots = [];
+    const slots = [] as Slot[];
 
     // Iterate over each day of week ordered by users preference
     const defaultWeekdays = [1,2,3,4,5,6,7];
@@ -282,8 +285,10 @@ export const useScheduleStore = defineStore('schedules', () => {
 
         while (pointer.isBefore(end)) {
           slots.push({
+            id: null,
             start: pointer,
             duration: s.slot_duration,
+            attendee_id: null,
           });
 
           pointer = pointer.add(s.slot_duration, 'minutes');

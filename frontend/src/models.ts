@@ -449,3 +449,23 @@ export type HTMLInputElementEvent = Event & {
 export type CopyTemplate = {
   [key:number]: boolean;
 }
+
+export type HourPeriod = {
+  startHour: number,
+  endHour: number,
+}
+
+export type GridElement = {
+  id: number|string,
+  gridColumn: number,
+  gridRowStart: number,
+  topOffset?: string,
+  height?: string,
+}
+
+export type GridTimeSlot = {
+  text: string,
+  startTime: string,
+  gridRowStart: number,
+  gridRowEnd: number,
+ }

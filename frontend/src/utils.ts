@@ -69,7 +69,7 @@ export const lcFirst = (s: string): string => {
 };
 
 // Rotate the elements of an array for <n> steps. Works in both directions (n can be negative).
-export const arrayRotate = (a: any[], n: number) => {
+export const arrayRotate = <T>(a: T[], n: number): T[] => {
   a.push(...a.splice(0, (-n % a.length + a.length) % a.length));
   return a;
 }

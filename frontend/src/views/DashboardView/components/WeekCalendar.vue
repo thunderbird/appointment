@@ -6,7 +6,7 @@ import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
 import { initialEventPopupData, showEventPopup } from '@/utils';
-import { Appointment, EventPopup as EventPopupType, RemoteEvent, Slot } from '@/models';
+import { Appointment, EventPopup as EventPopupType, GridElement, GridTimeSlot, RemoteEvent, Slot } from '@/models';
 import { BookingStatus, ColourSchemes, DateFormatStrings } from '@/definitions';
 import { Dayjs } from 'dayjs';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
@@ -118,7 +118,7 @@ function onRemoteEventMouseLeave() {
  * Calculates grid positioning for calendar events
  * Returns position info including calculated height based on duration
  */
-function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots: object[], gap = 2, topOffset = 0) {
+function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots: GridTimeSlot[], gap = 2, topOffset = 0): GridElement {
   if (!slots.length) return null;
 
   // 1. Calculate grid column based on the event's position within the week
@@ -163,7 +163,7 @@ function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots: o
       gridRowStart,
       topOffset: `${calculatedTopOffset}px`, // Set design offset of 6px for each event
       height,
-    };
+    } as GridElement;
   }
 
   return null;
@@ -204,7 +204,7 @@ const weekdays = computed(() => {
  * Generates an array of time slot objects for a full 24-hour day with grid positioning info
  */
 const timeSlotsForGrid = computed(() => {
-  const slots = [];
+  const slots = [] as GridTimeSlot[];
 
   // Always show full 24-hour day with 60-minute intervals
   const startTime = dj('00:00', 'HH:mm');
@@ -341,8 +341,8 @@ const filteredSelectableSlotsForGrid = computed(() => {
  * Generates an array of blocked slots with grid positioning info
  */
 const blockerPlaceholderForGrid = computed(() => {
-  const slots = [];
-  const isBlocked = (e, column: number, row: number) => e.gridColumn === column && e.gridRowStart === row;
+  const slots = [] as GridElement[];
+  const isBlocked = (e: GridElement, column: number, row: number) => e.gridColumn === column && e.gridRowStart === row;
 
   // Go through the whole event grid
   for (let i = 1; i <= 24; i++) {
