@@ -1,8 +1,87 @@
 ---
+### Special variables used throughout this file
+
+# Update this value to update all containers based on this thunderbird/accounts image
+.appointment_image: &APPOINTMENT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:22f638c2d66d8aa7141321a4cdb661694ceb6665
+
+# These variables go into the Appointment container environments
+.app_env: &VAR_APP_ENV {name: "APP_ENV", value: "dev"}
+.auth_scheme: &VAR_AUTH_SCHEME {name: "AUTH_SCHEME", value: "oidc"}
+.database_engine: &VAR_DATABASE_ENGINE {name: "DATABASE_ENGINE", value: "postgres"}
+.database_port: &VAR_DATABASE_PORT {name: "DATABASE_PORT", value: "5432"}
+.frontend_url: &VAR_FRONTEND_URL {name: "FRONTEND_URL", value: "https://appointment-dev.tb.pro"}
+.jwt_algo: &VAR_JWT_ALGO {name: "JWT_ALGO", value: "HS256"}
+.jwt_expire_in_mins: &VAR_JWT_EXPIRE_IN_MINS {name: "JWT_EXPIRE_IN_MINS", value: "10000"}
+.log_level: &VAR_LOG_LEVEL {name: "LOG_LEVEL", value: "ERROR"}
+.log_use_stream: &VAR_LOG_USE_STREAM {name: "LOG_USE_STREAM", value: "True"}
+.oidc_exp_grace_period: &VAR_OIDC_EXP_GRACE_PERIOD {name: "OIDC_EXP_GRACE_PERIOD", value: "60"}
+.oidc_fallback_match_by_email: &VAR_OIDC_FALLBACK_MATCH_BY_EMAIL {name: "OIDC_FALLBACK_MATCH_BY_EMAIL", value: "True"}
+.oidc_token_intropsection_url: &VAR_OIDC_TOKEN_INTROSPECTION_URL {name: "OIDC_TOKEN_INTROSPECTION_URL", value: "https://auth-stage.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"}
+.redis_db: &VAR_REDIS_DB {name: "REDIS_DB", value: "0"}
+.redis_port: &VAR_REDIS_PORT {name: "REDIS_PORT", value: "6379"}
+.redis_url: &VAR_REDIS_URL {name: "REDIS_URL", value: "appointment-dev-cache-backend-619e0e3-7syyoy.serverless.euc1.cache.amazonaws.com:6379"}
+.redis_use_cluster: &VAR_REDIS_USE_CLUSTER {name: "REDIS_USE_CLUSTER", value: "True"}
+.redis_use_ssl: &VAR_REDIS_USE_SSL {name: "REDIS_USE_SSL", value: "True"}
+.sentry_dsn: &VAR_SENTRY_DSN {name: "SENTRY_DSN", value: "https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648"}
+.service_email: &VAR_SERVICE_EMAIL {name: "SERVICE_EMAIL", value: "no-reply@appointment-dev.tb.pro"}
+.short_base_url: &VAR_SHORT_BASE_URL {name: "SHORT_BASE_URL", value: "https://dev.apt.mt"}
+.tb_accounts_caldav_url: &VAR_TB_ACCOUNTS_CALDAV_URL {name: "TB_ACCOUNTS_CALDAV_URL", value: "https://dev-thundermail.com"}
+.tier_basic_calendar_limit: &VAR_TIER_BASIC_CALENDAR_LIMIT {name: "TIER_BASIC_CALENDAR_LIMIT", value: "3"}
+.tier_plus_calendar_limit: &VAR_TIER_PLUS_CALENDAR_LIMIT {name: "TIER_PLUS_CALENDAR_LIMIT", value: "5"}
+.tier_pro_calendar_limit: &VAR_TIER_PRO_CALENDAR_LIMIT {name: "TIER_PRO_CALENDAR_LIMIT", value: "5"}
+.zoom_api_enabled: &VAR_ZOOM_API_ENABLED {name: "ZOOM_API_ENABLED", value: "True"}
+.zoom_auth_callback: &VAR_ZOOM_AUTH_CALLBACK {name: "ZOOM_AUTH_CALLBACK", value: "https://appointment-dev.tb.pro/api/v1/zoom/callback"}
+
+# These variables go into container defintions, referring to secret values
+.database_host: &SECRET_DATABASE_HOST {name: "DATABASE_HOST", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-host-9udgGP"}
+.database_name: &SECRET_DATABASE_NAME {name: "DATABASE_NAME", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-name-ajG5gL"}
+.database_user: &SECRET_DATABASE_USER {name: "DATABASE_USERNAME", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-user-ARowLy"}
+.database_password: &SECRET_DATABASE_PASSWORD {name: "DATABASE_PASSWORD", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-password-yetVzH"}
+.oidc_client_id: &SECRET_OIDC_CLIENT_ID {name: "OIDC_CLIENT_ID", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-id-yaAyEa"}
+.oidc_client_secret: &SECRET_OIDC_CLIENT_SECRET {name: "OIDC_CLIENT_SECRET", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-secret-uSFyGx"}
+
+# This forms the base of Appointment-based task definitions. The blank fields commented here must be set on any
+# inheriting task definition:
+#   family:
+#   cpu:
+#   memory:
+#   container_definitions:
+.appointment_taskdef: &APPOINTMENT_TASK_DEFINITION
+  network_mode: awsvpc
+  requires_compatibilities:
+   - FARGATE
+
+# This forms the base of Accounts-based container definitions. The blank fields commented here must be set on any
+# inheriting container definition:
+#   environment:
+#   logConfiguration:
+.appointment_contdef: &APPOINTMENT_CONTAINER_DEFINITION
+  image: *APPOINTMENT_IMAGE
+  essential: true
+  mountPoints: []
+  linuxParameters:
+    initProcessEnabled: True
+  restartPolicy:
+    enabled: yes
+    restartAttemptPeriod: 300
+  secrets:
+    - *SECRET_DATABASE_HOST
+    - *SECRET_DATABASE_NAME
+    - *SECRET_DATABASE_PASSWORD
+    - *SECRET_DATABASE_USER
+    - *SECRET_OIDC_CLIENT_ID
+    - *SECRET_OIDC_CLIENT_SECRET
+
 resources:
 
   domains:
     redis: cache.appointment-dev.tb.pro
+
+  tb:cloudwatch:LogDestination:
+    appointment:
+      log_group:
+        retention_in_days: 7
+      org_name: tb
 
   tb:network:MultiCidrVpc:
     appointment:
@@ -113,6 +192,215 @@ resources:
       description: Appointment backend (dev)
       engine: redis
       major_engine_version: "7"
+
+  tb:fargate:AutoscalingFargateCluster:
+    appointment:
+      cluster: {}
+      cluster_name: 'appointment-dev'
+      task_definitions:
+        celery:
+          <<: *APPOINTMENT_TASK_DEFINITION
+          family: appointment-celery-dev
+          cpu: 512
+          memory: 1024
+          container_definitions:
+            - <<: *APPOINTMENT_CONTAINER_DEFINITION
+              name: celery
+              logConfiguration:
+                logDriver: awslogs
+                options:
+                  awslogs-group: /tb/dev/appointment
+                  awslogs-stream-prefix: celery/
+                  awslogs-region: eu-central-1
+              environment:
+                - *VAR_APP_ENV
+                - *VAR_AUTH_SCHEME
+                - *VAR_DATABASE_ENGINE
+                - *VAR_DATABASE_PORT
+                - *VAR_FRONTEND_URL
+                - *VAR_JWT_ALGO
+                - *VAR_JWT_EXPIRE_IN_MINS
+                - *VAR_LOG_LEVEL
+                - *VAR_LOG_USE_STREAM
+                - *VAR_OIDC_EXP_GRACE_PERIOD
+                - *VAR_OIDC_FALLBACK_MATCH_BY_EMAIL
+                - *VAR_OIDC_TOKEN_INTROSPECTION_URL
+                - *VAR_REDIS_DB
+                - *VAR_REDIS_PORT
+                - *VAR_REDIS_URL
+                - *VAR_REDIS_USE_CLUSTER
+                - *VAR_REDIS_USE_SSL
+                - *VAR_SENTRY_DSN
+                - *VAR_SERVICE_EMAIL
+                - *VAR_SHORT_BASE_URL
+                - *VAR_TB_ACCOUNTS_CALDAV_URL
+                - *VAR_TIER_BASIC_CALENDAR_LIMIT
+                - *VAR_TIER_PLUS_CALENDAR_LIMIT
+                - *VAR_TIER_PRO_CALENDAR_LIMIT
+                - *VAR_ZOOM_API_ENABLED
+
+        flower:
+          <<: *APPOINTMENT_TASK_DEFINITION
+          family: appointment-flower-dev
+          cpu: 512
+          memory: 1024
+          container_definitions:
+            - <<: *APPOINTMENT_CONTAINER_DEFINITION
+              name: flower
+              logConfiguration:
+                logDriver: awslogs
+                options:
+                  awslogs-group: /tb/dev/appointment
+                  awslogs-stream-prefix: flower/
+                  awslogs-region: eu-central-1
+              portMappings:
+                - containerPort: 5555
+                  hostPort: 5555
+                  protocol: tcp
+              environment:
+                - *VAR_APP_ENV
+                - *VAR_AUTH_SCHEME
+                - *VAR_DATABASE_ENGINE
+                - *VAR_DATABASE_PORT
+                - *VAR_FRONTEND_URL
+                - *VAR_JWT_ALGO
+                - *VAR_JWT_EXPIRE_IN_MINS
+                - *VAR_LOG_LEVEL
+                - *VAR_LOG_USE_STREAM
+                - *VAR_OIDC_EXP_GRACE_PERIOD
+                - *VAR_OIDC_FALLBACK_MATCH_BY_EMAIL
+                - *VAR_OIDC_TOKEN_INTROSPECTION_URL
+                - *VAR_REDIS_DB
+                - *VAR_REDIS_PORT
+                - *VAR_REDIS_URL
+                - *VAR_REDIS_USE_CLUSTER
+                - *VAR_REDIS_USE_SSL
+                - *VAR_SENTRY_DSN
+                - *VAR_SERVICE_EMAIL
+                - *VAR_SHORT_BASE_URL
+                - *VAR_TB_ACCOUNTS_CALDAV_URL
+                - *VAR_TIER_BASIC_CALENDAR_LIMIT
+                - *VAR_TIER_PLUS_CALENDAR_LIMIT
+                - *VAR_TIER_PRO_CALENDAR_LIMIT
+                - *VAR_ZOOM_API_ENABLED
+      
+      targets:
+        flower:
+          name: flower-dev
+          health_check:
+            enabled: true
+            healthy_threshold: 3
+            interval: 15
+            path: /
+            port: 5555
+            protocol: HTTP
+            timeout: 5
+            unhealthy_threshold: 3
+          port: 5555
+          protocol: HTTP
+          target_type: ip
+          ip_address_type: ipv4
+
+      load_balancers:
+        flower:
+          enable_cross_zone_load_balancing: yes
+          internal: yes
+          ip_address_type: ipv4
+          load_balancer_type: application
+          name: appointment-flower-dev
+
+      container_security_groups:
+        celery:  # Indicates the service whose containers get this SG
+          none:  # Indicates no load balancer for this service
+            description: Network config for Celery containers in accounts-dev
+            rules:
+              egress:
+                - from_port: 0
+                  to_port: 65535
+                  protocol: tcp
+                  description: Allow all egress
+                  cidr_blocks:
+                    - 0.0.0.0/0
+              ingress: []  # Celery is a "pull" based system, requiring no ingress
+        flower:    # Indicates the service whose containers get this SG
+          flower:  # LB to allow connections from
+            description: Network config for Flower containers in accounts-dev
+            rules:
+              egress:
+                - from_port: 0
+                  to_port: 65535
+                  protocol: tcp
+                  description: Allow all egress
+                  cidr_blocks:
+                    - 0.0.0.0/0
+              ingress:
+                - from_port: 5555
+                  to_port: 5555
+                  protocol: tcp
+                  description: Allow traffic to Flower service
+
+      load_balancer_security_groups:
+        flower:  # LB to apply the rules to
+          description: Network config for Flower load balancer in accounts-dev
+          rules:
+            egress:
+              - from_port: 0
+                to_port: 65535
+                protocol: tcp
+                description: Allow all egress
+                cidr_blocks:
+                  - 0.0.0.0/0
+            ingress:
+              - from_port: 443
+                to_port: 443
+                protocol: tcp
+                description: Allow local TLS traffic only
+                cidr_blocks:
+                  - 10.22.0.0/16
+      
+      listeners:
+        flower:  # Load balancer to attach to
+          flower:  # Target to route traffic to
+            certificate_arn: arn:aws:acm:eu-central-1:768512802988:certificate/1841c871-30f9-461e-ba30-20d172fb656f
+            port: 443
+            protocol: HTTPS
+
+      services:
+        celery:
+          assign_public_ip: yes
+          service:
+            desired_count: 1
+          target: null
+        flower:
+          assign_public_ip: yes
+          container_name: flower
+          container_port: 5555
+          load_balancer: flower
+          service:
+            desired_count: 1
+          target: flower
+
+      registries:
+        celery:
+          - arn:aws:ecr:eu-central-1:768512802988:repository/thunderbird/appointment*
+        flower:
+          - arn:aws:ecr:eu-central-1:768512802988:repository/thunderbird/appointment*
+
+      secrets:
+        celery:
+          - arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/*
+        flower:
+          - arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/*
+      
+      ssm_params: {}
+
+      autoscalers:
+        celery:
+          min_capacity: 2
+          max_capacity: 4
+        flower:
+          min_capacity: 1
+          max_capacity: 1
 
   tb:fargate:FargateClusterWithLogging:
     backend:
@@ -252,26 +540,26 @@ resources:
         logging_config:
           include_cookies: True
 
-  tb:cloudwatch:CloudWatchMonitoringGroup:
-    cloudwatch:
-      notify_emails:
-        - thunderbird-services-monitoring@thunderbird.net
-      config:
-        alarms: {}
+  # tb:cloudwatch:CloudWatchMonitoringGroup:
+  #   cloudwatch:
+  #     notify_emails:
+  #       - thunderbird-services-monitoring@thunderbird.net
+  #     config:
+  #       alarms: {}
 
-  tb:ci:AwsAutomationUser:
-    ci:
-      additional_policies: []
-      # - arn:aws:iam::768512802988:policy/appointment-dev-frontend-cache-invalidation
-      enable_ecr_image_push: True
-      ecr_repositories:
-        - thunderbird/appointment
-      enable_fargate_deployments: True
-      fargate_clusters:
-        - appointment-dev-fargate-backend
-      fargate_task_role_arns:
-        - arn:aws:iam::768512802988:role/appointment-dev-fargate-backend
-      enable_full_s3_access: False
-      enable_s3_bucket_upload: True
-      s3_upload_buckets:
-        - tb-appointment-dev-frontend
+  # tb:ci:AwsAutomationUser:
+  #   ci:
+  #     additional_policies: []
+  #     # - arn:aws:iam::768512802988:policy/appointment-dev-frontend-cache-invalidation
+  #     enable_ecr_image_push: True
+  #     ecr_repositories:
+  #       - thunderbird/appointment
+  #     enable_fargate_deployments: True
+  #     fargate_clusters:
+  #       - appointment-dev-fargate-backend
+  #     fargate_task_role_arns:
+  #       - arn:aws:iam::768512802988:role/appointment-dev-fargate-backend
+  #     enable_full_s3_access: False
+  #     enable_s3_bucket_upload: True
+  #     s3_upload_buckets:
+  #       - tb-appointment-dev-frontend
