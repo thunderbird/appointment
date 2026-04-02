@@ -17,6 +17,7 @@ import 'dayjs/locale/de';
 import {
   dayjsKey, durationHumanizedKey, isoWeekdaysKey, tzGuessKey, isoFirstDayOfWeekKey,
 } from '@/keys';
+import { arrayRotate } from '@/utils';
 
 export type IsoWeekday = {
   iso: number,
@@ -60,9 +61,11 @@ export default function useDayJS(app: App<Element>, locale: string) {
   // provide unified list of locale weekdays with Monday=1 to Sunday=7 (isoweekdays)
   // taking locale first day of week into account
   const isoWeekdays = [] as IsoWeekday[];
-  // TODO: generate order list for all starting days
-  const order = isoFirstDayOfWeek === 7 ? [7, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5, 6, 7];
-  order.forEach((i) => {
+  // Generate order list for all starting days
+  const defaultWeekdays = [1,2,3,4,5,6,7];
+  const orderedWeekdays = arrayRotate(defaultWeekdays, -defaultWeekdays.indexOf(firstDayOfWeek));
+      
+  orderedWeekdays.forEach((i) => {
     const n = i === 7 ? 0 : i;
     isoWeekdays.push({
       iso: i,

@@ -6,7 +6,7 @@ import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
 import { initialEventPopupData, showEventPopup } from '@/utils';
-import { Appointment, EventPopup as EventPopupType, RemoteEvent, Slot } from '@/models';
+import { Appointment, EventPopup as EventPopupType, GridElement, GridTimeSlot, RemoteEvent, Slot } from '@/models';
 import { BookingStatus, ColourSchemes, DateFormatStrings } from '@/definitions';
 import { Dayjs } from 'dayjs';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
@@ -28,6 +28,7 @@ interface Props {
   pendingAppointments?: Appointment[],
   selectableSlots?: Slot[],
   isLoading?: boolean,
+  disabled?: boolean,
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -35,6 +36,7 @@ const props = withDefaults(defineProps<Props>(), {
   pendingAppointments: () => [] as Appointment[],
   selectableSlots: () => [] as Slot[],
   isLoading: false,
+  disabled: false,
 });
 
 const emit = defineEmits(['event-selected'])
@@ -116,7 +118,7 @@ function onRemoteEventMouseLeave() {
  * Calculates grid positioning for calendar events
  * Returns position info including calculated height based on duration
  */
-function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots) {
+function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots: GridTimeSlot[], gap = 2, topOffset = 0): GridElement {
   if (!slots.length) return null;
 
   // 1. Calculate grid column based on the event's position within the week
@@ -140,7 +142,7 @@ function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots) {
 
   // 3. Calculate vertical offset within the starting row (for events not starting on the hour)
   const startMinutes = eventStart.minute();
-  const topOffset = (startMinutes / 60) * ROW_HEIGHT_PX;
+  const calculatedTopOffset = ((startMinutes / 60) * ROW_HEIGHT_PX) + topOffset;
 
   // 4. Calculate event duration and height
   // Handle events that cross midnight
@@ -152,16 +154,16 @@ function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots) {
 
   // Height based on duration with minimum of 1.25rem (approximately 20px, 1rem for text and 0.25rem for padding)
   const calculatedHeight = (durationMinutes / 60) * ROW_HEIGHT_PX;
-  const height = `max(1.25rem, ${calculatedHeight}px)`;
+  const height = `max(1.25rem, ${calculatedHeight - gap}px)`;
 
   // Return the positioning data if the event falls within calendar hours
   if (gridRowStart >= 1 && gridRowStart <= 24) {
     return {
       gridColumn,
       gridRowStart,
-      topOffset: `${topOffset}px`,
+      topOffset: `${calculatedTopOffset}px`, // Set design offset of 6px for each event
       height,
-    };
+    } as GridElement;
   }
 
   return null;
@@ -202,7 +204,7 @@ const weekdays = computed(() => {
  * Generates an array of time slot objects for a full 24-hour day with grid positioning info
  */
 const timeSlotsForGrid = computed(() => {
-  const slots = [];
+  const slots = [] as GridTimeSlot[];
 
   // Always show full 24-hour day with 60-minute intervals
   const startTime = dj('00:00', 'HH:mm');
@@ -250,7 +252,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
     const appointmentStart = dj(appointment.slots[0].start);
     const appointmentEnd = appointmentStart.add(appointment.duration, 'minute');
 
-    const gridPosition = calculateEventGridPosition(appointmentStart, appointmentEnd, slots);
+    const gridPosition = calculateEventGridPosition(appointmentStart, appointmentEnd, slots, 2, -6);
 
     if (gridPosition) {
       return {
@@ -283,7 +285,7 @@ const filteredRemoteEventsForGrid = computed(() => {
     const eventStart = dj(remoteEvent.start);
     const eventEnd = dj(remoteEvent.end);
 
-    const gridPosition = calculateEventGridPosition(eventStart, eventEnd, slots);
+    const gridPosition = calculateEventGridPosition(eventStart, eventEnd, slots, 2, -6);
     const hasPendingPlaceholder = filteredPendingAppointmentsForGrid.value.find(
       (a) => a.title === remoteEvent.title && eventStart.isSame(a.start)
     );
@@ -318,7 +320,7 @@ const filteredSelectableSlotsForGrid = computed(() => {
     const slotStart = dj(slot.start);
     const slotEnd = slotStart.add(slot.duration, 'minute');
 
-    const gridPosition = calculateEventGridPosition(slotStart, slotEnd, slots);
+    const gridPosition = calculateEventGridPosition(slotStart, slotEnd, slots, 0, 0);
 
     if (gridPosition) {
       return {
@@ -333,6 +335,40 @@ const filteredSelectableSlotsForGrid = computed(() => {
       };
     }
   }).filter(Boolean)
+});
+
+/**
+ * Generates an array of blocked slots with grid positioning info
+ */
+const blockerPlaceholderForGrid = computed(() => {
+  const slots = [] as GridElement[];
+  const isBlocked = (e: GridElement, column: number, row: number) => e.gridColumn === column && e.gridRowStart === row;
+
+  // Go through the whole event grid
+  for (let i = 1; i <= 24; i++) {
+    for (let j = 2; j <= 8; j++) {
+      // If there is already an object existing at that col-row coordinate: skip
+      if (
+        filteredSelectableSlotsForGrid.value.some((e) => isBlocked(e, j, i))
+        || filteredPendingAppointmentsForGrid.value.some((e) => isBlocked(e, j, i))
+        || filteredRemoteEventsForGrid.value.some((e) => isBlocked(e, j, i))
+      ) {
+        continue;
+      }
+
+      // Otherwise add a blocker
+      slots.push({
+        id: `${i}-${j}`,
+        gridColumn: j,
+        gridRowStart: i,
+        topOffset: '1px',
+        height: `${ROW_HEIGHT_PX - 1}px`,
+      });
+    }
+   
+  }
+
+  return slots;
 });
 
 /**
@@ -367,7 +403,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="calendar-wrapper" :class="{ 'loading': isLoading }">
+  <div class="calendar-wrapper" :class="{ 'loading': isLoading, 'disabled': disabled }">
     <div class="calendar-loading" v-if="isLoading">
       <loading-spinner />
     </div>
@@ -406,6 +442,21 @@ onMounted(() => {
           {{ timeSlot.text }}
         </span>
       </div>
+
+      <!-- Blocked time slots -->
+      <div
+        v-for="blocker in blockerPlaceholderForGrid"
+        :key="blocker?.id"
+        class="event-item blocker-slot"
+        :class="{ 'dark': isDarkMode }"
+        :style="{
+          gridColumn: blocker?.gridColumn,
+          gridRowStart: blocker?.gridRowStart,
+          marginTop: blocker?.topOffset,
+          height: blocker?.height,
+        }"
+        :data-testid="`blocker-${dj(blocker.id)}`"
+      ></div>
 
       <!-- Remote events -->
       <div
@@ -457,7 +508,7 @@ onMounted(() => {
           marginTop: slot?.topOffset,
           height: slot?.height,
         }"
-        @click="emit('event-selected', slot.start)"
+        @click="!disabled ? emit('event-selected', slot.start) : null"
         :data-testid="`event-${dj(slot.start).format(DateFormatStrings.Qalendar)}`"
       >
         {{ slot?.title }}
@@ -552,24 +603,6 @@ onMounted(() => {
   }
 }
 
-.calendar-body {
-  display: grid;
-  grid-template-columns: 4rem repeat(7, 200px);
-  justify-items: center;
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: auto;
-  position: relative;
-
-  /* Hide scrollbar but keep scrolling functional */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-}
-
 .calendar-weekday-header {
   padding-block-start: 2rem;
   padding-block-end: 1rem;
@@ -588,6 +621,24 @@ onMounted(() => {
   }
 }
 
+.calendar-body {
+  display: grid;
+  grid-template-columns: 4rem repeat(7, 200px);
+  justify-items: center;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: auto;
+  position: relative;
+
+  /* Hide scrollbar but keep scrolling functional */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 .corner-cell-block {
   background-color: var(--colour-neutral-base);
   grid-column: 1;
@@ -598,7 +649,7 @@ onMounted(() => {
   z-index: 2;
 }
 
-.time-slot-cell {
+.calendar-body .time-slot-cell {
   padding-inline: 1rem;
   display: flex;
   align-items: flex-start;
@@ -618,22 +669,27 @@ onMounted(() => {
 }
 
 .event-item {
-  width: 100%;
+  width: 95%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  padding-block-start: 0.125rem;
-  padding-inline-start: 0.25rem;
+  padding-block-start: 0.325rem;
+  padding-inline-start: 0.5rem;
+  padding-inline-end: 0.125rem;
   color: var(--colour-ti-secondary);
-  font-size: 0.68rem;
+  font-size: 0.6875rem;
   border-left: solid 3px var(--colour-primary-default);
-  border-top: 1px solid var(--colour-neutral-border);
   border-radius: 3px;
-  background-color: #d4ebfa; /* One-off colour not in design system */
+  background-image: linear-gradient(
+    159deg,
+    color-mix(in srgb, var(--colour-primary-default) 20%, transparent) 13%,
+    color-mix(in srgb, var(--colour-accent-blue) 20%, transparent) 99%
+  );
   cursor: pointer;
   z-index: 1;
   min-width: 200px;
   align-self: start;
+  justify-self: start;
   box-sizing: border-box;
 
   &.dark {
@@ -643,7 +699,8 @@ onMounted(() => {
 
 .pending-appointment {
   border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 66%, transparent);
-  background-color: color-mix(in srgb, var(--colour-primary-default) 19%, transparent);
+  background-color: color-mix(in srgb, var(--colour-primary-default) 10%, transparent);
+  background-image: none;
 
   &.dark {
     border-color: var(--colour-primary-default);
@@ -651,13 +708,51 @@ onMounted(() => {
 }
 
 .selectable-slot {
-  border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 66%, transparent);
-  margin: .125rem;
-  width: 90%;
+  margin: 0;
+  width: 100%;
 
+  background-color: transparent;
+  background-image: none;
+  border: none;
+  color: transparent;
+  
   &.selected {
     background-color: var(--colour-accent-blue);
+    border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 80%, transparent);
     color: var(--colour-neutral-base);
+  }
+}
+.calendar-wrapper.disabled .selectable-slot {
+  cursor: default;
+}
+.calendar-wrapper:not(.disabled) .selectable-slot:not(.selected):hover {
+  background-color: color-mix(in srgb, var(--colour-ti-highlight) 10%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 66%, transparent);
+}
+
+.blocker-slot {
+  --stripe: color-mix(in srgb, var(--colour-neutral-border) 50%, transparent);
+
+  border: none;
+  margin: 0;
+  width: calc(100% - 1px);
+  margin-inline-start: 1px;
+  border-radius: 0;
+  background-color: var(--colour-neutral-lower);
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0px,
+    transparent 3px,
+    var(--stripe) 3px,
+    var(--stripe) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  cursor: default;
+
+  &.dark {
+    --stripe: var(--colour-neutral-base);
+    background-color:  color-mix(in srgb, var(--colour-neutral-lower) 66%, transparent);
   }
 }
 
