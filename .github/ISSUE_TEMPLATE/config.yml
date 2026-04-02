@@ -1,1 +1,12 @@
+---
 blank_issues_enabled: false
+contact_links:
+  - name: Feature Request
+    url: https://ideas.tb.pro
+    about: Submit your ideas to improve Thunderbird Appointment
+  - name: Support
+    url: https://support.tb.pro
+    about: Knowledge base and customer support requests
+  - name: Bug Report (Account Management)
+    url: https://github.com/thunderbird/thunderbird-accounts/issues/new
+    about: A bug report for general account management (accounts.tb.pro)
