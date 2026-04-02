@@ -268,6 +268,8 @@ class GoogleConnector(BaseConnector):
         attendee: schemas.AttendeeBase,
         organizer: schemas.Subscriber,
         organizer_email: str,
+        send_google_notification: bool = False,
+        booking_confirmation: bool = False,
     ) -> schemas.Event:
         """add a new event to the connected calendar"""
 
@@ -281,26 +283,52 @@ class GoogleConnector(BaseConnector):
         if event.location.phone:
             description.append(l10n('join-phone', {'phone': event.location.phone}, lang=organizer_language))
 
-        body = {
-            'iCalUID': event.uuid.hex,
-            'summary': event.title,
-            'location': event.location.url if event.location.url else None,
-            'description': '\n'.join(description),
-            'start': {'dateTime': event.start.isoformat()},
-            'end': {'dateTime': event.end.isoformat()},
-            'attendees': [
-                {'displayName': organizer.name, 'email': organizer_email, 'responseStatus': 'accepted'},
-                {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'accepted'},
-            ],
-            'organizer': {
-                'displayName': organizer.name,
-                'email': self.remote_calendar_id,
-            },
-        }
+        if send_google_notification:
+            if booking_confirmation:
+                attendees = [
+                    {'displayName': organizer.name, 'email': organizer_email, 'responseStatus': 'needsAction'},
+                    {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'needsAction'},
+                ]
+            else:
+                attendees = [
+                    {'displayName': organizer.name, 'email': organizer_email, 'responseStatus': 'accepted'},
+                    {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'needsAction'},
+                ]
 
-        new_event = self.google_client.save_event(
-            calendar_id=self.remote_calendar_id, body=body, token=self.google_token
-        )
+            body = {
+                'summary': event.title,
+                'location': event.location.url if event.location.url else None,
+                'description': '\n'.join(description),
+                'start': {'dateTime': event.start.isoformat()},
+                'end': {'dateTime': event.end.isoformat()},
+                'status': 'tentative' if booking_confirmation else 'confirmed',
+                'attendees': attendees,
+            }
+
+            new_event = self.google_client.insert_event(
+                calendar_id=self.remote_calendar_id, body=body, token=self.google_token
+            )
+        else:
+            body = {
+                'iCalUID': event.uuid.hex,
+                'summary': event.title,
+                'location': event.location.url if event.location.url else None,
+                'description': '\n'.join(description),
+                'start': {'dateTime': event.start.isoformat()},
+                'end': {'dateTime': event.end.isoformat()},
+                'attendees': [
+                    {'displayName': organizer.name, 'email': organizer_email, 'responseStatus': 'accepted'},
+                    {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'accepted'},
+                ],
+                'organizer': {
+                    'displayName': organizer.name,
+                    'email': self.remote_calendar_id,
+                },
+            }
+
+            new_event = self.google_client.save_event(
+                calendar_id=self.remote_calendar_id, body=body, token=self.google_token
+            )
 
         # Fill in the external_id so we can delete events later!
         event.external_id = new_event.get('id')
@@ -309,9 +337,54 @@ class GoogleConnector(BaseConnector):
 
         return event
 
-    def delete_event(self, uid: str):
+    def confirm_event(
+        self, event_id: str, event: schemas.Event = None, organizer_language: str = None,
+    ):
+        """Patch a tentative event to confirmed status, notifying attendees.
+
+        When *event* is provided the patch also updates summary, location,
+        and description so that a newly-created meeting link is visible on
+        the Google Calendar event.
+        """
+        body = {'status': 'confirmed'}
+
+        if event:
+            body['summary'] = event.title
+            if event.location and event.location.url:
+                body['location'] = event.location.url
+
+            lang = organizer_language or FALLBACK_LOCALE
+            description = [event.description] if event.description else []
+            if event.location and event.location.url:
+                description.append(l10n('join-online', {'url': event.location.url}, lang=lang))
+            if description:
+                body['description'] = '\n'.join(description)
+
+        remote_event = self.google_client.get_event(
+            calendar_id=self.remote_calendar_id,
+            event_id=event_id,
+            token=self.google_token,
+        )
+        if remote_event and remote_event.get('attendees'):
+            attendees = remote_event['attendees']
+            for att in attendees:
+                if att.get('self'):
+                    att['responseStatus'] = 'accepted'
+            body['attendees'] = attendees
+
+        self.google_client.patch_event(
+            calendar_id=self.remote_calendar_id,
+            event_id=event_id,
+            body=body,
+            token=self.google_token,
+        )
+        self.bust_cached_events()
+
+    def delete_event(self, uid: str, send_updates: str = 'none'):
         """Delete remote event of given external_id"""
-        self.google_client.delete_event(calendar_id=self.remote_calendar_id, event_id=uid, token=self.google_token)
+        self.google_client.delete_event(
+            calendar_id=self.remote_calendar_id, event_id=uid, token=self.google_token, send_updates=send_updates
+        )
         self.bust_cached_events()
 
     def delete_events(self, start):
@@ -549,7 +622,13 @@ class CalDavConnector(BaseConnector):
         return events
 
     def save_event(
-        self, event: schemas.Event, attendee: schemas.AttendeeBase, organizer: schemas.Subscriber, organizer_email: str
+        self,
+        event: schemas.Event,
+        attendee: schemas.AttendeeBase,
+        organizer: schemas.Subscriber,
+        organizer_email: str,
+        send_google_notification: bool = False,
+        booking_confirmation: bool = False,
     ):
         """add a new event to the connected calendar"""
         calendar = self.client.calendar(url=self.url)
@@ -571,7 +650,7 @@ class CalDavConnector(BaseConnector):
 
         return event
 
-    def delete_event(self, uid: str):
+    def delete_event(self, uid: str, send_updates: str = 'none'):
         """Delete remote event of given uid"""
         event = self.client.calendar(url=self.url).event_by_uid(uid)
         event.delete()
@@ -611,11 +690,14 @@ class Tools:
         cal = Calendar()
         cal.add('prodid', '-//thunderbird.net/Thunderbird Appointment//EN')
         cal.add('version', '2.0')
+        cal.add('calscale', 'GREGORIAN')
         cal.add('method', 'CANCEL' if event_status == RemoteEventState.CANCELLED.value else 'REQUEST')
 
         org = vCalAddress('MAILTO:' + organizer.preferred_email)
         org.params['cn'] = vText(organizer.preferred_email)
         org.params['role'] = vText('CHAIR')
+
+        now = datetime.now(UTC)
 
         event = Event()
         event.add('uid', appointment.uuid.hex)
@@ -625,8 +707,12 @@ class Tools:
             'dtend',
             slot.start.replace(tzinfo=timezone.utc) + timedelta(minutes=slot.duration),
         )
-        event.add('dtstamp', datetime.now(UTC))
+        event.add('dtstamp', now)
+        event.add('created', now)
+        event.add('last-modified', now)
+        event.add('sequence', 0)
         event.add('status', event_status)
+        event.add('transp', 'OPAQUE')
         event['description'] = appointment.details
         event['organizer'] = org
 
@@ -638,9 +724,9 @@ class Tools:
             else:
                 attendee.params['cn'] = vText(slot.attendee.email)
 
-            # Set the attendee status to accepted by default
-            # since they are the ones who are submitting the request
-            attendee.params['partstat'] = vText(RemoteEventState.ACCEPTED.value)
+            attendee.params['cutype'] = vText('INDIVIDUAL')
+            attendee.params['partstat'] = vText('NEEDS-ACTION')
+            attendee.params['rsvp'] = vText('TRUE')
             attendee.params['role'] = vText('REQ-PARTICIPANT')
             event.add('attendee', attendee)
 
