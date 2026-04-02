@@ -230,8 +230,7 @@ jobs:
   e2e-tests-browserstack-stage:
     name: e2e-tests-browserstack-stage
     needs: create-release
-    if: false
-    # if: ${{ !failure() || !cancelled() }}
+    if: ${{ success() && !cancelled() }} # only proceed if last steps passed and job hasn't been cancelled
     runs-on: ubuntu-latest
     environment: staging
     env:
@@ -262,8 +261,8 @@ jobs:
           project-name: 'Thunderbird Appointment'
           build-name: 'E2E Tests: BUILD_INFO'
 
-      - name: Stage E2E Tests on Desktop Firefox
+      - name: Stage Sanity E2E Tests on Desktop Firefox
         run: |
           cd ./test/e2e
           cp .env.stage.example .env
-          npm run e2e-test-browserstack-firefox
+          npm run stage-sanity-test-browserstack-firefox
