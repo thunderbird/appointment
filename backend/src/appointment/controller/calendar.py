@@ -29,7 +29,7 @@ from sqlalchemy.orm import Session
 
 from .. import utils
 from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE
-from .apis.google_client import GoogleClient
+from .apis.google_client import GoogleClient, SendUpdates
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
 from ..controller.mailer import Attachment
@@ -338,7 +338,10 @@ class GoogleConnector(BaseConnector):
         return event
 
     def confirm_event(
-        self, event_id: str, event: schemas.Event = None, organizer_language: str = None,
+        self,
+        event_id: str,
+        event: schemas.Event | None = None,
+        organizer_language: str | None = None,
     ):
         """Patch a tentative event to confirmed status, notifying attendees.
 
@@ -380,7 +383,7 @@ class GoogleConnector(BaseConnector):
         )
         self.bust_cached_events()
 
-    def delete_event(self, uid: str, send_updates: str = 'none'):
+    def delete_event(self, uid: str, send_updates: SendUpdates = SendUpdates.NONE):
         """Delete remote event of given external_id"""
         self.google_client.delete_event(
             calendar_id=self.remote_calendar_id, event_id=uid, token=self.google_token, send_updates=send_updates
@@ -650,7 +653,7 @@ class CalDavConnector(BaseConnector):
 
         return event
 
-    def delete_event(self, uid: str, send_updates: str = 'none'):
+    def delete_event(self, uid: str, send_updates: SendUpdates = SendUpdates.NONE):
         """Delete remote event of given uid"""
         event = self.client.calendar(url=self.url).event_by_uid(uid)
         event.delete()
@@ -807,8 +810,13 @@ class Tools:
 
         # Send mail
         background_tasks.add_task(
-            send_pending_email, organizer.name, date=date, duration=slot.duration,
-            to=attendee.email, attachment=ics_file, lang=lang,
+            send_pending_email,
+            organizer.name,
+            date=date,
+            duration=slot.duration,
+            to=attendee.email,
+            attachment=ics_file,
+            lang=lang,
         )
 
     def send_reject_vevent(
@@ -840,8 +848,13 @@ class Tools:
 
         # Send mail
         background_tasks.add_task(
-            send_rejection_email, organizer.name, date=date, duration=slot.duration,
-            to=attendee.email, attachment=ics_file, lang=lang,
+            send_rejection_email,
+            organizer.name,
+            date=date,
+            duration=slot.duration,
+            to=attendee.email,
+            attachment=ics_file,
+            lang=lang,
         )
 
     def send_cancel_vevent(

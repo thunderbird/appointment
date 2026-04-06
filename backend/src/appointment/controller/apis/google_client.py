@@ -2,6 +2,7 @@ import logging
 import os
 import uuid
 from datetime import datetime
+from enum import StrEnum
 
 import sentry_sdk
 from google_auth_oauthlib.flow import Flow
@@ -20,6 +21,14 @@ from ...exceptions.calendar import (
     FreeBusyTimeException
 )
 from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
+
+
+class SendUpdates(StrEnum):
+    """Maps to the Google Calendar API ``sendUpdates`` parameter."""
+    """Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events/delete"""
+    ALL = 'all'
+    EXTERNAL_ONLY = 'externalOnly'
+    NONE = 'none'
 
 
 class GoogleClient:
@@ -262,7 +271,7 @@ class GoogleClient:
 
         return response
 
-    def insert_event(self, calendar_id, body, token, send_updates='all'):
+    def insert_event(self, calendar_id, body, token, send_updates: SendUpdates = SendUpdates.ALL):
         response = None
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
@@ -275,7 +284,7 @@ class GoogleClient:
 
         return response
 
-    def patch_event(self, calendar_id, event_id, body, token, send_updates='all'):
+    def patch_event(self, calendar_id, event_id, body, token, send_updates: SendUpdates = SendUpdates.ALL):
         response = None
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
@@ -290,7 +299,7 @@ class GoogleClient:
 
         return response
 
-    def delete_event(self, calendar_id, event_id, token, send_updates='none'):
+    def delete_event(self, calendar_id, event_id, token, send_updates: SendUpdates = SendUpdates.NONE):
         response = None
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:

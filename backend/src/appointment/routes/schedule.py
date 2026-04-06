@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 
 from ..controller import zoom
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
-from ..controller.apis.google_client import GoogleClient
+from ..controller.apis.google_client import GoogleClient, SendUpdates
 from ..controller.google_watch import setup_watch_channel, teardown_watch_channel
 from ..controller.auth import signed_url_by_subscriber
 from ..database import repo, schemas, models
@@ -624,7 +624,7 @@ def handle_schedule_availability_decision(
         # Delete remote HOLD event if existing
         if appointment:
             uuid = slot.appointment.external_id if slot.appointment.external_id else str(slot.appointment.uuid)
-            send_updates = 'all' if use_google_invite else 'none'
+            send_updates = SendUpdates.ALL if use_google_invite else SendUpdates.NONE
             delete_remote_event(
                 uuid, appointment_calendar, subscriber, db, redis, google_client, send_updates=send_updates
             )
@@ -679,8 +679,15 @@ def handle_schedule_availability_decision(
         else:
             # No hold event exists (booking_confirmation was false); create a confirmed event directly.
             event = save_remote_event(
-                event, appointment_calendar, subscriber, slot, db, redis, google_client,
-                send_google_notification=True, booking_confirmation=False,
+                event,
+                appointment_calendar,
+                subscriber,
+                slot,
+                db,
+                redis,
+                google_client,
+                send_google_notification=True,
+                booking_confirmation=False,
             )
             if appointment and event.external_id:
                 repo.appointment.update_external_id(db, appointment, event.external_id)
@@ -771,7 +778,9 @@ def save_remote_event(
         raise EventCouldNotBeAccepted
 
 
-def delete_remote_event(uid: str, calendar, subscriber, db, redis, google_client, send_updates: str = 'none'):
+def delete_remote_event(
+    uid: str, calendar, subscriber, db, redis, google_client, send_updates: SendUpdates = SendUpdates.NONE
+):
     """Delete a remote event from the connected calendar."""
     con, _ = get_remote_connection(calendar, subscriber, db, redis, google_client)
 
