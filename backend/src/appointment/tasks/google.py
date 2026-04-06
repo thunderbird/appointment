@@ -6,7 +6,7 @@ from google.oauth2.credentials import Credentials
 from sqlalchemy.orm import Session
 
 from appointment.celery_app import celery
-from appointment.controller.apis.google_client import GoogleClient, SendUpdates
+from appointment.controller.apis.google_client import GoogleClient, ResponseStatus, SendUpdates
 from appointment.controller import zoom
 from appointment.database import repo, models, schemas
 from appointment.database.models import MeetingLinkProviderType
@@ -117,13 +117,13 @@ def _handle_subscriber_rsvp(
     db: Session,
     appointment: models.Appointment,
     slot: models.Slot,
-    response_status: str,
+    response_status: ResponseStatus,
     google_client: GoogleClient,
     google_token,
     remote_calendar_id: str,
 ):
     """React to the subscriber (calendar owner) accepting/declining via Google Calendar."""
-    if response_status == 'accepted':
+    if response_status == ResponseStatus.ACCEPTED:
         if (
             appointment.status != models.AppointmentStatus.opened
             or slot.booking_status != models.BookingStatus.requested
@@ -161,7 +161,7 @@ def _handle_subscriber_rsvp(
                 if remote_event and remote_event.get('attendees'):
                     for att in remote_event.get('attendees', []):
                         if att.get('self'):
-                            att['responseStatus'] = 'accepted'
+                            att['responseStatus'] = ResponseStatus.ACCEPTED
                     body['attendees'] = remote_event['attendees']
 
                 google_client.patch_event(
@@ -175,7 +175,7 @@ def _handle_subscriber_rsvp(
             f'via Google Calendar, slot {slot.id} booked'
         )
 
-    elif response_status == 'declined':
+    elif response_status == ResponseStatus.DECLINED:
         if slot.booking_status in (models.BookingStatus.requested, models.BookingStatus.booked):
             slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.declined)
             repo.slot.update(db, slot.id, slot_update)
@@ -199,13 +199,13 @@ def _handle_bookee_rsvp(
     db: Session,
     appointment: models.Appointment,
     slot: models.Slot,
-    response_status: str,
+    response_status: ResponseStatus,
     google_client: GoogleClient,
     google_token,
     remote_calendar_id: str,
 ):
     """React to the bookee's RSVP status change from Google Calendar."""
-    if response_status == 'declined':
+    if response_status == ResponseStatus.DECLINED:
         if slot.booking_status in (models.BookingStatus.requested, models.BookingStatus.booked):
             slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.declined)
             repo.slot.update(db, slot.id, slot_update)
@@ -221,7 +221,7 @@ def _handle_bookee_rsvp(
                 f'slot {slot.id} marked as declined'
             )
 
-    elif response_status == 'accepted':
+    elif response_status == ResponseStatus.ACCEPTED:
         log.info(
             f'[tasks.google] Bookee accepted appointment {appointment.id}, '
             f'slot {slot.id}'
