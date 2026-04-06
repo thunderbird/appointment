@@ -31,6 +31,15 @@ class SendUpdates(StrEnum):
     NONE = 'none'
 
 
+class ResponseStatus(StrEnum):
+    """Maps to the Google Calendar API attendee ``responseStatus`` field."""
+    """Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events"""
+    NEEDS_ACTION = 'needsAction'
+    DECLINED = 'declined'
+    TENTATIVE = 'tentative'
+    ACCEPTED = 'accepted'
+
+
 class GoogleClient:
     """Authenticates with Google OAuth and allows the retrieval of Google Calendar information"""
 

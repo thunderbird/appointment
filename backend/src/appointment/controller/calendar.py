@@ -29,7 +29,7 @@ from sqlalchemy.orm import Session
 
 from .. import utils
 from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE
-from .apis.google_client import GoogleClient, SendUpdates
+from .apis.google_client import GoogleClient, ResponseStatus, SendUpdates
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
 from ..controller.mailer import Attachment
@@ -219,7 +219,8 @@ class GoogleConnector(BaseConnector):
             # Grab the attendee list for marking tentative events / filtering out declined events
             attendees = event.get('attendees') or []
             declined = any(
-                (attendee.get('self') and attendee.get('responseStatus') == 'declined') for attendee in attendees
+                attendee.get('self') and attendee.get('responseStatus') == ResponseStatus.DECLINED
+                for attendee in attendees
             )
 
             # Don't show declined events
@@ -228,7 +229,8 @@ class GoogleConnector(BaseConnector):
 
             # Mark tentative events
             tentative = any(
-                (attendee.get('self') and attendee.get('responseStatus') == 'tentative') for attendee in attendees
+                attendee.get('self') and attendee.get('responseStatus') == ResponseStatus.TENTATIVE
+                for attendee in attendees
             )
 
             summary = event.get('summary', 'Title not found!')
@@ -286,13 +288,17 @@ class GoogleConnector(BaseConnector):
         if send_google_notification:
             if booking_confirmation:
                 attendees = [
-                    {'displayName': organizer.name, 'email': organizer_email, 'responseStatus': 'needsAction'},
-                    {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'needsAction'},
+                    {'displayName': organizer.name, 'email': organizer_email,
+                     'responseStatus': ResponseStatus.NEEDS_ACTION},
+                    {'displayName': attendee.name, 'email': attendee.email,
+                     'responseStatus': ResponseStatus.NEEDS_ACTION},
                 ]
             else:
                 attendees = [
-                    {'displayName': organizer.name, 'email': organizer_email, 'responseStatus': 'accepted'},
-                    {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'needsAction'},
+                    {'displayName': organizer.name, 'email': organizer_email,
+                     'responseStatus': ResponseStatus.ACCEPTED},
+                    {'displayName': attendee.name, 'email': attendee.email,
+                     'responseStatus': ResponseStatus.NEEDS_ACTION},
                 ]
 
             body = {
@@ -317,8 +323,10 @@ class GoogleConnector(BaseConnector):
                 'start': {'dateTime': event.start.isoformat()},
                 'end': {'dateTime': event.end.isoformat()},
                 'attendees': [
-                    {'displayName': organizer.name, 'email': organizer_email, 'responseStatus': 'accepted'},
-                    {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': 'accepted'},
+                    {'displayName': organizer.name, 'email': organizer_email,
+                     'responseStatus': ResponseStatus.ACCEPTED},
+                    {'displayName': attendee.name, 'email': attendee.email,
+                     'responseStatus': ResponseStatus.ACCEPTED},
                 ],
                 'organizer': {
                     'displayName': organizer.name,
@@ -372,7 +380,7 @@ class GoogleConnector(BaseConnector):
             attendees = remote_event['attendees']
             for att in attendees:
                 if att.get('self'):
-                    att['responseStatus'] = 'accepted'
+                    att['responseStatus'] = ResponseStatus.ACCEPTED
             body['attendees'] = attendees
 
         self.google_client.patch_event(
