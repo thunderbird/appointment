@@ -33,6 +33,22 @@ def renew_google_channels():
     log.info('Google Calendar channel renewal complete')
 
 
+@celery.task(
+    bind=True,
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_kwargs={'max_retries': 3},
+)
+def stop_google_channel(self, channel_id: str, resource_id: str, token_json: str):
+    """Stop a Google Calendar push notification channel, with automatic retries."""
+    google_client = get_google_client()
+    token = Credentials.from_authorized_user_info(
+        json.loads(token_json), google_client.SCOPES
+    )
+    google_client.stop_channel(channel_id, resource_id, token)
+    log.info(f'Stopped Google Calendar channel {channel_id}')
+
+
 @celery.task
 def process_google_event_changes(calendar_id: int, changed_events: list[dict]):
     """Process changed events from a Google Calendar push notification."""
