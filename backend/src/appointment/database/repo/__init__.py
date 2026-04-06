@@ -1,5 +1,3 @@
-# ruff: noqa
-
 from . import (
     appointment,
     attendee,
