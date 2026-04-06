@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session
 
 from .apis.google_client import GoogleClient
 from ..database import repo, models
+from ..tasks.google import stop_google_channel
 
 
 def get_webhook_url() -> str | None:
@@ -85,23 +86,17 @@ def setup_watch_channel(db: Session, google_client: GoogleClient, calendar: mode
     return True
 
 
-def teardown_watch_channel(db: Session, google_client: GoogleClient | None, calendar: models.Calendar) -> bool:
+def teardown_watch_channel(db: Session, calendar: models.Calendar) -> bool:
     """Stop and delete the watch channel for a single Google calendar.
     Returns True if the channel was deleted, False if there was nothing to remove."""
     channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
     if not channel:
         return False
 
-    if google_client and calendar.external_connection and calendar.external_connection.token:
-        try:
-            token = get_google_token(google_client, calendar.external_connection)
-
-            if not token:
-                logging.error(f'[google_watch] Missing token for channel {channel.channel_id}')
-            else:
-                google_client.stop_channel(channel.channel_id, channel.resource_id, token)
-        except Exception as e:
-            logging.warning(f'[google_watch] Failed to stop channel {channel.channel_id}: {e}')
+    if calendar.external_connection and calendar.external_connection.token:
+        stop_google_channel.delay(
+            channel.channel_id, channel.resource_id, calendar.external_connection.token,
+        )
 
     repo.google_calendar_channel.delete(db, channel)
     return True
@@ -109,19 +104,11 @@ def teardown_watch_channel(db: Session, google_client: GoogleClient | None, cale
 
 def teardown_watch_channels_for_connection(
     db: Session,
-    google_client: GoogleClient | None,
     google_connection: models.ExternalConnections,
 ):
     """Stop and remove all watch channels for calendars under a Google connection."""
     if not google_connection or not google_connection.token:
         return
-
-    token = None
-    if google_client:
-        try:
-            token = get_google_token(google_client, google_connection)
-        except (json.JSONDecodeError, Exception) as e:
-            logging.error(f'[google_watch] Could not parse token for channel teardown: {e}')
 
     calendars = (
         db.query(models.Calendar)
@@ -134,10 +121,8 @@ def teardown_watch_channels_for_connection(
         if not channel:
             continue
 
-        if google_client and token:
-            try:
-                google_client.stop_channel(channel.channel_id, channel.resource_id, token)
-            except Exception as e:
-                logging.warning(f'[google_watch] Failed to stop channel {channel.channel_id}: {e}')
+        stop_google_channel.delay(
+            channel.channel_id, channel.resource_id, google_connection.token,
+        )
 
         repo.google_calendar_channel.delete(db, channel)

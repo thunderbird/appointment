@@ -53,11 +53,9 @@ def run():
             json.loads(external_connection.token), google_client.SCOPES
         )
 
-        # Stop the old channel
-        try:
-            google_client.stop_channel(channel.channel_id, channel.resource_id, token)
-        except Exception as e:
-            logging.warning(f'[renew_google_channels] Failed to stop old channel {channel.channel_id}: {e}')
+        # Stop the old channel (fire-and-forget via Celery with retries)
+        from ..tasks.google import stop_google_channel
+        stop_google_channel.delay(channel.channel_id, channel.resource_id, external_connection.token)
 
         # Create a new channel
         try:

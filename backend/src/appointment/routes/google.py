@@ -152,7 +152,6 @@ def disconnect_account(
     request_body: schemas.DisconnectGoogleAccountRequest,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
-    google_client: GoogleClient = Depends(get_google_client),
 ):
     """Disconnects a google account. Removes associated data from our services and deletes the connection details."""
     google_connection = subscriber.get_external_connection(ExternalConnectionType.google, request_body.type_id)
@@ -165,7 +164,7 @@ def disconnect_account(
             raise ConnectionContainsDefaultCalendarException()
 
     # Tear down watch channels before deleting calendars
-    teardown_watch_channels_for_connection(db, google_client, google_connection)
+    teardown_watch_channels_for_connection(db, google_connection)
 
     # Remove all of the google calendars on their given google connection
     repo.calendar.delete_by_subscriber_and_provider(

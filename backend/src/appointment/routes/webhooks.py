@@ -151,12 +151,12 @@ def google_calendar_notification(
         repo.google_calendar_channel.delete(db, channel)
         return success_response
     if not calendar.connected:
-        teardown_watch_channel(db, google_client, calendar)
+        teardown_watch_channel(db, calendar)
         return success_response
 
     external_connection = calendar.external_connection
     if not external_connection or not external_connection.token:
-        teardown_watch_channel(db, google_client, calendar)
+        teardown_watch_channel(db, calendar)
         return success_response
 
     token = Credentials.from_authorized_user_info(

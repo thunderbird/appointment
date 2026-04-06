@@ -227,7 +227,7 @@ def _sync_watch_channels(db: Session, google_client: GoogleClient, subscriber: S
         if cal.id == default_calendar_id:
             setup_watch_channel(db, google_client, cal)
         else:
-            teardown_watch_channel(db, google_client, cal)
+            teardown_watch_channel(db, cal)
 
 
 @router.post('/public/availability', response_model=schemas.AppointmentOut, tags=['no-cache'])
