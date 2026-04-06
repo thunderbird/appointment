@@ -212,14 +212,15 @@ class TestRenewGoogleChannels:
 
     MODULE = 'appointment.commands.renew_google_channels'
 
-    def _run_renew(self, with_db, mock_google_client):
+    def _run_renew(self, with_db, mock_google_client, mock_stop_task=None):
         with patch(f'{self.MODULE}._common_setup'):
             with patch(f'{self.MODULE}.get_google_client', return_value=mock_google_client):
                 with patch(f'{self.MODULE}.get_webhook_url', return_value='https://example.com/webhook'):
                     with patch(f'{self.MODULE}.get_engine_and_session', return_value=(None, with_db)):
-                        from appointment.commands.renew_google_channels import run
+                        with patch('appointment.tasks.google.stop_google_channel', mock_stop_task or Mock()):
+                            from appointment.commands.renew_google_channels import run
 
-                        run()
+                            run()
 
     def _create_expiring_channel(self, with_db, calendar_id, hours_until_expiry=12):
         """Create a channel that expires within the renewal threshold (24h)."""
@@ -234,9 +235,7 @@ class TestRenewGoogleChannels:
                 sync_token='old-sync-token',
             )
 
-    def test_renews_expiring_channel(
-        self, with_db, make_google_calendar, make_external_connections
-    ):
+    def test_renews_expiring_channel(self, with_db, make_google_calendar, make_external_connections):
         """An expiring channel gets renewed with new ids and expiration."""
         ext = make_external_connections(
             subscriber_id=1,
@@ -255,9 +254,10 @@ class TestRenewGoogleChannels:
             'expiration': str(new_expiration_ms),
         }
 
-        self._run_renew(with_db, mock_google_client)
+        mock_stop_task = Mock()
+        self._run_renew(with_db, mock_google_client, mock_stop_task)
 
-        mock_google_client.stop_channel.assert_called_once()
+        mock_stop_task.delay.assert_called_once()
         mock_google_client.watch_events.assert_called_once()
 
         with with_db() as db:
@@ -270,9 +270,7 @@ class TestRenewGoogleChannels:
             assert updated.state is not None
             assert updated.state != 'old-state'
 
-    def test_skips_channel_not_yet_expiring(
-        self, with_db, make_google_calendar, make_external_connections
-    ):
+    def test_skips_channel_not_yet_expiring(self, with_db, make_google_calendar, make_external_connections):
         """A channel that expires beyond the 24-hour threshold is left alone."""
         ext = make_external_connections(
             subscriber_id=1,
@@ -298,16 +296,13 @@ class TestRenewGoogleChannels:
         self._run_renew(with_db, mock_google_client)
 
         mock_google_client.watch_events.assert_not_called()
-        mock_google_client.stop_channel.assert_not_called()
 
         with with_db() as db:
             channel = repo.google_calendar_channel.get_by_calendar_id(db, cal.id)
             assert channel is not None
             assert channel.channel_id == 'healthy-channel'
 
-    def test_deletes_channel_for_disconnected_calendar(
-        self, with_db, make_google_calendar, make_external_connections
-    ):
+    def test_deletes_channel_for_disconnected_calendar(self, with_db, make_google_calendar, make_external_connections):
         """If the calendar is disconnected, the channel record should be removed."""
         ext = make_external_connections(
             subscriber_id=1,
@@ -327,9 +322,7 @@ class TestRenewGoogleChannels:
         with with_db() as db:
             assert repo.google_calendar_channel.get_by_calendar_id(db, cal.id) is None
 
-    def test_deletes_channel_when_no_external_connection(
-        self, with_db, make_google_calendar
-    ):
+    def test_deletes_channel_when_no_external_connection(self, with_db, make_google_calendar):
         """If the calendar has no external connection, the channel record should be removed."""
         cal = make_google_calendar(connected=True)
         self._create_expiring_channel(with_db, cal.id)
@@ -344,9 +337,7 @@ class TestRenewGoogleChannels:
         with with_db() as db:
             assert repo.google_calendar_channel.get_by_calendar_id(db, cal.id) is None
 
-    def test_deletes_channel_when_watch_returns_none(
-        self, with_db, make_google_calendar, make_external_connections
-    ):
+    def test_deletes_channel_when_watch_returns_none(self, with_db, make_google_calendar, make_external_connections):
         """If watch_events returns None, the channel record should be cleaned up."""
         ext = make_external_connections(
             subscriber_id=1,
@@ -365,10 +356,10 @@ class TestRenewGoogleChannels:
         with with_db() as db:
             assert repo.google_calendar_channel.get_by_calendar_id(db, cal.id) is None
 
-    def test_still_renews_if_stop_channel_fails(
+    def test_stop_channel_is_async_and_does_not_block_renewal(
         self, with_db, make_google_calendar, make_external_connections
     ):
-        """Failure to stop the old channel should not prevent renewal."""
+        """Stopping the old channel is fire-and-forget via Celery; renewal always proceeds."""
         ext = make_external_connections(
             subscriber_id=1,
             type=models.ExternalConnectionType.google,
@@ -380,15 +371,16 @@ class TestRenewGoogleChannels:
         new_expiration_ms = int(datetime(2030, 6, 1, tzinfo=timezone.utc).timestamp() * 1000)
         mock_google_client = Mock()
         mock_google_client.SCOPES = ['https://www.googleapis.com/auth/calendar']
-        mock_google_client.stop_channel.side_effect = Exception('Google API error')
         mock_google_client.watch_events.return_value = {
             'id': 'new-channel-id',
             'resourceId': 'new-resource-id',
             'expiration': str(new_expiration_ms),
         }
 
-        self._run_renew(with_db, mock_google_client)
+        mock_stop_task = Mock()
+        self._run_renew(with_db, mock_google_client, mock_stop_task)
 
+        mock_stop_task.delay.assert_called_once()
         mock_google_client.watch_events.assert_called_once()
 
         with with_db() as db:

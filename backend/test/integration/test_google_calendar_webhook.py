@@ -2,14 +2,14 @@
 
 import json
 from datetime import datetime, timedelta, timezone
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
-from appointment.controller.apis.google_client import GoogleClient
+from appointment.controller.apis.google_client import GoogleClient, SendUpdates
 from appointment.database import models, repo, schemas
 from appointment.dependencies import google as google_dep
-from appointment.routes.webhooks import _handle_subscriber_rsvp, _handle_bookee_rsvp, _handle_event_cancelled
+from appointment.tasks.google import _handle_subscriber_rsvp, _handle_bookee_rsvp, _handle_event_cancelled
 
 from defines import auth_headers, TEST_USER_ID
 
@@ -93,8 +93,9 @@ class TestGoogleCalendarWebhook:
             assert channel is not None
             assert channel.sync_token == 'some-sync-token'
 
+    @patch('appointment.controller.google_watch.stop_google_channel')
     def test_disconnected_calendar_triggers_teardown(
-        self, with_db, with_client, make_pro_subscriber, make_google_calendar, make_external_connections
+        self, mock_stop_task, with_db, with_client, make_pro_subscriber, make_google_calendar, make_external_connections
     ):
         """If the calendar is no longer connected, the channel should be cleaned up."""
         subscriber = make_pro_subscriber()
@@ -140,8 +141,9 @@ class TestGoogleCalendarWebhook:
         with with_db() as db:
             assert repo.google_calendar_channel.get_by_channel_id(db, 'disconnected-cal-channel') is None
 
+    @patch('appointment.routes.webhooks.process_google_event_changes')
     def test_valid_notification_returns_200(
-        self, with_db, with_client, make_pro_subscriber, make_google_calendar, make_external_connections
+        self, mock_process_task, with_db, with_client, make_pro_subscriber, make_google_calendar, make_external_connections
     ):
         """A valid notification for a connected calendar should return 200 and update the sync token."""
         mock_google_client = MagicMock(spec=GoogleClient)
@@ -405,7 +407,7 @@ class TestGoogleCalendarEventRsvp:
 
         mock_google_client.delete_event.assert_called_once_with(
             self.REMOTE_CALENDAR_ID, self.GOOGLE_EVENT_ID, mock_token,
-            send_updates='all',
+            send_updates=SendUpdates.ALL,
         )
 
     def test_subscriber_declines_already_declined_is_noop(self, with_db, rsvp_setup):
