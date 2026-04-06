@@ -143,7 +143,13 @@ class TestGoogleCalendarWebhook:
 
     @patch('appointment.routes.webhooks.process_google_event_changes')
     def test_valid_notification_returns_200(
-        self, mock_process_task, with_db, with_client, make_pro_subscriber, make_google_calendar, make_external_connections
+        self,
+        mock_process_task,
+        with_db,
+        with_client,
+        make_pro_subscriber,
+        make_google_calendar,
+        make_external_connections
     ):
         """A valid notification for a connected calendar should return 200 and update the sync token."""
         mock_google_client = MagicMock(spec=GoogleClient)
