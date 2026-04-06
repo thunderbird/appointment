@@ -57,6 +57,7 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
         return calendar, appointment
 
     @patch('appointment.routes.schedule.get_remote_connection')
+    @patch.dict('os.environ', {'GOOGLE_INVITE_ENABLED': 'True'})
     def test_confirm_patches_existing_hold_event(
         self, mock_get_remote_connection,
         with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,
@@ -98,6 +99,7 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
         assert call_args.kwargs.get('organizer_language') == 'en'
 
     @patch('appointment.routes.schedule.save_remote_event')
+    @patch.dict('os.environ', {'GOOGLE_INVITE_ENABLED': 'True'})
     def test_confirm_creates_event_when_no_hold_exists(
         self, mock_save_remote_event,
         with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,
@@ -148,6 +150,7 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
             assert appt.external_id == 'new-google-event-456'
 
     @patch('appointment.routes.schedule.save_remote_event')
+    @patch.dict('os.environ', {'GOOGLE_INVITE_ENABLED': 'True'})
     def test_confirm_creates_event_does_not_send_branded_vevent(
         self, mock_save_remote_event,
         with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,

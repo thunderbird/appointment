@@ -7,8 +7,7 @@ from unittest.mock import Mock, patch
 
 from appointment.controller.google_watch import setup_watch_channel, teardown_watch_channel
 from appointment.database import models, repo
-from appointment.routes.webhooks import (
-    _find_appointment_by_external_id,
+from appointment.tasks.google import (
     _handle_bookee_rsvp,
     _handle_subscriber_rsvp,
 )
@@ -24,7 +23,7 @@ class TestFindAppointmentByExternalId:
             db_appointment.external_id = 'google-event-123'
             db.commit()
 
-            result = _find_appointment_by_external_id(db, calendar.id, 'google-event-123')
+            result = repo.appointment.get_by_calendar_and_external_id(db, calendar.id, 'google-event-123')
             assert result is not None
             assert result.id == appointment.id
 
@@ -33,7 +32,7 @@ class TestFindAppointmentByExternalId:
         make_appointment(calendar_id=calendar.id, slots=None)
 
         with with_db() as db:
-            result = _find_appointment_by_external_id(db, calendar.id, 'nonexistent-event')
+            result = repo.appointment.get_by_calendar_and_external_id(db, calendar.id, 'nonexistent-event')
             assert result is None
 
     def test_scoped_to_calendar(self, with_db, make_google_calendar, make_appointment, make_pro_subscriber):
@@ -48,8 +47,8 @@ class TestFindAppointmentByExternalId:
             db_appt.external_id = 'event-on-cal1'
             db.commit()
 
-            assert _find_appointment_by_external_id(db, cal1.id, 'event-on-cal1') is not None
-            assert _find_appointment_by_external_id(db, cal2.id, 'event-on-cal1') is None
+            assert repo.appointment.get_by_calendar_and_external_id(db, cal1.id, 'event-on-cal1') is not None
+            assert repo.appointment.get_by_calendar_and_external_id(db, cal2.id, 'event-on-cal1') is None
 
 
 class TestHandleBookeeRsvp:
@@ -559,8 +558,9 @@ class TestSetupWatchChannel:
 
 
 class TestTeardownWatchChannel:
+    @patch('appointment.controller.google_watch.stop_google_channel')
     def test_removes_existing_channel(
-        self, with_db, make_google_calendar, make_external_connections, make_pro_subscriber
+        self, mock_stop_task, with_db, make_google_calendar, make_external_connections, make_pro_subscriber
     ):
         subscriber = make_pro_subscriber()
         google_creds = json.dumps({
@@ -586,29 +586,25 @@ class TestTeardownWatchChannel:
                 state='teardown-state',
             )
 
-        mock_client = Mock()
-        mock_client.SCOPES = ['https://www.googleapis.com/auth/calendar.events']
-
         with with_db() as db:
             db_cal = repo.calendar.get(db, calendar.id)
-            result = teardown_watch_channel(db, mock_client, db_cal)
+            result = teardown_watch_channel(db, db_cal)
 
             assert result is True
-            mock_client.stop_channel.assert_called_once()
+            mock_stop_task.delay.assert_called_once()
             assert repo.google_calendar_channel.get_by_calendar_id(db, calendar.id) is None
 
     def test_noop_if_no_channel(self, with_db, make_google_calendar):
         calendar = make_google_calendar(connected=True)
-        mock_client = Mock()
 
         with with_db() as db:
             db_cal = repo.calendar.get(db, calendar.id)
-            result = teardown_watch_channel(db, mock_client, db_cal)
+            result = teardown_watch_channel(db, db_cal)
 
             assert result is False
-            mock_client.stop_channel.assert_not_called()
 
-    def test_deletes_record_even_without_google_client(self, with_db, make_google_calendar):
+    @patch('appointment.controller.google_watch.stop_google_channel')
+    def test_deletes_record_even_without_token(self, mock_stop_task, with_db, make_google_calendar):
         calendar = make_google_calendar(connected=True)
 
         with with_db() as db:
@@ -623,7 +619,8 @@ class TestTeardownWatchChannel:
 
         with with_db() as db:
             db_cal = repo.calendar.get(db, calendar.id)
-            result = teardown_watch_channel(db, None, db_cal)
+            result = teardown_watch_channel(db, db_cal)
 
             assert result is True
             assert repo.google_calendar_channel.get_by_calendar_id(db, calendar.id) is None
+            mock_stop_task.delay.assert_not_called()
