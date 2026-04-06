@@ -30,6 +30,18 @@ def get(db: Session, appointment_id: int) -> models.Appointment | None:
     return None
 
 
+def get_by_calendar_and_external_id(db: Session, calendar_id: int, external_id: str) -> models.Appointment | None:
+    """Retrieve an appointment by its calendar and external event ID."""
+    return (
+        db.query(models.Appointment)
+        .filter(
+            models.Appointment.calendar_id == calendar_id,
+            models.Appointment.external_id == external_id,
+        )
+        .first()
+    )
+
+
 def get_public(db: Session, slug: str):
     """retrieve appointment by appointment slug (public)"""
     if slug:
