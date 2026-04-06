@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from ..controller import auth, data, zoom
 from ..controller.apis.fxa_client import FxaClient
-from ..controller.apis.google_client import GoogleClient
+from ..controller.apis.google_client import GoogleClient, SendUpdates
 from ..controller.calendar import Tools
 from ..controller.google_watch import teardown_watch_channel
 from ..database import repo, models, schemas
@@ -367,7 +367,7 @@ def _handle_subscriber_rsvp(
                 try:
                     google_client.delete_event(
                         remote_calendar_id, appointment.external_id, google_token,
-                        send_updates='all',
+                        send_updates=SendUpdates.ALL,
                     )
                 except Exception:
                     logging.warning('[webhooks.google_calendar] Failed to delete declined event from Google')
