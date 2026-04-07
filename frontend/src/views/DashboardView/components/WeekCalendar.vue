@@ -252,7 +252,7 @@ const filteredPendingAppointmentsForGrid = computed(() => {
     const appointmentStart = dj(appointment.slots[0].start);
     const appointmentEnd = appointmentStart.add(appointment.duration, 'minute');
 
-    const gridPosition = calculateEventGridPosition(appointmentStart, appointmentEnd, slots, 2, -6);
+    const gridPosition = calculateEventGridPosition(appointmentStart, appointmentEnd, slots, 2, 0);
 
     if (gridPosition) {
       return {
@@ -285,7 +285,7 @@ const filteredRemoteEventsForGrid = computed(() => {
     const eventStart = dj(remoteEvent.start);
     const eventEnd = dj(remoteEvent.end);
 
-    const gridPosition = calculateEventGridPosition(eventStart, eventEnd, slots, 2, -6);
+    const gridPosition = calculateEventGridPosition(eventStart, eventEnd, slots, 2, 0);
     const hasPendingPlaceholder = filteredPendingAppointmentsForGrid.value.find(
       (a) => a.title === remoteEvent.title && eventStart.isSame(a.start)
     );
