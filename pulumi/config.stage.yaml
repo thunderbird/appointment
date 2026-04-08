@@ -240,6 +240,8 @@ resources:
                 value: stage
               - name: AUTH_SCHEME
                 value: "oidc"
+              - name: CONTAINER_ROLE
+                value: api
               - name: DATABASE_ENGINE
                 value: postgresql
               - name: DATABASE_PORT

@@ -7,6 +7,7 @@ celery[redis]==5.*
 cryptography==46.*
 dnspython==2.*
 fastapi[standard]==0.*
+flower>=2.0.1,<3
 fluent.runtime==0.4.0
 fluent.syntax==0.19.0
 google-api-python-client==2.*

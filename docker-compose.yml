@@ -36,6 +36,17 @@ services:
       - backend
       - redis
 
+  celery-flower:
+    <<: *backend
+    ports:
+      - 5555:5555
+    environment:
+      - CONTAINER_ROLE=flower
+      - FLOWER_UNAUTHENTICATED_API=true
+    depends_on:
+      - backend
+      - redis
+
   frontend:
     build: ./frontend
     volumes:

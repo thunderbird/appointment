@@ -161,21 +161,13 @@ resources:
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-user-ARowLy
               - name: DATABASE_PASSWORD
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-password-yetVzH
-              # - name: DB_ENC_SECRET
-              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-encryption-wVW5q5
-              # - name: FXA_SECRETS
-              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/fxa-secrets-9V5Bk5
-              # - name: GOOGLE_OAUTH_SECRETS
-              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/google-oauth-fkGJlJ
               - name: OIDC_CLIENT_ID
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-id-yaAyEa
               - name: OIDC_CLIENT_SECRET
                 valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-secret-uSFyGx
-              #  - name: SMTP_SECRETS
-              #    valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/smtp-connection-6QglYt
-              # - name: ZOOM_SECRETS
-              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/zoom-secrets-0A8KzQ
             environment:
+              - name: CONTAINER_ROLE
+                value: api
               - name: DATABASE_ENGINE
                 value: postgresql
               - name: DATABASE_PORT
