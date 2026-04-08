@@ -49,12 +49,11 @@ def run():
             repo.google_calendar_channel.delete(db, channel)
             continue
 
-        token = Credentials.from_authorized_user_info(
-            json.loads(external_connection.token), google_client.SCOPES
-        )
+        token = Credentials.from_authorized_user_info(json.loads(external_connection.token), google_client.SCOPES)
 
         # Stop the old channel (fire-and-forget via Celery with retries)
         from ..tasks.google import stop_google_channel
+
         stop_google_channel.delay(channel.channel_id, channel.resource_id, external_connection.token)
 
         # Create a new channel
@@ -82,4 +81,6 @@ def run():
             failed += 1
 
     db.close()
-    print(f'Channel renewal complete: {renewed} renewed, {failed} failed, {len(channels)} total processed')
+    logging.info(
+        f'[renew_google_channels] Channel renewal complete: {renewed} renewed, {failed} failed, {len(channels)} total processed'
+    )
