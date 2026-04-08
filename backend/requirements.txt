@@ -4,7 +4,7 @@ argon2-cffi-bindings==25.*
 Babel==2.*
 caldav==1.6.0
 celery[redis]==5.*
-cryptography==46.*
+cryptography==46.0.6
 dnspython==2.*
 fastapi[standard]==0.*
 fluent.runtime==0.4.0
@@ -16,15 +16,15 @@ hiredis==2.*
 jinja2==3.*
 icalendar==5.*
 itsdangerous==2.*
-markdown==3.*
+markdown==3.8.1
 MarkupSafe==2.*
 nh3==0.*
 oauthlib==3.*
 posthog==3.23.0
 psycopg[binary]==3.2.12
 python-dotenv==1.*
-python-multipart==0.*
-PyJWT==2.*
+python-multipart==0.0.22
+PyJWT==2.12.0
 pydantic[email]==2.*
 requests-oauthlib==2.*
 redis==5.*
