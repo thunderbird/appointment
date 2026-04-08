@@ -4,6 +4,10 @@ resources:
   domains:
     redis: cache.appointment.tb.pro
 
+  tb:cloudwatch:LogDestination:
+    appointment:
+      org_name: tb
+
   tb:network:MultiCidrVpc:
     appointment:
       cidr_block: 10.20.0.0/16
