@@ -24,16 +24,16 @@ from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredential
 
 
 class SendUpdates(StrEnum):
-    """Maps to the Google Calendar API ``sendUpdates`` parameter."""
-    """Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events/delete"""
+    """Maps to the Google Calendar API ``sendUpdates`` parameter.
+    Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events/delete"""
     ALL = 'all'
     EXTERNAL_ONLY = 'externalOnly'
     NONE = 'none'
 
 
 class ResponseStatus(StrEnum):
-    """Maps to the Google Calendar API attendee ``responseStatus`` field."""
-    """Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events"""
+    """Maps to the Google Calendar API attendee ``responseStatus`` field.
+    Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events"""
     NEEDS_ACTION = 'needsAction'
     DECLINED = 'declined'
     TENTATIVE = 'tentative'
@@ -270,34 +270,27 @@ class GoogleClient:
                 return None
 
     def save_event(self, calendar_id, body, token):
-        response = None
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
-                response = service.events().import_(calendarId=calendar_id, body=body).execute()
+                return service.events().import_(calendarId=calendar_id, body=body).execute()
             except HttpError as e:
                 logging.warning(f'[google_client.save_event] Request Error: {e.status_code}/{e.error_details}')
                 raise EventNotCreatedException()
 
-        return response
-
     def insert_event(self, calendar_id, body, token, send_updates: SendUpdates = SendUpdates.ALL):
-        response = None
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
-                response = service.events().insert(
+                return service.events().insert(
                     calendarId=calendar_id, body=body, sendUpdates=send_updates
                 ).execute()
             except HttpError as e:
                 logging.warning(f'[google_client.insert_event] Request Error: {e.status_code}/{e.error_details}')
                 raise EventNotCreatedException()
 
-        return response
-
     def patch_event(self, calendar_id, event_id, body, token, send_updates: SendUpdates = SendUpdates.ALL):
-        response = None
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
-                response = (
+                return (
                     service.events()
                     .patch(calendarId=calendar_id, eventId=event_id, body=body, sendUpdates=send_updates)
                     .execute()
@@ -306,13 +299,10 @@ class GoogleClient:
                 logging.warning(f'[google_client.patch_event] Request Error: {e.status_code}/{e.error_details}')
                 raise EventNotPatchedException()
 
-        return response
-
     def delete_event(self, calendar_id, event_id, token, send_updates: SendUpdates = SendUpdates.NONE):
-        response = None
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
-                response = (
+                return (
                     service.events()
                     .delete(calendarId=calendar_id, eventId=event_id, sendUpdates=send_updates)
                     .execute()
@@ -320,8 +310,6 @@ class GoogleClient:
             except HttpError as e:
                 logging.warning(f'[google_client.delete_event] Request Error: {e.status_code}/{e.error_details}')
                 raise EventNotDeletedException()
-
-        return response
 
     def watch_events(self, calendar_id, webhook_url, token, state: str):
         """Register a push notification channel for calendar event changes.
