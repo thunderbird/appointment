@@ -679,7 +679,7 @@ onMounted(() => {
   color: var(--colour-ti-secondary);
   font-size: 0.6875rem;
   border-left: solid 3px var(--colour-primary-default);
-  border-radius: 3px;
+  border-radius: 0.1875rem; /* 3px */
   background-image: linear-gradient(
     159deg,
     color-mix(in srgb, var(--colour-primary-default) 20%, transparent) 13%,
@@ -714,8 +714,9 @@ onMounted(() => {
   background-color: transparent;
   background-image: none;
   border: none;
+  border-radius: 0;
   color: transparent;
-  
+
   &.selected {
     background-color: var(--colour-accent-blue);
     border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 80%, transparent);
@@ -728,6 +729,7 @@ onMounted(() => {
 .calendar-wrapper:not(.disabled) .selectable-slot:not(.selected):hover {
   background-color: color-mix(in srgb, var(--colour-ti-highlight) 10%, transparent);
   border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 66%, transparent);
+  border-radius: 0.1875rem; /* 3px */
 }
 
 .blocker-slot {
