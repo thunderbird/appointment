@@ -29,7 +29,7 @@ from sqlalchemy.orm import Session
 
 from .. import utils
 from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE
-from .apis.google_client import GoogleClient, ResponseStatus, SendUpdates
+from .apis.google_client import EventStatus, GoogleClient, ResponseStatus, SendUpdates
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
 from ..controller.mailer import Attachment
@@ -213,7 +213,7 @@ class GoogleConnector(BaseConnector):
             status = event.get('status').lower()
 
             # Ignore cancelled events or non-time blocking events
-            if status == 'cancelled' or transparency == 'transparent':
+            if status == EventStatus.CANCELLED or transparency == 'transparent':
                 continue
 
             # Grab the attendee list for marking tentative events / filtering out declined events
@@ -286,20 +286,11 @@ class GoogleConnector(BaseConnector):
             description.append(l10n('join-phone', {'phone': event.location.phone}, lang=organizer_language))
 
         if send_google_notification:
-            if booking_confirmation:
-                attendees = [
-                    {'displayName': organizer.name, 'email': organizer_email,
-                     'responseStatus': ResponseStatus.NEEDS_ACTION},
-                    {'displayName': attendee.name, 'email': attendee.email,
-                     'responseStatus': ResponseStatus.NEEDS_ACTION},
-                ]
-            else:
-                attendees = [
-                    {'displayName': organizer.name, 'email': organizer_email,
-                     'responseStatus': ResponseStatus.ACCEPTED},
-                    {'displayName': attendee.name, 'email': attendee.email,
-                     'responseStatus': ResponseStatus.NEEDS_ACTION},
-                ]
+            organizer_response = ResponseStatus.NEEDS_ACTION if booking_confirmation else ResponseStatus.ACCEPTED
+            attendees = [
+                {'displayName': organizer.name, 'email': organizer_email, 'responseStatus': organizer_response},
+                {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': ResponseStatus.NEEDS_ACTION},
+            ]
 
             body = {
                 'summary': event.title,
@@ -307,7 +298,7 @@ class GoogleConnector(BaseConnector):
                 'description': '\n'.join(description),
                 'start': {'dateTime': event.start.isoformat()},
                 'end': {'dateTime': event.end.isoformat()},
-                'status': 'tentative' if booking_confirmation else 'confirmed',
+                'status': EventStatus.TENTATIVE if booking_confirmation else EventStatus.CONFIRMED,
                 'attendees': attendees,
             }
 
@@ -357,7 +348,7 @@ class GoogleConnector(BaseConnector):
         and description so that a newly-created meeting link is visible on
         the Google Calendar event.
         """
-        body = {'status': 'confirmed'}
+        body = {'status': EventStatus.CONFIRMED}
 
         if event:
             body['summary'] = event.title
@@ -586,7 +577,7 @@ class CalDavConnector(BaseConnector):
             status = e.icalendar_component['status'].lower() if 'status' in e.icalendar_component else ''
 
             # Ignore cancelled events
-            if status == 'cancelled' or transparency == 'transparent':
+            if status == EventStatus.CANCELLED or transparency == 'transparent':
                 continue
 
             vevent = e.vobject_instance.vevent
@@ -609,7 +600,7 @@ class CalDavConnector(BaseConnector):
             title = vevent.summary.value if has_summary else l10n('event-summary-default')
 
             # Mark tentative events
-            tentative = status == 'tentative'
+            tentative = status == EventStatus.TENTATIVE
 
             start = vevent.dtstart.value
             # get_duration grabs either end or duration into a timedelta

@@ -6,7 +6,7 @@ from google.oauth2.credentials import Credentials
 from sqlalchemy.orm import Session
 
 from appointment.celery_app import celery
-from appointment.controller.apis.google_client import GoogleClient, ResponseStatus, SendUpdates
+from appointment.controller.apis.google_client import EventStatus, GoogleClient, ResponseStatus, SendUpdates
 from appointment.controller import zoom
 from appointment.database import repo, models, schemas
 from appointment.database.models import MeetingLinkProviderType
@@ -81,7 +81,7 @@ def process_google_event_changes(calendar_id: int, changed_events: list[dict]):
             if not slot or not slot.attendee:
                 continue
 
-            if event.get('status') == 'cancelled':
+            if event.get('status') == EventStatus.CANCELLED:
                 _handle_event_cancelled(db, appointment, slot)
                 continue
 
@@ -167,7 +167,7 @@ def _handle_subscriber_rsvp(
                 location_url = zoom.create_meeting_link(db, slot, subscriber, title) or location_url
 
             owner_lang = subscriber.language if subscriber.language else FALLBACK_LOCALE
-            body = {'status': 'confirmed', 'summary': title}
+            body = {'status': EventStatus.CONFIRMED, 'summary': title}
 
             if location_url:
                 body['location'] = location_url
