@@ -8,7 +8,6 @@ import pytest
 
 from appointment.controller.apis.google_client import GoogleClient, SendUpdates
 from appointment.database import models, repo, schemas
-from appointment.dependencies import google as google_dep
 from appointment.tasks.google import _handle_subscriber_rsvp, _handle_bookee_rsvp, _handle_event_cancelled
 
 from defines import auth_headers, TEST_USER_ID
@@ -141,22 +140,18 @@ class TestGoogleCalendarWebhook:
         with with_db() as db:
             assert repo.google_calendar_channel.get_by_channel_id(db, 'disconnected-cal-channel') is None
 
-    @patch('appointment.routes.webhooks.process_google_event_changes')
+    @patch('appointment.routes.webhooks.sync_google_calendar_changes')
     def test_valid_notification_returns_200(
         self,
-        mock_process_task,
+        mock_sync_task,
         with_db,
         with_client,
         make_pro_subscriber,
         make_google_calendar,
         make_external_connections
     ):
-        """A valid notification for a connected calendar should return 200 and update the sync token."""
-        mock_google_client = MagicMock(spec=GoogleClient)
-        mock_google_client.SCOPES = GoogleClient.SCOPES
-        mock_google_client.list_events_sync.return_value = ([], 'new-sync-token')
-        with_client.app.dependency_overrides[google_dep.get_google_client] = lambda: mock_google_client
-
+        """A valid notification for a connected calendar should return 200
+        immediately and dispatch the sync task."""
         subscriber = make_pro_subscriber()
         google_creds = json.dumps({
             'token': 'fake-token',
@@ -196,11 +191,7 @@ class TestGoogleCalendarWebhook:
             },
         )
         assert response.status_code == 200
-
-        with with_db() as db:
-            channel = repo.google_calendar_channel.get_by_channel_id(db, 'valid-channel')
-            assert channel is not None
-            assert channel.sync_token == 'new-sync-token'
+        mock_sync_task.delay.assert_called_once_with('valid-channel')
 
 
 class TestCalendarConnectWatchChannel:

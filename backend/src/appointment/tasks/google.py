@@ -49,71 +49,115 @@ def stop_google_channel(self, channel_id: str, resource_id: str, token_json: str
     log.info(f'Stopped Google Calendar channel {channel_id}')
 
 
-@celery.task
-def process_google_event_changes(calendar_id: int, changed_events: list[dict]):
-    """Process changed events from a Google Calendar push notification."""
+@celery.task(
+    bind=True,
+    autoretry_for=(Exception,),
+    retry_backoff=True,
+    retry_kwargs={'max_retries': 3},
+)
+def sync_google_calendar_changes(self, channel_id: str):
+    """Fetch and process changed events for a Google Calendar push notification.
+
+    Called by the webhook handler after lightweight validation.  Handles sync
+    token management, event fetching via the Google API, and event processing
+    with automatic retries on transient failures.
+    """
     google_client = get_google_client()
 
     _, SessionLocal = get_engine_and_session()
     db = SessionLocal()
 
     try:
-        calendar = repo.calendar.get(db, calendar_id)
-        if not calendar or not calendar.external_connection or not calendar.external_connection.token:
-            log.warning(f'[tasks.google] Calendar {calendar_id} missing or has no external connection')
+        channel = repo.google_calendar_channel.get_by_channel_id(db, channel_id)
+        if not channel:
+            log.warning(f'[tasks.google] Channel {channel_id} not found, skipping')
+            return
+
+        calendar = channel.calendar
+        if not calendar or not calendar.connected:
+            log.warning(f'[tasks.google] Calendar for channel {channel_id} missing or disconnected')
+            return
+
+        external_connection = calendar.external_connection
+        if not external_connection or not external_connection.token:
+            log.warning(f'[tasks.google] No token for calendar on channel {channel_id}')
             return
 
         google_token = Credentials.from_authorized_user_info(
-            json.loads(calendar.external_connection.token), google_client.SCOPES
+            json.loads(external_connection.token), google_client.SCOPES
         )
-        remote_calendar_id = calendar.user
 
-        for event in changed_events:
-            google_event_id = event.get('id')
-            if not google_event_id:
-                continue
+        if not channel.sync_token:
+            sync_token = google_client.get_initial_sync_token(calendar.user, google_token)
+            if sync_token:
+                repo.google_calendar_channel.update_sync_token(db, channel, sync_token)
 
-            appointment = repo.appointment.get_by_calendar_and_external_id(db, calendar_id, google_event_id)
-            if not appointment:
-                continue
+        changed_events, new_sync_token = google_client.list_events_sync(
+            calendar.user, channel.sync_token, google_token
+        )
 
-            slot = appointment.slots[0] if appointment.slots else None
-            if not slot or not slot.attendee:
-                continue
+        if changed_events is None:
+            fresh_token = google_client.get_initial_sync_token(calendar.user, google_token)
+            if fresh_token:
+                repo.google_calendar_channel.update_sync_token(db, channel, fresh_token)
+            return
 
-            if event.get('status') == EventStatus.CANCELLED:
-                _handle_event_cancelled(db, appointment, slot)
-                continue
+        if new_sync_token:
+            repo.google_calendar_channel.update_sync_token(db, channel, new_sync_token)
 
-            attendees = event.get('attendees', [])
-            if not attendees:
-                continue
-
-            self_attendee = next((a for a in attendees if a.get('self')), None)
-            if self_attendee:
-                _handle_subscriber_rsvp(
-                    db, appointment, slot, self_attendee.get('responseStatus'),
-                    google_client, google_token, remote_calendar_id,
-                )
-
-            attendee_email = slot.attendee.email.lower()
-            google_attendee = next(
-                (a for a in attendees if a.get('email', '').lower() == attendee_email),
-                None,
+        if changed_events:
+            _process_changed_events(
+                db, calendar.id, changed_events, google_client, google_token, calendar.user
             )
-            if not google_attendee:
-                continue
-
-            response_status = google_attendee.get('responseStatus')
-            _handle_bookee_rsvp(
-                db, appointment, slot, response_status, google_client, google_token, remote_calendar_id
-            )
-    except Exception as e:
-        log.error(f'[tasks.google] Error processing event changes: {e}')
-        if sentry_sdk.is_initialized():
-            sentry_sdk.capture_exception(e)
     finally:
         db.close()
+
+
+def _process_changed_events(
+    db, calendar_id: int, changed_events: list[dict],
+    google_client: GoogleClient, google_token, remote_calendar_id: str,
+):
+    """Walk through changed events and dispatch to the appropriate RSVP / cancellation handler."""
+    for event in changed_events:
+        google_event_id = event.get('id')
+        if not google_event_id:
+            continue
+
+        appointment = repo.appointment.get_by_calendar_and_external_id(db, calendar_id, google_event_id)
+        if not appointment:
+            continue
+
+        slot = appointment.slots[0] if appointment.slots else None
+        if not slot or not slot.attendee:
+            continue
+
+        if event.get('status') == EventStatus.CANCELLED:
+            _handle_event_cancelled(db, appointment, slot)
+            continue
+
+        attendees = event.get('attendees', [])
+        if not attendees:
+            continue
+
+        self_attendee = next((a for a in attendees if a.get('self')), None)
+        if self_attendee:
+            _handle_subscriber_rsvp(
+                db, appointment, slot, self_attendee.get('responseStatus'),
+                google_client, google_token, remote_calendar_id,
+            )
+
+        attendee_email = slot.attendee.email.lower()
+        google_attendee = next(
+            (a for a in attendees if a.get('email', '').lower() == attendee_email),
+            None,
+        )
+        if not google_attendee:
+            continue
+
+        response_status = google_attendee.get('responseStatus')
+        _handle_bookee_rsvp(
+            db, appointment, slot, response_status, google_client, google_token, remote_calendar_id
+        )
 
 
 
