@@ -31,6 +31,14 @@ class SendUpdates(StrEnum):
     NONE = 'none'
 
 
+class EventStatus(StrEnum):
+    """Maps to the Google Calendar API event ``status`` field.
+    Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events#status"""
+    CONFIRMED = 'confirmed'
+    TENTATIVE = 'tentative'
+    CANCELLED = 'cancelled'
+
+
 class ResponseStatus(StrEnum):
     """Maps to the Google Calendar API attendee ``responseStatus`` field.
     Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events"""
