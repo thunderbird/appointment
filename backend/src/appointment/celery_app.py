@@ -3,6 +3,7 @@ import os
 import sentry_sdk
 from celery import Celery
 from dotenv import load_dotenv
+from appointment.defines import ONE_DAY_IN_SECONDS, SEVEN_DAYS_IN_SECONDS
 
 
 def _base_redis_url() -> str:
@@ -40,8 +41,8 @@ def create_celery_app() -> Celery:
     sentry_sdk.set_extra('CELERY_RESULT_EXPIRES', result_expires)
     sentry_sdk.set_extra('CELERY_TASK_ALWAYS_EAGER', task_always_eager)
 
-    google_channel_ttl = float(os.getenv('GOOGLE_CHANNEL_TTL_IN_SECONDS', 604800))
-    google_channel_renew_interval = google_channel_ttl - 86400  # 1 day buffer
+    google_channel_ttl = float(os.getenv('GOOGLE_CHANNEL_TTL_IN_SECONDS', SEVEN_DAYS_IN_SECONDS))
+    google_channel_renew_interval = google_channel_ttl - ONE_DAY_IN_SECONDS
 
     app = Celery('appointment')
 
