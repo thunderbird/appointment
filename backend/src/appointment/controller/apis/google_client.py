@@ -13,7 +13,7 @@ from ... import utils
 from ...database import repo
 from ...database.models import CalendarProvider
 from ...database.schemas import CalendarConnection
-from ...defines import DATETIMEFMT
+from ...defines import DATETIMEFMT, SEVEN_DAYS_IN_SECONDS
 from ...exceptions.calendar import (
     EventNotCreatedException,
     EventNotDeletedException,
@@ -315,7 +315,7 @@ class GoogleClient:
         """Register a push notification channel for calendar event changes.
         Ref: https://developers.google.com/calendar/api/v3/reference/events/watch"""
         channel_id = str(uuid.uuid4())
-        ttl = os.getenv('GOOGLE_CHANNEL_TTL_IN_SECONDS', 604800) # 7 days
+        ttl = os.getenv('GOOGLE_CHANNEL_TTL_IN_SECONDS', SEVEN_DAYS_IN_SECONDS)
 
         body = {
             'id': channel_id,
@@ -361,9 +361,9 @@ class GoogleClient:
         Ref: https://developers.google.com/calendar/api/v3/reference/events/list (incremental sync)"""
         items = []
         next_sync_token = None
+        page_token = None
 
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
-            page_token = None
             while True:
                 try:
                     params = {
