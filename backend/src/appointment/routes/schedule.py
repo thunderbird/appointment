@@ -220,10 +220,8 @@ def update_schedule(
 def _sync_watch_channels(db: Session, google_client: GoogleClient, subscriber: Subscriber, default_calendar_id: int):
     """Ensure a watch channel exists only for the schedule's default Google calendar.
     Tears down channels on any other Google calendars for this subscriber."""
-    calendars = repo.calendar.get_by_subscriber(db, subscriber.id)
+    calendars = repo.calendar.get_by_subscriber(db, subscriber.id, provider=CalendarProvider.google)
     for cal in calendars:
-        if cal.provider != CalendarProvider.google:
-            continue
         if cal.id == default_calendar_id:
             setup_watch_channel(db, google_client, cal)
         else:
