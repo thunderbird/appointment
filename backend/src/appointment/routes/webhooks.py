@@ -1,24 +1,20 @@
-import json
 import logging
 
 import requests
 import sentry_sdk
 from fastapi import APIRouter, Depends, Request, Response
-from google.oauth2.credentials import Credentials
 from sqlalchemy.orm import Session
 
 from ..controller import auth, data, zoom
 from ..controller.apis.fxa_client import FxaClient
-from ..controller.apis.google_client import GoogleClient
 from ..controller.google_watch import teardown_watch_channel
 from ..database import repo, models, schemas
-from ..dependencies.database import get_db, get_redis
+from ..dependencies.database import get_db
 from ..dependencies.fxa import get_webhook_auth as get_webhook_auth_fxa, get_fxa_client
-from ..dependencies.google import get_google_client
 from ..dependencies.zoom import get_webhook_auth as get_webhook_auth_zoom
 from ..exceptions.account_api import AccountDeletionSubscriberFail
 from ..exceptions.fxa_api import MissingRefreshTokenException
-from ..tasks.google import process_google_event_changes
+from ..tasks.google import sync_google_calendar_changes
 
 router = APIRouter()
 
@@ -122,11 +118,14 @@ def zoom_deauthorization(
 def google_calendar_notification(
     request: Request,
     db: Session = Depends(get_db),
-    redis=Depends(get_redis),
-    google_client: GoogleClient = Depends(get_google_client),
 ):
     """Webhook endpoint for Google Calendar push notifications.
-    Google sends a POST here whenever events change on a watched calendar."""
+    Google sends a POST here whenever events change on a watched calendar.
+
+    Returns 200 immediately and defers all Google API work to a celery
+    task so we stay within Google's expected response window and avoid
+    duplicate deliveries from retries.
+    """
     channel_id = request.headers.get('X-Goog-Channel-Id')
     resource_state = request.headers.get('X-Goog-Resource-State')
 
@@ -154,35 +153,7 @@ def google_calendar_notification(
         teardown_watch_channel(db, calendar)
         return success_response
 
-    external_connection = calendar.external_connection
-    if not external_connection or not external_connection.token:
-        teardown_watch_channel(db, calendar)
-        return success_response
-
-    token = Credentials.from_authorized_user_info(
-        json.loads(external_connection.token), google_client.SCOPES
-    )
-
-    if not channel.sync_token:
-        sync_token = google_client.get_initial_sync_token(calendar.user, token)
-        if sync_token:
-            repo.google_calendar_channel.update_sync_token(db, channel, sync_token)
-
-    changed_events, new_sync_token = google_client.list_events_sync(
-        calendar.user, channel.sync_token, token
-    )
-
-    if changed_events is None:
-        # Sync token expired -- do a full re-sync to get a fresh one
-        fresh_token = google_client.get_initial_sync_token(calendar.user, token)
-        if fresh_token:
-            repo.google_calendar_channel.update_sync_token(db, channel, fresh_token)
-        return success_response
-
-    if new_sync_token:
-        repo.google_calendar_channel.update_sync_token(db, channel, new_sync_token)
-
-    process_google_event_changes.delay(calendar.id, changed_events)
+    sync_google_calendar_changes.delay(channel_id)
 
     return success_response
 
