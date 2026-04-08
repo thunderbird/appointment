@@ -641,6 +641,8 @@ def handle_schedule_availability_decision(
 
     # If needed: Create a zoom meeting link for this booking
     if schedule.meeting_link_provider == MeetingLinkProviderType.zoom:
+        # In the future we should punt zoom link creation
+        # (along with the appointment_id so we can update it after) to a celery task
         zoom_url = zoom.create_meeting_link(db, slot, subscriber, title)
         if zoom_url:
             location_url = zoom_url
