@@ -27,8 +27,7 @@ def renew_google_channels():
         run()
     except Exception as e:
         log.error(f'Google Calendar channel renewal failed: {e}')
-        if sentry_sdk.is_initialized():
-            sentry_sdk.capture_exception(e)
+        sentry_sdk.capture_exception(e)
         raise
     log.info('Google Calendar channel renewal complete')
 

@@ -40,8 +40,7 @@ def create_meeting_link(
             return join_url
     except Exception as err:
         logging.error(f'[zoom] Zoom meeting creation error: {err}')
-        if sentry_sdk.is_initialized():
-            sentry_sdk.capture_exception(err)
+        sentry_sdk.capture_exception(err)
     return None
 
 
