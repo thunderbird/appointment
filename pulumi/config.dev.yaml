@@ -155,6 +155,16 @@ resources:
               protocol: tcp
               from_port: 6380
               to_port: 6380
+            - description: Allow Redis traffic from Celery
+              protocol: tcp
+              from_port: 6379
+              to_port: 6379
+              source_security_group_id: sg-0e2da3bf63a814eda
+            - description: Allow Redis traffic from Flower
+              protocol: tcp
+              from_port: 6379
+              to_port: 6379
+              source_security_group_id: sg-01e3bef415d4ceb1b
           egress:
             - description: Allow outbound traffic to anywhere
               protocol: tcp
