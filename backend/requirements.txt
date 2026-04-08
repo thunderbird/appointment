@@ -38,4 +38,4 @@ typer==0.*
 tzdata==2025.*
 uvicorn==0.*
 validators==0.*
-Authlib==1.*
+Authlib==1.6.9
