@@ -14,6 +14,9 @@ if [[ "$CONTAINER_ROLE" == "worker" ]]; then
 elif [[ "$CONTAINER_ROLE" == "beat" ]]; then
     echo "Starting Celery beat scheduler..."
     celery -A appointment.celery_app:celery beat -l INFO
+elif [[ "$CONTAINER_ROLE" == "flower" ]]; then
+    echo "Starting Flower monitoring..."
+    celery -A appointment.celery_app:celery flower --port=5555
 else
     if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
         echo "Running setup"

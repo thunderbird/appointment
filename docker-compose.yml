@@ -36,6 +36,16 @@ services:
       - backend
       - redis
 
+  flower:
+    <<: *backend
+    ports:
+      - "5556:5555"
+    environment:
+      - CONTAINER_ROLE=flower
+    depends_on:
+      - backend
+      - redis
+
   frontend:
     build: ./frontend
     volumes:
