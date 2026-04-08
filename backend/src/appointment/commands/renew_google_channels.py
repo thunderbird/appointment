@@ -82,5 +82,6 @@ def run():
 
     db.close()
     logging.info(
-        f'[renew_google_channels] Channel renewal complete: {renewed} renewed, {failed} failed, {len(channels)} total processed'
+        f'[renew_google_channels] Channel renewal complete: '
+        f'{renewed} renewed, {failed} failed, {len(channels)} total processed'
     )
