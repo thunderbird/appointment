@@ -54,8 +54,9 @@
 
 # This forms the base of Appointment-based container definitions. The blank fields commented here must be set on any
 # inheriting container definition:
-#   environment:
-#   logConfiguration:
+#   environment
+#   logConfiguration
+#   portMappings
 .apmt_contdef: &APMT_CONTAINER_DEFINITION
   image: *APMT_IMAGE
   essential: true
@@ -233,6 +234,12 @@ resources:
         container_definitions:
           backend:
             <<: *APMT_CONTAINER_DEFINITION
+            logConfiguration:
+              logDriver: awslogs
+              options:
+                awslogs-group: /tb/dev/appointment
+                awslogs-stream-prefix: ecs
+                awslogs-region: eu-central-1
             portMappings:
               - name: backend
                 containerPort: 5000
@@ -275,8 +282,8 @@ resources:
       ram_threshold: 80
       cooldown: 180
       disable_scale_in: False
-      min_capacity: 2
-      max_capacity: 4
+      min_capacity: 1
+      max_capacity: 1
       suspend: False
   
   tb:fargate:AutoscalingFargateCluster:
