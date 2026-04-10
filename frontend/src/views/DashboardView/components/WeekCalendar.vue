@@ -685,7 +685,7 @@ onMounted(() => {
   box-sizing: border-box;
 
   &.dark {
-    background-color: var(--colour-neutral-raised); /* One-off colour not in design system */
+    background-color: var(--colour-neutral-raised);
   }
 }
 
