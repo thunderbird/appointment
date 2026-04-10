@@ -68,6 +68,12 @@ export const lcFirst = (s: string): string => {
   return s[0].toLowerCase() + s.slice(1);
 };
 
+// Rotate the elements of an array for <n> steps. Works in both directions (n can be negative).
+export const arrayRotate = <T>(a: T[], n: number): T[] => {
+  a.push(...a.splice(0, (-n % a.length + a.length) % a.length));
+  return a;
+}
+
 // Convert a numeric enum to an object for key-value iteration
 export const enumToObject = (e: object): { [key in string]: number } => {
   const o = {};
@@ -480,6 +486,7 @@ export const isUnconfirmed = (a: Appointment): boolean => {
 
 export default {
   keyByValue,
+  arrayRotate,
   eventColor,
   initials,
   download,

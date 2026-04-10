@@ -12,11 +12,12 @@ import {
   MeetingLinkProviderType,
 } from '@/definitions';
 import {
-  Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse, Exception, ExceptionDetail,
+  Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse, Exception, ExceptionDetail, HourPeriod, Slot,
 } from '@/models';
 import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
-import { timeFormat } from '@/utils';
+import { arrayRotate, getStartOfWeek, timeFormat } from '@/utils';
+import { Dayjs } from 'dayjs';
 
  
 export const useScheduleStore = defineStore('schedules', () => {
@@ -226,6 +227,79 @@ export const useScheduleStore = defineStore('schedules', () => {
   };
 
   /**
+   * Takes the current schedule configuration and generates an array of time slots that are available, meaning they are
+   * within the time slots the user defined with their availability settings.
+   * This is the client-side implementation of controller/calendar.py::available_slots_from_schedule
+   * 
+   * @param date The date object indicating the week to calculate available time slots for
+   */
+  const availableTimeSlots = (date: Dayjs) => {
+    const s = firstSchedule.value;
+
+    if (!s) return [];
+
+    // Get general start and end hour from the schedule config
+    const startHour = parseInt(timeToFrontendTime(s.start_time, s.time_updated).slice(0, 2));
+    const endHour = parseInt(timeToFrontendTime(s.end_time, s.time_updated).slice(0, 2));
+
+    // Normalise availability to a list of weekdays with their general time window or, if set, custom availability
+    // Format: {[weekday]: [{startHour, endHour}, ...]}
+    const weeklyTimes = {} as {[key:number]: HourPeriod[]};
+    s.weekdays.forEach((weekday) => {
+      if (s.use_custom_availabilities) {
+        s.availabilities.filter((a) => a.day_of_week === weekday).forEach((a) => {
+          if (!(weekday in weeklyTimes)) weeklyTimes[weekday] = [];
+          weeklyTimes[weekday].push({
+            startHour: parseInt(timeToFrontendTime(a.start_time, s.time_updated).slice(0, 2)),
+            endHour: parseInt(timeToFrontendTime(a.end_time, s.time_updated).slice(0, 2)),
+          });
+        });
+      } else {
+        weeklyTimes[weekday] = [{
+          startHour: startHour,
+          endHour: endHour,
+        }];
+      }
+    });
+
+    // Handle custom start of week setting
+    const user = useUserStore();
+    const startOfWeek = user.data.settings.startOfWeek ?? 7;
+
+    const d = date.minute(0).second(0).millisecond(0);
+
+    const slots = [] as Slot[];
+
+    // Iterate over each day of week ordered by users preference
+    const defaultWeekdays = [1,2,3,4,5,6,7];
+    const orderedWeekdays = arrayRotate(defaultWeekdays, -defaultWeekdays.indexOf(startOfWeek));
+
+    orderedWeekdays.forEach((day, index) => {
+      // Iterate over each available time slot
+      weeklyTimes[day]?.forEach((slot) => {
+        const start = getStartOfWeek(d, startOfWeek).add(index, 'days').hour(slot.startHour);
+        const end = start.hour(slot.endHour).subtract(s.slot_duration - 2, 'minutes');
+
+        // Init date pointer with first time slot start
+        let pointer = start;
+
+        while (pointer.isBefore(end)) {
+          slots.push({
+            id: null,
+            start: pointer,
+            duration: s.slot_duration,
+            attendee_id: null,
+          });
+
+          pointer = pointer.add(s.slot_duration, 'minutes');
+        }
+      });
+    });
+
+    return slots;
+  };
+
+  /**
    * Converts a time (startTime or endTime) to a timezone that the backend expects
    * @param {string} time
    */
@@ -267,6 +341,7 @@ export const useScheduleStore = defineStore('schedules', () => {
     createSchedule,
     updateSchedule,
     updateFirstSlug,
+    availableTimeSlots,
     timeToBackendTime,
     timeToFrontendTime,
   };
