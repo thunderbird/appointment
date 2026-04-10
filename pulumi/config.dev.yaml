@@ -350,6 +350,10 @@ resources:
                   awslogs-group: /tb/dev/appointment
                   awslogs-stream-prefix: ecs
                   awslogs-region: eu-central-1
+              portMappings:
+                - containerPort: 5555
+                  hostPort: 5555
+                  protocol: tcp
               environment:
                 - *VAR_APP_ENV
                 - *VAR_AUTH_SCHEME
@@ -475,7 +479,10 @@ resources:
           load_balancer: flower
           service:
             desired_count: 1
-          target: flower
+          targets:
+            - container_name: flower
+              container_port: 5555
+              target_name: flower
 
       registries:
         celery:
