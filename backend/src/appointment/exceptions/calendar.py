@@ -4,6 +4,11 @@ class EventNotCreatedException(Exception):
     pass
 
 
+class EventNotPatchedException(Exception):
+    """Raise if an event cannot be patched on a remote calendar"""
+
+    pass
+
 class EventNotDeletedException(Exception):
     """Raise if an event cannot be deleted on a remote calendar"""
 

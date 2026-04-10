@@ -1,0 +1,128 @@
+"""Shared helpers for managing Google Calendar push notification (watch) channels."""
+
+import json
+import logging
+import os
+import uuid
+from datetime import datetime, timezone
+
+from google.oauth2.credentials import Credentials
+from sqlalchemy.orm import Session
+
+from .apis.google_client import GoogleClient
+from ..database import repo, models
+from ..tasks.google import stop_google_channel
+
+
+def get_webhook_url() -> str | None:
+    """Build the Google Calendar webhook URL from the backend URL, requires https."""
+    backend_url = os.getenv('BACKEND_URL')
+    if not backend_url:
+        return None
+    return f'{backend_url}/webhooks/google-calendar'
+
+
+def get_google_token(google_client: GoogleClient, external_connection: models.ExternalConnections):
+    """Build Google Credentials from an external connection's stored token."""
+    if not external_connection.token:
+        return None
+
+    return Credentials.from_authorized_user_info(
+        json.loads(external_connection.token), google_client.SCOPES
+    )
+
+
+def setup_watch_channel(db: Session, google_client: GoogleClient, calendar: models.Calendar) -> bool:
+    """Register a push notification channel for a single Google calendar.
+    Returns True if a channel exists (or was created), False on failure."""
+    if not google_client or calendar.provider != models.CalendarProvider.google:
+        return False
+
+    webhook_url = get_webhook_url()
+    if not webhook_url:
+        logging.warning('[google_watch] BACKEND_URL not set, skipping watch channel setup')
+        return False
+
+    existing = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
+    if existing:
+        return True
+
+    external_connection = calendar.external_connection
+    if not external_connection or not external_connection.token:
+        return False
+
+    try:
+        token = get_google_token(google_client, external_connection)
+    except (json.JSONDecodeError, Exception) as e:
+        logging.error(f'[google_watch] Could not parse token for calendar {calendar.id}: {e}')
+        return False
+
+    if not token:
+        logging.error(f'[google_watch] Missing token for calendar {calendar.id}')
+        return False
+
+    try:
+        state = str(uuid.uuid4())
+        response = google_client.watch_events(calendar.user, webhook_url, token, state=state)
+        if response:
+            expiration_ms = int(response.get('expiration', 0))
+            expiration_dt = datetime.fromtimestamp(expiration_ms / 1000, tz=timezone.utc)
+
+            sync_token = google_client.get_initial_sync_token(calendar.user, token)
+
+            repo.google_calendar_channel.create(
+                db,
+                calendar_id=calendar.id,
+                channel_id=response['id'],
+                resource_id=response['resourceId'],
+                expiration=expiration_dt,
+                state=state,
+                sync_token=sync_token,
+            )
+    except Exception as e:
+        logging.warning(f'[google_watch] Failed to set up watch channel for calendar {calendar.id}: {e}')
+        return False
+
+    return True
+
+
+def teardown_watch_channel(db: Session, calendar: models.Calendar) -> bool:
+    """Stop and delete the watch channel for a single Google calendar.
+    Returns True if the channel was deleted, False if there was nothing to remove."""
+    channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
+    if not channel:
+        return False
+
+    if calendar.external_connection and calendar.external_connection.token:
+        stop_google_channel.delay(
+            channel.channel_id, channel.resource_id, calendar.external_connection.token,
+        )
+
+    repo.google_calendar_channel.delete(db, channel)
+    return True
+
+
+def teardown_watch_channels_for_connection(
+    db: Session,
+    google_connection: models.ExternalConnections,
+):
+    """Stop and remove all watch channels for calendars under a Google connection."""
+    if not google_connection or not google_connection.token:
+        return
+
+    calendars = (
+        db.query(models.Calendar)
+        .filter(models.Calendar.external_connection_id == google_connection.id)
+        .all()
+    )
+
+    for calendar in calendars:
+        channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
+        if not channel:
+            continue
+
+        stop_google_channel.delay(
+            channel.channel_id, channel.resource_id, google_connection.token,
+        )
+
+        repo.google_calendar_channel.delete(db, channel)

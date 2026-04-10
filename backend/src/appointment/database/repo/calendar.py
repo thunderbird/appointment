@@ -41,7 +41,12 @@ def get_by_url(db: Session, url: str) -> models.Calendar | None:
     return db.query(models.Calendar).filter(models.Calendar.url == url).first()
 
 
-def get_by_subscriber(db: Session, subscriber_id: int, include_unconnected: bool = True):
+def get_by_subscriber(
+    db: Session,
+    subscriber_id: int,
+    include_unconnected: bool = True,
+    provider: models.CalendarProvider | None = None,
+):
     """retrieve list of calendars by owner id"""
     query = db.query(models.Calendar).filter(models.Calendar.owner_id == subscriber_id)
 
@@ -49,6 +54,9 @@ def get_by_subscriber(db: Session, subscriber_id: int, include_unconnected: bool
         # Skipping ruff check here since we need to compare a boolean to an integer in Postgresql
         # and "models.Calendar.connected is True" always evaluates to false.
         query = query.filter(models.Calendar.connected == True)  # noqa: E712
+
+    if provider is not None:
+        query = query.filter(models.Calendar.provider == provider)
 
     return query.all()
 
@@ -164,18 +172,14 @@ def delete_by_subscriber_and_provider(
     external_connection_id: Optional[int] = None,
 ):
     """Delete all subscriber's calendar by a provider"""
-    calendars = get_by_subscriber(db, subscriber_id=subscriber_id)
+    calendars = get_by_subscriber(db, subscriber_id=subscriber_id, provider=provider)
     for calendar in calendars:
-        if calendar.provider == provider:
-            # If user is provided and it's not the same as the calendar user then we can skip
-            if user and user != calendar.user:
-                continue
+        if user and user != calendar.user:
+            continue
 
-            """If external_connection_id is provided and it's not the same as the calendar external_connection_id
-               then we can skip"""
-            if external_connection_id and external_connection_id != calendar.external_connection_id:
-                continue
+        if external_connection_id and external_connection_id != calendar.external_connection_id:
+            continue
 
-            delete(db, calendar_id=calendar.id)
+        delete(db, calendar_id=calendar.id)
 
     return True

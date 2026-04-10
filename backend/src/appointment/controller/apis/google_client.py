@@ -1,6 +1,8 @@
 import logging
 import os
+import uuid
 from datetime import datetime
+from enum import StrEnum
 
 import sentry_sdk
 from google_auth_oauthlib.flow import Flow
@@ -11,9 +13,39 @@ from ... import utils
 from ...database import repo
 from ...database.models import CalendarProvider
 from ...database.schemas import CalendarConnection
-from ...defines import DATETIMEFMT
-from ...exceptions.calendar import EventNotCreatedException, EventNotDeletedException, FreeBusyTimeException
+from ...defines import DATETIMEFMT, SEVEN_DAYS_IN_SECONDS
+from ...exceptions.calendar import (
+    EventNotCreatedException,
+    EventNotDeletedException,
+    EventNotPatchedException,
+    FreeBusyTimeException
+)
 from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
+
+
+class SendUpdates(StrEnum):
+    """Maps to the Google Calendar API ``sendUpdates`` parameter.
+    Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events/delete"""
+    ALL = 'all'
+    EXTERNAL_ONLY = 'externalOnly'
+    NONE = 'none'
+
+
+class EventStatus(StrEnum):
+    """Maps to the Google Calendar API event ``status`` field.
+    Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events#status"""
+    CONFIRMED = 'confirmed'
+    TENTATIVE = 'tentative'
+    CANCELLED = 'cancelled'
+
+
+class ResponseStatus(StrEnum):
+    """Maps to the Google Calendar API attendee ``responseStatus`` field.
+    Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events"""
+    NEEDS_ACTION = 'needsAction'
+    DECLINED = 'declined'
+    TENTATIVE = 'tentative'
+    ACCEPTED = 'accepted'
 
 
 class GoogleClient:
@@ -235,27 +267,158 @@ class GoogleClient:
 
         return items
 
-    def save_event(self, calendar_id, body, token):
-        response = None
+    def get_event(self, calendar_id, event_id, token):
+        """Retrieve a single event by ID.
+        Ref: https://developers.google.com/calendar/api/v3/reference/events/get"""
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
-                response = service.events().import_(calendarId=calendar_id, body=body).execute()
+                return service.events().get(calendarId=calendar_id, eventId=event_id).execute()
+            except HttpError as e:
+                logging.warning(f'[google_client.get_event] Request Error: {e.status_code}/{e.error_details}')
+                return None
+
+    def save_event(self, calendar_id, body, token):
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            try:
+                return service.events().import_(calendarId=calendar_id, body=body).execute()
             except HttpError as e:
                 logging.warning(f'[google_client.save_event] Request Error: {e.status_code}/{e.error_details}')
                 raise EventNotCreatedException()
 
-        return response
-
-    def delete_event(self, calendar_id, event_id, token):
-        response = None
+    def insert_event(self, calendar_id, body, token, send_updates: SendUpdates = SendUpdates.ALL):
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
-                response = service.events().delete(calendarId=calendar_id, eventId=event_id).execute()
+                return service.events().insert(
+                    calendarId=calendar_id, body=body, sendUpdates=send_updates
+                ).execute()
+            except HttpError as e:
+                logging.warning(f'[google_client.insert_event] Request Error: {e.status_code}/{e.error_details}')
+                raise EventNotCreatedException()
+
+    def patch_event(self, calendar_id, event_id, body, token, send_updates: SendUpdates = SendUpdates.ALL):
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            try:
+                return (
+                    service.events()
+                    .patch(calendarId=calendar_id, eventId=event_id, body=body, sendUpdates=send_updates)
+                    .execute()
+                )
+            except HttpError as e:
+                logging.warning(f'[google_client.patch_event] Request Error: {e.status_code}/{e.error_details}')
+                raise EventNotPatchedException()
+
+    def delete_event(self, calendar_id, event_id, token, send_updates: SendUpdates = SendUpdates.NONE):
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            try:
+                return (
+                    service.events()
+                    .delete(calendarId=calendar_id, eventId=event_id, sendUpdates=send_updates)
+                    .execute()
+                )
             except HttpError as e:
                 logging.warning(f'[google_client.delete_event] Request Error: {e.status_code}/{e.error_details}')
                 raise EventNotDeletedException()
 
+    def watch_events(self, calendar_id, webhook_url, token, state: str):
+        """Register a push notification channel for calendar event changes.
+        Ref: https://developers.google.com/calendar/api/v3/reference/events/watch"""
+        channel_id = str(uuid.uuid4())
+        ttl = os.getenv('GOOGLE_CHANNEL_TTL_IN_SECONDS', SEVEN_DAYS_IN_SECONDS)
+
+        body = {
+            'id': channel_id,
+            'type': 'web_hook',
+            'address': webhook_url,
+            'token': state,
+            'params': {
+                'ttl': str(ttl)
+            },
+        }
+
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            try:
+                response = service.events().watch(
+                    calendarId=calendar_id,
+                    body=body,
+                ).execute()
+            except HttpError as e:
+                logging.error(f'[google_client.watch_events] Request Error: {e.status_code}/{e.error_details}')
+                return None
+            except Exception as e:
+                logging.error(f'[google_client.watch_events] Error: {e}')
+                return None
+
         return response
+
+    def stop_channel(self, channel_id, resource_id, token):
+        """Stop a push notification channel.
+        Ref: https://developers.google.com/calendar/api/v3/reference/channels/stop"""
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            try:
+                service.channels().stop(
+                    body={
+                        'id': channel_id,
+                        'resourceId': resource_id,
+                    },
+                ).execute()
+            except HttpError as e:
+                logging.warning(f'[google_client.stop_channel] Request Error: {e.status_code}/{e.error_details}')
+
+    def list_events_sync(self, calendar_id, sync_token, token):
+        """Fetch events that changed since the last sync token.
+        Ref: https://developers.google.com/calendar/api/v3/reference/events/list (incremental sync)"""
+        items = []
+        next_sync_token = None
+        page_token = None
+
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            while True:
+                try:
+                    params = {
+                        'calendarId': calendar_id,
+                        'syncToken': sync_token,
+                    }
+                    if page_token:
+                        params['pageToken'] = page_token
+
+                    response = service.events().list(**params).execute()
+                    items += response.get('items', [])
+                    page_token = response.get('nextPageToken')
+                    if not page_token:
+                        next_sync_token = response.get('nextSyncToken')
+                        break
+                except HttpError as e:
+                    if e.status_code == 410:
+                        logging.info('[google_client.list_events_sync] Sync token expired, full sync needed')
+                        return None, None
+                    logging.warning(
+                        f'[google_client.list_events_sync] Request Error: {e.status_code}/{e.error_details}'
+                    )
+                    break
+
+        return items, next_sync_token
+
+    def get_initial_sync_token(self, calendar_id, token):
+        """Perform an initial list to obtain a sync token without fetching all events."""
+        with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
+            try:
+                page_token = None
+                while True:
+                    params = {
+                        'calendarId': calendar_id,
+                        'maxResults': 250,
+                    }
+                    if page_token:
+                        params['pageToken'] = page_token
+                    response = service.events().list(**params).execute()
+                    page_token = response.get('nextPageToken')
+                    if not page_token:
+                        return response.get('nextSyncToken')
+            except HttpError as e:
+                logging.error(
+                    f'[google_client.get_initial_sync_token] Request Error: {e.status_code}/{e.error_details}'
+                )
+                return None
 
     def sync_calendars(self, db, subscriber_id: int, token, external_connection_id: int | None = None):
         # Grab all the Google calendars
