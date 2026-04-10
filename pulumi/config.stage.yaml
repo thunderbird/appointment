@@ -204,6 +204,16 @@ resources:
               protocol: tcp
               from_port: 6380
               to_port: 6380
+            - description: Allow Redis traffic from Celery
+              protocol: tcp
+              from_port: 6379
+              to_port: 6379
+              source_security_group_id: sg-0813bff6aa9832e2d
+            - description: Allow Redis traffic from Flower
+              protocol: tcp
+              from_port: 6379
+              to_port: 6379
+              source_security_group_id: sg-089861804a280fa38
           egress:
             - description: Allow outbound traffic to anywhere
               protocol: tcp
@@ -247,11 +257,11 @@ resources:
 
   tb:ec2:SshableInstance: {}
   # Fill out this template to build an SSH bastion
-  # tb:ec2:SshableInstance:
-  #   bastion:
-  #     ssh_keypair_name: your-ec2-keypair
-  #     source_cidrs:
-  #       - your.ip.addr.ess/32
+  tb:ec2:SshableInstance:
+    rjung:
+      ssh_keypair_name: rjung-burrito
+      source_cidrs:
+        - 38.15.46.29/32
 
   aws:elasticache:ServerlessCache:
     backend:
@@ -346,6 +356,230 @@ resources:
       max_capacity: 4
       suspend: False
 
+  tb:fargate:AutoscalingFargateCluster:
+    appointment:
+      cluster: {}
+
+      cluster_name: appointment-stage
+
+      task_definitions:
+        celery:
+          <<: *APMT_TASK_DEFINITION
+          family: appointment-stage-celery
+          cpu: 512
+          memory: 1024
+          container_definitions:
+            - <<: *APMT_CONTAINER_DEFINITION
+              name: celery
+              logConfiguration:
+                logDriver: awslogs
+                options:
+                  awslogs-group: /tb/stage/appointment
+                  awslogs-stream-prefix: ecs
+                  awslogs-region: eu-central-1
+              environment:
+                - *VAR_APP_ENV
+                - *VAR_AUTH_SCHEME
+                - *VAR_DATABASE_ENGINE
+                - *VAR_DATABASE_PORT
+                - *VAR_FRONTEND_URL
+                - *VAR_FXA_CALLBACK
+                - *VAR_GOOGLE_AUTH_CALLBACK
+                - *VAR_JWT_ALGO
+                - *VAR_JWT_EXPIRE_IN_MINS
+                - *VAR_LOG_LEVEL
+                - *VAR_LOG_USE_STREAM
+                - *VAR_OIDC_EXP_GRACE_PERIOD
+                - *VAR_OIDC_FALLBACK_MATCH_BY_EMAIL
+                - *VAR_OIDC_TOKEN_INTROSPECTION_URL
+                - *VAR_POSTHOG_HOST
+                - *VAR_REDIS_DB
+                - *VAR_REDIS_PORT
+                - *VAR_REDIS_URL
+                - *VAR_REDIS_USE_SSL
+                - *VAR_REDIS_USE_CLUSTER
+                - *VAR_SENTRY_DSN
+                - *VAR_SERVICE_EMAIL
+                - *VAR_SHORT_BASE_URL
+                - *VAR_SMTP_PORT
+                - *VAR_SMTP_SECURITY
+                - *VAR_TB_ACCOUNTS_CALDAV_URL
+                - *VAR_TB_ACCOUNTS_HOST
+                - *VAR_TIER_BASIC_CALENDAR_LIMIT
+                - *VAR_TIER_PLUS_CALENDAR_LIMIT
+                - *VAR_TIER_PRO_CALENDAR_LIMIT
+                - *VAR_ZOOM_API_ENABLED
+                - *VAR_ZOOM_API_NEW_APP
+                - name: CONTAINER_ROLE
+                  value: celery
+        flower:
+          <<: *APMT_TASK_DEFINITION
+          family: appointment-stage-flower
+          cpu: 512
+          memory: 1024
+          container_definitions:
+            - <<: *APMT_CONTAINER_DEFINITION
+              name: flower
+              logConfiguration:
+                logDriver: awslogs
+                options:
+                  awslogs-group: /tb/stage/appointment
+                  awslogs-stream-prefix: ecs
+                  awslogs-region: eu-central-1
+              environment:
+                - *VAR_APP_ENV
+                - *VAR_AUTH_SCHEME
+                - *VAR_DATABASE_ENGINE
+                - *VAR_DATABASE_PORT
+                - *VAR_FRONTEND_URL
+                - *VAR_FXA_CALLBACK
+                - *VAR_GOOGLE_AUTH_CALLBACK
+                - *VAR_JWT_ALGO
+                - *VAR_JWT_EXPIRE_IN_MINS
+                - *VAR_LOG_LEVEL
+                - *VAR_LOG_USE_STREAM
+                - *VAR_OIDC_EXP_GRACE_PERIOD
+                - *VAR_OIDC_FALLBACK_MATCH_BY_EMAIL
+                - *VAR_OIDC_TOKEN_INTROSPECTION_URL
+                - *VAR_POSTHOG_HOST
+                - *VAR_REDIS_DB
+                - *VAR_REDIS_PORT
+                - *VAR_REDIS_URL
+                - *VAR_REDIS_USE_SSL
+                - *VAR_REDIS_USE_CLUSTER
+                - *VAR_SENTRY_DSN
+                - *VAR_SERVICE_EMAIL
+                - *VAR_SHORT_BASE_URL
+                - *VAR_SMTP_PORT
+                - *VAR_SMTP_SECURITY
+                - *VAR_TB_ACCOUNTS_CALDAV_URL
+                - *VAR_TB_ACCOUNTS_HOST
+                - *VAR_TIER_BASIC_CALENDAR_LIMIT
+                - *VAR_TIER_PLUS_CALENDAR_LIMIT
+                - *VAR_TIER_PRO_CALENDAR_LIMIT
+                - *VAR_ZOOM_API_ENABLED
+                - *VAR_ZOOM_API_NEW_APP
+                - name: CONTAINER_ROLE
+                  value: flower
+      
+      targets:
+        flower:
+          name: apmt-stage-flower
+          health_check:
+            enabled: true
+            healthy_threshold: 3
+            interval: 15
+            path: /
+            port: 5555
+            protocol: HTTP
+            timeout: 5
+            unhealthy_threshold: 3
+          port: 5555
+          protocol: HTTP
+          target_type: ip
+          ip_address_type: ipv4
+
+      load_balancers:
+        flower:
+          enable_cross_zone_load_balancing: yes
+          internal: yes
+          ip_address_type: ipv4
+          load_balancer_type: application
+          name: apmt-flower-stage
+
+      container_security_groups:
+        celery:
+          none:
+            description: Network config for Celery containers in appointment-stage
+            rules:
+              egress:
+                - from_port: 0
+                  to_port: 65535
+                  protocol: tcp
+                  description: Allow all egress
+                  cidr_blocks:
+                    - 0.0.0.0/0
+              ingress: []  # Celery is a "pull" based system, requiring no ingress
+        flower:    # Service to connect
+          flower:  # LB to allow connections from
+            description: Network config for Flower containers in appointment-stage
+            rules:
+              egress:
+                - from_port: 0
+                  to_port: 65535
+                  protocol: tcp
+                  description: Allow all egress
+                  cidr_blocks:
+                    - 0.0.0.0/0
+              ingress:
+                - from_port: 5555
+                  to_port: 5555
+                  protocol: tcp
+                  description: Allow traffic to Flower service
+
+      load_balancer_security_groups:
+        flower:  # LB to apply the rules to
+          description: Network config for Flower load balancer in appointment-stage
+          rules:
+            egress:
+              - from_port: 0
+                to_port: 65535
+                protocol: tcp
+                description: Allow all egress
+                cidr_blocks:
+                  - 0.0.0.0/0
+            ingress:
+              - from_port: 443
+                to_port: 443
+                protocol: tcp
+                description: Allow local TLS traffic only
+                cidr_blocks:
+                  - 10.21.0.0/16
+
+      listeners:
+        flower:  # Load balancer to attach to
+          flower:  # Target to route traffic to
+            # This cert is for flower.appointment-stage.tb.pro
+            certificate_arn: arn:aws:acm:eu-central-1:768512802988:certificate/51a138de-01b0-4f91-a7ed-ecaadd901dc5
+            port: 443
+            protocol: HTTPS
+
+      services:
+        celery:
+          assign_public_ip: yes
+          service:
+            desired_count: 1
+          target: null
+        flower:
+          assign_public_ip: yes
+          container_name: flower
+          container_port: 5555
+          load_balancer: flower
+          service:
+            desired_count: 1
+          target: flower
+
+      registries:
+        celery:
+          - arn:aws:ecr:eu-central-1:768512802988:repository/thunderbird/appointment*
+        flower:
+          - arn:aws:ecr:eu-central-1:768512802988:repository/thunderbird/appointment*
+
+      secrets:
+        celery:
+          - arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/*
+        flower:
+          - arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/*
+      
+      ssm_params: {}
+
+      autoscalers:
+        celery:
+          min_capacity: 1
+          max_capacity: 1
+        flower:
+          min_capacity: 1
+          max_capacity: 1
   tb:cloudfront:CloudFrontS3Service:
     frontend:
       service_bucket_name: tb-appointment-stage-frontend

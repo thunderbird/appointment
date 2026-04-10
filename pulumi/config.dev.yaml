@@ -452,12 +452,13 @@ resources:
                 protocol: tcp
                 description: Allow local TLS traffic only
                 cidr_blocks:
-                  - 10.11.0.0/16
+                  - 10.22.0.0/16
 
       listeners:
         flower:  # Load balancer to attach to
           flower:  # Target to route traffic to
-            certificate_arn: arn:aws:acm:eu-central-1:768512802988:certificate/1841c871-30f9-461e-ba30-20d172fb656f # flower-dev.tb.pro
+            # This cert is for flower.appointment-dev.tb.pro
+            certificate_arn: arn:aws:acm:eu-central-1:768512802988:certificate/616f7481-eb9c-438b-a0b8-3ca26af022c2
             port: 443
             protocol: HTTPS
 
