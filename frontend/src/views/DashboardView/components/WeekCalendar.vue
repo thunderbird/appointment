@@ -342,27 +342,19 @@ const filteredSelectableSlotsForGrid = computed(() => {
  */
 const blockerPlaceholderForGrid = computed(() => {
   const slots = [] as GridElement[];
-  const isBlocked = (e: GridElement, column: number, row: number) => e.gridColumn === column && e.gridRowStart === row;
 
-  // Go through the whole event grid
+  // Go through the whole event grid. We currently fill the grid completely with blockers, to keep the time slots
+  // consistent. We can however add conditions to skip blocked slots in the future if needed.
   for (let i = 1; i <= 24; i++) {
     for (let j = 2; j <= 8; j++) {
-      // If there is already an object existing at that col-row coordinate: skip
-      if (
-        filteredSelectableSlotsForGrid.value.some((e) => isBlocked(e, j, i))
-        || filteredPendingAppointmentsForGrid.value.some((e) => isBlocked(e, j, i))
-        || filteredRemoteEventsForGrid.value.some((e) => isBlocked(e, j, i))
-      ) {
-        continue;
-      }
+      const borderWidth = 1;
 
-      // Otherwise add a blocker
       slots.push({
         id: `${i}-${j}`,
         gridColumn: j,
         gridRowStart: i,
-        topOffset: '1px',
-        height: `${ROW_HEIGHT_PX - 1}px`,
+        topOffset: `${borderWidth}px`,
+        height: `${ROW_HEIGHT_PX - borderWidth}px`,
       });
     }
    
@@ -462,7 +454,7 @@ onMounted(() => {
       <div
         v-for="remoteEvent in filteredRemoteEventsForGrid"
         :key="remoteEvent?.start"
-        class="event-item"
+        class="event-item remote-event"
         :class="{ 'dark': isDarkMode }"
         :style="{
           gridColumn: remoteEvent?.gridColumn,
@@ -693,7 +685,7 @@ onMounted(() => {
   box-sizing: border-box;
 
   &.dark {
-    background-color: #d4ebfa19; /* One-off colour not in design system */
+    background-color: var(--colour-neutral-raised); /* One-off colour not in design system */
   }
 }
 
@@ -702,16 +694,22 @@ onMounted(() => {
   background-color: color-mix(in srgb, var(--colour-primary-default) 10%, transparent);
   background-image: none;
 
+  z-index: 4;
+
   &.dark {
     border-color: var(--colour-primary-default);
   }
+}
+
+.remote-event {
+  z-index: 4;
 }
 
 .selectable-slot {
   margin: 0;
   width: 100%;
 
-  background-color: transparent;
+  background-color: var(--colour-neutral-base);
   background-image: none;
   border: none;
   border-radius: 0;
@@ -720,16 +718,21 @@ onMounted(() => {
   &.selected {
     background-color: var(--colour-accent-blue);
     border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 80%, transparent);
+    border-radius: 0.1875rem; /* 3px */
     color: var(--colour-neutral-base);
+
+    z-index: 4;
   }
 }
 .calendar-wrapper.disabled .selectable-slot {
   cursor: default;
 }
 .calendar-wrapper:not(.disabled) .selectable-slot:not(.selected):hover {
-  background-color: color-mix(in srgb, var(--colour-ti-highlight) 10%, transparent);
+  background-color: color-mix(in srgb, var(--colour-ti-highlight) 10%, var(--colour-neutral-base));
   border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 66%, transparent);
   border-radius: 0.1875rem; /* 3px */
+
+  z-index: 4;
 }
 
 .blocker-slot {
@@ -762,7 +765,7 @@ onMounted(() => {
   justify-self: flex-start;
   border-left: 1px solid var(--colour-neutral-border);
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .horizontal-line {
@@ -770,7 +773,7 @@ onMounted(() => {
   background-color: var(--colour-neutral-border);
   width: 100%;
   position: relative;
-  z-index: 1;
+  z-index: 2;
 }
 
 .calendar-footer {
@@ -812,7 +815,6 @@ onMounted(() => {
 
   .event-item {
     min-width: auto;
-    z-index: 4;
   }
 
   .vertical-line {

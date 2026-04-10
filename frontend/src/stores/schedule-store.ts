@@ -278,7 +278,7 @@ export const useScheduleStore = defineStore('schedules', () => {
       // Iterate over each available time slot
       weeklyTimes[day]?.forEach((slot) => {
         const start = getStartOfWeek(d, startOfWeek).add(index, 'days').hour(slot.startHour);
-        const end = start.hour(slot.endHour);
+        const end = start.hour(slot.endHour).subtract(s.slot_duration - 2, 'minutes');
 
         // Init date pointer with first time slot start
         let pointer = start;
