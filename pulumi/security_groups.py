@@ -69,7 +69,8 @@ def security_groups(
     )
     backend_cache_sg_ingress_rules = backend_cache_sg_opts.get('rules', {}).get('ingress', {})
     for rule in backend_cache_sg_ingress_rules:
-        rule['source_security_group_id'] = container_sgs.get('backend').resources.get('sg').id
+        if 'source_security_group_id' not in rule and 'cidr_blocks' not in rule:
+            rule['source_security_group_id'] = container_sgs.get('backend').resources.get('sg').id
     backend_cache_sg = tb_pulumi.network.SecurityGroupWithRules(
         name=f'{project.name_prefix}-sg-cache-backend',
         project=project,

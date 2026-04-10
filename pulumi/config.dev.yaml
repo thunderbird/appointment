@@ -1,8 +1,89 @@
 ---
+
+### Special variables used throughout this file
+
+# Update this value to update all containers based on the thunderbird/appointment image
+.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:85f15a97bf5ee889bb3ca56cea3f4dac7f5c00d2
+
+# These variables are common to Accounts application environments. Some tasks will require additional configuration.
+.app_env: &VAR_APP_ENV {name: "APP_ENV", value: "dev"}
+.auth_scheme: &VAR_AUTH_SCHEME {name: "AUTH_SCHEME", value: "oidc"}
+.database_engine: &VAR_DATABASE_ENGINE {name: "DATABASE_ENGINE", value: "postgresql"}
+.database_port: &VAR_DATABASE_PORT {name: "DATABASE_PORT", value: "5432"}
+.jwt_algo: &VAR_JWT_ALGO {name: "JWT_ALGO", value: "HS256"}
+.jwt_expire_in_mins: &VAR_JWT_EXPIRE_IN_MINS {name: "JWT_EXPIRE_IN_MINS", value: "10000"}
+.log_level: &VAR_LOG_LEVEL {name: "LOG_LEVEL", value: "ERROR"}
+.log_use_stream: &VAR_LOG_USE_STREAM {name: "LOG_USE_STREAM", value: "True"}
+.oids_exp_grace_period: &VAR_OIDC_EXP_GRACE_PERIOD {name: "OIDC_EXP_GRACE_PERIOD", value: "60"}
+.oidc_fallback_match_by_email: &VAR_OIDC_FALLBACK_MATCH_BY_EMAIL {name: "OIDC_FALLBACK_MATCH_BY_EMAIL", value: "True"}
+.oidc_token_introspection_url: &VAR_OIDC_TOKEN_INTROSPECTION_URL {name: "OIDC_TOKEN_INTROSPECTION_URL", value: "https://auth-dev.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"}
+.frontend_url: &VAR_FRONTEND_URL {name: "FRONTEND_URL", value: "https://appointment-dev.tb.pro"}
+.redis_db: &VAR_REDIS_DB {name: "REDIS_DB", value: "0"}
+.redis_port: &VAR_REDIS_PORT {name: "REDIS_PORT", value: "6379"}
+.redis_use_ssl: &VAR_REDIS_USE_SSL {name: "REDIS_USE_SSL", value: "True"}
+.redis_use_cluster: &VAR_REDIS_USE_CLUSTER {name: "REDIS_USE_CLUSTER", value: "True"}
+.redis_url: &VAR_REDIS_URL {name: "REDIS_URL", value: "cache.appointment-dev.tb.pro"}
+.sentry_dsn: &VAR_SENTRY_DSN {name: "SENTRY_DSN", value: "https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648"}
+.service_email: &VAR_SERVICE_EMAIL {name: "SERVICE_EMAIL", value: "no-reply@appointment-dev.tb.pro"}
+.short_base_url: &VAR_SHORT_BASE_URL {name: "SHORT_BASE_URL", value: "https://dev.apt.mt"}
+.tb_accounts_caldav_url: &VAR_TB_ACCOUNTS_CALDAV_URL {name: "TB_ACCOUNTS_CALDAV_URL", value: "https://dev-thundermail.com"}
+.tier_basic_calendar_limit: &VAR_TIER_BASIC_CALENDAR_LIMIT {name: "TIER_BASIC_CALENDAR_LIMIT", value: "3"}
+.tier_plus_calendar_limit: &VAR_TIER_PLUS_CALENDAR_LIMIT {name: "TIER_PLUS_CALENDAR_LIMIT", value: "5"}
+.tier_pro_calendar_limit: &VAR_TIER_PRO_CALENDAR_LIMIT {name: "TIER_PRO_CALENDAR_LIMIT", value: "10"}
+.zoom_api_enabled: &VAR_ZOOM_API_ENABLED {name: "ZOOM_API_ENABLED", value: "True"}
+.zoom_auth_callback: &VAR_ZOOM_AUTH_CALLBACK {name: "ZOOM_AUTH_CALLBACK", value: "https://appointment-dev.tb.pro/api/v1/zoom/callback"}
+
+# These variables are also common to our environments, but are pulled from secret stores instead
+.database_host: &SECRET_DATABASE_HOST {name: "DATABASE_HOST", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-host-pnM2d9"}
+.database_name: &SECRET_DATABASE_NAME {name: "DATABASE_NAME", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-name-slQJtj"}
+.database_username: &SECRET_DATABASE_USERNAME {name: "DATABASE_USERNAME", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-user-9EgJWM"}
+.database_password: &SECRET_DATABASE_PASSWORD {name: "DATABASE_PASSWORD", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-password-yaGZdw"}
+.oidc_client_id: &SECRET_OIDC_CLIENT_ID {name: "OIDC_CLIENT_ID", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-id-sbebkz"}
+.oidc_client_secret: &SECRET_OIDC_CLIENT_SECRET {name: "OIDC_CLIENT_SECRET", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-secret-I9BTf2"}
+
+# This forms the base of Appointment-based task definitions. The blank fields commented here must be set on any
+# inheriting task definition:
+#   family:
+#   cpu:
+#   memory:
+#   container_definitions:
+.apmt_taskdef: &APMT_TASK_DEFINITION
+  network_mode: awsvpc
+  requires_compatibilities:
+   - FARGATE
+
+# This forms the base of Appointment-based container definitions. The blank fields commented here must be set on any
+# inheriting container definition:
+#   environment
+#   logConfiguration
+#   portMappings
+.apmt_contdef: &APMT_CONTAINER_DEFINITION
+  image: *APMT_IMAGE
+  essential: true
+  mountPoints: []
+  linuxParameters:
+    initProcessEnabled: True
+  restartPolicy:
+    enabled: yes
+    restartAttemptPeriod: 300
+  secrets:
+    - *SECRET_DATABASE_HOST
+    - *SECRET_DATABASE_NAME
+    - *SECRET_DATABASE_USERNAME
+    - *SECRET_DATABASE_PASSWORD
+    - *SECRET_OIDC_CLIENT_ID
+    - *SECRET_OIDC_CLIENT_SECRET
+
 resources:
 
   domains:
     redis: cache.appointment-dev.tb.pro
+
+  tb:cloudwatch:LogDestination:
+    appointment:
+      log_group:
+        retention_in_days: 7
+      org_name: tb
 
   tb:network:MultiCidrVpc:
     appointment:
@@ -75,6 +156,16 @@ resources:
               protocol: tcp
               from_port: 6380
               to_port: 6380
+            - description: Allow Redis traffic from Celery
+              protocol: tcp
+              from_port: 6379
+              to_port: 6379
+              source_security_group_id: sg-0e2da3bf63a814eda
+            - description: Allow Redis traffic from Flower
+              protocol: tcp
+              from_port: 6379
+              to_port: 6379
+              source_security_group_id: sg-01e3bef415d4ceb1b
           egress:
             - description: Allow outbound traffic to anywhere
               protocol: tcp
@@ -136,108 +227,284 @@ resources:
             path: /
             port: 5000
       task_definition:
-        network_mode: awsvpc
+        <<: *APMT_TASK_DEFINITION
+        family: appointment-dev-api
         cpu: 512
         memory: 2048
-        requires_compatibilities:
-          - FARGATE
         container_definitions:
           backend:
-            image: 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:5201a66e89a9adf761aef44ea2a9453af9213558
+            <<: *APMT_CONTAINER_DEFINITION
+            logConfiguration:
+              logDriver: awslogs
+              options:
+                awslogs-group: /tb/dev/appointment
+                awslogs-stream-prefix: ecs
+                awslogs-region: eu-central-1
             portMappings:
               - name: backend
                 containerPort: 5000
                 hostPort: 5000
                 protocol: tcp
                 appProtocol: http
-            linuxParameters:
-              initProcessEnabled: True
-            secrets:
-              - name: DATABASE_HOST
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-host-9udgGP
-              - name: DATABASE_NAME
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-name-ajG5gL
-              - name: DATABASE_USERNAME
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-user-ARowLy
-              - name: DATABASE_PASSWORD
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-password-yetVzH
-              # - name: DB_ENC_SECRET
-              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-encryption-wVW5q5
-              # - name: FXA_SECRETS
-              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/fxa-secrets-9V5Bk5
-              # - name: GOOGLE_OAUTH_SECRETS
-              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/google-oauth-fkGJlJ
-              - name: OIDC_CLIENT_ID
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-id-yaAyEa
-              - name: OIDC_CLIENT_SECRET
-                valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-secret-uSFyGx
-              #  - name: SMTP_SECRETS
-              #    valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/smtp-connection-6QglYt
-              # - name: ZOOM_SECRETS
-              #   valueFrom: arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/zoom-secrets-0A8KzQ
             environment:
-              - name: DATABASE_ENGINE
-                value: postgresql
-              - name: DATABASE_PORT
-                value: '5432'
-              - name: LOG_LEVEL
-                value: ERROR
-              - name: FRONTEND_URL
-                value: https://appointment-dev.tb.pro
-              - name: SHORT_BASE_URL
-                value: https://dev.apt.mt
-              - name: TIER_BASIC_CALENDAR_LIMIT
-                value: "3"
-              - name: TIER_PLUS_CALENDAR_LIMIT
-                value: "5"
-              - name: TIER_PRO_CALENDAR_LIMIT
-                value: "10"
-              - name: LOG_USE_STREAM
-                value: "True"
-              - name: APP_ENV
-                value: dev
-              - name: SENTRY_DSN
-                value: https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648
-              - name: ZOOM_API_ENABLED
-                value: "True"
-              - name: ZOOM_AUTH_CALLBACK
-                value: https://appointment-stage.tb.pro/api/v1/zoom/callback
-              - name: SERVICE_EMAIL
-                value: no-reply@appointment-dev.tb.pro
-              - name: AUTH_SCHEME
-                value: "oidc"
-              - name: JWT_ALGO
-                value: "HS256"
-              - name: JWT_EXPIRE_IN_MINS
-                value: "10000"
-              - name: REDIS_URL
-                value: cache.appointment-dev.tb.pro
-              - name: REDIS_PORT
-                value: "6379"
-              - name: REDIS_DB
-                value: "0"
-              - name: REDIS_USE_SSL
-                value: "True"
-              - name: REDIS_USE_CLUSTER
-                value: "True"
-              - name: OIDC_TOKEN_INTROSPECTION_URL
-                value: "https://auth-stage.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"
-              - name: OIDC_EXP_GRACE_PERIOD
-                value: "60"
-              - name: OIDC_FALLBACK_MATCH_BY_EMAIL
-                value: "True"
-              - name: TB_ACCOUNTS_CALDAV_URL
-                value: https://stage-thundermail.com
-
+              - *VAR_APP_ENV
+              - *VAR_AUTH_SCHEME
+              - *VAR_DATABASE_ENGINE
+              - *VAR_DATABASE_PORT
+              - *VAR_JWT_ALGO
+              - *VAR_JWT_EXPIRE_IN_MINS
+              - *VAR_LOG_LEVEL
+              - *VAR_LOG_USE_STREAM
+              - *VAR_OIDC_EXP_GRACE_PERIOD
+              - *VAR_OIDC_FALLBACK_MATCH_BY_EMAIL
+              - *VAR_OIDC_TOKEN_INTROSPECTION_URL
+              - *VAR_FRONTEND_URL
+              - *VAR_REDIS_DB
+              - *VAR_REDIS_PORT
+              - *VAR_REDIS_USE_SSL
+              - *VAR_REDIS_USE_CLUSTER
+              - *VAR_REDIS_URL
+              - *VAR_SENTRY_DSN
+              - *VAR_SERVICE_EMAIL
+              - *VAR_SHORT_BASE_URL
+              - *VAR_TB_ACCOUNTS_CALDAV_URL
+              - *VAR_TIER_BASIC_CALENDAR_LIMIT
+              - *VAR_TIER_PLUS_CALENDAR_LIMIT
+              - *VAR_TIER_PRO_CALENDAR_LIMIT
+              - *VAR_ZOOM_API_ENABLED
+              - *VAR_ZOOM_AUTH_CALLBACK
+              - name: CONTAINER_ROLE
+                value: api
+  
   tb:autoscale:EcsServiceAutoscaler:
     backend:
       cpu_threshold: 80
       ram_threshold: 80
       cooldown: 180
       disable_scale_in: False
-      min_capacity: 2
-      max_capacity: 4
+      min_capacity: 1
+      max_capacity: 1
       suspend: False
+  
+  tb:fargate:AutoscalingFargateCluster:
+    appointment:
+      cluster: {}
+
+      cluster_name: appointment-dev
+
+      task_definitions:
+        celery:
+          <<: *APMT_TASK_DEFINITION
+          family: appointment-dev-celery
+          cpu: 512
+          memory: 1024
+          container_definitions:
+            - <<: *APMT_CONTAINER_DEFINITION
+              name: celery
+              logConfiguration:
+                logDriver: awslogs
+                options:
+                  awslogs-group: /tb/dev/appointment
+                  awslogs-stream-prefix: ecs
+                  awslogs-region: eu-central-1
+              environment:
+                - *VAR_APP_ENV
+                - *VAR_AUTH_SCHEME
+                - *VAR_DATABASE_ENGINE
+                - *VAR_DATABASE_PORT
+                - *VAR_JWT_ALGO
+                - *VAR_JWT_EXPIRE_IN_MINS
+                - *VAR_LOG_LEVEL
+                - *VAR_LOG_USE_STREAM
+                - *VAR_OIDC_EXP_GRACE_PERIOD
+                - *VAR_OIDC_FALLBACK_MATCH_BY_EMAIL
+                - *VAR_OIDC_TOKEN_INTROSPECTION_URL
+                - *VAR_FRONTEND_URL
+                - *VAR_REDIS_DB
+                - *VAR_REDIS_PORT
+                - *VAR_REDIS_USE_SSL
+                - *VAR_REDIS_USE_CLUSTER
+                - *VAR_REDIS_URL
+                - *VAR_SENTRY_DSN
+                - *VAR_SERVICE_EMAIL
+                - *VAR_SHORT_BASE_URL
+                - *VAR_TB_ACCOUNTS_CALDAV_URL
+                - *VAR_TIER_BASIC_CALENDAR_LIMIT
+                - *VAR_TIER_PLUS_CALENDAR_LIMIT
+                - *VAR_TIER_PRO_CALENDAR_LIMIT
+                - *VAR_ZOOM_API_ENABLED
+                - *VAR_ZOOM_AUTH_CALLBACK
+                - name: CONTAINER_ROLE
+                  value: celery
+        flower:
+          <<: *APMT_TASK_DEFINITION
+          family: appointment-dev-flower
+          cpu: 512
+          memory: 1024
+          container_definitions:
+            - <<: *APMT_CONTAINER_DEFINITION
+              name: flower
+              logConfiguration:
+                logDriver: awslogs
+                options:
+                  awslogs-group: /tb/dev/appointment
+                  awslogs-stream-prefix: ecs
+                  awslogs-region: eu-central-1
+              portMappings:
+                - containerPort: 5555
+                  hostPort: 5555
+                  protocol: tcp
+              environment:
+                - *VAR_APP_ENV
+                - *VAR_AUTH_SCHEME
+                - *VAR_DATABASE_ENGINE
+                - *VAR_DATABASE_PORT
+                - *VAR_JWT_ALGO
+                - *VAR_JWT_EXPIRE_IN_MINS
+                - *VAR_LOG_LEVEL
+                - *VAR_LOG_USE_STREAM
+                - *VAR_OIDC_EXP_GRACE_PERIOD
+                - *VAR_OIDC_FALLBACK_MATCH_BY_EMAIL
+                - *VAR_OIDC_TOKEN_INTROSPECTION_URL
+                - *VAR_FRONTEND_URL
+                - *VAR_REDIS_DB
+                - *VAR_REDIS_PORT
+                - *VAR_REDIS_USE_SSL
+                - *VAR_REDIS_USE_CLUSTER
+                - *VAR_REDIS_URL
+                - *VAR_SENTRY_DSN
+                - *VAR_SERVICE_EMAIL
+                - *VAR_SHORT_BASE_URL
+                - *VAR_TB_ACCOUNTS_CALDAV_URL
+                - *VAR_TIER_BASIC_CALENDAR_LIMIT
+                - *VAR_TIER_PLUS_CALENDAR_LIMIT
+                - *VAR_TIER_PRO_CALENDAR_LIMIT
+                - *VAR_ZOOM_API_ENABLED
+                - *VAR_ZOOM_AUTH_CALLBACK
+                - name: CONTAINER_ROLE
+                  value: flower
+      
+      targets:
+        flower:
+          name: apmt-dev-flower
+          health_check:
+            enabled: true
+            healthy_threshold: 3
+            interval: 15
+            path: /
+            port: 5555
+            protocol: HTTP
+            timeout: 5
+            unhealthy_threshold: 3
+          port: 5555
+          protocol: HTTP
+          target_type: ip
+          ip_address_type: ipv4
+
+      load_balancers:
+        flower:
+          enable_cross_zone_load_balancing: yes
+          internal: yes
+          ip_address_type: ipv4
+          load_balancer_type: application
+          name: apmt-flower-dev
+
+      container_security_groups:
+        celery:
+          none:
+            description: Network config for Celery containers in appointment-dev
+            rules:
+              egress:
+                - from_port: 0
+                  to_port: 65535
+                  protocol: tcp
+                  description: Allow all egress
+                  cidr_blocks:
+                    - 0.0.0.0/0
+              ingress: []  # Celery is a "pull" based system, requiring no ingress
+        flower:    # Service to connect
+          flower:  # LB to allow connections from
+            description: Network config for Flower containers in appointment-dev
+            rules:
+              egress:
+                - from_port: 0
+                  to_port: 65535
+                  protocol: tcp
+                  description: Allow all egress
+                  cidr_blocks:
+                    - 0.0.0.0/0
+              ingress:
+                - from_port: 5555
+                  to_port: 5555
+                  protocol: tcp
+                  description: Allow traffic to Flower service
+
+      load_balancer_security_groups:
+        flower:  # LB to apply the rules to
+          description: Network config for Flower load balancer in appointment-dev
+          rules:
+            egress:
+              - from_port: 0
+                to_port: 65535
+                protocol: tcp
+                description: Allow all egress
+                cidr_blocks:
+                  - 0.0.0.0/0
+            ingress:
+              - from_port: 443
+                to_port: 443
+                protocol: tcp
+                description: Allow local TLS traffic only
+                cidr_blocks:
+                  - 10.22.0.0/16
+
+      listeners:
+        flower:  # Load balancer to attach to
+          flower:  # Target to route traffic to
+            # This cert is for flower.appointment-dev.tb.pro
+            certificate_arn: arn:aws:acm:eu-central-1:768512802988:certificate/616f7481-eb9c-438b-a0b8-3ca26af022c2
+            port: 443
+            protocol: HTTPS
+
+      services:
+        celery:
+          assign_public_ip: yes
+          service:
+            desired_count: 1
+          target: null
+        flower:
+          assign_public_ip: yes
+          container_name: flower
+          container_port: 5555
+          load_balancer: flower
+          service:
+            desired_count: 1
+          targets:
+            - container_name: flower
+              container_port: 5555
+              target_name: flower
+
+      registries:
+        celery:
+          - arn:aws:ecr:eu-central-1:768512802988:repository/thunderbird/appointment*
+        flower:
+          - arn:aws:ecr:eu-central-1:768512802988:repository/thunderbird/appointment*
+
+      secrets:
+        celery:
+          - arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/*
+        flower:
+          - arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/*
+      
+      ssm_params: {}
+
+      autoscalers:
+        celery:
+          min_capacity: 1
+          max_capacity: 1
+        flower:
+          min_capacity: 1
+          max_capacity: 1
 
   tb:cloudfront:CloudFrontS3Service:
     frontend:
@@ -261,6 +528,8 @@ resources:
 
   tb:ci:AwsAutomationUser:
     ci:
+      access_keys: {}
+      enable_legacy_access_key: True
       additional_policies: []
       # - arn:aws:iam::768512802988:policy/appointment-dev-frontend-cache-invalidation
       enable_ecr_image_push: True

@@ -137,16 +137,8 @@ jobs:
 
           cd pulumi
 
-          # Create a YAML config stump containing only the nested tree leading to the image tag update
-          cat << EOF > newimage.yaml
-          resources:
-            tb:fargate:FargateClusterWithLogging:
-              backend:
-                task_definition:
-                  container_definitions:
-                    backend:
-                      image: "$ECR_TAG"
-          EOF
+          # Create a YAML config stump containing only the new image tag as a YAML variable
+          echo ".apmt_image: &APMT_IMAGE $ECR_TAG" > newimage.yaml
 
           # Use yq to merge the stump into the main config
           yq -i '. *= load("newimage.yaml")' config.stage.yaml

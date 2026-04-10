@@ -4,6 +4,10 @@ resources:
   domains:
     redis: cache.appointment.tb.pro
 
+  tb:cloudwatch:LogDestination:
+    appointment:
+      org_name: tb
+
   tb:network:MultiCidrVpc:
     appointment:
       cidr_block: 10.20.0.0/16
@@ -239,6 +243,8 @@ resources:
                 value: prod
               - name: AUTH_SCHEME
                 value: oidc
+              - name: CONTAINER_ROLE
+                value: api
               - name: DATABASE_ENGINE
                 value: postgresql
               - name: DATABASE_PORT

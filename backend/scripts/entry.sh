@@ -14,7 +14,9 @@ if [[ "$CONTAINER_ROLE" == "worker" ]]; then
 elif [[ "$CONTAINER_ROLE" == "beat" ]]; then
     echo "Starting Celery beat scheduler..."
     celery -A appointment.celery_app:celery beat -l INFO
-else
+elif [[ "$CONTAINER_ROLE" == "flower" ]]; then
+    celery -A appointment.celery_app:celery flower -l INFO
+elif [[ "$CONTAINER_ROLE" == "api" ]]; then
     if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
         echo "Running setup"
         run-command main setup
@@ -35,4 +37,7 @@ else
 
     echo "Running uvicorn with these arguments: '$ARGS'"
     uvicorn $ARGS
+else
+    echo "Unrecognized CONTAINER_ROLE: $CONTAINER_ROLE"
+    exit 1
 fi
