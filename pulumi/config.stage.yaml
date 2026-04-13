@@ -257,11 +257,11 @@ resources:
 
   tb:ec2:SshableInstance: {}
   # Fill out this template to build an SSH bastion
-  tb:ec2:SshableInstance:
-    rjung:
-      ssh_keypair_name: rjung-burrito
-      source_cidrs:
-        - 38.15.46.29/32
+  # tb:ec2:SshableInstance:
+  #   bastion:
+  #     ssh_keypair_name: your-ec2-keypair
+  #     source_cidrs:
+  #       - your.ip.addr.ess/32
 
   aws:elasticache:ServerlessCache:
     backend:
