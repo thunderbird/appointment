@@ -383,6 +383,8 @@ resources:
                 - *VAR_ZOOM_AUTH_CALLBACK
                 - name: CONTAINER_ROLE
                   value: flower
+                - name: FLOWER_UNAUTHENTICATED_API
+                  value: true
       
       targets:
         flower:
