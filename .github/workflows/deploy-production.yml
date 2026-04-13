@@ -112,8 +112,8 @@ jobs:
           pulumi stack select prod
           TBPULUMI_DISABLE_PROTECTION=True \
             pulumi up -y --diff \
-            --target 'urn:pulumi:stage::appointment::tb:fargate:FargateClusterWithLogging$aws:ecs/taskDefinition:TaskDefinition::appointment-stage-fargate-backend-taskdef' \
-            --target 'urn:pulumi:stage::appointment::tb:fargate:AutoscalingFargateCluster::appointment-stage-afc-appointment' \
+            --target 'urn:pulumi:prod::appointment::tb:fargate:FargateClusterWithLogging$aws:ecs/taskDefinition:TaskDefinition::appointment-prod-fargate-backend-taskdef' \
+            --target 'urn:pulumi:prod::appointment::tb:fargate:AutoscalingFargateCluster::appointment-prod-afc-appointment' \
             --target-dependents
 
   prod-sanity-browserstack:
