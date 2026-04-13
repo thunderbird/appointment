@@ -411,7 +411,7 @@ resources:
                 - *VAR_ZOOM_API_ENABLED
                 - *VAR_ZOOM_API_NEW_APP
                 - name: CONTAINER_ROLE
-                  value: celery
+                  value: worker
         flower:
           <<: *APMT_TASK_DEFINITION
           family: appointment-stage-flower
