@@ -147,8 +147,9 @@ jobs:
           export PULUMI_CONFIG_PASSPHRASE="${{ secrets.PULUMI_PASSPHRASE }}"
           pulumi login
           pulumi stack select stage
-          pulumi up -y --diff --target \
-            'urn:pulumi:stage::appointment::tb:fargate:FargateClusterWithLogging$aws:ecs/taskDefinition:TaskDefinition::appointment-stage-fargate-backend-taskdef' \
+          pulumi up -y --diff \
+            --target 'urn:pulumi:stage::appointment::tb:fargate:FargateClusterWithLogging$aws:ecs/taskDefinition:TaskDefinition::appointment-stage-fargate-backend-taskdef' \
+            --target 'urn:pulumi:stage::appointment::tb:fargate:AutoscalingFargateCluster::appointment-stage-afc-appointment' \
             --target-dependents
 
   create-release:
