@@ -7,6 +7,7 @@ import withSetup from '../utils/with-setup';
 import { useUserStore } from '@/stores/user-store';
 import { RouterLink } from 'vue-router';
 import FooterBar from '@/components/FooterBar.vue';
+import { supportUrlKey, tbProUrlKey } from '@/keys';
 
 
 describe('FooterBar', () => {
@@ -28,6 +29,9 @@ describe('FooterBar', () => {
       global: {
         // the FooterBar uses i18n and rounter-link so install these global component plugins
         plugins: [i18ninstance, router],
+        provide: {
+          [tbProUrlKey]: import.meta.env.VITE_TB_PRO_URL,
+        },
       },
     });
 
@@ -60,6 +64,9 @@ describe('FooterBar', () => {
       global: {
         // the FooterBar uses i18n and rounter-link so install these global component plugins
         plugins: [i18ninstance, router],
+        provide: {
+          [supportUrlKey]: import.meta.env.VITE_SUPPORT_URL,
+        },
       },
     }); 
 
