@@ -42,7 +42,7 @@
       font-weight: 700;
       height: 16px;
       ">
-      {{ clock_image_small|safe }} {{ l10n('new-booking-html-time', {'duration': duration}) }}
+      {{ clock_image_small|safe }} {{ l10n('new-booking-html-time', {'duration': duration}, lang=lang) }}
     </div>
   </div>
 {% endblock %}
