@@ -15,7 +15,7 @@ import {
   PhUserSquare,
 } from '@phosphor-icons/vue';
 import { PrimaryButton, UserAvatar } from '@thunderbirdops/services-ui';
-import { accountsTbProfileUrlKey } from '@/keys';
+import { accountsTbProfileUrlKey, supportUrlKey } from '@/keys';
 
 // component constants
 const userStore = useUserStore();
@@ -29,7 +29,7 @@ const navItems = [
 ];
 
 const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
-const supportUrl = import.meta.env?.VITE_SUPPORT_URL;
+const supportUrl = inject(supportUrlKey);
 
 const menuOpen = ref(false);
 const myLinkTooltip = ref(t('navBar.shareMyLink'));

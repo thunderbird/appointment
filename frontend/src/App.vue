@@ -11,7 +11,7 @@ import FooterBar from '@/components/FooterBar.vue';
 import SiteNotification from '@/elements/SiteNotification.vue';
 import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
 import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
-import { accountsTbProfileUrlKey, apiUrlKey, callKey, refreshKey } from '@/keys';
+import { accountsTbProfileUrlKey, apiUrlKey, callKey, refreshKey, supportUrlKey } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 
@@ -40,6 +40,7 @@ const {
 } = storeToRefs(siteNotificationStore);
 
 provide(accountsTbProfileUrlKey, import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL);
+provide(supportUrlKey, import.meta.env.VITE_SUPPORT_URL);
 
 const {
   isSame: isSameNotification,

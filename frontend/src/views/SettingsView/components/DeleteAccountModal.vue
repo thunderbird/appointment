@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { inject, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { callKey } from '@/keys';
+import { callKey, supportUrlKey } from '@/keys';
 import { createUserStore } from '@/stores/user-store';
 import { useRouter } from 'vue-router';
 import { TextInput, IconButton, ModalDialog, DangerButton, LinkButton, CheckboxInput, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
@@ -12,13 +12,13 @@ import { MetricEvents } from '@/definitions';
 
 const { t } = useI18n();
 const call = inject(callKey);
+const supportUrl = inject(supportUrlKey);
 const userStore = createUserStore(call);
 const router = useRouter();
 
 const deleteModal = useTemplateRef('deleteModal');
 const consentToDeletion = ref(false);
 const confirmPassword = ref('');
-const supportUrl = import.meta.env?.VITE_SUPPORT_URL;
 const validationError = ref<Alert>(null);
 
 /**

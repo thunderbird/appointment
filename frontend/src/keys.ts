@@ -26,6 +26,7 @@ export const shortUrlKey = Symbol('shortUrl') as InjectionKey<string>;
 
 // Provide environment and authentication keys
 export const accountsTbProfileUrlKey = Symbol('accountsTbProfileUrl') as InjectionKey<string>;
+export const supportUrlKey = Symbol('supportUrl') as InjectionKey<string>;
 
 // Provide configured fetch call to our backend API
 export const callKey = Symbol('call') as InjectionKey<Fetch>;

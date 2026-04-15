@@ -2,7 +2,7 @@
 import { ref, onMounted, onBeforeUnmount, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { UserAvatar } from '@thunderbirdops/services-ui';
-import { accountsTbProfileUrlKey } from '@/keys';
+import { accountsTbProfileUrlKey, supportUrlKey } from '@/keys';
 
 defineProps<{
   username: string;
@@ -10,7 +10,7 @@ defineProps<{
 }>();
 
 const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
-const supportUrl = import.meta.env?.VITE_SUPPORT_URL;
+const supportUrl = inject(supportUrlKey);
 
 const { t } = useI18n();
 
