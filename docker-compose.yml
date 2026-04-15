@@ -9,6 +9,7 @@ services:
       - ./backend/.env:/app/.env
       - ./backend/src/appointment:/app/appointment
     environment:
+      - CONTAINER_ROLE=api
       - IS_LOCAL_DEV=yes
       - RELEASE_VERSION=localdev
     extra_hosts:
@@ -32,6 +33,17 @@ services:
     ports: []
     environment:
       - CONTAINER_ROLE=beat
+    depends_on:
+      - backend
+      - redis
+
+  celery-flower:
+    <<: *backend
+    ports:
+      - 5556:5555
+    environment:
+      - CONTAINER_ROLE=flower
+      - FLOWER_UNAUTHENTICATED_API=true
     depends_on:
       - backend
       - redis

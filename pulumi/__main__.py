@@ -22,6 +22,16 @@ project = tb_pulumi.ThunderbirdPulumiProject()
 resources = project.config.get('resources')
 cloudflare_zone_id = project.pulumi_config.require_secret('cloudflare_zone_id')
 
+# Create CloudWatch Logs groups to store application logs, etc. in
+logdests = {
+    dest_name: tb_pulumi.cloudwatch.LogDestination(
+        f'{project.name_prefix}-logdest-{dest_name}',
+        project=project,
+        **dest_config,
+    )
+    for dest_name, dest_config in resources.get('tb:cloudwatch:LogDestination', {}).items()
+}
+
 # Create some private network space
 vpc_opts = resources['tb:network:MultiCidrVpc'].get('appointment', {})
 vpc = tb_pulumi.network.MultiCidrVpc(name=f'{project.name_prefix}-vpc', project=project, **vpc_opts)
@@ -69,6 +79,17 @@ fargate_clusters, autoscalers = fargate(
     resources=resources,
     vpc=vpc,
 )
+
+# AutoscalingFargateClusters, the newer class that replaces the above model. For now, we run it alongside.
+afcs = {
+    afc_name: tb_pulumi.fargate.AutoscalingFargateCluster(
+        f'{project.name_prefix}-afc-{afc_name}',
+        project=project,
+        subnets=vpc.resources['subnets'],
+        **afc_config,
+    )
+    for afc_name, afc_config in resources.get('tb:fargate:AutoscalingFargateCluster', {}).items()
+}
 
 # CloudFront function to handle request rewrites headed to the backend
 rewrite_function = cloudfront.rewrite_function(project=project)

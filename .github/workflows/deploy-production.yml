@@ -98,17 +98,10 @@ jobs:
           # to do with the GHA workflow "env" settings.
           export PATH="/home/runner/.pulumi/bin:$PATH"
 
-          # Create a YAML config stump containing only the nested tree leading to the image tag update
+
+          # Create a YAML config stump containing only the new image tag as a YAML variable
           cd pulumi
-          cat << EOF > newimage.yaml
-          resources:
-            tb:fargate:FargateClusterWithLogging:
-              backend:
-                task_definition:
-                  container_definitions:
-                    backend:
-                      image: "${{ steps.pulumi-tag-extract.outputs.pulumi_tag }}"
-          EOF
+          echo ".apmt_image: &APMT_IMAGE ${{ steps.pulumi-tag-extract.outputs.pulumi_tag }}" > newimage.yaml
 
           # Use yq to merge the stump into the main config
           yq -i '. *= load("newimage.yaml")' config.prod.yaml
@@ -118,8 +111,9 @@ jobs:
           pulumi login
           pulumi stack select prod
           TBPULUMI_DISABLE_PROTECTION=True \
-            pulumi up -y --diff --target \
-            'urn:pulumi:prod::appointment::tb:fargate:FargateClusterWithLogging$aws:ecs/taskDefinition:TaskDefinition::appointment-prod-fargate-backend-taskdef' \
+            pulumi up -y --diff \
+            --target 'urn:pulumi:prod::appointment::tb:fargate:FargateClusterWithLogging$aws:ecs/taskDefinition:TaskDefinition::appointment-prod-fargate-backend-taskdef' \
+            --target 'urn:pulumi:prod::appointment::tb:fargate:AutoscalingFargateCluster::appointment-prod-afc-appointment' \
             --target-dependents
 
   prod-sanity-browserstack:
