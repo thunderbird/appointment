@@ -28,6 +28,11 @@
       <div>
         {{ calendar_image|safe }} {{ day }}
       </div>
+      {% if meeting_link_url %}
+      <div style="margin-top: 18px; line-height: 1.3;">
+      {{ l10n('invite-mail-html-meeting-link', lang=lang) }}: <a href="{{ meeting_link_url }}">{{ meeting_link_url }}</a>
+      </div>
+      {% endif %}
     </div>
     {# Chip #}
     <div style="

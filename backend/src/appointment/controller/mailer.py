@@ -183,6 +183,7 @@ class BaseBookingMail(Mailer):
         self.email = email
         self.date = date
         self.duration = duration
+        self.meeting_link_url = kwargs.pop('meeting_link_url', None)
 
         # Pass to super now!
         super().__init__(*args, **kwargs)
@@ -238,6 +239,15 @@ class InvitationMail(BaseBookingMail):
         }
         super().__init__(*args, **default_kwargs, **kwargs)
 
+    def text(self):
+        plain = super().text()
+        if self.meeting_link_url:
+            meeting_link_text = l10n(
+                'invite-mail-plain-meeting-link', {'meeting_link_url': self.meeting_link_url}, lang=self.lang
+            )
+            plain = meeting_link_text + '\n\n' + plain
+        return plain
+
     def html(self):
         return get_template('invite.jinja2').render(
             name=self.name,
@@ -246,6 +256,7 @@ class InvitationMail(BaseBookingMail):
             timezone=self.timezone,
             day=self.day,
             duration=self.duration,
+            meeting_link_url=self.meeting_link_url,
             lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
