@@ -31,6 +31,10 @@ invite-mail-html-heading-name = { $name }
 invite-mail-html-heading-email = ({ $email })
 invite-mail-html-heading-text = hat deine Buchung bestätigt:
 invite-mail-html-time = { $duration } min
+# Variables:
+# $meeting_link_url (String) - URL for the meeting link
+invite-mail-plain-meeting-link = Meeting beitreten: { $meeting_link_url }
+invite-mail-html-meeting-link = Meeting beitreten
 invite-mail-html-invite-is-attached = Deine Kalendereinladung ist angehängt.
 invite-mail-html-download = Download
 

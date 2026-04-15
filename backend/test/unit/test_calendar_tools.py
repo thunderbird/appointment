@@ -523,8 +523,10 @@ class TestVEventTimezoneFallback:
         organizer.email = 'organizer@example.com'
         return organizer
 
-    def _make_appointment(self):
-        return Mock()
+    def _make_appointment(self, location_url=None):
+        appointment = Mock()
+        appointment.location_url = location_url
+        return appointment
 
     def _make_attendee(self, tz='America/New_York'):
         return schemas.AttendeeBase(email='attendee@example.com', name='Attendee', timezone=tz)
@@ -595,3 +597,42 @@ class TestVEventTimezoneFallback:
         call_kwargs = bg.add_task.call_args
         date_arg = call_kwargs.kwargs.get('date') or call_kwargs[1].get('date')
         assert date_arg.tzinfo is not None
+
+    def test_invitation_passes_slot_meeting_link_url(self):
+        tools = self._make_tools()
+        tools.create_vevent = Mock(return_value=b'VCALENDAR')
+        bg = MagicMock()
+        slot = self._make_slot()
+        slot.meeting_link_url = 'https://zoom.us/j/12345'
+        appointment = self._make_appointment(location_url='https://fallback.example.com')
+
+        tools.send_invitation_vevent(bg, appointment, slot, self._make_organizer(), self._make_attendee())
+
+        call_kwargs = bg.add_task.call_args
+        assert call_kwargs.kwargs['meeting_link_url'] == 'https://zoom.us/j/12345'
+
+    def test_invitation_falls_back_to_appointment_location_url(self):
+        tools = self._make_tools()
+        tools.create_vevent = Mock(return_value=b'VCALENDAR')
+        bg = MagicMock()
+        slot = self._make_slot()
+        slot.meeting_link_url = None
+        appointment = self._make_appointment(location_url='https://fallback.example.com')
+
+        tools.send_invitation_vevent(bg, appointment, slot, self._make_organizer(), self._make_attendee())
+
+        call_kwargs = bg.add_task.call_args
+        assert call_kwargs.kwargs['meeting_link_url'] == 'https://fallback.example.com'
+
+    def test_invitation_meeting_link_url_is_none_when_absent(self):
+        tools = self._make_tools()
+        tools.create_vevent = Mock(return_value=b'VCALENDAR')
+        bg = MagicMock()
+        slot = self._make_slot()
+        slot.meeting_link_url = None
+        appointment = self._make_appointment(location_url=None)
+
+        tools.send_invitation_vevent(bg, appointment, slot, self._make_organizer(), self._make_attendee())
+
+        call_kwargs = bg.add_task.call_args
+        assert call_kwargs.kwargs['meeting_link_url'] is None

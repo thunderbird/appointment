@@ -680,6 +680,8 @@ class Tools:
         # Emails to attendee should be sent in the attendee's language if available
         lang = attendee.language if attendee.language is not None else FALLBACK_LOCALE
 
+        meeting_link_url = slot.meeting_link_url if slot.meeting_link_url is not None else appointment.location_url
+
         # Send mail
         background_tasks.add_task(
             send_invite_email,
@@ -690,6 +692,7 @@ class Tools:
             to=attendee.email,
             attachment=ics_file,
             lang=lang,
+            meeting_link_url=meeting_link_url,
         )
 
     def send_hold_vevent(
