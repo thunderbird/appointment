@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import {
@@ -15,6 +15,7 @@ import {
   PhUserSquare,
 } from '@phosphor-icons/vue';
 import { PrimaryButton, UserAvatar } from '@thunderbirdops/services-ui';
+import { accountsTbProfileUrlKey } from '@/keys';
 
 // component constants
 const userStore = useUserStore();
@@ -27,7 +28,7 @@ const navItems = [
   { route: 'settings', i18nKey: 'settings', icon: PhGear },
 ];
 
-const accountsTbProfileUrl = import.meta.env?.VITE_TB_ACCOUNT_DASHBOARD_URL;
+const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 const supportUrl = import.meta.env?.VITE_SUPPORT_URL;
 
 const menuOpen = ref(false);
