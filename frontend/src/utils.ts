@@ -81,47 +81,6 @@ export const enumToObject = (e: object): { [key in string]: number } => {
   return o;
 };
 
-// find a key by a given value and return it
-export const keyByValue = (o: object, v: number|string, isEnum = false): number|string => {
-  const e = isEnum ? enumToObject(o) : o;
-  return Object.keys(e).find((k) => e[k] === v);
-};
-
-// create event color for border and background, inherited from calendar color attribute
-export const eventColor = (event: CustomEventData, placeholder: boolean): Coloring => {
-  const color = {
-    border: null,
-    background: null,
-  };
-  // color appointment slots
-  if (!placeholder) {
-    color.border = event.calendar_color;
-    color.background = event.calendar_color;
-    // keep solid background only for slots with attendee
-    if (!event.attendee && !event.remote) {
-      color.background += '22';
-    }
-  }
-
-  return color;
-};
-
-// file download
-export const download = (data: BlobPart, filename: string, contenttype: string = 'text/plain'): void => {
-  const a = document.createElement('a');
-  const file = new Blob([data], { type: `${contenttype};charset=UTF-8`, endings: 'native' });
-  // TODO: use fetch or similar to programmatically trigger a download
-  const url = URL.createObjectURL(file);
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  setTimeout(() => {
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  }, 0);
-};
-
 // handle time format, return dayjs format string
 // can be either set by the user (local storage) or detected from system.
 // This functions works independent from Pinia stores so that
@@ -257,72 +216,6 @@ export const showEventPopup = (el: HTMLElementEvent, event: CalendarEvent, posit
 };
 
 /**
- * via: https://stackoverflow.com/a/11868398
- */
-export const getAccessibleColor = (hexcolor: string): string => {
-  const r = parseInt(hexcolor.substring(1, 3), 16);
-  const g = parseInt(hexcolor.substring(3, 5), 16);
-  const b = parseInt(hexcolor.substring(5, 7), 16);
-  const yiq = ((r * 299) + (g * 587) + (b * 114)) / 1000;
-  return (yiq >= 160) ? 'black' : 'white';
-};
-
-/**
- * Helper function to parse hex color to RGB values
- * @param hexcolor - Hex color string (with or without #)
- * @returns Object with r, g, b values or null if invalid
- */
-const parseHexToRgb = (hexcolor: string): { r: number, g: number, b: number } | null => {
-  if (!hexcolor) return null;
-
-  // Remove # if present
-  const hex = hexcolor.replace('#', '');
-
-  // Validate hex format (6 characters)
-  if (hex.length !== 6) return null;
-
-  // Parse r, g, b values
-  const r = parseInt(hex.substring(0, 2), 16);
-  const g = parseInt(hex.substring(2, 4), 16);
-  const b = parseInt(hex.substring(4, 6), 16);
-
-  return { r, g, b };
-};
-
-/**
- * Darken a hex color by a given percentage
- * @param hexcolor - Hex color string (with or without #)
- * @param percent - Amount to darken (0-100, default 20)
- */
-export const darkenColor = (hexcolor: string, percent: number = 20): string => {
-  const rgb = parseHexToRgb(hexcolor);
-  if (!rgb) return hexcolor;
-
-  // Calculate darkened values
-  const darkenFactor = (100 - percent) / 100;
-  const newR = Math.round(rgb.r * darkenFactor);
-  const newG = Math.round(rgb.g * darkenFactor);
-  const newB = Math.round(rgb.b * darkenFactor);
-
-  // Convert back to hex and ensure two digits
-  const toHex = (n: number) => n.toString(16).padStart(2, '0');
-
-  return `#${toHex(newR)}${toHex(newG)}${toHex(newB)}`;
-};
-
-/**
- * Convert a hex color to rgba with specified alpha
- * @param hexcolor - Hex color string (with or without #)
- * @param alpha - Alpha value (0-1)
- */
-export const hexToRgba = (hexcolor: string, alpha: number = 1): string => {
-  const rgb = parseHexToRgb(hexcolor);
-  if (!rgb) return hexcolor;
-
-  return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
-};
-
-/**
  * Handles Pydantic errors, returns a form-level error message
  * or null if the error has to do with individual fields
  */
@@ -371,6 +264,11 @@ export const clearFormErrors = (formRef: Ref) => {
   }
 };
 
+/**
+ * Halt code execution intentionally for a given period of time
+ * @param timeMs milliseconds to wait
+ * @returns Promise
+ */
 export const sleep = async (timeMs: number) => new Promise((resolve) => { window.setTimeout(resolve, timeMs); });
 
 /**
@@ -443,16 +341,6 @@ export const hhmmToMinutes = (formattedTime: string | Dayjs): number => {
 };
 
 /**
- * Calculate number of minutes from formatted time string.
- * @param formattedTime A string of format HH:MM
- */
-export const minutesToHhmm = (minutes: number): string => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}`;
-};
-
-/**
  * Compare two availabilities by their start time
  */
 export const compareAvailabilityStart = (a: Availability, b: Availability) => {
@@ -474,21 +362,14 @@ export const isUnconfirmed = (a: Appointment): boolean => {
 };
 
 export default {
-  keyByValue,
   arrayRotate,
-  eventColor,
-  download,
   timeFormat,
   defaultLocale,
   initialEventPopupData,
   showEventPopup,
-  getAccessibleColor,
-  darkenColor,
-  hexToRgba,
   handleFormError,
   sleep,
   hhmmToMinutes,
-  minutesToHhmm,
   compareAvailabilityStart,
   deepClone,
   isUnconfirmed,
