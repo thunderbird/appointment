@@ -32,6 +32,33 @@ class TestMailer:
         assert mailer.html()
         assert mailer.text()
 
+    def test_invite_without_meeting_link(self, with_l10n):
+        mailer = InvitationMail(
+            to='to@example.org',
+            name='fake',
+            email='fake@example.org',
+            date=datetime.datetime.now(),
+            duration=30,
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+        )
+        assert 'meeting_link_url' not in mailer.html()
+        assert 'Join Meeting' not in mailer.text()
+
+    def test_invite_with_meeting_link(self, with_l10n):
+        meeting_url = 'https://zoom.us/j/12345'
+
+        mailer = InvitationMail(
+            to='to@example.org',
+            name='fake',
+            email='fake@example.org',
+            date=datetime.datetime.now(),
+            duration=30,
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+            meeting_link_url=meeting_url,
+        )
+        assert meeting_url in mailer.html()
+        assert meeting_url in mailer.text()
+
     def test_confirm(self, faker, with_l10n):
         confirm_url = 'https://example.org/yes'
         deny_url = 'https://example.org/no'
