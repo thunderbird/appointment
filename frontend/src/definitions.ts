@@ -34,16 +34,6 @@ export const SLOT_DURATION_OPTIONS = [15, 30, 45, 60, 75, 90];
 export const DEFAULT_SLOT_DURATION = 30;
 
 /**
- * Appointment subscriber levels
- */
-export enum SubscriberLevels {
-  Basic = 1,
-  Plus = 2,
-  Pro = 3,
-  Admin = 99,
-}
-
-/**
  * Booking calendar view modes
  */
 export enum BookingCalendarView {
@@ -76,48 +66,6 @@ export enum BookingsFilterOptions {
 export enum BookingsSortOptions {
   DateRequested = 'date-requested',
   MeetingDate = 'meeting-date'
-}
-
-/**
- * Available appointment views
- */
-export enum BookingsViews {
-  Booked = 1,
-  Pending = 2,
-  Past = 3,
-  All = 4,
-}
-
-/**
- * List columns for bookings page
- */
-export enum BookingsTableColumns {
-  Date = 1,
-  Time = 2,
-  MeetingTitle = 3,
-  ConfirmedUnconfirmed = 4,
-  Calendar = 5,
-}
-
-/**
- * Filter options for bookings page
- */
-export enum BookingsTableFilterOptions {
-  AllAppointments = 1,
-  AppointmentsToday = 2,
-  AppointmentsNext7Days = 3,
-  AppointmentsNext14Days = 4,
-  AppointmentsNext31Days = 5,
-  AppointmentsInMonth = 6,
-  AllFutureAppointments = 7,
-}
-
-/**
- * View types for the bookings page
- */
-export enum BookingsViewTypes {
-  List = 1,
-  Grid = 2,
 }
 
 /**
@@ -174,16 +122,6 @@ export enum MeetingLinkProviderType {
   None = 'none',
   Zoom = 'zoom',
   GoogleMeet = 'google_meet',
-}
-
-/**
- * Model states
- */
-export enum ModalStates {
-  Loading = 1, // Modal is loading, this includes submission requests
-  Open = 2, // Modal is open for editing
-  Error = 3, // Modal is open for editing but contains errors
-  Finished = 4, // Modal is finished, so either self-close, or show a success screen
 }
 
 /**
@@ -244,22 +182,6 @@ export enum TooltipPosition {
   Right = 'pos-right',
 }
 
-/**
- * Colors used for solor select inputs
- */
-export enum ColorPalette {
-  Rose = '#ff7b91',
-  Pink = '#fe64b6',
-  Fuchsia = '#c276c5',
-  Purple = '#b865ff',
-  Blue = '#8fa5ff',
-  Sky = '#64c2d0',
-  Teal = '#64bead',
-  Green = '#73c690',
-  Orange = '#e0ad6a',
-  Red = '#ff8b67',
-}
-
 export enum MetricEvents {
   PageLoaded = 'apmt.page.loaded',
   FTUEStep = 'apmt.ftue.step',
@@ -295,13 +217,8 @@ export default {
   AlertSchemes,
   AuthSchemes,
   BookingCalendarView,
-  BookingsTableColumns,
-  BookingsTableFilterOptions,
   BookingStatus,
-  BookingsViews,
-  BookingsViewTypes,
   CalendarProviders,
-  ColorPalette,
   ColourSchemes,
   DateFormatStrings,
   DEFAULT_SLOT_DURATION,
@@ -311,11 +228,9 @@ export default {
   LOGIN_REDIRECT_KEY,
   MeetingLinkProviderType,
   MetricEvents,
-  ModalStates,
   ProviderDisplayName,
   SettingsSections,
   SLOT_DURATION_OPTIONS,
-  SubscriberLevels,
   TableDataButtonType,
   TableDataType,
   TooltipPosition,

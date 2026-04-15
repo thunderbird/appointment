@@ -106,17 +106,6 @@ export const eventColor = (event: CustomEventData, placeholder: boolean): Colori
   return color;
 };
 
-// create initials from given name
-export const initials = (name: string): string => {
-  if (name) {
-    const parts = name.toUpperCase().split(' ');
-    return parts.length > 1
-      ? parts[0][0] + parts.at(-1)[0]
-      : name[0];
-  }
-  return '';
-};
-
 // file download
 export const download = (data: BlobPart, filename: string, contenttype: string = 'text/plain'): void => {
   const a = document.createElement('a');
@@ -488,7 +477,6 @@ export default {
   keyByValue,
   arrayRotate,
   eventColor,
-  initials,
   download,
   timeFormat,
   defaultLocale,

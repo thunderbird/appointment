@@ -64,21 +64,6 @@ export type Appointment = {
   booking_confirmation?: boolean;
 };
 
-/**
- * Appointment with slots from current schedule data
- */
-export type ScheduleAppointment = {
-  title: string;
-  calendar_id: number;
-  calendar_title: string;
-  location_type: number; // TODO
-  location_url: string;
-  details: string;
-  status: number; // TODO
-  slots: Slot[];
-  type: string; // TODO
-};
-
 export type CustomEventData = {
   attendee?: Attendee;
   slot_status: number; // TODO: definitions.BookingStatus?
@@ -154,12 +139,6 @@ export type Calendar = {
   url?: string;
   user?: string;
   password?: string;
-};
-
-export type CalendarItem = {
-  key: number;
-  label: string;
-  checked: boolean;
 };
 
 export enum ExternalConnectionStatus {
@@ -374,7 +353,6 @@ export type AppointmentResponse = UseFetchReturn<Appointment>;
 export type AvailabilitySlotResponse = UseFetchReturn<SlotAttendee>;
 export type BooleanResponse = UseFetchReturn<boolean|Exception>;
 export type BlobResponse = UseFetchReturn<Blob>;
-export type CalendarResponse = UseFetchReturn<Calendar|Exception>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
 export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
@@ -385,7 +363,6 @@ export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type SignatureResponse = UseFetchReturn<Signature>;
 export type SlotResponse = UseFetchReturn<Slot & Appointment|Exception>;
 export type StringResponse = UseFetchReturn<string|Exception>;
-export type StringListResponse = UseFetchReturn<string[]>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
 export type TokenResponse = UseFetchReturn<Token>;
 export type ListResponse = UseFetchReturn<{
@@ -424,7 +401,6 @@ export type Time<T> = {
   start: T;
   end: T;
 };
-export type TimeNumeric = Time<number>;
 export type TimeFormatted = Time<string>;
 
 export type SelectOption<T = number> = {
