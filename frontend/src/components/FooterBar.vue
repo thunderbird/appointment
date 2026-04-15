@@ -4,9 +4,9 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import { StandardFooter } from '@thunderbirdops/services-ui';
-import { supportUrlKey } from '@/keys';
+import { supportUrlKey, tbProUrlKey } from '@/keys';
 
-const tbProUrl = import.meta.env.VITE_TB_PRO_URL;
+const tbProUrl = inject(tbProUrlKey);
 const supportUrl = inject(supportUrlKey);
 
 const { t } = useI18n();
