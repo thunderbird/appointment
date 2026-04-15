@@ -3,7 +3,7 @@
 ### Special variables used throughout this file
 
 # Update this value to update all containers based on the thunderbird/appointment image
-.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:e430fe06e3407e4b6b00b770b2e1f0f9dd5af7a3
+.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:2a8e57c78807346aebf7d89cfbd1f00e065f727f
 
 # These variables are common to Accounts application environments. Some tasks will require additional configuration.
 .app_env: &VAR_APP_ENV {name: "APP_ENV", value: "stage"}
@@ -466,7 +466,7 @@ resources:
                 - name: CONTAINER_ROLE
                   value: flower
                 - name: FLOWER_UNAUTHENTICATED_API
-                  value: true
+                  value: "true"
       
       targets:
         flower:
