@@ -31,7 +31,7 @@
       {% if meeting_link_url %}
       <div style="word-break: break-all; padding-inline-start: 17px;">
         {{ l10n('invite-mail-html-meeting-link', lang=lang) }}:<br>
-        <a href="{{ meeting_link_url }}">{{ meeting_link_url }}</a>
+        <a href="{{ meeting_link_url }}" style="color:{{ colour_tbpro_apmt_primary }};">{{ meeting_link_url }}</a>
       </div>
       {% endif %}
     </div>
