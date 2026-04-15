@@ -2,12 +2,13 @@ import json
 import pulumi
 import pulumi_aws as aws
 
+
 def sqs(project, api_exec_role, celery_exec_role):
     # Build a queue
     celery_sqs_queue = aws.sqs.Queue(
         f'{project.name_prefix}-queue-celery',
         fifo_queue=True,
-        name=f'{project.name_prefix}-celery.fifo', # FIFO queue names *must* end in ".fifo"
+        name=f'{project.name_prefix}-celery.fifo',  # FIFO queue names *must* end in ".fifo"
         # policy=json.dumps(
         #     {
         #         'Version': '2012-10-17',
@@ -92,6 +93,7 @@ def sqs(project, api_exec_role, celery_exec_role):
         role=celery_exec_role,
         opts=pulumi.ResourceOptions(depends_on=[iam_queue_read_access_policy]),
     )
+
     aws.iam.RolePolicyAttachment(
         f'{project.name_prefix}-polatt-celerywrite',
         policy_arn=iam_queue_write_access_policy.arn,
