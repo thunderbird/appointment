@@ -3,8 +3,6 @@ import { Ref } from 'vue';
 import { Dayjs } from 'dayjs';
 import { i18nType } from '@/composables/i18n';
 import {
-  CustomEventData,
-  Coloring,
   EventPopup,
   HTMLElementEvent,
   CalendarEvent,

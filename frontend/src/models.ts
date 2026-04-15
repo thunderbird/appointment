@@ -408,11 +408,6 @@ export type SelectOption<T = number> = {
   value: T;
 };
 
-export type Coloring = {
-  border?: string;
-  background?: string;
-};
-
 export type HTMLElementEvent = Event & {
   target: HTMLElement;
   currentTarget: HTMLElement;
