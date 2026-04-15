@@ -464,7 +464,7 @@ resources:
                 - name: CONTAINER_ROLE
                   value: flower
                 - name: FLOWER_UNAUTHENTICATED_API
-                  value: true
+                  value: "true"
       
       targets:
         flower:
