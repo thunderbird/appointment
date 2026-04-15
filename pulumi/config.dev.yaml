@@ -3,7 +3,7 @@
 ### Special variables used throughout this file
 
 # Update this value to update all containers based on the thunderbird/appointment image
-.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:85f15a97bf5ee889bb3ca56cea3f4dac7f5c00d2
+.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:f0b6b209385f77dd2d522ded8e4826b66eb045df
 
 # These variables are common to Accounts application environments. Some tasks will require additional configuration.
 .app_env: &VAR_APP_ENV {name: "APP_ENV", value: "dev"}
@@ -502,8 +502,8 @@ resources:
 
       autoscalers:
         celery:
-          min_capacity: 1
-          max_capacity: 1
+          min_capacity: 0
+          max_capacity: 0
         flower:
           min_capacity: 1
           max_capacity: 1
