@@ -14,9 +14,7 @@ import timezone from 'dayjs/plugin/timezone';
 import weekday from 'dayjs/plugin/weekday';
 import customParseFormat from 'dayjs/plugin/customParseFormat';
 import 'dayjs/locale/de';
-import {
-  dayjsKey, durationHumanizedKey, isoWeekdaysKey, tzGuessKey, isoFirstDayOfWeekKey,
-} from '@/keys';
+import { dayjsKey, isoWeekdaysKey, tzGuessKey } from '@/keys';
 import { arrayRotate } from '@/utils';
 
 export type IsoWeekday = {
@@ -42,21 +40,13 @@ export default function useDayJS(app: App<Element>, locale: string) {
   dayjs.extend(weekday);
   dayjs.extend(customParseFormat);
 
-  // provide the configured dayjs instance as well es some helper functions
-  // TODO: provide method to live update the dayjs locale
+  // Provide the configured dayjs instance as well es some helper functions
   app.provide(dayjsKey, dayjs);
   app.provide(tzGuessKey, dayjs.tz.guess());
-
-  const durationHumanized = (minutes: number): string => ((minutes < 60)
-    ? dayjs.duration(minutes, 'minutes').humanize()
-    : dayjs.duration(minutes / 60, 'hours').humanize());
-  app.provide(durationHumanizedKey, durationHumanized);
 
   // User settings or locale aware first day of week
   const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}');
   const firstDayOfWeek = user.settings?.startOfWeek ?? dayjs.localeData().firstDayOfWeek();
-  const isoFirstDayOfWeek = firstDayOfWeek === 0 ? 7 : firstDayOfWeek;
-  app.provide(isoFirstDayOfWeekKey, isoFirstDayOfWeek);
 
   // provide unified list of locale weekdays with Monday=1 to Sunday=7 (isoweekdays)
   // taking locale first day of week into account

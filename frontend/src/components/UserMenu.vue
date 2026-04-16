@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { UserAvatar } from '@thunderbirdops/services-ui';
+import { accountsTbProfileUrlKey, supportUrlKey } from '@/keys';
 
 defineProps<{
   username: string;
   avatarUrl?: string;
 }>();
 
-const accountsTbProfileUrl = import.meta.env?.VITE_TB_ACCOUNT_DASHBOARD_URL;
-const supportUrl = import.meta.env?.VITE_SUPPORT_URL;
+const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
+const supportUrl = inject(supportUrlKey);
 
 const { t } = useI18n();
 

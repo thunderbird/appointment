@@ -19,26 +19,18 @@ type DayjsType = ((_?: ConfigType) => Dayjs) & {
 export const dayjsKey = Symbol('dayjs') as InjectionKey<DayjsType>;
 export const isoWeekdaysKey = Symbol('isoWeekdays') as InjectionKey<IsoWeekday[]>;
 export const tzGuessKey = Symbol('tzGuess') as InjectionKey<string>;
-export const isoFirstDayOfWeekKey = Symbol('isoFirstDayOfWeek') as InjectionKey<number>;
 
 // Provide urls for API and booking
 export const apiUrlKey = Symbol('apiUrl') as InjectionKey<string>;
-export const bookingUrlKey = Symbol('bookingUrl') as InjectionKey<string>;
 export const shortUrlKey = Symbol('shortUrl') as InjectionKey<string>;
 
 // Provide environment and authentication keys
 export const accountsTbProfileUrlKey = Symbol('accountsTbProfileUrl') as InjectionKey<string>;
+export const tbProUrlKey = Symbol('tbProUrl') as InjectionKey<string>;
+export const supportUrlKey = Symbol('supportUrl') as InjectionKey<string>;
 
 // Provide configured fetch call to our backend API
 export const callKey = Symbol('call') as InjectionKey<Fetch>;
 
 // Provide a refresh data function
 export const refreshKey = Symbol('refresh') as InjectionKey<Refresh>;
-
-// Provide functionality to paint background of event objects
-type PaintBackgroundType = (element: Event, hexColor: string, hexTransparency?: string, reset?: boolean) => void;
-export const paintBackgroundKey = Symbol('paintBackground') as InjectionKey<PaintBackgroundType>;
-
-// Provide duration data in human friendly form
-type DurationHumanizedType = (minutes: number) => string;
-export const durationHumanizedKey = Symbol('durationHumanized') as InjectionKey<DurationHumanizedType>;

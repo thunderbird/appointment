@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
@@ -9,9 +9,10 @@ import { PhLinkSimple } from '@phosphor-icons/vue';
 import { ToolTip, BaseButton } from '@thunderbirdops/services-ui';
 import UserMenu from '@/components/UserMenu.vue';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
+import { tbProUrlKey } from '@/keys';
 
 // component constants
-const tbProUrl = import.meta.env.VITE_TB_PRO_URL;
+const tbProUrl = inject(tbProUrlKey);
 const user = useUserStore();
 const externalConnectionStore = useExternalConnectionsStore();
 const route = useRoute();
