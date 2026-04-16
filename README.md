@@ -64,6 +64,6 @@ This project uses [Fluent](https://projectfluent.org/) for localization. Files a
 
 ### Deployment
 
-When changes are merged to main, a new [release](https://github.com/thunderbird/appointment/releases/) is cut, and the changes are deployed to [stage.appointment.day](https://stage.appointment.day/).
+When changes are merged to main, a new [release](https://github.com/thunderbird/appointment/releases/) is cut, and the changes are deployed to [Appointment Staging](https://appointment-stage.tb.pro/).
 
 After you've checked staging and it's ready to push to production, edit the release entry, and press the 'Publish release' button.
