@@ -4,12 +4,12 @@ Invite others to grab times on your calendar. Choose a date. Make appointments a
 
 ## Screenshots
 
-The Bookers page for attendees and the dashboard for subscribers:
+The bookers page for attendees and the dashboard for subscribers:
 
 <img width="49%" alt="Thunderbird Appointment Bookers Page" src="docs/screenshots/appointment_bookers_page.png" />
 <img width="49%" alt="Thunderbird Appointment Dashboard" src="docs/screenshots/appointment_dashboard.png" />
 
-First time user experience, Availability setup, managing bookings and general settings:
+Availability setup, managing bookings and general settings:
 
 <img width="32%" alt="Thunderbird Appointment Availability" src="docs/screenshots/appointment_availability.png" />
 <img width="32%" alt="Thunderbird Appointment Bookings" src="docs/screenshots/appointment_bookings.png" />
