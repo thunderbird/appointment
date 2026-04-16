@@ -62,15 +62,6 @@ secrets_managers = {
 # Build security groups for load balancers, containers, and our Redis cache
 backend_cache_sg, container_sgs, lb_sgs = security_groups(project=project, resources=resources, vpc=vpc)
 
-# Create the Redis memory cache
-backend_cache, cache_dns = redis_cache(
-    cloudflare_zone_id=cloudflare_zone_id,
-    project=project,
-    security_group=backend_cache_sg,
-    vpc=vpc,
-    resources=resources,
-)
-
 # Fargate Service
 fargate_clusters, autoscalers = fargate(
     container_security_groups=container_sgs,
@@ -90,6 +81,22 @@ afcs = {
     )
     for afc_name, afc_config in resources.get('tb:fargate:AutoscalingFargateCluster', {}).items()
 }
+
+# Build a list of SGs to grant access to the new cache replica set
+_redis_source_sgs = [backend_cache_sg]
+for afc in afcs.values():
+    for cont_sgs in afc.resources['container_security_groups'].values():
+        _redis_source_sgs.extend([sg_with_rules for sg_with_rules in cont_sgs.values()])
+
+# Create the Redis memory cache
+backend_cache, cache_dns = redis_cache(
+    cloudflare_zone_id=cloudflare_zone_id,
+    project=project,
+    security_group=backend_cache_sg,
+    security_groups=_redis_source_sgs,
+    vpc=vpc,
+    resources=resources,
+)
 
 # CloudFront function to handle request rewrites headed to the backend
 rewrite_function = cloudfront.rewrite_function(project=project)
