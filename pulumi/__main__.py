@@ -13,6 +13,7 @@ import tb_pulumi.secrets
 from fargate import fargate
 from redis import redis_cache
 from security_groups import security_groups
+from sqs import sqs
 
 #: Environments in which we should build a proxy for Posthog calls
 POSTHOG_PROXY_STACKS = ['prod']
@@ -90,6 +91,13 @@ afcs = {
     )
     for afc_name, afc_config in resources.get('tb:fargate:AutoscalingFargateCluster', {}).items()
 }
+
+# Celery does not currently support clustered Redis brokers. Therefore, we build an SQS queue to route tasks through.
+sqs(
+    project=project,
+    api_exec_role=fargate_clusters['backend'].resources['task_role'].name,
+    celery_exec_role=afcs['appointment'].resources['execution_roles']['celery'].name,
+)
 
 # CloudFront function to handle request rewrites headed to the backend
 rewrite_function = cloudfront.rewrite_function(project=project)

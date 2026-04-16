@@ -8,6 +8,7 @@
 # These variables are common to Accounts application environments. Some tasks will require additional configuration.
 .app_env: &VAR_APP_ENV {name: "APP_ENV", value: "stage"}
 .auth_scheme: &VAR_AUTH_SCHEME {name: "AUTH_SCHEME", value: "oidc"}
+.celery_broken: &VAR_CELERY_BROKER {name: "CELERY_BROKER", value: "sqs"}
 .database_engine: &VAR_DATABASE_ENGINE {name: "DATABASE_ENGINE", value: "postgresql"}
 .database_port: &VAR_DATABASE_PORT {name: "DATABASE_PORT", value: "5432"}
 .frontend_url: &VAR_FRONTEND_URL {name: "FRONTEND_URL", value: "https://appointment-stage.tb.pro"}

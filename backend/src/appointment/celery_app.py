@@ -20,17 +20,23 @@ def _base_redis_url() -> str:
 def create_celery_app() -> Celery:
     load_dotenv()
 
-    redis_url = _base_redis_url()
+    _celery_broker = os.getenv('CELERY_BROKER', 'redis')
+    if _celery_broker == 'redis':
+        redis_url = _base_redis_url()
 
-    broker_url = '/'.join(filter(None, [os.getenv('CELERY_BROKER') or redis_url, os.getenv('REDIS_CELERY_DB')]))
-    result_backend = '/'.join(
-        filter(None, [os.getenv('CELERY_BACKEND') or redis_url, os.getenv('REDIS_CELERY_RESULTS_DB')])
-    )
+        broker_url = '/'.join(filter(None, [os.getenv('CELERY_BROKER') or redis_url, os.getenv('REDIS_CELERY_DB')]))
+        result_backend = '/'.join(
+            filter(None, [os.getenv('CELERY_BACKEND') or redis_url, os.getenv('REDIS_CELERY_RESULTS_DB')])
+        )
 
-    if broker_url.startswith('rediss://'):
-        broker_url = f'{broker_url}?ssl_cert_reqs=CERT_REQUIRED'
-    if result_backend.startswith('rediss://'):
-        result_backend = f'{result_backend}?ssl_cert_reqs=CERT_REQUIRED'
+        if broker_url.startswith('rediss://'):
+            broker_url = f'{broker_url}?ssl_cert_reqs=CERT_REQUIRED'
+        if result_backend.startswith('rediss://'):
+            result_backend = f'{result_backend}?ssl_cert_reqs=CERT_REQUIRED'
+    elif _celery_broker == 'sqs':
+        
+    else:
+        raise ValueError(f'"{_celery_broker}" is not a valid value for CELERY_BROKER. Choose "redis" or "sqs".')
 
     result_expires = 3600
     task_always_eager = os.getenv('CELERY_EAGER', 'False') == 'True'
