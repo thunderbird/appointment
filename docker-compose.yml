@@ -9,6 +9,7 @@ services:
       - ./backend/.env:/app/.env
       - ./backend/src/appointment:/app/appointment
     environment:
+      - CELERY_BROKER=redis
       - CONTAINER_ROLE=api
       - IS_LOCAL_DEV=yes
       - RELEASE_VERSION=localdev
@@ -23,6 +24,7 @@ services:
     <<: *backend
     ports: []
     environment:
+      - CELERY_BROKER=redis
       - CONTAINER_ROLE=worker
     depends_on:
       - backend
@@ -32,6 +34,7 @@ services:
     <<: *backend
     ports: []
     environment:
+      - CELERY_BROKER=redis
       - CONTAINER_ROLE=beat
     depends_on:
       - backend
@@ -42,6 +45,7 @@ services:
     ports:
       - 5556:5555
     environment:
+      - CELERY_BROKER=redis
       - CONTAINER_ROLE=flower
       - FLOWER_UNAUTHENTICATED_API=true
     depends_on:

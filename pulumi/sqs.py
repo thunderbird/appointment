@@ -1,6 +1,7 @@
 import json
 import pulumi
 import pulumi_aws as aws
+import tb_pulumi.secrets
 
 
 def sqs(project, api_exec_role, celery_exec_role):
@@ -106,4 +107,78 @@ def sqs(project, api_exec_role, celery_exec_role):
         policy_arn=iam_queue_write_access_policy.arn,
         role=api_exec_role,
         opts=pulumi.ResourceOptions(depends_on=[iam_queue_write_access_policy]),
+    )
+
+    # Celery won't let us use container/IMDS permissions; we must supply access key/ID options.
+    # Therefore, we must build users with access keys to assign permissions to our running Celery configs.
+    read_user = aws.iam.User(
+        f'{project.name_prefix}-user',
+        name=f'{project.name_prefix}-celery-sqs-read-user',
+        path='/',
+        tags=project.common_tags,
+    )
+
+    read_key_blue = aws.iam.AccessKey(
+        f'{project.name_prefix}-celery-sqs-read-key',
+        user = read_user,
+        status='Active',
+    )
+
+    # read_key_green = aws.iam.AccessKey( # Uncomment when we need to rotate credentials
+    #     user=read_user,
+    #     status='Inactive',
+    # )
+
+    write_user = aws.iam.User(
+        f'{project.name_prefix}-celery-sqs-write-user',
+        name=f'{project.name_prefix}-celery-sqs-write',
+        path='/',
+        tags=project.common_tags,
+    )
+
+    write_key_blue = aws.iam.AccessKey(
+        f'{project.name_prefix}-celery-sqs-write-key',
+        user = write_user,
+        status='Active',
+    )
+
+    # write_key_green = aws.iam.AccessKey( # Uncomment when we need to rotate credentials
+    #     user=write_user,
+    #     status='Inactive',
+    # )
+
+    aws.iam.UserPolicyAttachment(
+        f'{project.name_prefix}-polatt-celerysqsreader-read',
+        policy_arn=iam_queue_read_access_policy,
+        user=read_user,
+        opts=pulumi.ResourceOptions(depends_on=[iam_queue_read_access_policy, read_user])
+    )
+
+    aws.iam.UserPolicyAttachment(
+        f'{project.name_prefix}-polatt-celerysqswriter-read',
+        policy_arn=iam_queue_read_access_policy,
+        user=write_user,
+        opts=pulumi.ResourceOptions(depends_on=[iam_queue_read_access_policy, read_user])
+    )
+
+    aws.iam.UserPolicyAttachment(
+        f'{project.name_prefix}-polatt-celerysqswriter-write',
+        policy_arn=iam_queue_write_access_policy,
+        user=write_user,
+        opts=pulumi.ResourceOptions(depends_on=[iam_queue_read_access_policy, read_user])
+    )
+
+    # Build secrets containing these keys' super secret data
+    tb_pulumi.secrets.SecretsManagerSecret(
+        f'{project.name_prefix}-secret-celerysqsread-blue',
+        project=project,
+        secret_name=f'{project.project}/{project.stack}/celerysqsreaduser-blue',
+        secret_value={'access_key_id': read_key_blue.id, 'secret_access_key': read_key_blue.secret}
+    )
+
+    tb_pulumi.secrets.SecretsManagerSecret(
+        f'{project.name_prefix}-secret-celerysqswrite-blue',
+        project=project,
+        secret_name=f'{project.project}/{project.stack}/celerysqswriteuser-blue',
+        secret_value={'access_key_id': read_key_blue.id, 'secret_access_key': read_key_blue.secret}
     )
