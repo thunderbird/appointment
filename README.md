@@ -6,15 +6,14 @@ Invite others to grab times on your calendar. Choose a date. Make appointments a
 
 The Bookers page for attendees and the dashboard for subscribers:
 
-<img width="49%" alt="Thunderbird Appointment Bookers Page" src="https://github.com/user-attachments/assets/5bdde2fe-5c77-4d2a-b440-aef12d0a4d6d" />
-<img width="49%" alt="Thunderbird Appointment Dashboard" src="https://github.com/user-attachments/assets/1050a0c6-10ee-4992-af9f-c20ec21a922e" />
+<img width="49%" alt="Thunderbird Appointment Bookers Page" src="docs/screenshots/appointment_bookers_page.png" />
+<img width="49%" alt="Thunderbird Appointment Dashboard" src="docs/screenshots/appointment_dashboard.png" />
 
 First time user experience, Availability setup, managing bookings and general settings:
 
-<img width="24%" alt="appointment_ftue" src="https://github.com/user-attachments/assets/56eed5b9-538a-411d-9758-c90a66e0c57e" />
-<img width="24%" alt="Thunderbird Appointment Availability" src="https://github.com/user-attachments/assets/37a90df5-1825-47b8-a05f-64f3455d0e5e" />
-<img width="24%" alt="Thunderbird Appointment Bookings" src="https://github.com/user-attachments/assets/4de85940-09a0-4905-965e-29f658b6bbd5" />
-<img width="24%" alt="Thunderbird Appointment Settings" src="https://github.com/user-attachments/assets/fb18f443-81ae-42bb-94d3-c896f44f6aab" />
+<img width="32%" alt="Thunderbird Appointment Availability" src="docs/screenshots/appointment_availability.png" />
+<img width="32%" alt="Thunderbird Appointment Bookings" src="docs/screenshots/appointment_bookings.png" />
+<img width="32%" alt="Thunderbird Appointment Settings" src="docs/screenshots/appointment_settings.png" />
 
 ## Feedback and Support
 
