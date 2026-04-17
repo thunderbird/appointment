@@ -85,7 +85,7 @@ def redis_cache(
     #    Change DNS to the new replica set in stage
     # -> Change DNS in prod, removing the condition below
 
-    backend_cache_primary_endpoint = backend_cache.endpoints.apply(lambda endpoints: endpoints[0]['address'])
+    backend_cache.endpoints.apply(lambda endpoints: endpoints[0]['address'])
     redis_replica_group_primary_endpoint = redis_replica_group.resources['replication_group'].primary_endpoint_address
     backend_cache_dns = cloudflare.DnsRecord(
         f'{project.name_prefix}-dns-redis',
