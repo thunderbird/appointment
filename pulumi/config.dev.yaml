@@ -537,8 +537,8 @@ resources:
   # Additional properties for this environment's cache
   tb:elasticache:ElastiCacheReplicationGroup:
     backend:
-      num_cache_nodes: 1
-      # Settings below should be "yes" when (num_cache_nodes > 1)
+      num_cache_clusters: 1
+      # Settings below should be "yes" when (num_cache_clusters > 1)
       automatic_failover_enabled: no
       multi_az_enabled: no
 
