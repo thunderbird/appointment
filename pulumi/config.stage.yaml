@@ -3,7 +3,7 @@
 ### Special variables used throughout this file
 
 # Update this value to update all containers based on the thunderbird/appointment image
-.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:2a8e57c78807346aebf7d89cfbd1f00e065f727f
+.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:c8caacf81a3f37073588bfed17f13ef6f3131dc1
 
 # These variables are common to Accounts application environments. Some tasks will require additional configuration.
 .app_env: &VAR_APP_ENV {name: "APP_ENV", value: "stage"}
@@ -17,7 +17,7 @@
 .jwt_expire_in_mins: &VAR_JWT_EXPIRE_IN_MINS {name: "JWT_EXPIRE_IN_MINS", value: "10000"}
 .log_level: &VAR_LOG_LEVEL {name: "LOG_LEVEL", value: "ERROR"}
 .log_use_stream: &VAR_LOG_USE_STREAM {name: "LOG_USE_STREAM", value: "True"}
-.oids_exp_grace_period: &VAR_OIDC_EXP_GRACE_PERIOD {name: "OIDC_EXP_GRACE_PERIOD", value: "60"}
+.oidc_exp_grace_period: &VAR_OIDC_EXP_GRACE_PERIOD {name: "OIDC_EXP_GRACE_PERIOD", value: "60"}
 .oidc_fallback_match_by_email: &VAR_OIDC_FALLBACK_MATCH_BY_EMAIL {name: "OIDC_FALLBACK_MATCH_BY_EMAIL", value: "True"}
 .oidc_token_introspection_url: &VAR_OIDC_TOKEN_INTROSPECTION_URL {name: "OIDC_TOKEN_INTROSPECTION_URL", value: "https://auth-stage.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"}
 .posthog_host: &VAR_POSTHOG_HOST {name: "POSTHOG_HOST", value: "https://us.i.posthog.com"}
@@ -587,8 +587,16 @@ resources:
           min_capacity: 1
           max_capacity: 1
         flower:
-          min_capacity: 0
-          max_capacity: 0
+          min_capacity: 1
+          max_capacity: 1
+
+  # Additional properties for this environment's cache
+  tb:elasticache:ElastiCacheReplicationGroup:
+    backend:
+      num_cache_nodes: 1
+      # Settings below should be "yes" when (num_cache_nodes > 1)
+      automatic_failover_enabled: no
+      multi_az_enabled: no
 
   tb:cloudfront:CloudFrontS3Service:
     frontend:

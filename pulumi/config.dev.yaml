@@ -10,14 +10,17 @@
 .auth_scheme: &VAR_AUTH_SCHEME {name: "AUTH_SCHEME", value: "oidc"}
 .database_engine: &VAR_DATABASE_ENGINE {name: "DATABASE_ENGINE", value: "postgresql"}
 .database_port: &VAR_DATABASE_PORT {name: "DATABASE_PORT", value: "5432"}
+.frontend_url: &VAR_FRONTEND_URL {name: "FRONTEND_URL", value: "https://appointment-dev.tb.pro"}
+.fxa_callback: &VAR_FXA_CALLBACK {name: "FXA_CALLBACK", value: "https://appointment-dev.tb.pro/fxa"}
+.google_auth_callback: &VAR_GOOGLE_AUTH_CALLBACK {name: "GOOGLE_AUTH_CALLBACK", value: "https://appointment-dev.tb.pro/api/v1/google/callback"}
 .jwt_algo: &VAR_JWT_ALGO {name: "JWT_ALGO", value: "HS256"}
 .jwt_expire_in_mins: &VAR_JWT_EXPIRE_IN_MINS {name: "JWT_EXPIRE_IN_MINS", value: "10000"}
 .log_level: &VAR_LOG_LEVEL {name: "LOG_LEVEL", value: "ERROR"}
 .log_use_stream: &VAR_LOG_USE_STREAM {name: "LOG_USE_STREAM", value: "True"}
-.oids_exp_grace_period: &VAR_OIDC_EXP_GRACE_PERIOD {name: "OIDC_EXP_GRACE_PERIOD", value: "60"}
+.oidc_exp_grace_period: &VAR_OIDC_EXP_GRACE_PERIOD {name: "OIDC_EXP_GRACE_PERIOD", value: "60"}
 .oidc_fallback_match_by_email: &VAR_OIDC_FALLBACK_MATCH_BY_EMAIL {name: "OIDC_FALLBACK_MATCH_BY_EMAIL", value: "True"}
 .oidc_token_introspection_url: &VAR_OIDC_TOKEN_INTROSPECTION_URL {name: "OIDC_TOKEN_INTROSPECTION_URL", value: "https://auth-dev.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"}
-.frontend_url: &VAR_FRONTEND_URL {name: "FRONTEND_URL", value: "https://appointment-dev.tb.pro"}
+.posthog_host: &VAR_POSTHOG_HOST {name: "POSTHOG_HOST", value: "https://us.i.posthog.com"}
 .redis_db: &VAR_REDIS_DB {name: "REDIS_DB", value: "0"}
 .redis_port: &VAR_REDIS_PORT {name: "REDIS_PORT", value: "6379"}
 .redis_use_ssl: &VAR_REDIS_USE_SSL {name: "REDIS_USE_SSL", value: "True"}
@@ -26,20 +29,43 @@
 .sentry_dsn: &VAR_SENTRY_DSN {name: "SENTRY_DSN", value: "https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648"}
 .service_email: &VAR_SERVICE_EMAIL {name: "SERVICE_EMAIL", value: "no-reply@appointment-dev.tb.pro"}
 .short_base_url: &VAR_SHORT_BASE_URL {name: "SHORT_BASE_URL", value: "https://dev.apt.mt"}
+.smtp_port: &VAR_SMTP_PORT {name: "SMTP_PORT", value: "587"}
+.smtp_security: &VAR_SMTP_SECURITY {name: "SMTP_SECURITY", value: "STARTTLS"}
 .tb_accounts_caldav_url: &VAR_TB_ACCOUNTS_CALDAV_URL {name: "TB_ACCOUNTS_CALDAV_URL", value: "https://dev-thundermail.com"}
+.tb_accounts_host: &VAR_TB_ACCOUNTS_HOST {name: "TB_ACCOUNTS_HOST", value: "https://accounts-dev.tb.pro"}
 .tier_basic_calendar_limit: &VAR_TIER_BASIC_CALENDAR_LIMIT {name: "TIER_BASIC_CALENDAR_LIMIT", value: "3"}
 .tier_plus_calendar_limit: &VAR_TIER_PLUS_CALENDAR_LIMIT {name: "TIER_PLUS_CALENDAR_LIMIT", value: "5"}
 .tier_pro_calendar_limit: &VAR_TIER_PRO_CALENDAR_LIMIT {name: "TIER_PRO_CALENDAR_LIMIT", value: "10"}
 .zoom_api_enabled: &VAR_ZOOM_API_ENABLED {name: "ZOOM_API_ENABLED", value: "True"}
+.zoom_api_new_app: &VAR_ZOOM_API_NEW_APP {name: "ZOOM_API_NEW_APP", value: "False"}
 .zoom_auth_callback: &VAR_ZOOM_AUTH_CALLBACK {name: "ZOOM_AUTH_CALLBACK", value: "https://appointment-dev.tb.pro/api/v1/zoom/callback"}
 
 # These variables are also common to our environments, but are pulled from secret stores instead
+.app_admin_allow_list: &SECRET_APP_ADMIN_ALLOW_LIST {name: "APP_ADMIN_ALLOW_LIST", valueFrom: ""}
+.appointment_caldav_secret: &SECRET_APPOINTMENT_CALDAV_SECRET {name: "APPOINTMENT_CALDAV_SECRET", valueFrom: ""}
 .database_host: &SECRET_DATABASE_HOST {name: "DATABASE_HOST", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-host-pnM2d9"}
 .database_name: &SECRET_DATABASE_NAME {name: "DATABASE_NAME", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-name-slQJtj"}
-.database_username: &SECRET_DATABASE_USERNAME {name: "DATABASE_USERNAME", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-user-9EgJWM"}
 .database_password: &SECRET_DATABASE_PASSWORD {name: "DATABASE_PASSWORD", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-password-yaGZdw"}
+.database_username: &SECRET_DATABASE_USERNAME {name: "DATABASE_USERNAME", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/database-user-9EgJWM"}
+.db_secret: &SECRET_DB_SECRET {name: "DB_SECRET", valueFrom: ""}
+.fxa_allow_list: &SECRET_FXA_ALLOW_LIST {name: "FXA_ALLOW_LIST", valueFrom: ""}
+.fxa_client_id: &SECRET_FXA_CLIENT_ID {name: "FXA_CLIENT_ID", valueFrom: ""}
+.fxa_open_id_config: &SECRET_FXA_OPEN_ID_CONFIG {name: "FXA_OPEN_ID_CONFIG", valueFrom: ""}
+.fxa_secret: &SECRET_FXA_SECRET {name: "FXA_SECRET", valueFrom: ""}
+.google_auth_client_id: &SECRET_GOOGLE_AUTH_CLIENT_ID {name: "GOOGLE_AUTH_CLIENT_ID", valueFrom: ""}
+.google_auth_project_id: &SECRET_GOOGLE_AUTH_PROJECT_ID {name: "GOOGLE_AUTH_PROJECT_ID", valueFrom: ""}
+.google_auth_secret: &SECRET_GOOGLE_AUTH_SECRET {name: "GOOGLE_AUTH_SECRET", valueFrom: ""}
+.jwt_secret: &SECRET_JWT_SECRET {name: "JWT_SECRET", valueFrom: ""}
 .oidc_client_id: &SECRET_OIDC_CLIENT_ID {name: "OIDC_CLIENT_ID", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-id-sbebkz"}
 .oidc_client_secret: &SECRET_OIDC_CLIENT_SECRET {name: "OIDC_CLIENT_SECRET", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/dev/oidc-client-secret-I9BTf2"}
+.posthog_project_key: &SECRET_POSTHOG_PROJECT_KEY {name: "POSTHOG_PROJECT_KEY", valueFrom: ""}
+.session_secret: &SECRET_SESSION_SECRET {name: "SESSION_SECRET", valueFrom: ""}
+.signed_secret: &SECRET_SIGNED_SECRET {name: "SIGNED_SECRET", valueFrom: ""}
+.smtp_pass: &SECRET_SMTP_PASS {name: "SMTP_PASS", valueFrom: ""}
+.smtp_url: &SECRET_SMTP_URL {name: "SMTP_URL", valueFrom: ""}
+.smtp_user: &SECRET_SMTP_USER {name: "SMTP_USER", valueFrom: ""}
+.zoom_api_secret: &SECRET_ZOOM_API_SECRET {name: "ZOOM_API_SECRET", valueFrom: ""}
+.zoom_auth_client_id: &SECRET_ZOOM_AUTH_CLIENT_ID {name: "ZOOM_AUTH_CLIENT_ID", valueFrom: ""}
 
 # This forms the base of Appointment-based task definitions. The blank fields commented here must be set on any
 # inheriting task definition:
@@ -507,6 +533,14 @@ resources:
         flower:
           min_capacity: 1
           max_capacity: 1
+
+  # Additional properties for this environment's cache
+  tb:elasticache:ElastiCacheReplicationGroup:
+    backend:
+      num_cache_nodes: 1
+      # Settings below should be "yes" when (num_cache_nodes > 1)
+      automatic_failover_enabled: no
+      multi_az_enabled: no
 
   tb:cloudfront:CloudFrontS3Service:
     frontend:
