@@ -231,14 +231,6 @@ resources:
       engine: redis
       major_engine_version: "7"
 
-  tb:elasticache:ElastiCacheReplicaGroup:
-    backend:
-      num_cache_nodes: 1
-      automatic_failover_enabled: False
-      transit_encryption_mode: required
-      transit_encryption_enabled: True
-      apply_immediately: True
-  
   tb:fargate:FargateClusterWithLogging:
     backend:
       assign_public_ip: True
