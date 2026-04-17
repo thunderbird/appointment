@@ -11,7 +11,7 @@ def redis_cache(
     cloudflare_zone_id: str,
     project: ThunderbirdPulumiProject,
     # **IN PROGRESS**
-    # 
+    #
     #    Keep "security_group" as a single group that gets access to the old serverless cache
     # -> Add "security_groups" as a list of groups that get access to the new replicaset
     #    Remove "security_group" when we destroy the old serverless cache
@@ -46,7 +46,7 @@ def redis_cache(
     """
 
     # **IN PROGRESS**
-    # 
+    #
     # -> Migrate traffic to new replicaset
     #    Delete this code block along with relevant config sections
     backend_cache = aws.elasticache.ServerlessCache(
@@ -64,7 +64,7 @@ def redis_cache(
     #    Build new replication group alongside the old cluster
     # -> Move DNS to new replication group
     #    Destroy the old cluster
-    
+
     redis_replica_group = ElastiCacheReplicationGroup(
         name=f'{project.name_prefix}-redis-replicaset',
         project=project,
