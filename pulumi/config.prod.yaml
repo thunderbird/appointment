@@ -588,6 +588,14 @@ resources:
           min_capacity: 0
           max_capacity: 0
 
+  # Additional properties for this environment's cache
+  tb:elasticache:ElastiCacheReplicationGroup:
+    backend:
+      num_cache_nodes: 2
+      # Settings below should be "yes" when (num_cache_nodes > 1)
+      automatic_failover_enabled: yes
+      multi_az_enabled: yes
+
   tb:cloudfront:CloudFrontS3Service:
     frontend:
       service_bucket_name: tb-appointment-prod-frontend

@@ -48,7 +48,7 @@ def redis_cache(
     # **IN PROGRESS**
     # 
     # -> Migrate traffic to new replicaset
-    #    Delete this code along with relevant config sections
+    #    Delete this code block along with relevant config sections
     backend_cache = aws.elasticache.ServerlessCache(
         f'{project.name_prefix}-cache-backend',
         security_group_ids=[security_group.resources.get('sg').id],
@@ -61,15 +61,19 @@ def redis_cache(
 
     # **IN PROGRESS**
     #
-    # -> Build new replication group alongside the old cluster
-    #    Move DNS to new replication group
+    #    Build new replication group alongside the old cluster
+    # -> Move DNS to new replication group
     #    Destroy the old cluster
     
     redis_replica_group = ElastiCacheReplicationGroup(
         name=f'{project.name_prefix}-redis-replicaset',
         project=project,
+        at_rest_encryption_enabled=True,
+        cluster_mode='disabled',
         source_sgids=[sg_with_rules.resources['sg'].id for sg_with_rules in security_groups],
         subnets=[subnet for subnet in vpc.resources.get('subnets', {})],
+        transit_encryption_enabled=True,
+        transit_encryption_mode='preferred',
         **resources.get('tb:elasticache:ElastiCacheReplicationGroup', {}).get('backend', {}),
         opts=pulumi.ResourceOptions(depends_on=[vpc]),
     )
@@ -77,18 +81,19 @@ def redis_cache(
 
     # **IN PROGRESS**
     #
-    # -> Build new replica set
-    #    Change DNS to the new replica set
+    #    Build new replica set
+    # -> Change DNS to the new replica set in stage
+    #    Change DNS in prod, removing the condition below
 
-    # Set the DNS record's target
     backend_cache_primary_endpoint = backend_cache.endpoints.apply(lambda endpoints: endpoints[0]['address'])
+    redis_replica_group_primary_endpoint = redis_replica_group.resources['replication_group'].primary_endpoint_address
     backend_cache_dns = cloudflare.DnsRecord(
         f'{project.name_prefix}-dns-redis',
         name=resources.get('domains', {}).get('redis', None),
         ttl=60,
         type='CNAME',
         zone_id=cloudflare_zone_id,
-        content=backend_cache_primary_endpoint,
+        content=backend_cache_primary_endpoint if project.stack == 'prod' else redis_replica_group_primary_endpoint,
         proxied=False,
     )
     project.resources['backend_cache_dns'] = backend_cache_dns
