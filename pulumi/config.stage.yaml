@@ -3,7 +3,7 @@
 ### Special variables used throughout this file
 
 # Update this value to update all containers based on the thunderbird/appointment image
-.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:4716c63ceb3ce4dc7aeb40b7205eadff7ecf8084
+.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:2a2fae2d6beff65bfd317212d3a7d13ab287483c7e5058ace21f884b49ef86d4
 
 # These variables are common to Accounts application environments. Some tasks will require additional configuration.
 .app_env: &VAR_APP_ENV {name: "APP_ENV", value: "stage"}
@@ -25,7 +25,7 @@
 .redis_port: &VAR_REDIS_PORT {name: "REDIS_PORT", value: "6379"}
 .redis_url: &VAR_REDIS_URL {name: "REDIS_URL", value: "cache.appointment-stage.tb.pro"}
 .redis_use_ssl: &VAR_REDIS_USE_SSL {name: "REDIS_USE_SSL", value: "True"}
-.redis_use_cluster: &VAR_REDIS_USE_CLUSTER {name: "REDIS_USE_CLUSTER", value: "False"}
+.redis_use_cluster: &VAR_REDIS_USE_CLUSTER {name: "REDIS_USE_CLUSTER", value: "True"}
 .sentry_dsn: &VAR_SENTRY_DSN {name: "SENTRY_DSN", value: "https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648"}
 .service_email: &VAR_SERVICE_EMAIL {name: "SERVICE_EMAIL", value: "no-reply@appointment-stage.tb.pro"}
 .short_base_url: &VAR_SHORT_BASE_URL {name: "SHORT_BASE_URL", value: "https://stage.apt.mt"}
@@ -255,8 +255,13 @@ resources:
         - zoom-auth-secret
         - zoom-api-secret
 
-  tb:ec2:SshableInstance: {}
+  # tb:ec2:SshableInstance: {}
   # Fill out this template to build an SSH bastion
+  tb:ec2:SshableInstance:
+    rjung:
+      ssh_keypair_name: rjung-crunchwrap
+      source_cidrs:
+        - 38.15.46.29/32
   # tb:ec2:SshableInstance:
   #   bastion:
   #     ssh_keypair_name: your-ec2-keypair
@@ -584,11 +589,11 @@ resources:
 
       autoscalers:
         celery:
-          min_capacity: 1
-          max_capacity: 1
+          min_capacity: 0
+          max_capacity: 0
         flower:
-          min_capacity: 1
-          max_capacity: 1
+          min_capacity: 0
+          max_capacity: 0
 
   # Additional properties for this environment's cache
   tb:elasticache:ElastiCacheReplicationGroup:

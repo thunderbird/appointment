@@ -83,7 +83,7 @@ afcs = {
 }
 
 # Build a list of SGs to grant access to the new cache replica set
-_redis_source_sgs = [backend_cache_sg]
+_redis_source_sgs = [container_sgs['backend']]
 for afc in afcs.values():
     for cont_sgs in afc.resources['container_security_groups'].values():
         _redis_source_sgs.extend([sg_with_rules for sg_with_rules in cont_sgs.values()])
