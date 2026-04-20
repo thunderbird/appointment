@@ -21,6 +21,7 @@ router = APIRouter()
 
 SESSION_OAUTH_STATE = 'google_oauth_state'
 SESSION_OAUTH_SUBSCRIBER_ID = 'google_oauth_subscriber_id'
+SESSION_OAUTH_CODE_VERIFIER = 'google_oauth_code_verifier'
 
 
 @router.get('/ftue-status')
@@ -43,10 +44,11 @@ def google_auth(
     subscriber: Subscriber = Depends(get_subscriber),
 ):
     """Starts the google oauth process"""
-    url, state = google_client.get_redirect_url()
+    url, state, code_verifier = google_client.get_redirect_url()
 
     request.session[SESSION_OAUTH_STATE] = state
     request.session[SESSION_OAUTH_SUBSCRIBER_ID] = subscriber.id
+    request.session[SESSION_OAUTH_CODE_VERIFIER] = code_verifier
 
     return url
 
@@ -74,8 +76,10 @@ def google_callback(
             return google_callback_error(is_setup, l10n('google-connect-to-continue'))
         return google_callback_error(is_setup, l10n('google-sync-fail'))
 
+    code_verifier = request.session.get(SESSION_OAUTH_CODE_VERIFIER)
+
     try:
-        creds = google_client.get_credentials(code)
+        creds = google_client.get_credentials(code, code_verifier=code_verifier)
     except GoogleScopeChanged:
         return google_callback_error(is_setup, l10n('google-scope-changed'))
     except GoogleInvalidCredentials:
@@ -87,6 +91,7 @@ def google_callback(
     # Clear session keys
     request.session.pop(SESSION_OAUTH_STATE)
     request.session.pop(SESSION_OAUTH_SUBSCRIBER_ID)
+    request.session.pop(SESSION_OAUTH_CODE_VERIFIER, None)
 
     if subscriber is None:
         return google_callback_error(is_setup, l10n('google-auth-fail'))
