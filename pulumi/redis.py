@@ -93,9 +93,8 @@ def redis_cache(
         ttl=60,
         type='CNAME',
         zone_id=cloudflare_zone_id,
-        content=backend_cache_primary_endpoint if project.stack == 'prod' else redis_replica_group_primary_endpoint,
+        content=backend_cache_endpoint if project.stack == 'prod' else redis_replica_group_primary_endpoint,
         # content=redis_replica_group_primary_endpoint,
-        # content=backend_cache_endpoint,
         proxied=False,
     )
     project.resources['backend_cache_dns'] = backend_cache_dns
