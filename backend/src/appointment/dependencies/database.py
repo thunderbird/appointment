@@ -77,7 +77,11 @@ def boot_redis_cluster():
 def close_redis_cluster():
     """Close a connection to a redis cluster"""
     global _redis_instance
-    if not _redis_instance or not os.getenv('REDIS_URL') or not os.getenv('REDIS_USE_CLUSTER', 'false').lower() == 'true':
+    if (
+        not _redis_instance
+        or not os.getenv('REDIS_URL')
+        or not os.getenv('REDIS_USE_CLUSTER', 'false').lower() == 'true'
+    ):
         return None
 
     _redis_instance.close()
