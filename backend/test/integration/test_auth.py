@@ -781,7 +781,7 @@ class TestGoogle:
         second_google_email = 'user2@gmail.com'
         mock_profile = {'email': second_google_email, 'id': second_google_id}
 
-        def mock_get_credentials(code):
+        def mock_get_credentials(code, code_verifier=None):
             return mock_creds
 
         def mock_get_profile(token):
@@ -801,6 +801,7 @@ class TestGoogle:
             {
                 'google_oauth_state': state,
                 'google_oauth_subscriber_id': subscriber.id,
+                'google_oauth_code_verifier': 'mock_code_verifier',
             },
         )
 
@@ -841,6 +842,122 @@ class TestGoogle:
             assert second_connection[0].type_id == second_google_id
             assert second_connection[0].name == second_google_email
             assert second_connection[0].owner_id == subscriber.id
+
+    def test_google_auth_stores_code_verifier_in_session(self, with_client, monkeypatch):
+        """Test that GET /google/auth stores a code_verifier in the session for PKCE"""
+        from appointment.controller.apis.google_client import GoogleClient
+        from appointment.dependencies.google import get_google_client
+
+        mock_google_client = GoogleClient('client_id', 'client_secret', 'project_id', 'callback_url')
+
+        def mock_get_redirect_url():
+            return 'https://accounts.google.com/o/oauth2/auth?...', 'mock_state', 'mock_code_verifier_abc'
+
+        monkeypatch.setattr(mock_google_client, 'get_redirect_url', mock_get_redirect_url)
+
+        session_data = {}
+        monkeypatch.setattr('starlette.requests.HTTPConnection.session', session_data)
+
+        with_client.app.dependency_overrides[get_google_client] = lambda: mock_google_client
+
+        response = with_client.get('/google/auth', headers=auth_headers)
+        assert response.status_code == 200
+
+        assert session_data.get('google_oauth_code_verifier') == 'mock_code_verifier_abc'
+        assert session_data.get('google_oauth_state') == 'mock_state'
+
+    def test_google_callback_passes_code_verifier_to_get_credentials(
+        self, with_db, with_client, monkeypatch, make_basic_subscriber
+    ):
+        """Test that the callback reads code_verifier from session and passes it to get_credentials"""
+        from appointment.controller.apis.google_client import GoogleClient
+        from appointment.dependencies.google import get_google_client
+
+        subscriber = make_basic_subscriber()
+
+        mock_google_client = GoogleClient('client_id', 'client_secret', 'project_id', 'callback_url')
+
+        class MockCredentials:
+            def to_json(self):
+                return '{"access_token": "tok", "refresh_token": "ref"}'
+
+        captured_verifier = {}
+
+        def mock_get_credentials(code, code_verifier=None):
+            captured_verifier['value'] = code_verifier
+            return MockCredentials()
+
+        def mock_get_profile(token):
+            return {'email': 'test@gmail.com', 'id': 'google_id_999'}
+
+        def mock_sync_calendars(db, subscriber_id, token, external_connection_id):
+            return False
+
+        monkeypatch.setattr(mock_google_client, 'get_credentials', mock_get_credentials)
+        monkeypatch.setattr(mock_google_client, 'get_profile', mock_get_profile)
+        monkeypatch.setattr(mock_google_client, 'sync_calendars', mock_sync_calendars)
+
+        state = 'test_state_verifier'
+        monkeypatch.setattr(
+            'starlette.requests.HTTPConnection.session',
+            {
+                'google_oauth_state': state,
+                'google_oauth_subscriber_id': subscriber.id,
+                'google_oauth_code_verifier': 'the_real_verifier_xyz',
+            },
+        )
+
+        with_client.app.dependency_overrides[get_google_client] = lambda: mock_google_client
+
+        response = with_client.get(
+            '/google/callback', params={'code': 'auth_code', 'state': state}, follow_redirects=False
+        )
+
+        assert response.status_code == 307
+        assert captured_verifier['value'] == 'the_real_verifier_xyz'
+
+    def test_google_callback_clears_code_verifier_from_session(
+        self, with_db, with_client, monkeypatch, make_basic_subscriber
+    ):
+        """Test that the callback clears the code_verifier from the session after use"""
+        from appointment.controller.apis.google_client import GoogleClient
+        from appointment.dependencies.google import get_google_client
+
+        subscriber = make_basic_subscriber()
+
+        mock_google_client = GoogleClient('client_id', 'client_secret', 'project_id', 'callback_url')
+
+        class MockCredentials:
+            def to_json(self):
+                return '{"access_token": "tok", "refresh_token": "ref"}'
+
+        def mock_get_credentials(code, code_verifier=None):
+            return MockCredentials()
+
+        def mock_get_profile(token):
+            return {'email': 'clean@gmail.com', 'id': 'google_clean_id'}
+
+        def mock_sync_calendars(db, subscriber_id, token, external_connection_id):
+            return False
+
+        monkeypatch.setattr(mock_google_client, 'get_credentials', mock_get_credentials)
+        monkeypatch.setattr(mock_google_client, 'get_profile', mock_get_profile)
+        monkeypatch.setattr(mock_google_client, 'sync_calendars', mock_sync_calendars)
+
+        state = 'test_state_cleanup'
+        session_data = {
+            'google_oauth_state': state,
+            'google_oauth_subscriber_id': subscriber.id,
+            'google_oauth_code_verifier': 'verifier_to_be_cleaned',
+        }
+        monkeypatch.setattr('starlette.requests.HTTPConnection.session', session_data)
+
+        with_client.app.dependency_overrides[get_google_client] = lambda: mock_google_client
+
+        with_client.get('/google/callback', params={'code': 'auth_code', 'state': state}, follow_redirects=False)
+
+        assert 'google_oauth_code_verifier' not in session_data
+        assert 'google_oauth_state' not in session_data
 
 
 class TestOIDCToken:

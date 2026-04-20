@@ -25,7 +25,6 @@ class GoogleClient:
         'https://www.googleapis.com/auth/userinfo.email',
         'openid',
     ]
-    client: Flow | None = None
 
     def __init__(self, client_id, client_secret, project_id, callback_url):
         self.config = {
@@ -39,30 +38,40 @@ class GoogleClient:
         }
 
         self.callback_url = callback_url
-        self.client = None
+        self._setup_verified = False
+
+    def _create_flow(self) -> Flow:
+        """Create a fresh Flow instance for an OAuth exchange."""
+        return Flow.from_client_config(self.config, self.SCOPES, redirect_uri=self.callback_url)
 
     def setup(self):
-        # Ignore if we're already setup!
-        if self.client:
+        """Verify that credentials are valid by attempting to create a Flow.
+        Called once at startup; raises on bad credentials."""
+        if self._setup_verified:
             return
-        """Actually create the client, this is separate, so we can catch any errors without breaking everything"""
-        self.client = Flow.from_client_config(self.config, self.SCOPES, redirect_uri=self.callback_url)
+        self._create_flow()
+        self._setup_verified = True
 
     def get_redirect_url(self):
-        """Returns the redirect url for the google oauth flow"""
-        if self.client is None:
-            return None
+        """Returns the redirect url, state, and code_verifier for the google oauth flow.
+
+        The code_verifier must be stored (in the session, in this case) and passed back
+        to get_credentials() when the callback arrives so PKCE validation succeeds,
+        even if a different server instance handles the callback.
+        """
+        flow = self._create_flow()
 
         # (Url, State ID)
-        return self.client.authorization_url(access_type='offline', prompt='consent')
+        url, state = flow.authorization_url(access_type='offline', prompt='consent')
+        return url, state, flow.code_verifier
 
-    def get_credentials(self, code: str):
-        if self.client is None:
-            return None
+    def get_credentials(self, code: str, code_verifier: str | None = None):
+        flow = self._create_flow()
+        flow.code_verifier = code_verifier
 
         try:
-            self.client.fetch_token(code=code)
-            return self.client.credentials
+            flow.fetch_token(code=code)
+            return flow.credentials
         except Warning as e:
             logging.error(f'[google_client.get_credentials] Google Warning: {str(e)}')
             # This usually is the "Scope has changed" error.
@@ -73,9 +82,6 @@ class GoogleClient:
 
     def get_profile(self, token):
         """Retrieve the user's profile associated with the token"""
-        if self.client is None:
-            return None
-
         user_info_service = build('oauth2', 'v2', credentials=token)
         user_info = user_info_service.userinfo().get().execute()
 
