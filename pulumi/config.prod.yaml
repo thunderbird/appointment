@@ -261,12 +261,6 @@ resources:
   #     source_cidrs:
   #       - your.ip.addr.ess/32
 
-  aws:elasticache:ServerlessCache:
-    backend:
-      description: Appointment backend (prod)
-      engine: redis
-      major_engine_version: "7"
-
   tb:fargate:FargateClusterWithLogging:
     backend:
       assign_public_ip: True

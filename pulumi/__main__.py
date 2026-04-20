@@ -92,7 +92,6 @@ for afc in afcs.values():
 backend_cache, cache_dns = redis_cache(
     cloudflare_zone_id=cloudflare_zone_id,
     project=project,
-    security_group=backend_cache_sg,
     security_groups=_redis_source_sgs,
     vpc=vpc,
     resources=resources,

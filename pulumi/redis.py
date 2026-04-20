@@ -1,5 +1,4 @@
 import pulumi
-import pulumi_aws as aws
 import pulumi_cloudflare as cloudflare
 
 from tb_pulumi import ThunderbirdPulumiProject
@@ -10,12 +9,6 @@ from tb_pulumi.network import MultiCidrVpc, SecurityGroupWithRules
 def redis_cache(
     cloudflare_zone_id: str,
     project: ThunderbirdPulumiProject,
-    # **IN PROGRESS**
-    #
-    #    Keep "security_group" as a single group that gets access to the old serverless cache
-    # -> Add "security_groups" as a list of groups that get access to the new replicaset
-    #    Remove "security_group" when we destroy the old serverless cache
-    security_group: SecurityGroupWithRules,
     security_groups: list[SecurityGroupWithRules],
     resources: dict,
     vpc: MultiCidrVpc,
@@ -25,9 +18,6 @@ def redis_cache(
 
     :param project: The project to store all the resources in.
     :type project: ThunderbirdPulumiProject
-
-    :param security_group: The security group to apply to the old serverless cache.
-    :type security_group: SecurityGroupWithRules
 
     :param security_groups: List of SecurityGroupWithRules resources which should have access to the new cache replica
         set.
@@ -45,26 +35,6 @@ def redis_cache(
     :rtype: _type_
     """
 
-    # **IN PROGRESS**
-    #
-    #    Migrate traffic to new replicaset
-    # -> Delete this code block along with relevant config sections
-    backend_cache = aws.elasticache.ServerlessCache(
-        f'{project.name_prefix}-cache-backend',
-        security_group_ids=[security_group.resources.get('sg').id],
-        subnet_ids=[subnet.id for subnet in vpc.resources.get('subnets', {})],
-        tags=project.common_tags,
-        **resources.get('aws:elasticache:ServerlessCache', {}).get('backend', {}),
-        opts=pulumi.ResourceOptions(depends_on=[vpc]),
-    )
-    project.resources['backend_cache'] = backend_cache
-
-    # **IN PROGRESS**
-    #
-    #    Build new replication group alongside the old cluster
-    #    Move DNS to new replication group
-    # -> Destroy the old cluster
-
     redis_replica_group = ElastiCacheReplicationGroup(
         name=f'{project.name_prefix}-redis-replicaset',
         project=project,
@@ -79,7 +49,6 @@ def redis_cache(
     )
     project.resources['backend_cache_replicaset'] = redis_replica_group
 
-    backend_cache.endpoints.apply(lambda endpoints: endpoints[0]['address'])
     redis_replica_group_primary_endpoint = redis_replica_group.resources['replication_group'].primary_endpoint_address
     backend_cache_dns = cloudflare.DnsRecord(
         f'{project.name_prefix}-dns-redis',
@@ -92,4 +61,4 @@ def redis_cache(
     )
     project.resources['backend_cache_dns'] = backend_cache_dns
 
-    return (backend_cache, backend_cache_dns)
+    return (redis_replica_group, backend_cache_dns)
