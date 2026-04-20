@@ -9,7 +9,7 @@ from redis.backoff import ExponentialBackoff
 from redis.retry import Retry
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from ..utils import get_database_url
+from ..utils import get_database_url, get_envvar_as_bool
 
 
 _redis_instance: Optional[RedisCluster] = None
@@ -42,7 +42,8 @@ def get_db():
 def boot_redis_cluster():
     """Open a connection to a redis cluster"""
     global _redis_instance
-    if not os.getenv('REDIS_URL') or not os.getenv('REDIS_USE_CLUSTER'):
+
+    if not os.getenv('REDIS_URL') or not get_envvar_as_bool('REDIS_USE_CLUSTER')
         return None
 
     host = os.getenv('REDIS_URL')
@@ -76,7 +77,7 @@ def boot_redis_cluster():
 def close_redis_cluster():
     """Close a connection to a redis cluster"""
     global _redis_instance
-    if not _redis_instance or not os.getenv('REDIS_URL') or not os.getenv('REDIS_USE_CLUSTER'):
+    if not _redis_instance or not os.getenv('REDIS_URL') or not get_envvar_as_bool('REDIS_USE_CLUSTER'):
         return None
 
     _redis_instance.close()
@@ -103,7 +104,8 @@ def get_redis(db=None) -> Redis | RedisCluster | None:
 
     timer_boot = time.perf_counter_ns()
 
-    if os.getenv('REDIS_USE_CLUSTER'):
+    if get_envvar_as_bool(os.getenv('REDIS_USE_CLUSTER')):
+        logging.debug('Returning a Redis cluster client')
         return _redis_instance
 
     redis = Redis(
@@ -116,6 +118,7 @@ def get_redis(db=None) -> Redis | RedisCluster | None:
     )
 
     sentry_sdk.set_measurement('redis_boot_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
+    logging.debug('Returning a Redis single node client')
     return redis
 
 
