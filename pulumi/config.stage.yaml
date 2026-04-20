@@ -3,7 +3,7 @@
 ### Special variables used throughout this file
 
 # Update this value to update all containers based on the thunderbird/appointment image
-.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:6fc0cb44c9f0e4a4dff07c4e539b0b998d6b54654b43d234940d52185941683e
+.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:641c35f9f42ea16a9ee0b1eff3e5551eb872dd4202432d39d6ed47f410916888
 # .apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:2a2fae2d6beff65bfd317212d3a7d13ab287483c7e5058ace21f884b49ef86d4
 
 # These variables are common to Accounts application environments. Some tasks will require additional configuration.

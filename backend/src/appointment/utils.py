@@ -20,7 +20,11 @@ log = logging.getLogger(__name__)
 
 
 def get_envvar_as_bool(envvar):
-    return os.get(envvar).lower() in ['true', 'yes']
+    value = os.getenv(envvar)
+    if value == None:
+        return False
+
+    return value in ['true', 'yes']
 
 
 def verify_password(password, hashed_password):
