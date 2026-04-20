@@ -584,11 +584,11 @@ resources:
 
       autoscalers:
         celery:
-          min_capacity: 0
-          max_capacity: 0
+          min_capacity: 1
+          max_capacity: 1
         flower:
-          min_capacity: 0
-          max_capacity: 0
+          min_capacity: 1
+          max_capacity: 1
 
   # Additional properties for this environment's cache
   tb:elasticache:ElastiCacheReplicationGroup:
