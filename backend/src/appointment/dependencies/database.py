@@ -105,7 +105,6 @@ def get_redis(db=None) -> Redis | RedisCluster | None:
     timer_boot = time.perf_counter_ns()
 
     if get_envvar_as_bool(os.getenv('REDIS_USE_CLUSTER')):
-        logging.debug('Returning a Redis cluster client')
         return _redis_instance
 
     redis = Redis(
@@ -118,7 +117,6 @@ def get_redis(db=None) -> Redis | RedisCluster | None:
     )
 
     sentry_sdk.set_measurement('redis_boot_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
-    logging.debug('Returning a Redis single node client')
     return redis
 
 
