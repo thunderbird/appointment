@@ -538,7 +538,7 @@ resources:
                 protocol: tcp
                 description: Allow local TLS traffic only
                 cidr_blocks:
-                  - 10.21.0.0/16
+                  - 10.20.0.0/16
 
       listeners:
         flower:  # Load balancer to attach to
