@@ -20,10 +20,8 @@ log = logging.getLogger(__name__)
 
 
 def get_envvar_as_bool(envvar):
-    value = os.getenv(envvar)
-    if value is None:
-        return False
-
+    """Returns False unless the environment variable is present and indicates truth."""
+    value = os.getenv(envvar, 'false')
     return value in ['true', 'yes']
 
 
