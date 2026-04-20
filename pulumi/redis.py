@@ -47,8 +47,8 @@ def redis_cache(
 
     # **IN PROGRESS**
     #
-    # -> Migrate traffic to new replicaset
-    #    Delete this code block along with relevant config sections
+    #    Migrate traffic to new replicaset
+    # -> Delete this code block along with relevant config sections
     backend_cache = aws.elasticache.ServerlessCache(
         f'{project.name_prefix}-cache-backend',
         security_group_ids=[security_group.resources.get('sg').id],
@@ -62,8 +62,8 @@ def redis_cache(
     # **IN PROGRESS**
     #
     #    Build new replication group alongside the old cluster
-    # -> Move DNS to new replication group
-    #    Destroy the old cluster
+    #    Move DNS to new replication group
+    # -> Destroy the old cluster
 
     redis_replica_group = ElastiCacheReplicationGroup(
         name=f'{project.name_prefix}-redis-replicaset',
@@ -79,13 +79,7 @@ def redis_cache(
     )
     project.resources['backend_cache_replicaset'] = redis_replica_group
 
-    # **IN PROGRESS**
-    #
-    #    Build new replica set
-    #    Change DNS to the new replica set in stage
-    # -> Change DNS in prod, removing the condition below
-
-    backend_cache_endpoint = backend_cache.endpoints.apply(lambda endpoints: endpoints[0]['address'])
+    backend_cache.endpoints.apply(lambda endpoints: endpoints[0]['address'])
     redis_replica_group_primary_endpoint = redis_replica_group.resources['replication_group'].primary_endpoint_address
     backend_cache_dns = cloudflare.DnsRecord(
         f'{project.name_prefix}-dns-redis',
@@ -93,8 +87,7 @@ def redis_cache(
         ttl=60,
         type='CNAME',
         zone_id=cloudflare_zone_id,
-        content=backend_cache_endpoint if project.stack == 'prod' else redis_replica_group_primary_endpoint,
-        # content=redis_replica_group_primary_endpoint,
+        content=redis_replica_group_primary_endpoint,
         proxied=False,
     )
     project.resources['backend_cache_dns'] = backend_cache_dns
