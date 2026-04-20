@@ -42,7 +42,8 @@ def get_db():
 def boot_redis_cluster():
     """Open a connection to a redis cluster"""
     global _redis_instance
-    if not os.getenv('REDIS_URL') or not os.getenv('REDIS_USE_CLUSTER'):
+
+    if not os.getenv('REDIS_URL') or not os.getenv('REDIS_USE_CLUSTER', 'false').lower() == 'true':
         return None
 
     host = os.getenv('REDIS_URL')
@@ -76,7 +77,11 @@ def boot_redis_cluster():
 def close_redis_cluster():
     """Close a connection to a redis cluster"""
     global _redis_instance
-    if not _redis_instance or not os.getenv('REDIS_URL') or not os.getenv('REDIS_USE_CLUSTER'):
+    if (
+        not _redis_instance
+        or not os.getenv('REDIS_URL')
+        or not os.getenv('REDIS_USE_CLUSTER', 'false').lower() == 'true'
+    ):
         return None
 
     _redis_instance.close()
@@ -103,7 +108,7 @@ def get_redis(db=None) -> Redis | RedisCluster | None:
 
     timer_boot = time.perf_counter_ns()
 
-    if os.getenv('REDIS_USE_CLUSTER'):
+    if os.getenv('REDIS_USE_CLUSTER', 'false').lower() == 'true':
         return _redis_instance
 
     redis = Redis(
