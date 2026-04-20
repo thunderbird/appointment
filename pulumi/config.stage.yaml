@@ -190,38 +190,6 @@ resources:
               cidr_blocks:
                 - 0.0.0.0/0
     
-    other:
-      backend_cache:
-        rules:
-          ingress:
-            - description: Primary Redis traffic
-              # source_sgs set in code
-              protocol: tcp
-              from_port: 6379
-              to_port: 6379
-            - description: Replica Redis traffic
-              # source_sgs set in code
-              protocol: tcp
-              from_port: 6380
-              to_port: 6380
-            - description: Allow Redis traffic from Celery
-              protocol: tcp
-              from_port: 6379
-              to_port: 6379
-              source_security_group_id: sg-0813bff6aa9832e2d
-            - description: Allow Redis traffic from Flower
-              protocol: tcp
-              from_port: 6379
-              to_port: 6379
-              source_security_group_id: sg-089861804a280fa38
-          egress:
-            - description: Allow outbound traffic to anywhere
-              protocol: tcp
-              from_port: 0
-              to_port: 65535
-              cidr_blocks:
-                - 0.0.0.0/0
-  
   tb:secrets:PulumiSecretsManager:
     pulumi:
       recovery_window_in_days: 0
