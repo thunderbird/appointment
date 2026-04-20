@@ -3,7 +3,7 @@
 ### Special variables used throughout this file
 
 # Update this value to update all containers based on the thunderbird/appointment image
-.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:7de6f16bdd309937caa186c8f5a269ea00118e5e
+.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:c0a95e3f440550541ccaea6604f3d765f0259efb
 
 # These variables are common to Accounts application environments. Some tasks will require additional configuration.
 .app_env: &VAR_APP_ENV {name: "APP_ENV", value: "prod"}
@@ -582,11 +582,11 @@ resources:
 
       autoscalers:
         celery:
-          min_capacity: 0
-          max_capacity: 0
+          min_capacity: 1
+          max_capacity: 1
         flower:
-          min_capacity: 0
-          max_capacity: 0
+          min_capacity: 1
+          max_capacity: 1
 
   # Additional properties for this environment's cache
   tb:elasticache:ElastiCacheReplicationGroup:

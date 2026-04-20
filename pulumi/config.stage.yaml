@@ -3,7 +3,7 @@
 ### Special variables used throughout this file
 
 # Update this value to update all containers based on the thunderbird/appointment image
-.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:f61f1a1ae8fda422fd6e168b11b4c4d79a72f5ff71f625851615172aa2d8f77a
+.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:c0a95e3f440550541ccaea6604f3d765f0259efb
 
 # These variables are common to Accounts application environments. Some tasks will require additional configuration.
 .app_env: &VAR_APP_ENV {name: "APP_ENV", value: "stage"}
