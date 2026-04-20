@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 
 def get_envvar_as_bool(envvar):
     value = os.getenv(envvar)
-    if value == None:
+    if value is None:
         return False
 
     return value in ['true', 'yes']
