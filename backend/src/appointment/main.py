@@ -16,7 +16,7 @@ from starlette_csrf import CSRFMiddleware
 
 from .defines import APP_ENV_DEV, APP_ENV_TEST, APP_ENV_STAGE, APP_ENV_PROD, AuthScheme
 from .exceptions.validation import APIRateLimitExceeded
-from .dependencies.database import boot_redis, close_redis
+from .dependencies.database import boot_redis_cluster, close_redis_cluster
 from .middleware.l10n import L10n
 from .middleware.SanitizeMiddleware import SanitizeMiddleware
 
@@ -145,9 +145,9 @@ def server():
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         # Boot the redis cluster as the app starts up
-        boot_redis()
+        boot_redis_cluster()
         yield
-        close_redis()
+        boot_redis_cluster()
 
     # init app
     app = FastAPI(openapi_url=openapi_url, lifespan=lifespan, openapi_tags=tags_metadata)
