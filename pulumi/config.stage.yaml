@@ -4,7 +4,6 @@
 
 # Update this value to update all containers based on the thunderbird/appointment image
 .apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:641c35f9f42ea16a9ee0b1eff3e5551eb872dd4202432d39d6ed47f410916888
-# .apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:2a2fae2d6beff65bfd317212d3a7d13ab287483c7e5058ace21f884b49ef86d4
 
 # These variables are common to Accounts application environments. Some tasks will require additional configuration.
 .app_env: &VAR_APP_ENV {name: "APP_ENV", value: "stage"}
@@ -16,7 +15,7 @@
 .google_auth_callback: &VAR_GOOGLE_AUTH_CALLBACK {name: "GOOGLE_AUTH_CALLBACK", value: "https://appointment-stage.tb.pro/api/v1/google/callback"}
 .jwt_algo: &VAR_JWT_ALGO {name: "JWT_ALGO", value: "HS256"}
 .jwt_expire_in_mins: &VAR_JWT_EXPIRE_IN_MINS {name: "JWT_EXPIRE_IN_MINS", value: "10000"}
-.log_level: &VAR_LOG_LEVEL {name: "LOG_LEVEL", value: "DEBUG"}
+.log_level: &VAR_LOG_LEVEL {name: "LOG_LEVEL", value: "ERROR"}
 .log_use_stream: &VAR_LOG_USE_STREAM {name: "LOG_USE_STREAM", value: "True"}
 .oidc_exp_grace_period: &VAR_OIDC_EXP_GRACE_PERIOD {name: "OIDC_EXP_GRACE_PERIOD", value: "60"}
 .oidc_fallback_match_by_email: &VAR_OIDC_FALLBACK_MATCH_BY_EMAIL {name: "OIDC_FALLBACK_MATCH_BY_EMAIL", value: "True"}
@@ -256,13 +255,8 @@ resources:
         - zoom-auth-secret
         - zoom-api-secret
 
-  # tb:ec2:SshableInstance: {}
+  tb:ec2:SshableInstance: {}
   # Fill out this template to build an SSH bastion
-  tb:ec2:SshableInstance:
-    rjung:
-      ssh_keypair_name: rjung-crunchwrap
-      source_cidrs:
-        - 38.15.46.29/32
   # tb:ec2:SshableInstance:
   #   bastion:
   #     ssh_keypair_name: your-ec2-keypair
