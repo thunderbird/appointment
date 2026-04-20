@@ -3,7 +3,8 @@
 ### Special variables used throughout this file
 
 # Update this value to update all containers based on the thunderbird/appointment image
-.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:2a2fae2d6beff65bfd317212d3a7d13ab287483c7e5058ace21f884b49ef86d4
+.apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:21a96e415701487c8a2f6ad55eb6b13f5191c8734852ec48359fb81f3f2e18fb
+# .apmt_image: &APMT_IMAGE 768512802988.dkr.ecr.eu-central-1.amazonaws.com/thunderbird/appointment:2a2fae2d6beff65bfd317212d3a7d13ab287483c7e5058ace21f884b49ef86d4
 
 # These variables are common to Accounts application environments. Some tasks will require additional configuration.
 .app_env: &VAR_APP_ENV {name: "APP_ENV", value: "stage"}
@@ -25,7 +26,7 @@
 .redis_port: &VAR_REDIS_PORT {name: "REDIS_PORT", value: "6379"}
 .redis_url: &VAR_REDIS_URL {name: "REDIS_URL", value: "cache.appointment-stage.tb.pro"}
 .redis_use_ssl: &VAR_REDIS_USE_SSL {name: "REDIS_USE_SSL", value: "True"}
-.redis_use_cluster: &VAR_REDIS_USE_CLUSTER {name: "REDIS_USE_CLUSTER", value: "True"}
+.redis_use_cluster: &VAR_REDIS_USE_CLUSTER {name: "REDIS_USE_CLUSTER", value: "False"}
 .sentry_dsn: &VAR_SENTRY_DSN {name: "SENTRY_DSN", value: "https://5dddca3ecc964284bb8008bc2beef808@o4505428107853824.ingest.sentry.io/4505428124827648"}
 .service_email: &VAR_SERVICE_EMAIL {name: "SERVICE_EMAIL", value: "no-reply@appointment-stage.tb.pro"}
 .short_base_url: &VAR_SHORT_BASE_URL {name: "SHORT_BASE_URL", value: "https://stage.apt.mt"}

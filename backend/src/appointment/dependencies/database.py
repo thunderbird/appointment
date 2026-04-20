@@ -43,7 +43,7 @@ def boot_redis_cluster():
     """Open a connection to a redis cluster"""
     global _redis_instance
 
-    if not os.getenv('REDIS_URL') or not get_envvar_as_bool('REDIS_USE_CLUSTER')
+    if not os.getenv('REDIS_URL') or not get_envvar_as_bool('REDIS_USE_CLUSTER'):
         return None
 
     host = os.getenv('REDIS_URL')
