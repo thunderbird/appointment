@@ -147,7 +147,7 @@ def server():
         # Boot the redis cluster as the app starts up
         boot_redis_cluster()
         yield
-        boot_redis_cluster()
+        close_redis_cluster()
 
     # init app
     app = FastAPI(openapi_url=openapi_url, lifespan=lifespan, openapi_tags=tags_metadata)
