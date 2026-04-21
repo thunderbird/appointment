@@ -43,12 +43,12 @@ onMounted(async () => {
   } else {
     // If we're not on the first step but there's no query param, add it
     // If we're on the first step, ensure query param is removed
-    if (ftueStore.currentStep !== FtueStep.SetupProfile) {
+    if (ftueStore.currentStep !== FtueStep.ConnectCalendars) {
       ftueStore.moveToStep(ftueStore.currentStep, true);
     } else {
       // Ensure first step has no query param
       if (route.query.step) {
-        ftueStore.moveToStep(FtueStep.SetupProfile, true);
+        ftueStore.moveToStep(FtueStep.ConnectCalendars, true);
       }
     }
   }
