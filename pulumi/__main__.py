@@ -59,8 +59,8 @@ secrets_managers = {
     for name, config in resources.get('tb:secrets:PulumiSecretsManager', {}).items()
 }
 
-# Build security groups for load balancers, containers, and our Redis cache
-backend_cache_sg, container_sgs, lb_sgs = security_groups(project=project, resources=resources, vpc=vpc)
+# Build security groups for load balancers and containers
+container_sgs, lb_sgs = security_groups(project=project, resources=resources, vpc=vpc)
 
 # Fargate Service
 fargate_clusters, autoscalers = fargate(
@@ -92,7 +92,6 @@ for afc in afcs.values():
 backend_cache, cache_dns = redis_cache(
     cloudflare_zone_id=cloudflare_zone_id,
     project=project,
-    security_group=backend_cache_sg,
     security_groups=_redis_source_sgs,
     vpc=vpc,
     resources=resources,

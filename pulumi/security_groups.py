@@ -63,20 +63,4 @@ def security_groups(
             **sg,
         )
 
-    # Build a security group to allow traffic from containers into Redis
-    backend_cache_sg_opts = (
-        resources.get('tb:network:SecurityGroupWithRules', {}).get('other', {}).get('backend_cache', {})
-    )
-    backend_cache_sg_ingress_rules = backend_cache_sg_opts.get('rules', {}).get('ingress', {})
-    for rule in backend_cache_sg_ingress_rules:
-        if 'source_security_group_id' not in rule and 'cidr_blocks' not in rule:
-            rule['source_security_group_id'] = container_sgs.get('backend').resources.get('sg').id
-    backend_cache_sg = tb_pulumi.network.SecurityGroupWithRules(
-        name=f'{project.name_prefix}-sg-cache-backend',
-        project=project,
-        vpc_id=vpc.resources['vpc'].id,
-        opts=pulumi.ResourceOptions(depends_on=depends_on),
-        **backend_cache_sg_opts,
-    )
-
-    return (backend_cache_sg, container_sgs, lb_sgs)
+    return (container_sgs, lb_sgs)
