@@ -8,7 +8,6 @@ import { inject, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 // Steps
-import CreateYourProfileStep from './steps/CreateYourProfileStep.vue';
 import ConnectYourCalendarStep from './steps/ConnectYourCalendarStep.vue';
 import ConnectYourCalendarCalDavStep from './steps/ConnectYourCalendarCalDavStep.vue';
 import ConnectYourCalendarGoogleStep from './steps/ConnectYourCalendarGoogleStep.vue';
@@ -18,7 +17,6 @@ import VideoMeetingLinkStep from './steps/VideoMeetingLinkStep.vue';
 import SetupCompleteStep from './steps/SetupCompleteStep.vue';
 
 const STEPS = {
-  [FtueStep.SetupProfile]: CreateYourProfileStep,
   [FtueStep.ConnectCalendars]: ConnectYourCalendarStep,
   [FtueStep.ConnectCalendarsCalDav]: ConnectYourCalendarCalDavStep,
   [FtueStep.ConnectCalendarsGoogle]: ConnectYourCalendarGoogleStep,

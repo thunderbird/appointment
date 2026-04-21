@@ -6,7 +6,7 @@ import { FtueStep } from '@/definitions';
 import { Alert, Fetch } from '@/models';
 
 const initialObject = {
-  step: FtueStep.SetupProfile, // First step
+  step: FtueStep.ConnectCalendars, // First step
 };
 
 export const useFTUEStore = defineStore('FTUE', () => {
