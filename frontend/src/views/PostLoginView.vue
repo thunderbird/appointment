@@ -28,9 +28,11 @@ onMounted(async () => {
   if (isOidcAuth) {
     // Stored in an internal store
     const userData = await userManager.signinCallback(window.location.href);
+    const timezone = userData?.profile?.zoneinfo ?? dj.tz.guess();
+
     const { error, data }: BooleanResponse = await call('oidc/token').post({
       'access_token': userData.access_token,
-      'timezone': dj.tz.guess(),
+      'timezone': timezone,
     }).json();
 
     if (error.value) {
