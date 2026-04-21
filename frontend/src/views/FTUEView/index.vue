@@ -8,7 +8,6 @@ import { inject, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
 // Steps
-import CreateYourProfileStep from './steps/CreateYourProfileStep.vue';
 import ConnectYourCalendarStep from './steps/ConnectYourCalendarStep.vue';
 import ConnectYourCalendarCalDavStep from './steps/ConnectYourCalendarCalDavStep.vue';
 import ConnectYourCalendarGoogleStep from './steps/ConnectYourCalendarGoogleStep.vue';
@@ -18,7 +17,6 @@ import VideoMeetingLinkStep from './steps/VideoMeetingLinkStep.vue';
 import SetupCompleteStep from './steps/SetupCompleteStep.vue';
 
 const STEPS = {
-  [FtueStep.SetupProfile]: CreateYourProfileStep,
   [FtueStep.ConnectCalendars]: ConnectYourCalendarStep,
   [FtueStep.ConnectCalendarsCalDav]: ConnectYourCalendarCalDavStep,
   [FtueStep.ConnectCalendarsGoogle]: ConnectYourCalendarGoogleStep,
@@ -45,12 +43,12 @@ onMounted(async () => {
   } else {
     // If we're not on the first step but there's no query param, add it
     // If we're on the first step, ensure query param is removed
-    if (ftueStore.currentStep !== FtueStep.SetupProfile) {
+    if (ftueStore.currentStep !== FtueStep.ConnectCalendars) {
       ftueStore.moveToStep(ftueStore.currentStep, true);
     } else {
       // Ensure first step has no query param
       if (route.query.step) {
-        ftueStore.moveToStep(FtueStep.SetupProfile, true);
+        ftueStore.moveToStep(FtueStep.ConnectCalendars, true);
       }
     }
   }

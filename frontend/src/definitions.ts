@@ -164,7 +164,6 @@ export enum TableDataButtonType {
  * Step amounts are 10-based to allow us flexibility in adding steps later.
  */
 export enum FtueStep {
-  SetupProfile = 10,
   ConnectCalendars = 20,
   ConnectCalendarsCalDav = 21,
   ConnectCalendarsGoogle = 22,

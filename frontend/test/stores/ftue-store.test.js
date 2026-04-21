@@ -24,7 +24,7 @@ describe('FTUE Store', () => {
 
   test('init', () => {
     const ftue = useFTUEStore();
-    expect(ftue.currentStep).toBe(FtueStep.SetupProfile);
+    expect(ftue.currentStep).toBe(FtueStep.ConnectCalendars);
   });
 
   test('messages', () => {
@@ -50,8 +50,6 @@ describe('FTUE Store', () => {
 
   test('steps', () => {
     const ftue = useFTUEStore();
-    expect(ftue.currentStep).toBe(FtueStep.SetupProfile);
-    ftue.moveToStep(FtueStep.ConnectCalendars);
     expect(ftue.currentStep).toBe(FtueStep.ConnectCalendars);
     ftue.moveToStep(FtueStep.ConnectCalendarsCalDav);
     expect(ftue.currentStep).toBe(FtueStep.ConnectCalendarsCalDav);

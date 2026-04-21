@@ -23,10 +23,6 @@ type CalendarProvider = 'caldav' | 'google' | 'oidc';
 const calendarProvider = ref<CalendarProvider | null>('oidc');
 const isLoading = ref(false);
 
-const onBackButtonClick = () => {
-  ftueStore.moveToStep(FtueStep.SetupProfile, true);
-};
-
 const onContinueButtonClick = async () => {
   ftueStore.clearMessages();
 
@@ -108,9 +104,6 @@ const onContinueButtonClick = async () => {
   </div>
 
   <div class="buttons-container">
-    <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick" :disabled="isLoading">
-      {{ t('label.back') }}
-    </primary-button>
     <primary-button :title="t('label.continue')" @click="onContinueButtonClick" :disabled="!calendarProvider || isLoading">
       {{ isLoading ? t('label.connecting') : t('label.continue') }}
     </primary-button>
@@ -136,20 +129,10 @@ p {
 .buttons-container {
   display: flex;
   justify-content: end;
-  gap: 1.5rem;
-  margin-block-start: 4.25rem;
 
   button {
     min-width: 123px;
-  }
-
-  .base.link.filled {
-    font-size: 0.75rem;
-    color: var(--colour-ti-highlight);
-  }
-
-  button + button {
-    margin-block-start: 0;
+    margin-block-start: 4.25rem;
   }
 }
 </style>

@@ -6,7 +6,7 @@ import { FtueStep } from '@/definitions';
 import { Alert, Fetch } from '@/models';
 
 const initialObject = {
-  step: FtueStep.SetupProfile, // First step
+  step: FtueStep.ConnectCalendars, // First step
 };
 
 export const useFTUEStore = defineStore('FTUE', () => {
@@ -41,8 +41,8 @@ export const useFTUEStore = defineStore('FTUE', () => {
     // Add query parameter to router history for browser back button support
     const routerMethod = replace ? router.replace : router.push;
 
-    // First step (SetupProfile) doesn't have a query param
-    const isFirstStep = newStep === FtueStep.SetupProfile;
+    // First step (ConnectCalendars) doesn't have a query param
+    const isFirstStep = newStep === FtueStep.ConnectCalendars;
 
     if (isFirstStep) {
       // Remove step query param for first step
@@ -86,8 +86,8 @@ export const useFTUEStore = defineStore('FTUE', () => {
       }
     } else if (!stepParam) {
       // No query param means we're on the first step
-      if (data.value.step !== FtueStep.SetupProfile) {
-        data.value.step = FtueStep.SetupProfile;
+      if (data.value.step !== FtueStep.ConnectCalendars) {
+        data.value.step = FtueStep.ConnectCalendars;
         clearMessages();
       }
     }
@@ -95,7 +95,7 @@ export const useFTUEStore = defineStore('FTUE', () => {
 
   const currentStep = computed(() => data.value.step);
   const $reset = () => {
-    data.value.step = FtueStep.SetupProfile;
+    data.value.step = FtueStep.ConnectCalendars;
     clearMessages();
   };
 
