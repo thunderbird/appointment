@@ -22,8 +22,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-central-1
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PULUMI }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PULUMI }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
 
       - name: Clean up before Pulumi release
         run: rm -rf dist
@@ -68,8 +67,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-region: eu-central-1
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID_PULUMI }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY_PULUMI }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
 
       - name: Login to Amazon ECR
         id: login-ecr
