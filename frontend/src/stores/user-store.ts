@@ -73,27 +73,6 @@ export const useUserStore = defineStore('user', () => {
   }
 
   /**
-   * Update user settings only
-   */
-  const updateSettings = async () => {
-    const obj = {
-      username: data.value.username,
-      language: data.value.settings.language,
-      timezone: data.value.settings.timezone,
-      colour_scheme: data.value.settings.colourScheme,
-      time_mode: data.value.settings.timeFormat,
-      start_of_week: data.value.settings.startOfWeek,
-    };
-
-    const { error }: SubscriberResponse = await call.value('me').put(obj).json();
-    if (!error.value) {
-      // TODO show some confirmation
-    } else {
-      // TODO show error message
-    }
-  };
-
-  /**
    * Return the first slug key, or null if they don't have one.
    */
   const mySlug = computed((): string | null => {
@@ -329,7 +308,6 @@ export const useUserStore = defineStore('user', () => {
     data,
     init,
     authenticated,
-    updateSettings,
     $reset,
     updateSignedUrl,
     profile,
