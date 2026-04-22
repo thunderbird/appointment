@@ -19,6 +19,8 @@ from ..main import _common_setup
 
 
 def run():
+    from ..tasks.google import stop_google_channel
+
     _common_setup()
     google_client = get_google_client()
 
@@ -52,8 +54,6 @@ def run():
         token = Credentials.from_authorized_user_info(json.loads(external_connection.token), google_client.SCOPES)
 
         # Stop the old channel (fire-and-forget via Celery with retries)
-        from ..tasks.google import stop_google_channel
-
         stop_google_channel.delay(channel.channel_id, channel.resource_id, external_connection.token)
 
         # Create a new channel

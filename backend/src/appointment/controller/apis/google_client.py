@@ -341,7 +341,7 @@ class GoogleClient:
             'address': webhook_url,
             'token': state,
             'params': {
-                'ttl': str(ttl)
+                'ttl': ttl
             },
         }
 
