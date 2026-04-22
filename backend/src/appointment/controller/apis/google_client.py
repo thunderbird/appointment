@@ -72,9 +72,13 @@ class GoogleClient:
         self.callback_url = callback_url
         self._setup_verified = False
 
-    def _create_flow(self) -> Flow:
+    def _create_flow(self, *, autogenerate_code_verifier: bool = False) -> Flow:
         """Create a fresh Flow instance for an OAuth exchange."""
-        return Flow.from_client_config(self.config, self.SCOPES, redirect_uri=self.callback_url)
+        return Flow.from_client_config(
+            self.config, self.SCOPES,
+            redirect_uri=self.callback_url,
+            autogenerate_code_verifier=autogenerate_code_verifier,
+        )
 
     def setup(self):
         """Verify that credentials are valid by attempting to create a Flow.
@@ -91,7 +95,7 @@ class GoogleClient:
         to get_credentials() when the callback arrives so PKCE validation succeeds,
         even if a different server instance handles the callback.
         """
-        flow = self._create_flow()
+        flow = self._create_flow(autogenerate_code_verifier=True)
 
         # (Url, State ID)
         url, state = flow.authorization_url(access_type='offline', prompt='consent')
