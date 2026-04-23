@@ -621,9 +621,15 @@ def oidc_token(
 
         raise HTTPException(403, l10n('invalid-credentials'))
 
-    if not oidc_connection:
+    if oidc_connection:
+        ec = oidc_connection[0]
+        if ec.name != email:
+            ec.name = email
+            db.commit()
+            db.refresh(ec)
+    else:
         external_connection_schema = schemas.ExternalConnection(
-            name=token_data.get('email'),
+            name=email,
             type=ExternalConnectionType.oidc,
             type_id=oidc_id,
             owner_id=subscriber.id,

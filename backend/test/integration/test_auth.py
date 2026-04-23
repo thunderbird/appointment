@@ -996,7 +996,7 @@ class TestOIDCToken:
             data = response.json()
             assert 'not valid' in data['detail']
 
-    def test_oidc_token_existing_subscriber(self, with_client, make_pro_subscriber, make_external_connections):
+    def test_oidc_token_existing_subscriber(self, with_db, with_client, make_pro_subscriber, make_external_connections):
         """Test successful login for existing subscriber with OIDC connection"""
         os.environ['AUTH_SCHEME'] = 'oidc'
 
@@ -1005,14 +1005,15 @@ class TestOIDCToken:
 
         # Create existing OIDC external connection
         make_external_connections(
-            subscriber_id=subscriber.id, type=models.ExternalConnectionType.oidc, type_id=oidc_id, name=subscriber.email
+            subscriber_id=subscriber.id, type=models.ExternalConnectionType.oidc, type_id=oidc_id, name='stale@old.com'
         )
 
         # Mock OIDCClient to return valid token data
         with patch('appointment.controller.apis.oidc_client.OIDCClient.introspect_token') as mock_introspect:
             mock_introspect.return_value = {
                 'sub': oidc_id,
-                'email': subscriber.email,
+                'email': 'different@email.com',
+                'preferred_username': subscriber.email,
                 'username': subscriber.username,
                 'name': subscriber.name,
             }
@@ -1023,6 +1024,12 @@ class TestOIDCToken:
 
             assert response.status_code == 200, response.text
             assert response.json() is True
+
+            with with_db() as db:
+                oidc_connection = repo.external_connection.get_by_type(
+                    db, subscriber.id, models.ExternalConnectionType.oidc, oidc_id
+                )
+                assert oidc_connection[0].name == subscriber.email
 
     def test_oidc_token_fallback_match_by_email(self, with_db, with_client, make_pro_subscriber):
         """Test that fallback email matching works when OIDC_FALLBACK_MATCH_BY_EMAIL is True"""
