@@ -3,14 +3,13 @@ import logging
 import os
 import zoneinfo
 
-from oauthlib.oauth2 import OAuth2Error
-from requests import HTTPError
 from sentry_sdk import capture_exception
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from ..controller import zoom
 from ..controller.calendar import CalDavConnector, Tools, GoogleConnector
-from ..controller.apis.google_client import GoogleClient
+from ..controller.apis.google_client import GoogleClient, SendUpdates
+from ..controller.google_watch import setup_watch_channel, teardown_watch_channel
 from ..controller.auth import signed_url_by_subscriber
 from ..database import repo, schemas, models
 from ..database.models import (
@@ -29,7 +28,6 @@ from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
 from ..defines import FALLBACK_LOCALE
-from ..dependencies.zoom import get_zoom_client
 from ..exceptions import validation
 from ..exceptions.calendar import EventNotCreatedException, EventNotDeletedException
 from ..exceptions.misc import UnexpectedBehaviourWarning
@@ -81,10 +79,7 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
     booking_slot_end = booking_slot_start + timedelta(minutes=schedule.slot_duration)
 
     if schedule.use_custom_availabilities:
-        custom_availabilities = [
-            a for a in schedule.availabilities
-            if a.day_of_week.value == iso_weekday
-        ]
+        custom_availabilities = [a for a in schedule.availabilities if a.day_of_week.value == iso_weekday]
 
         if not custom_availabilities:
             return False
@@ -95,8 +90,7 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
             add_day = 1 if availability.end_time <= availability.start_time else 0
 
             start_datetime = (
-                datetime.combine(today, availability.start_time, tzinfo=schedule_tzinfo)
-                + schedule.timezone_offset
+                datetime.combine(today, availability.start_time, tzinfo=schedule_tzinfo) + schedule.timezone_offset
             )
             end_datetime = (
                 datetime.combine(today, availability.end_time, tzinfo=schedule_tzinfo)
@@ -137,6 +131,7 @@ def create_calendar_schedule(
     schedule: schemas.ScheduleValidationIn,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
+    google_client: GoogleClient = Depends(get_google_client),
 ):
     """endpoint to add a new schedule for a given calendar"""
     if not repo.calendar.exists(db, calendar_id=schedule.calendar_id):
@@ -156,6 +151,9 @@ def create_calendar_schedule(
             # A little extra, but things are a little out of place right now..
             repo.schedule.hard_delete(db, db_schedule.id)
             raise validation.ScheduleCreationException()
+
+    if os.getenv('GOOGLE_INVITE_ENABLED') == 'True':
+        _sync_watch_channels(db, google_client, subscriber, schedule.calendar_id)
 
     return db_schedule
 
@@ -188,6 +186,7 @@ def update_schedule(
     schedule: schemas.ScheduleValidationIn,
     db: Session = Depends(get_db),
     subscriber: Subscriber = Depends(get_subscriber),
+    google_client: GoogleClient = Depends(get_google_client),
 ):
     """endpoint to update an existing schedule for authenticated subscriber"""
     if not repo.schedule.exists(db, schedule_id=id):
@@ -210,7 +209,23 @@ def update_schedule(
     if schedule.use_custom_availabilities and not repo.schedule.all_availability_is_valid(schedule):
         raise validation.InvalidAvailabilityException()
 
-    return repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
+    result = repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
+
+    if os.getenv('GOOGLE_INVITE_ENABLED') == 'True':
+        _sync_watch_channels(db, google_client, subscriber, schedule.calendar_id)
+
+    return result
+
+
+def _sync_watch_channels(db: Session, google_client: GoogleClient, subscriber: Subscriber, default_calendar_id: int):
+    """Ensure a watch channel exists only for the schedule's default Google calendar.
+    Tears down channels on any other Google calendars for this subscriber."""
+    calendars = repo.calendar.get_by_subscriber(db, subscriber.id, provider=CalendarProvider.google)
+    for cal in calendars:
+        if cal.id == default_calendar_id:
+            setup_watch_channel(db, google_client, cal)
+        else:
+            teardown_watch_channel(db, cal)
 
 
 @router.post('/public/availability', response_model=schemas.AppointmentOut, tags=['no-cache'])
@@ -398,7 +413,14 @@ def request_schedule_availability_slot(
 
         # Create a pending appointment
         owner_language = subscriber.language if subscriber.language is not None else FALLBACK_LOCALE
-        prefix = f'{l10n("event-hold-prefix", lang=owner_language)} ' if schedule.booking_confirmation else ''
+        use_google_invite = (
+            calendar.provider == CalendarProvider.google and os.getenv('GOOGLE_INVITE_ENABLED') == 'True'
+        )
+
+        # Google invites skip the HOLD step — the event is created directly and
+        # Google sends the invite to the subscriber for accept/decline.
+        use_hold = schedule.booking_confirmation and not use_google_invite
+        prefix = f'{l10n("event-hold-prefix", lang=owner_language)} ' if use_hold else ''
         title = Tools.default_event_title(slot, subscriber, prefix)
         status = models.AppointmentStatus.opened if schedule.booking_confirmation else models.AppointmentStatus.closed
 
@@ -432,7 +454,6 @@ def request_schedule_availability_slot(
         # If bookings are configured to be confirmed by the owner for this schedule,
         # Create HOLD event in owners calender and send emails to owner for confirmation and attendee for information
         if schedule.booking_confirmation:
-            # Sending confirmation email to owner
             background_tasks.add_task(
                 send_confirmation_email,
                 url=url,
@@ -445,7 +466,6 @@ def request_schedule_availability_slot(
                 lang=subscriber.language,
             )
 
-            # Create remote HOLD event
             event = schemas.Event(
                 title=title,
                 start=slot.start.replace(tzinfo=timezone.utc),
@@ -459,14 +479,23 @@ def request_schedule_availability_slot(
                 uuid=slot.appointment.uuid if slot.appointment else None,
             )
 
-            # create HOLD event in owners calender
-            event = save_remote_event(event, calendar, subscriber, slot, db, redis, google_client)
+            event = save_remote_event(
+                event,
+                calendar,
+                subscriber,
+                slot,
+                db,
+                redis,
+                google_client,
+                send_google_notification=use_google_invite,
+                booking_confirmation=schedule.booking_confirmation,
+            )
             # Add the external id if available
             if appointment and event.external_id:
                 repo.appointment.update_external_id(db, appointment, event.external_id)
 
-            # Sending confirmation pending information email to attendee with HOLD event attached
-            Tools().send_hold_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
+            if not use_google_invite:
+                Tools().send_hold_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
 
         # If no confirmation is needed, directly confirm the booking and send invitation mail
         else:
@@ -576,11 +605,15 @@ def handle_schedule_availability_decision(
         db.add(appointment)
         appointment_calendar = appointment.calendar
 
+    use_google_invite = calendar.provider == CalendarProvider.google and os.getenv('GOOGLE_INVITE_ENABLED') == 'True'
+
     # TODO: Check booking expiration date
     # check if request was denied
     if confirmed is False:
-        # send rejection information to bookee
-        Tools().send_reject_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
+        # For non-Google calendars, send branded rejection email to the bookee.
+        # For Google, the delete with sendUpdates handles the cancellation notification.
+        if not use_google_invite:
+            Tools().send_reject_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
 
         # mark the slot as BookingStatus.declined
         slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.declined)
@@ -589,7 +622,10 @@ def handle_schedule_availability_decision(
         # Delete remote HOLD event if existing
         if appointment:
             uuid = slot.appointment.external_id if slot.appointment.external_id else str(slot.appointment.uuid)
-            delete_remote_event(uuid, appointment_calendar, subscriber, db, redis, google_client)
+            send_updates = SendUpdates.ALL if use_google_invite else SendUpdates.NONE
+            delete_remote_event(
+                uuid, appointment_calendar, subscriber, db, redis, google_client, send_updates=send_updates
+            )
 
         return True
 
@@ -605,46 +641,18 @@ def handle_schedule_availability_decision(
 
     # If needed: Create a zoom meeting link for this booking
     if schedule.meeting_link_provider == MeetingLinkProviderType.zoom:
-        try:
-            zoom_client = get_zoom_client(subscriber)
-            response = zoom_client.create_meeting(title, slot.start.isoformat(), slot.duration, subscriber.timezone)
-            if 'id' in response:
-                location_url = zoom_client.get_meeting(response['id'])['join_url']
-                slot.meeting_link_id = response['id']
-                slot.meeting_link_url = location_url
-
-                db.add(slot)
-                db.commit()
-        except HTTPError as err:  # Not fatal, just a bummer
-            logging.error('Zoom meeting creation error: ', err)
-
-            # Ensure sentry captures the error too!
-            if os.getenv('SENTRY_DSN') != '':
-                capture_exception(err)
-
-            # Notify the organizer that the meeting link could not be created!
+        # In the future we should punt zoom link creation
+        # (along with the appointment_id so we can update it after) to a celery task
+        zoom_url = zoom.create_meeting_link(db, slot, subscriber, title)
+        if zoom_url:
+            location_url = zoom_url
+        else:
             background_tasks.add_task(
                 send_zoom_meeting_failed_email,
                 to=subscriber.preferred_email,
                 appointment_title=schedule.name,
                 lang=subscriber.language,
             )
-        except OAuth2Error as err:
-            logging.error('OAuth flow error during zoom meeting creation: ', err)
-            if os.getenv('SENTRY_DSN') != '':
-                capture_exception(err)
-
-            # Notify the organizer that the meeting link could not be created!
-            background_tasks.add_task(
-                send_zoom_meeting_failed_email,
-                to=subscriber.preferred_email,
-                appointment_title=schedule.name,
-                lang=subscriber.language,
-            )
-        except SQLAlchemyError as err:  # Not fatal, but could make things tricky
-            logging.error('Failed to save the zoom meeting link to the appointment: ', err)
-            if os.getenv('SENTRY_DSN') != '':
-                capture_exception(err)
 
     event = schemas.Event(
         title=title,
@@ -661,14 +669,46 @@ def handle_schedule_availability_decision(
 
     # Update HOLD event
     appointment = repo.appointment.update_title(db, slot.appointment_id, title)
-    event = save_remote_event(event, appointment_calendar, subscriber, slot, db, redis, google_client)
-    if appointment and event.external_id:
-        repo.appointment.update_external_id(db, appointment, event.external_id)
+
+    if use_google_invite:
+        if appointment and appointment.external_id:
+            # Patch the tentative hold event to confirmed; Google notifies the bookee.
+            con, _ = get_remote_connection(appointment_calendar, subscriber, db, redis, google_client)
+            owner_language = subscriber.language if subscriber.language is not None else FALLBACK_LOCALE
+            con.confirm_event(appointment.external_id, event=event, organizer_language=owner_language)
+        else:
+            # No hold event exists (booking_confirmation was false); create a confirmed event directly.
+            event = save_remote_event(
+                event,
+                appointment_calendar,
+                subscriber,
+                slot,
+                db,
+                redis,
+                google_client,
+                send_google_notification=True,
+                booking_confirmation=False,
+            )
+            if appointment and event.external_id:
+                repo.appointment.update_external_id(db, appointment, event.external_id)
+    else:
+        event = save_remote_event(
+            event,
+            appointment_calendar,
+            subscriber,
+            slot,
+            db,
+            redis,
+            google_client,
+        )
+        if appointment and event.external_id:
+            repo.appointment.update_external_id(db, appointment, event.external_id)
 
     # Book the slot at the end
     slot = repo.slot.book(db, slot.id)
 
-    Tools().send_invitation_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
+    if not use_google_invite:
+        Tools().send_invitation_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
 
     return True
 
@@ -711,25 +751,40 @@ def get_remote_connection(calendar, subscriber, db, redis, google_client):
     return (con, organizer_email)
 
 
-def save_remote_event(event, calendar, subscriber, slot, db, redis, google_client):
+def save_remote_event(
+    event,
+    calendar,
+    subscriber,
+    slot,
+    db,
+    redis,
+    google_client,
+    send_google_notification=False,
+    booking_confirmation=False,
+):
     """Create or update a remote event"""
     con, organizer_email = get_remote_connection(calendar, subscriber, db, redis, google_client)
 
     try:
         return con.save_event(
-            event=event, attendee=slot.attendee, organizer=subscriber, organizer_email=organizer_email
+            event=event,
+            attendee=slot.attendee,
+            organizer=subscriber,
+            organizer_email=organizer_email,
+            send_google_notification=send_google_notification,
+            booking_confirmation=booking_confirmation,
         )
     except EventNotCreatedException:
         raise EventCouldNotBeAccepted
 
 
-def delete_remote_event(uid: str, calendar, subscriber, db, redis, google_client):
-    """Delete a remote event
-    if is_hold: remove an event from remote calendar
-    """
+def delete_remote_event(
+    uid: str, calendar, subscriber, db, redis, google_client, send_updates: SendUpdates = SendUpdates.NONE
+):
+    """Delete a remote event from the connected calendar."""
     con, _ = get_remote_connection(calendar, subscriber, db, redis, google_client)
 
     try:
-        con.delete_event(uid=uid)
+        con.delete_event(uid=uid, send_updates=send_updates)
     except EventNotDeletedException:
         raise EventCouldNotBeDeleted

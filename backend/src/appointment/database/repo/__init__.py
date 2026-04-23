@@ -1,1 +1,12 @@
-from . import appointment, attendee, availability, calendar, external_connection, schedule, slot, subscriber  # noqa: F401
+# ruff: noqa
+from . import (
+    appointment,
+    attendee,
+    availability,
+    calendar,
+    external_connection,
+    google_calendar_channel,
+    schedule,
+    slot,
+    subscriber,
+)

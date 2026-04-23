@@ -34,6 +34,8 @@ GOOGLE_CALDAV_DOMAINS = ['googleusercontent.com', 'google.com', 'gmail.com']
 # Resolves to absolute appointment package path
 BASE_PATH = f'{sys.modules["appointment"].__path__[0]}'
 
+ONE_DAY_IN_SECONDS = 86400
+SEVEN_DAYS_IN_SECONDS = 604800
 
 # This has to be lazy loaded because the env vars are not available at import time in main.py
 @cache
