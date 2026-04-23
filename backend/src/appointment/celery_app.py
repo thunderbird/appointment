@@ -58,6 +58,7 @@ def create_celery_app() -> Celery:
         'accept_content': ['json'],
         'timezone': 'UTC',
         'enable_utc': True,
+        'beat_scheduler': 'redbeat.RedBeatScheduler',
         'beat_schedule': {
             'heartbeat-every-60s': {
                 'task': 'appointment.tasks.health.heartbeat',
@@ -68,7 +69,6 @@ def create_celery_app() -> Celery:
                 'schedule': google_channel_renew_interval,
             },
         },
-        'beat_schedule_filename': 'celerybeat-appointment-schedule',
     })
 
     app.autodiscover_tasks(['appointment'])
