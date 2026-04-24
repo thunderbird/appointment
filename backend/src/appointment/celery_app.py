@@ -44,6 +44,9 @@ def create_celery_app() -> Celery:
     google_channel_ttl = float(os.getenv('GOOGLE_CHANNEL_TTL_IN_SECONDS', SEVEN_DAYS_IN_SECONDS))
     google_channel_renew_interval = google_channel_ttl - ONE_DAY_IN_SECONDS
 
+    zoom_token_ttl = float(os.getenv('ZOOM_TOKEN_TTL_IN_SECONDS', SEVEN_DAYS_IN_SECONDS))
+    zoom_token_renew_interval = zoom_token_ttl - ONE_DAY_IN_SECONDS
+
     app = Celery('appointment')
 
     app.config_from_object({
@@ -67,6 +70,10 @@ def create_celery_app() -> Celery:
             'renew-google-channels': {
                 'task': 'appointment.tasks.google.renew_google_channels',
                 'schedule': google_channel_renew_interval,
+            },
+            'renew-zoom-tokens': {
+                'task': 'appointment.tasks.zoom.renew_zoom_tokens',
+                'schedule': zoom_token_renew_interval,
             },
         },
     })
