@@ -38,11 +38,11 @@ def run():
             zoom_client.setup(subscriber.id, connection.token, threshold.timestamp())
             checked += 1
         except Exception as e:
-            logging.error(f'[renew_zoom_tokens] Failed to renew Zoom token for subscriber {subscriber.id}: {e}')
+            logging.error(f'[refresh_zoom_tokens] Failed to renew Zoom token for subscriber {subscriber.id}: {e}')
             failed += 1
 
     db.close()
     logging.info(
-        f'[renew_zoom_tokens] Zoom token checks complete: '
+        f'[refresh_zoom_tokens] Zoom token checks complete: '
         f'{checked} checked, {failed} failed, {len(zoom_connections)} total processed'
     )

@@ -71,8 +71,8 @@ def create_celery_app() -> Celery:
                 'task': 'appointment.tasks.google.renew_google_channels',
                 'schedule': google_channel_renew_interval,
             },
-            'renew-zoom-tokens': {
-                'task': 'appointment.tasks.zoom.renew_zoom_tokens',
+            'refresh-zoom-tokens': {
+                'task': 'appointment.tasks.zoom.refresh_zoom_tokens',
                 'schedule': zoom_token_renew_interval,
             },
         },
