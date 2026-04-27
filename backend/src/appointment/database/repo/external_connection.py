@@ -136,6 +136,14 @@ def get_subscriber_by_oidc_id(db: Session, type_id: str):
     return None
 
 
+def update_name(db: Session, db_external_connection: models.ExternalConnections, name: str):
+    """Update the name field of an existing external connection"""
+    db_external_connection.name = name
+    db.commit()
+    db.refresh(db_external_connection)
+    return db_external_connection
+
+
 def get_subscriber_without_oidc_by_email(db: Session, email: str):
     """Return a subscriber by the OIDC recovery email address without an OIDC connection"""
     # Subquery to check if a subscriber has an OIDC external connection

@@ -624,9 +624,7 @@ def oidc_token(
     if oidc_connection:
         ec = oidc_connection[0]
         if ec.name != email:
-            ec.name = email
-            db.commit()
-            db.refresh(ec)
+            repo.external_connection.update_name(db, ec, email)
     else:
         external_connection_schema = schemas.ExternalConnection(
             name=email,
