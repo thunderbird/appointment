@@ -9,11 +9,8 @@
 echo "Entry script starting..."
 
 if [[ "$CONTAINER_ROLE" == "worker" ]]; then
-    echo "Starting Celery worker..."
-    celery -A appointment.celery_app:celery worker -l INFO -Q appointment
-elif [[ "$CONTAINER_ROLE" == "beat" ]]; then
-    echo "Starting Celery beat scheduler..."
-    celery -A appointment.celery_app:celery beat -l INFO
+    echo "Starting Celery..."
+    celery -A appointment.celery_app:celery worker -l INFO --beat -Q appointment
 elif [[ "$CONTAINER_ROLE" == "flower" ]]; then
     celery -A appointment.celery_app:celery flower -l INFO
 elif [[ "$CONTAINER_ROLE" == "api" ]]; then

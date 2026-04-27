@@ -22,17 +22,15 @@ services:
   celery-worker:
     <<: *backend
     ports: []
+    # Workaround for embedded beat (--beat) spinning at 100% CPU in Docker.
+    # Docker inherits a huge SC_OPEN_MAX (~1B) causing close_open_fds() to loop.
+    # https://github.com/celery/celery/issues/8306
+    ulimits:
+      nofile:
+        soft: 10000
+        hard: 10000
     environment:
       - CONTAINER_ROLE=worker
-    depends_on:
-      - backend
-      - redis
-
-  celery-beat:
-    <<: *backend
-    ports: []
-    environment:
-      - CONTAINER_ROLE=beat
     depends_on:
       - backend
       - redis
