@@ -1012,8 +1012,8 @@ class TestOIDCToken:
         with patch('appointment.controller.apis.oidc_client.OIDCClient.introspect_token') as mock_introspect:
             mock_introspect.return_value = {
                 'sub': oidc_id,
-                'email': 'different@email.com',
-                'preferred_username': subscriber.email,
+                'email': subscriber.username,
+                'preferred_username': subscriber.username,
                 'username': subscriber.username,
                 'name': subscriber.name,
             }
@@ -1029,7 +1029,7 @@ class TestOIDCToken:
                 oidc_connection = repo.external_connection.get_by_type(
                     db, subscriber.id, models.ExternalConnectionType.oidc, oidc_id
                 )
-                assert oidc_connection[0].name == subscriber.email
+                assert oidc_connection[0].name == subscriber.username
 
     def test_oidc_token_fallback_match_by_email(self, with_db, with_client, make_pro_subscriber):
         """Test that fallback email matching works when OIDC_FALLBACK_MATCH_BY_EMAIL is True"""
