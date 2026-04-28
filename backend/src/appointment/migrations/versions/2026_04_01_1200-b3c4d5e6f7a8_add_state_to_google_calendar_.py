@@ -15,7 +15,7 @@ from appointment.database.models import encrypted_type
 revision = 'b3c4d5e6f7a8'
 down_revision = 'd9c5594694c5'
 branch_labels = None
-depends_on = None
+depends_on = ('a1b2c3d4e5f6',)
 
 
 def upgrade() -> None:

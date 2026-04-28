@@ -26,6 +26,8 @@ def upgrade() -> None:
         sa.Column('resource_id', sa.String),
         sa.Column('expiration', sa.DateTime),
         sa.Column('sync_token', sa.String, nullable=True),
+        sa.Column('time_created', sa.DateTime, server_default=sa.func.now(), index=True),
+        sa.Column('time_updated', sa.DateTime, server_default=sa.func.now(), index=True),
     )
 
 
