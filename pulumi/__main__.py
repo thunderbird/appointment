@@ -130,11 +130,6 @@ monitoring = tb_pulumi.cloudwatch.CloudWatchMonitoringGroup(
     name=f'{project.name_prefix}-monitoring', project=project, **monitoring_opts
 )
 
-# CI Automation User
-auto_users_opts = resources.get('tb:ci:AwsAutomationUser', {})
-for user, user_opts in auto_users_opts.items():
-    tb_pulumi.ci.AwsAutomationUser(f'{project.name_prefix}-{user}', project=project, **user_opts)
-
 # IAM policies granting access to these resources
 sap = tb_pulumi.iam.StackAccessPolicies(
     f'{project.name_prefix}-sap',
