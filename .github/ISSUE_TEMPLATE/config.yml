@@ -7,6 +7,12 @@ contact_links:
   - name: Support
     url: https://support.tb.pro
     about: Knowledge base and customer support requests
-  - name: Bug Report (Account Management)
+  - name: Bug Report (Thunderbird Accounts)
     url: https://github.com/thunderbird/thunderbird-accounts/issues/new
-    about: A bug report for general account management (accounts.tb.pro)
+    about: A bug report for the accounts dashboard, including Thundermail configuration (accounts.tb.pro)
+  - name: Bug Report (Mailstrom)
+    url: https://github.com/thunderbird/mailstrom/issues/new
+    about: A bug report for the mail server deployment of Thundermail
+  - name: Bug Report (Thunderbird Send / Pro Add-on)
+    url: https://github.com/thunderbird/tbpro-add-on/issues/new
+    about: A bug report for Thunderbird Send and the Thunderbird Pro add-on (send.tb.pro)
