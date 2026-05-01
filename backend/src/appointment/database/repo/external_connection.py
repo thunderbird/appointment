@@ -37,7 +37,14 @@ def update_token(
     if db_results is None or len(db_results) == 0:
         return None
 
-    db_external_connection = db_results[0]
+    return update_token_by_connection(db, token, db_results[0])
+
+
+def update_token_by_connection(
+    db: Session,
+    token: str,
+    db_external_connection: models.ExternalConnections,
+):
     db_external_connection.token = token
     db.commit()
     db.refresh(db_external_connection)
@@ -147,16 +154,9 @@ def update_name(db: Session, db_external_connection: models.ExternalConnections,
 
 def update_status(
     db: Session,
-    subscriber_id: int,
-    type: models.ExternalConnectionType,
+    db_external_connection: models.ExternalConnections,
     status: models.ExternalConnectionStatus,
-    type_id: str | None = None,
 ):
-    db_results = get_by_type(db, subscriber_id, type, type_id)
-    if db_results is None or len(db_results) == 0:
-        return None
-
-    db_external_connection = db_results[0]
     db_external_connection.status = status
     db_external_connection.status_checked_at = datetime.now(UTC)
     db.commit()
