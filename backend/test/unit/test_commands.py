@@ -522,6 +522,47 @@ class TestRefreshZoomTokens:
             assert connection.status == models.ExternalConnectionStatus.error
             assert connection.status_checked_at is not None
 
+    def test_successful_refresh_resets_external_connection_status(self, with_db, make_external_connections):
+        """A successful refresh should mark previously-failed connections back to ok."""
+        make_external_connections(
+            subscriber_id=1,
+            type=models.ExternalConnectionType.zoom,
+            token=self._make_zoom_token(),
+        )
+
+        with with_db() as db:
+            connection = repo.external_connection.get_by_type(db, 1, models.ExternalConnectionType.zoom)[0]
+            repo.external_connection.update_status(
+                db,
+                connection,
+                models.ExternalConnectionStatus.error,
+            )
+
+        refreshed_token = {
+            'access_token': 'new-access-token',
+            'refresh_token': 'new-refresh-token',
+            'token_type': 'bearer',
+            'expires_in': 3600,
+            'expires_at': time.time() + 3600,
+            'scope': 'meeting:read meeting:write user:read',
+        }
+
+        mock_zoom_client = Mock()
+
+        def fake_setup(subscriber_id, token, threshold=0.0):
+            mock_zoom_client.client = Mock()
+            mock_zoom_client.client.token = refreshed_token
+
+        mock_zoom_client.setup.side_effect = fake_setup
+        mock_zoom_client.get_me.return_value = {'id': 'user123'}
+
+        self._run_refresh(with_db, mock_zoom_client)
+
+        with with_db() as db:
+            connection = repo.external_connection.get_by_type(db, 1, models.ExternalConnectionType.zoom)[0]
+            assert connection.status == models.ExternalConnectionStatus.ok
+            assert connection.status_checked_at is not None
+
     def test_invalid_token_payload_does_not_stop_others(
         self, with_db, make_external_connections, make_pro_subscriber
     ):
