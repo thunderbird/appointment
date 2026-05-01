@@ -11,7 +11,6 @@ from ..commands import (
     generate_documentation_pages,
     renew_google_channels,
     backfill_google_channels,
-    refresh_zoom_tokens,
 )
 
 router = typer.Typer()
@@ -73,8 +72,7 @@ def backfill_channels():
 
 @router.command('refresh-zoom-tokens')
 def refresh_tokens():
-    try:
-        with cron_lock('refresh_zoom_tokens'):
-            refresh_zoom_tokens.run()
-    except FileExistsError:
-        print('refresh-zoom-tokens is already running, skipping.')
+    from ..tasks.zoom import refresh_zoom_tokens as refresh_zoom_tokens_task
+
+    refresh_zoom_tokens_task.delay()
+    print('refresh-zoom-tokens task queued.')
