@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import pytest
 
 from datetime import datetime, timedelta, timezone
@@ -389,3 +390,182 @@ class TestRenewGoogleChannels:
             assert updated.channel_id == 'new-channel-id'
             assert updated.state is not None
             assert updated.state != 'old-state'
+
+class TestRefreshZoomTokens:
+    """Tests that the refresh command correctly renews Zoom OAuth tokens."""
+
+    MODULE = 'appointment.commands.refresh_zoom_tokens'
+
+    @staticmethod
+    def _make_zoom_token(**overrides):
+        token = {
+            'access_token': 'old-access-token',
+            'refresh_token': 'old-refresh-token',
+            'token_type': 'bearer',
+            'expires_in': 3600,
+            'scope': 'meeting:read meeting:write user:read',
+        }
+        token.update(overrides)
+        return json.dumps(token)
+
+    def _run_refresh(self, with_db, mock_zoom_client):
+        with patch(f'{self.MODULE}._common_setup'):
+            with patch(f'{self.MODULE}.get_zoom_client', return_value=mock_zoom_client):
+                with patch(f'{self.MODULE}.get_engine_and_session', return_value=(None, with_db)):
+                    from appointment.commands.refresh_zoom_tokens import run
+
+                    run()
+
+    def test_token_is_refreshed(self, with_db, make_external_connections):
+        """Running the command should trigger a token refresh and persist the new token in the DB."""
+        old_token = self._make_zoom_token()
+        make_external_connections(
+            subscriber_id=1,
+            type=models.ExternalConnectionType.zoom,
+            token=old_token,
+        )
+
+        refreshed_token = {
+            'access_token': 'new-access-token',
+            'refresh_token': 'new-refresh-token',
+            'token_type': 'bearer',
+            'expires_in': 3600,
+            'expires_at': time.time() + 3600,
+            'scope': 'meeting:read meeting:write user:read',
+        }
+
+        mock_zoom_client = Mock()
+
+        def fake_setup(subscriber_id, token, threshold=0.0):
+            mock_zoom_client.client = Mock()
+            mock_zoom_client.client.token = refreshed_token
+
+        mock_zoom_client.setup.side_effect = fake_setup
+        mock_zoom_client.get_me.return_value = {'id': 'user123'}
+
+        self._run_refresh(with_db, mock_zoom_client)
+
+        mock_zoom_client.get_me.assert_called_once()
+        setup_subscriber_id, setup_token = mock_zoom_client.setup.call_args.args
+        assert setup_subscriber_id == 1
+        assert setup_token['expires_in'] == -100
+        assert setup_token['expires_at'] == 0
+
+        with with_db() as db:
+            connections = repo.external_connection.get_by_type(
+                db, 1, models.ExternalConnectionType.zoom
+            )
+            assert len(connections) == 1
+            stored_token = json.loads(connections[0].token)
+            assert stored_token['access_token'] == 'new-access-token'
+            assert stored_token['refresh_token'] == 'new-refresh-token'
+            assert 'expires_at' in stored_token
+
+    def test_skips_connection_without_token(self, with_db, make_external_connections):
+        """Connections with no token should be skipped."""
+        make_external_connections(
+            subscriber_id=1,
+            type=models.ExternalConnectionType.zoom,
+            token='',
+        )
+
+        mock_zoom_client = Mock()
+        self._run_refresh(with_db, mock_zoom_client)
+
+        mock_zoom_client.setup.assert_not_called()
+
+    def test_failed_refresh_does_not_stop_others(self, with_db, make_external_connections, make_pro_subscriber):
+        """If one token fails to refresh, the command should continue with the rest."""
+        make_external_connections(
+            subscriber_id=1,
+            type=models.ExternalConnectionType.zoom,
+            token=self._make_zoom_token(),
+        )
+
+        subscriber_2 = make_pro_subscriber()
+        make_external_connections(
+            subscriber_id=subscriber_2.id,
+            type=models.ExternalConnectionType.zoom,
+            token=self._make_zoom_token(),
+        )
+
+        call_count = 0
+
+        def fail_first_setup(subscriber_id, token, threshold=0.0):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise Exception('Zoom API error')
+
+        mock_zoom_client = Mock()
+        mock_zoom_client.setup.side_effect = fail_first_setup
+
+        self._run_refresh(with_db, mock_zoom_client)
+
+        assert mock_zoom_client.setup.call_count == 2
+
+    def test_failed_refresh_marks_external_connection_error(self, with_db, make_external_connections):
+        """If token refresh fails, external connection status should be marked as error."""
+        make_external_connections(
+            subscriber_id=1,
+            type=models.ExternalConnectionType.zoom,
+            token=self._make_zoom_token(),
+        )
+
+        mock_zoom_client = Mock()
+        mock_zoom_client.setup.side_effect = Exception('Zoom API error')
+
+        self._run_refresh(with_db, mock_zoom_client)
+
+        with with_db() as db:
+            connection = repo.external_connection.get_by_type(db, 1, models.ExternalConnectionType.zoom)[0]
+            assert connection.status == models.ExternalConnectionStatus.error
+            assert connection.status_checked_at is not None
+
+    def test_invalid_token_payload_does_not_stop_others(
+        self, with_db, make_external_connections, make_pro_subscriber
+    ):
+        """If one stored token is invalid JSON, the command should still refresh other users."""
+        make_external_connections(
+            subscriber_id=1,
+            type=models.ExternalConnectionType.zoom,
+            token='not-json',
+        )
+
+        subscriber_2 = make_pro_subscriber()
+        make_external_connections(
+            subscriber_id=subscriber_2.id,
+            type=models.ExternalConnectionType.zoom,
+            token=self._make_zoom_token(),
+        )
+
+        refreshed_token = {
+            'access_token': 'new-access-token',
+            'refresh_token': 'new-refresh-token',
+            'token_type': 'bearer',
+            'expires_in': 3600,
+            'expires_at': time.time() + 3600,
+            'scope': 'meeting:read meeting:write user:read',
+        }
+
+        mock_zoom_client = Mock()
+
+        def fake_setup(subscriber_id, token, threshold=0.0):
+            assert subscriber_id == subscriber_2.id
+            mock_zoom_client.client = Mock()
+            mock_zoom_client.client.token = refreshed_token
+
+        mock_zoom_client.setup.side_effect = fake_setup
+        mock_zoom_client.get_me.return_value = {'id': 'user456'}
+
+        self._run_refresh(with_db, mock_zoom_client)
+
+        mock_zoom_client.setup.assert_called_once()
+        mock_zoom_client.get_me.assert_called_once()
+
+        with with_db() as db:
+            valid_connection = repo.external_connection.get_by_type(
+                db, subscriber_2.id, models.ExternalConnectionType.zoom
+            )[0]
+            assert json.loads(valid_connection.token)['refresh_token'] == 'new-refresh-token'
+
