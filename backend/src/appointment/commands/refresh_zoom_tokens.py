@@ -45,8 +45,15 @@ def run():
                 zoom_client.get_me()
 
                 new_token = zoom_client.client.token
-                repo.external_connection.update_token(
-                    db, json.dumps(new_token), subscriber.id, models.ExternalConnectionType.zoom
+                repo.external_connection.update_token_by_connection(
+                    db,
+                    json.dumps(new_token),
+                    connection,
+                )
+                repo.external_connection.update_status(
+                    db,
+                    connection,
+                    models.ExternalConnectionStatus.ok,
                 )
                 refreshed += 1
             except Exception:
@@ -54,8 +61,7 @@ def run():
                 # it in the Settings UI and fix it manually when they log in
                 repo.external_connection.update_status(
                     db,
-                    owner_id,
-                    models.ExternalConnectionType.zoom,
+                    connection,
                     models.ExternalConnectionStatus.error,
                 )
 
