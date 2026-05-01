@@ -5,6 +5,7 @@ Repository providing CRUD functions for external_connection database models.
 
 import logging
 import os
+from datetime import UTC, datetime
 import sentry_sdk
 from sqlalchemy.orm import Session
 from .. import models
@@ -139,6 +140,25 @@ def get_subscriber_by_oidc_id(db: Session, type_id: str):
 def update_name(db: Session, db_external_connection: models.ExternalConnections, name: str):
     """Update the name field of an existing external connection"""
     db_external_connection.name = name
+    db.commit()
+    db.refresh(db_external_connection)
+    return db_external_connection
+
+
+def update_status(
+    db: Session,
+    subscriber_id: int,
+    type: models.ExternalConnectionType,
+    status: models.ExternalConnectionStatus,
+    type_id: str | None = None,
+):
+    db_results = get_by_type(db, subscriber_id, type, type_id)
+    if db_results is None or len(db_results) == 0:
+        return None
+
+    db_external_connection = db_results[0]
+    db_external_connection.status = status
+    db_external_connection.status_checked_at = datetime.now(UTC)
     db.commit()
     db.refresh(db_external_connection)
     return db_external_connection
