@@ -661,6 +661,22 @@ class TestRefreshZoomTokens:
             assert connection.status == models.ExternalConnectionStatus.ok
             assert connection.status_checked_at is not None
 
+    def test_orphaned_zoom_connection_is_cleaned_up(self, with_db, make_external_connections):
+        """If an external connection has no subscriber, it should be deleted as orphaned."""
+        make_external_connections(
+            subscriber_id=99999,
+            type=models.ExternalConnectionType.zoom,
+            token=self._make_zoom_token(),
+        )
+
+        mock_zoom_client = Mock()
+        self._run_refresh(with_db, mock_zoom_client)
+
+        mock_zoom_client.setup.assert_not_called()
+
+        with with_db() as db:
+            assert repo.external_connection.get_zoom(db) == []
+
     def test_invalid_token_payload_does_not_stop_others(
         self, with_db, make_external_connections, make_pro_subscriber
     ):

@@ -21,6 +21,7 @@ def run():
     zoom_connections = []
     refreshed = 0
     failed = 0
+    cleaned = 0
 
     try:
         zoom_connections = repo.external_connection.get_zoom(db)
@@ -33,7 +34,10 @@ def run():
             try:
                 subscriber = repo.subscriber.get(db, owner_id)
                 if not subscriber:
-                    raise ValueError('No subscriber found for external connection')
+                    # Orphaned external connection so let's just remove it.
+                    repo.external_connection.delete(db, connection)
+                    cleaned += 1
+                    continue
 
                 zoom_client = get_zoom_client(subscriber)
                 token = json.loads(connection.token)
@@ -73,5 +77,5 @@ def run():
 
     logging.info(
         f'[refresh_zoom_tokens] Zoom token refresh complete: '
-        f'{refreshed} refreshed, {failed} failed, {len(zoom_connections)} total processed'
+        f'{refreshed} refreshed, {failed} failed, {cleaned} cleaned, {len(zoom_connections)} total processed'
     )

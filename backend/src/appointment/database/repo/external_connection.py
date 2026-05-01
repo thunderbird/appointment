@@ -62,6 +62,12 @@ def delete_by_type(db: Session, subscriber_id: int, type: models.ExternalConnect
     return True
 
 
+def delete(db: Session, db_external_connection: models.ExternalConnections):
+    db.delete(db_external_connection)
+    db.commit()
+    return True
+
+
 def get_by_type(
     db: Session, subscriber_id: int, type: models.ExternalConnectionType, type_id: str | None = None
 ) -> list[models.ExternalConnections] | None:
