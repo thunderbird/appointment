@@ -7,7 +7,7 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
 
 from appointment.database import models, repo
-from appointment.routes.commands import cron_lock
+from appointment.routes.commands import cron_lock, refresh_tokens
 
 
 def test_cron_lock():
@@ -34,6 +34,104 @@ def test_cron_lock():
 
     # Remove the lock file we manually created
     os.remove(test_lock_file_name)
+
+
+def test_refresh_zoom_tokens_command_queues_celery_task():
+    """CLI refresh command should enqueue task instead of running inline."""
+    with patch('appointment.tasks.zoom.refresh_zoom_tokens.delay') as mock_delay:
+        refresh_tokens()
+
+    mock_delay.assert_called_once()
+
+
+def test_acquire_task_lock_returns_token_when_acquired():
+    """Lock helper should return a lock token when Redis acquires lock."""
+    from appointment.tasks.locks import acquire_task_lock
+
+    mock_redis = Mock()
+    mock_redis.set.return_value = True
+
+    with patch('appointment.tasks.locks.uuid.uuid4', return_value='abc-123'):
+        lock_token = acquire_task_lock(mock_redis, 'refresh_zoom_tokens', ttl_seconds=123)
+
+    assert lock_token == 'abc-123'
+    mock_redis.set.assert_called_once_with(
+        'lock:task:refresh_zoom_tokens',
+        'abc-123',
+        nx=True,
+        ex=123,
+    )
+
+
+def test_acquire_task_lock_returns_none_when_not_acquired():
+    """Lock helper should return None when lock is already held."""
+    from appointment.tasks.locks import acquire_task_lock
+
+    mock_redis = Mock()
+    mock_redis.set.return_value = False
+
+    lock_token = acquire_task_lock(mock_redis, 'refresh_zoom_tokens')
+
+    assert lock_token is None
+
+
+def test_release_task_lock_uses_task_scoped_key():
+    """Lock helper should release using task-scoped key and token check."""
+    from appointment.tasks.locks import release_task_lock
+
+    mock_redis = Mock()
+    release_task_lock(mock_redis, 'refresh_zoom_tokens', 'abc-123')
+
+    mock_redis.eval.assert_called_once()
+    _, key_count, lock_key, lock_token = mock_redis.eval.call_args.args
+    assert key_count == 1
+    assert lock_key == 'lock:task:refresh_zoom_tokens'
+    assert lock_token == 'abc-123'
+
+
+def test_refresh_zoom_tokens_task_skips_when_lock_is_held():
+    """Celery task should skip execution when lock cannot be acquired."""
+    from appointment.tasks.zoom import refresh_zoom_tokens as refresh_zoom_tokens_task
+
+    mock_redis = Mock()
+
+    with patch('appointment.tasks.zoom.get_redis', return_value=mock_redis):
+        with patch('appointment.tasks.zoom.acquire_task_lock', return_value=None):
+            with patch('appointment.tasks.zoom.release_task_lock') as mock_release_lock:
+                with patch('appointment.commands.refresh_zoom_tokens.run') as mock_run:
+                    refresh_zoom_tokens_task()
+
+    mock_run.assert_not_called()
+    mock_release_lock.assert_not_called()
+
+
+def test_refresh_zoom_tokens_task_releases_lock_after_run():
+    """Celery task should release lock after successful execution."""
+    from appointment.tasks.zoom import refresh_zoom_tokens as refresh_zoom_tokens_task
+
+    mock_redis = Mock()
+
+    with patch('appointment.tasks.zoom.get_redis', return_value=mock_redis):
+        with patch('appointment.tasks.zoom.acquire_task_lock', return_value='lock-123') as mock_acquire_lock:
+            with patch('appointment.tasks.zoom.release_task_lock') as mock_release_lock:
+                with patch('appointment.commands.refresh_zoom_tokens.run') as mock_run:
+                    refresh_zoom_tokens_task()
+
+    mock_acquire_lock.assert_called_once()
+    mock_run.assert_called_once()
+    mock_release_lock.assert_called_once_with(mock_redis, 'refresh_zoom_tokens', 'lock-123')
+
+
+def test_refresh_zoom_tokens_task_uses_function_name_for_lock():
+    """Task should use its own function name as lock key scope."""
+    from appointment.tasks.zoom import refresh_zoom_tokens as refresh_zoom_tokens_task
+
+    mock_redis = Mock()
+    with patch('appointment.tasks.zoom.get_redis', return_value=mock_redis):
+        with patch('appointment.tasks.zoom.acquire_task_lock', return_value=None) as mock_acquire_lock:
+            refresh_zoom_tokens_task()
+
+    assert mock_acquire_lock.call_args.args[1] == 'refresh_zoom_tokens'
 
 
 def _make_google_token():
