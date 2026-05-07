@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import {
-  computed, onMounted, ref,
-} from 'vue';
+import { computed, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
 /* eslint import/no-unresolved: [2, { ignore: ['\\.html'] }] */
 import privacy from '@/assets/legal/en/privacy.html?raw';
@@ -9,16 +7,22 @@ import terms from '@/assets/legal/en/terms.html?raw';
 
 const route = useRoute();
 
-const pageContents = ref('');
 const isTerms = computed(() => route.name === 'terms');
+const pageContents = computed(() => (isTerms.value ? terms : privacy));
 
-onMounted(async () => {
-  if (isTerms.value) {
-    pageContents.value = terms;
-  } else {
-    pageContents.value = privacy;
-  }
-});
+// Since we are using the same component for both privacy and terms routes,
+// we need to use a watch here to scroll to the top when the route changes
+// otherwise the scroll would remain at the bottom
+watch(
+  () => route.fullPath,
+  async () => {
+    await nextTick();
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  },
+  { immediate: true },
+);
 </script>
 
 <template>
