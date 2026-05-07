@@ -36,7 +36,7 @@ watch(
   padding: 0 1rem 1rem;
 
   @media (--md) {
-    padding: 0 5rem 2rem;
+    padding: 0 3.75rem 2rem;
   }
 }
 
