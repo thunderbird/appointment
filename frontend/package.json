@@ -25,7 +25,7 @@
     "dayjs": "^1.11.5",
     "oidc-client-ts": "^3.3.0",
     "pinia": "^3.0.1",
-    "posthog-js": "^1.174.3",
+    "posthog-js": "1.373.5",
     "ua-parser-js": "^2.0.3",
     "vite": "^7.3.2",
     "vue": "^3.5.12",
