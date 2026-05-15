@@ -1,12 +1,13 @@
 import json
 import os
+import time
 import pytest
 
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
 
 from appointment.database import models, repo
-from appointment.routes.commands import cron_lock
+from appointment.routes.commands import cron_lock, refresh_tokens
 
 
 def test_cron_lock():
@@ -33,6 +34,104 @@ def test_cron_lock():
 
     # Remove the lock file we manually created
     os.remove(test_lock_file_name)
+
+
+def test_refresh_zoom_tokens_command_queues_celery_task():
+    """CLI refresh command should enqueue task instead of running inline."""
+    with patch('appointment.tasks.zoom.refresh_zoom_tokens.delay') as mock_delay:
+        refresh_tokens()
+
+    mock_delay.assert_called_once()
+
+
+def test_acquire_task_lock_returns_token_when_acquired():
+    """Lock helper should return a lock token when Redis acquires lock."""
+    from appointment.tasks.locks import acquire_task_lock
+
+    mock_redis = Mock()
+    mock_redis.set.return_value = True
+
+    with patch('appointment.tasks.locks.uuid.uuid4', return_value='abc-123'):
+        lock_token = acquire_task_lock(mock_redis, 'refresh_zoom_tokens', ttl_seconds=123)
+
+    assert lock_token == 'abc-123'
+    mock_redis.set.assert_called_once_with(
+        'lock:task:refresh_zoom_tokens',
+        'abc-123',
+        nx=True,
+        ex=123,
+    )
+
+
+def test_acquire_task_lock_returns_none_when_not_acquired():
+    """Lock helper should return None when lock is already held."""
+    from appointment.tasks.locks import acquire_task_lock
+
+    mock_redis = Mock()
+    mock_redis.set.return_value = False
+
+    lock_token = acquire_task_lock(mock_redis, 'refresh_zoom_tokens')
+
+    assert lock_token is None
+
+
+def test_release_task_lock_uses_task_scoped_key():
+    """Lock helper should release using task-scoped key and token check."""
+    from appointment.tasks.locks import release_task_lock
+
+    mock_redis = Mock()
+    release_task_lock(mock_redis, 'refresh_zoom_tokens', 'abc-123')
+
+    mock_redis.eval.assert_called_once()
+    _, key_count, lock_key, lock_token = mock_redis.eval.call_args.args
+    assert key_count == 1
+    assert lock_key == 'lock:task:refresh_zoom_tokens'
+    assert lock_token == 'abc-123'
+
+
+def test_refresh_zoom_tokens_task_skips_when_lock_is_held():
+    """Celery task should skip execution when lock cannot be acquired."""
+    from appointment.tasks.zoom import refresh_zoom_tokens as refresh_zoom_tokens_task
+
+    mock_redis = Mock()
+
+    with patch('appointment.tasks.zoom.get_redis', return_value=mock_redis):
+        with patch('appointment.tasks.zoom.acquire_task_lock', return_value=None):
+            with patch('appointment.tasks.zoom.release_task_lock') as mock_release_lock:
+                with patch('appointment.commands.refresh_zoom_tokens.run') as mock_run:
+                    refresh_zoom_tokens_task()
+
+    mock_run.assert_not_called()
+    mock_release_lock.assert_not_called()
+
+
+def test_refresh_zoom_tokens_task_releases_lock_after_run():
+    """Celery task should release lock after successful execution."""
+    from appointment.tasks.zoom import refresh_zoom_tokens as refresh_zoom_tokens_task
+
+    mock_redis = Mock()
+
+    with patch('appointment.tasks.zoom.get_redis', return_value=mock_redis):
+        with patch('appointment.tasks.zoom.acquire_task_lock', return_value='lock-123') as mock_acquire_lock:
+            with patch('appointment.tasks.zoom.release_task_lock') as mock_release_lock:
+                with patch('appointment.commands.refresh_zoom_tokens.run') as mock_run:
+                    refresh_zoom_tokens_task()
+
+    mock_acquire_lock.assert_called_once()
+    mock_run.assert_called_once()
+    mock_release_lock.assert_called_once_with(mock_redis, 'refresh_zoom_tokens', 'lock-123')
+
+
+def test_refresh_zoom_tokens_task_uses_function_name_for_lock():
+    """Task should use its own function name as lock key scope."""
+    from appointment.tasks.zoom import refresh_zoom_tokens as refresh_zoom_tokens_task
+
+    mock_redis = Mock()
+    with patch('appointment.tasks.zoom.get_redis', return_value=mock_redis):
+        with patch('appointment.tasks.zoom.acquire_task_lock', return_value=None) as mock_acquire_lock:
+            refresh_zoom_tokens_task()
+
+    assert mock_acquire_lock.call_args.args[1] == 'refresh_zoom_tokens'
 
 
 def _make_google_token():
@@ -389,3 +488,239 @@ class TestRenewGoogleChannels:
             assert updated.channel_id == 'new-channel-id'
             assert updated.state is not None
             assert updated.state != 'old-state'
+
+class TestRefreshZoomTokens:
+    """Tests that the refresh command correctly renews Zoom OAuth tokens."""
+
+    MODULE = 'appointment.commands.refresh_zoom_tokens'
+
+    @staticmethod
+    def _make_zoom_token(**overrides):
+        token = {
+            'access_token': 'old-access-token',
+            'refresh_token': 'old-refresh-token',
+            'token_type': 'bearer',
+            'expires_in': 3600,
+            'scope': 'meeting:read meeting:write user:read',
+        }
+        token.update(overrides)
+        return json.dumps(token)
+
+    def _run_refresh(self, with_db, mock_zoom_client):
+        with patch(f'{self.MODULE}._common_setup'):
+            with patch(f'{self.MODULE}.get_zoom_client', return_value=mock_zoom_client):
+                with patch(f'{self.MODULE}.get_engine_and_session', return_value=(None, with_db)):
+                    from appointment.commands.refresh_zoom_tokens import run
+
+                    run()
+
+    def test_token_is_refreshed(self, with_db, make_external_connections):
+        """Running the command should trigger a token refresh and persist the new token in the DB."""
+        old_token = self._make_zoom_token()
+        make_external_connections(
+            subscriber_id=1,
+            type=models.ExternalConnectionType.zoom,
+            token=old_token,
+        )
+
+        refreshed_token = {
+            'access_token': 'new-access-token',
+            'refresh_token': 'new-refresh-token',
+            'token_type': 'bearer',
+            'expires_in': 3600,
+            'expires_at': time.time() + 3600,
+            'scope': 'meeting:read meeting:write user:read',
+        }
+
+        mock_zoom_client = Mock()
+
+        def fake_setup(subscriber_id, token, threshold=0.0):
+            mock_zoom_client.client = Mock()
+            mock_zoom_client.client.token = refreshed_token
+
+        mock_zoom_client.setup.side_effect = fake_setup
+        mock_zoom_client.get_me.return_value = {'id': 'user123'}
+
+        self._run_refresh(with_db, mock_zoom_client)
+
+        mock_zoom_client.get_me.assert_called_once()
+        setup_subscriber_id, setup_token = mock_zoom_client.setup.call_args.args
+        assert setup_subscriber_id == 1
+        assert setup_token['expires_in'] == -100
+        assert setup_token['expires_at'] == 0
+
+        with with_db() as db:
+            connections = repo.external_connection.get_by_type(
+                db, 1, models.ExternalConnectionType.zoom
+            )
+            assert len(connections) == 1
+            stored_token = json.loads(connections[0].token)
+            assert stored_token['access_token'] == 'new-access-token'
+            assert stored_token['refresh_token'] == 'new-refresh-token'
+            assert 'expires_at' in stored_token
+
+    def test_skips_connection_without_token(self, with_db, make_external_connections):
+        """Connections with no token should be skipped."""
+        make_external_connections(
+            subscriber_id=1,
+            type=models.ExternalConnectionType.zoom,
+            token='',
+        )
+
+        mock_zoom_client = Mock()
+        self._run_refresh(with_db, mock_zoom_client)
+
+        mock_zoom_client.setup.assert_not_called()
+
+    def test_failed_refresh_does_not_stop_others(self, with_db, make_external_connections, make_pro_subscriber):
+        """If one token fails to refresh, the command should continue with the rest."""
+        make_external_connections(
+            subscriber_id=1,
+            type=models.ExternalConnectionType.zoom,
+            token=self._make_zoom_token(),
+        )
+
+        subscriber_2 = make_pro_subscriber()
+        make_external_connections(
+            subscriber_id=subscriber_2.id,
+            type=models.ExternalConnectionType.zoom,
+            token=self._make_zoom_token(),
+        )
+
+        call_count = 0
+
+        def fail_first_setup(subscriber_id, token, threshold=0.0):
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                raise Exception('Zoom API error')
+
+        mock_zoom_client = Mock()
+        mock_zoom_client.setup.side_effect = fail_first_setup
+
+        self._run_refresh(with_db, mock_zoom_client)
+
+        assert mock_zoom_client.setup.call_count == 2
+
+    def test_failed_refresh_marks_external_connection_error(self, with_db, make_external_connections):
+        """If token refresh fails, external connection status should be marked as error."""
+        make_external_connections(
+            subscriber_id=1,
+            type=models.ExternalConnectionType.zoom,
+            token=self._make_zoom_token(),
+        )
+
+        mock_zoom_client = Mock()
+        mock_zoom_client.setup.side_effect = Exception('Zoom API error')
+
+        self._run_refresh(with_db, mock_zoom_client)
+
+        with with_db() as db:
+            connection = repo.external_connection.get_by_type(db, 1, models.ExternalConnectionType.zoom)[0]
+            assert connection.status == models.ExternalConnectionStatus.error
+            assert connection.status_checked_at is not None
+
+    def test_successful_refresh_resets_external_connection_status(self, with_db, make_external_connections):
+        """A successful refresh should mark previously-failed connections back to ok."""
+        make_external_connections(
+            subscriber_id=1,
+            type=models.ExternalConnectionType.zoom,
+            token=self._make_zoom_token(),
+        )
+
+        with with_db() as db:
+            connection = repo.external_connection.get_by_type(db, 1, models.ExternalConnectionType.zoom)[0]
+            repo.external_connection.update_status(
+                db,
+                connection,
+                models.ExternalConnectionStatus.error,
+            )
+
+        refreshed_token = {
+            'access_token': 'new-access-token',
+            'refresh_token': 'new-refresh-token',
+            'token_type': 'bearer',
+            'expires_in': 3600,
+            'expires_at': time.time() + 3600,
+            'scope': 'meeting:read meeting:write user:read',
+        }
+
+        mock_zoom_client = Mock()
+
+        def fake_setup(subscriber_id, token, threshold=0.0):
+            mock_zoom_client.client = Mock()
+            mock_zoom_client.client.token = refreshed_token
+
+        mock_zoom_client.setup.side_effect = fake_setup
+        mock_zoom_client.get_me.return_value = {'id': 'user123'}
+
+        self._run_refresh(with_db, mock_zoom_client)
+
+        with with_db() as db:
+            connection = repo.external_connection.get_by_type(db, 1, models.ExternalConnectionType.zoom)[0]
+            assert connection.status == models.ExternalConnectionStatus.ok
+            assert connection.status_checked_at is not None
+
+    def test_orphaned_zoom_connection_is_cleaned_up(self, with_db, make_external_connections):
+        """If an external connection has no subscriber, it should be deleted as orphaned."""
+        make_external_connections(
+            subscriber_id=99999,
+            type=models.ExternalConnectionType.zoom,
+            token=self._make_zoom_token(),
+        )
+
+        mock_zoom_client = Mock()
+        self._run_refresh(with_db, mock_zoom_client)
+
+        mock_zoom_client.setup.assert_not_called()
+
+        with with_db() as db:
+            assert repo.external_connection.get_zoom(db) == []
+
+    def test_invalid_token_payload_does_not_stop_others(
+        self, with_db, make_external_connections, make_pro_subscriber
+    ):
+        """If one stored token is invalid JSON, the command should still refresh other users."""
+        make_external_connections(
+            subscriber_id=1,
+            type=models.ExternalConnectionType.zoom,
+            token='not-json',
+        )
+
+        subscriber_2 = make_pro_subscriber()
+        make_external_connections(
+            subscriber_id=subscriber_2.id,
+            type=models.ExternalConnectionType.zoom,
+            token=self._make_zoom_token(),
+        )
+
+        refreshed_token = {
+            'access_token': 'new-access-token',
+            'refresh_token': 'new-refresh-token',
+            'token_type': 'bearer',
+            'expires_in': 3600,
+            'expires_at': time.time() + 3600,
+            'scope': 'meeting:read meeting:write user:read',
+        }
+
+        mock_zoom_client = Mock()
+
+        def fake_setup(subscriber_id, token, threshold=0.0):
+            assert subscriber_id == subscriber_2.id
+            mock_zoom_client.client = Mock()
+            mock_zoom_client.client.token = refreshed_token
+
+        mock_zoom_client.setup.side_effect = fake_setup
+        mock_zoom_client.get_me.return_value = {'id': 'user456'}
+
+        self._run_refresh(with_db, mock_zoom_client)
+
+        mock_zoom_client.setup.assert_called_once()
+        mock_zoom_client.get_me.assert_called_once()
+
+        with with_db() as db:
+            valid_connection = repo.external_connection.get_by_type(
+                db, subscriber_2.id, models.ExternalConnectionType.zoom
+            )[0]
+            assert json.loads(valid_connection.token)['refresh_token'] == 'new-refresh-token'
+
