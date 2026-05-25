@@ -25,17 +25,17 @@ def acquire_task_lock(redis_instance, task_name: str, ttl_seconds: int = DEFAULT
 
 
 def release_task_lock(redis_instance, task_name: str, lock_token: str):
+    """Only delete the lock if still owned by this task instance."""
     lock_key = _task_lock_key(task_name)
 
-    # Only delete lock if still owned by this task instance.
-    release_script = """
-if redis.call("get", KEYS[1]) == ARGV[1] then
-    return redis.call("del", KEYS[1])
-else
-    return 0
-end
-"""
-    redis_instance.eval(release_script, 1, lock_key, lock_token)
+    with redis_instance.pipeline() as pipe:
+        pipe.watch(lock_key)
+        if pipe.get(lock_key) == lock_token:
+            pipe.multi()
+            pipe.delete(lock_key)
+            pipe.execute()
+        else:
+            pipe.unwatch()
 
 
 @contextmanager

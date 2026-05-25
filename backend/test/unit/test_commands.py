@@ -76,17 +76,40 @@ def test_acquire_task_lock_returns_none_when_not_acquired():
     assert lock_token is None
 
 
-def test_release_task_lock_uses_task_scoped_key():
-    """Lock helper should release using task-scoped key and token check."""
+def test_release_task_lock_deletes_when_token_matches():
+    """Lock helper should delete the key when the stored token matches."""
+    mock_pipe = Mock()
+    mock_pipe.get.return_value = 'abc-123'
+    mock_pipe.__enter__ = Mock(return_value=mock_pipe)
+    mock_pipe.__exit__ = Mock(return_value=False)
 
     mock_redis = Mock()
+    mock_redis.pipeline.return_value = mock_pipe
+
     release_task_lock(mock_redis, 'refresh_zoom_tokens', 'abc-123')
 
-    mock_redis.eval.assert_called_once()
-    _, key_count, lock_key, lock_token = mock_redis.eval.call_args.args
-    assert key_count == 1
-    assert lock_key == 'lock:task:refresh_zoom_tokens'
-    assert lock_token == 'abc-123'
+    mock_pipe.watch.assert_called_once_with('lock:task:refresh_zoom_tokens')
+    mock_pipe.multi.assert_called_once()
+    mock_pipe.delete.assert_called_once_with('lock:task:refresh_zoom_tokens')
+    mock_pipe.execute.assert_called_once()
+
+
+def test_release_task_lock_skips_when_token_differs():
+    """Lock helper should not delete the key when a different token owns it."""
+    mock_pipe = Mock()
+    mock_pipe.get.return_value = 'other-token'
+    mock_pipe.__enter__ = Mock(return_value=mock_pipe)
+    mock_pipe.__exit__ = Mock(return_value=False)
+
+    mock_redis = Mock()
+    mock_redis.pipeline.return_value = mock_pipe
+
+    release_task_lock(mock_redis, 'refresh_zoom_tokens', 'abc-123')
+
+    mock_pipe.watch.assert_called_once_with('lock:task:refresh_zoom_tokens')
+    mock_pipe.multi.assert_not_called()
+    mock_pipe.delete.assert_not_called()
+    mock_pipe.unwatch.assert_called_once()
 
 
 def test_task_lock_context_manager_acquires_and_releases():
@@ -97,12 +120,11 @@ def test_task_lock_context_manager_acquires_and_releases():
 
     with patch('appointment.tasks.locks.get_redis', return_value=mock_redis):
         with patch('appointment.tasks.locks.uuid.uuid4', return_value='ctx-token'):
-            with task_lock('my_task'):
-                mock_redis.set.assert_called_once()
+            with patch('appointment.tasks.locks.release_task_lock') as mock_release:
+                with task_lock('my_task'):
+                    mock_redis.set.assert_called_once()
 
-    mock_redis.eval.assert_called_once()
-    _, _, _, lock_token = mock_redis.eval.call_args.args
-    assert lock_token == 'ctx-token'
+    mock_release.assert_called_once_with(mock_redis, 'my_task', 'ctx-token')
 
 
 def test_task_lock_context_manager_raises_when_lock_held():
@@ -125,13 +147,12 @@ def test_task_lock_context_manager_releases_on_exception():
 
     with patch('appointment.tasks.locks.get_redis', return_value=mock_redis):
         with patch('appointment.tasks.locks.uuid.uuid4', return_value='err-token'):
-            with pytest.raises(RuntimeError):
-                with task_lock('my_task'):
-                    raise RuntimeError('boom')
+            with patch('appointment.tasks.locks.release_task_lock') as mock_release:
+                with pytest.raises(RuntimeError):
+                    with task_lock('my_task'):
+                        raise RuntimeError('boom')
 
-    mock_redis.eval.assert_called_once()
-    _, _, _, lock_token = mock_redis.eval.call_args.args
-    assert lock_token == 'err-token'
+    mock_release.assert_called_once_with(mock_redis, 'my_task', 'err-token')
 
 
 def test_task_lock_context_manager_proceeds_without_redis():
