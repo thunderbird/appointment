@@ -1,7 +1,14 @@
+import logging
+import os
 import uuid
-
+from contextlib import contextmanager
+from appointment.dependencies.database import get_redis
 
 DEFAULT_LOCK_TTL_SECONDS = 60 * 60
+
+
+class TaskLockFailed(Exception):
+    """Raised when a task lock cannot be acquired."""
 
 
 def _task_lock_key(task_name: str) -> str:
@@ -29,3 +36,33 @@ else
 end
 """
     redis_instance.eval(release_script, 1, lock_key, lock_token)
+
+
+@contextmanager
+def task_lock(task_name: str, ttl_seconds: int = DEFAULT_LOCK_TTL_SECONDS):
+    """Context manager that acquires and releases a distributed task lock.
+
+    Raises TaskLockFailed if Redis is available but the lock is already held.
+    When Redis is unavailable, execution proceeds without a lock.
+    """
+    import sentry_sdk
+
+    redis_instance = get_redis(os.getenv('REDIS_CELERY_DB'))
+    lock_token = None
+
+    if redis_instance is not None:
+        lock_token = acquire_task_lock(redis_instance, task_name, ttl_seconds)
+        if lock_token is None:
+            raise TaskLockFailed(f'Failed to acquire lock for {task_name}')
+    else:
+        logging.warning(f'Redis unavailable; running {task_name} without distributed lock.')
+
+    try:
+        yield
+    finally:
+        if lock_token is not None:
+            try:
+                release_task_lock(redis_instance, task_name, lock_token)
+            except Exception as e:
+                logging.error(f'Failed to release {task_name} lock: {e}')
+                sentry_sdk.capture_exception(e)
