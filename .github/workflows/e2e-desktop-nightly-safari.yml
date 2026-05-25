@@ -39,7 +39,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ./test/e2e
-          npm install
+          npm ci
 
       - name: BrowserStack Env Setup
         uses: browserstack/github-actions/setup-env@master

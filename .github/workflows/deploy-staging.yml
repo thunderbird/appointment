@@ -33,7 +33,7 @@ jobs:
           node-version: '20.x'
 
       - name: Install dependencies
-        run: cd frontend && npm install
+        run: cd frontend && npm ci
 
       - name: Build stage frontend
         run: |
@@ -171,7 +171,7 @@ jobs:
           node-version: '20.x'
 
       - name: Install dependencies
-        run: cd frontend && npm install
+        run: cd frontend && npm ci
 
       - name: Build prod frontend
         run: |
@@ -242,7 +242,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ./test/e2e
-          npm install
+          npm ci
 
       - name: BrowserStack Env Setup
         uses: browserstack/github-actions/setup-env@master

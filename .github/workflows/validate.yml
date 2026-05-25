@@ -106,7 +106,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ./frontend
-          npm install
+          npm ci
 
       - name: Frontend lint check
         run: |
