@@ -3,11 +3,14 @@ import os
 import time
 import pytest
 
+from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock, patch
 
 from appointment.database import models, repo
 from appointment.routes.commands import cron_lock, refresh_tokens
+from appointment.tasks.locks import acquire_task_lock, release_task_lock, task_lock, TaskLockFailed
+from appointment.tasks.zoom import refresh_zoom_tokens as refresh_zoom_tokens_task
 
 
 def test_cron_lock():
@@ -46,7 +49,6 @@ def test_refresh_zoom_tokens_command_queues_celery_task():
 
 def test_acquire_task_lock_returns_token_when_acquired():
     """Lock helper should return a lock token when Redis acquires lock."""
-    from appointment.tasks.locks import acquire_task_lock
 
     mock_redis = Mock()
     mock_redis.set.return_value = True
@@ -65,7 +67,6 @@ def test_acquire_task_lock_returns_token_when_acquired():
 
 def test_acquire_task_lock_returns_none_when_not_acquired():
     """Lock helper should return None when lock is already held."""
-    from appointment.tasks.locks import acquire_task_lock
 
     mock_redis = Mock()
     mock_redis.set.return_value = False
@@ -77,7 +78,6 @@ def test_acquire_task_lock_returns_none_when_not_acquired():
 
 def test_release_task_lock_uses_task_scoped_key():
     """Lock helper should release using task-scoped key and token check."""
-    from appointment.tasks.locks import release_task_lock
 
     mock_redis = Mock()
     release_task_lock(mock_redis, 'refresh_zoom_tokens', 'abc-123')
@@ -89,49 +89,110 @@ def test_release_task_lock_uses_task_scoped_key():
     assert lock_token == 'abc-123'
 
 
+def test_task_lock_context_manager_acquires_and_releases():
+    """Context manager should acquire lock on entry and release on exit."""
+
+    mock_redis = Mock()
+    mock_redis.set.return_value = True
+
+    with patch('appointment.tasks.locks.get_redis', return_value=mock_redis):
+        with patch('appointment.tasks.locks.uuid.uuid4', return_value='ctx-token'):
+            with task_lock('my_task'):
+                mock_redis.set.assert_called_once()
+
+    mock_redis.eval.assert_called_once()
+    _, _, _, lock_token = mock_redis.eval.call_args.args
+    assert lock_token == 'ctx-token'
+
+
+def test_task_lock_context_manager_raises_when_lock_held():
+    """Context manager should raise TaskLockFailed when lock is already held."""
+
+    mock_redis = Mock()
+    mock_redis.set.return_value = False
+
+    with patch('appointment.tasks.locks.get_redis', return_value=mock_redis):
+        with pytest.raises(TaskLockFailed):
+            with task_lock('my_task'):
+                pass
+
+
+def test_task_lock_context_manager_releases_on_exception():
+    """Context manager should still release the lock when the body raises."""
+
+    mock_redis = Mock()
+    mock_redis.set.return_value = True
+
+    with patch('appointment.tasks.locks.get_redis', return_value=mock_redis):
+        with patch('appointment.tasks.locks.uuid.uuid4', return_value='err-token'):
+            with pytest.raises(RuntimeError):
+                with task_lock('my_task'):
+                    raise RuntimeError('boom')
+
+    mock_redis.eval.assert_called_once()
+    _, _, _, lock_token = mock_redis.eval.call_args.args
+    assert lock_token == 'err-token'
+
+
+def test_task_lock_context_manager_proceeds_without_redis():
+    """Context manager should proceed without locking when Redis is unavailable."""
+
+    ran = False
+    with patch('appointment.tasks.locks.get_redis', return_value=None):
+        with task_lock('my_task'):
+            ran = True
+
+    assert ran
+
+
 def test_refresh_zoom_tokens_task_skips_when_lock_is_held():
     """Celery task should skip execution when lock cannot be acquired."""
-    from appointment.tasks.zoom import refresh_zoom_tokens as refresh_zoom_tokens_task
 
-    mock_redis = Mock()
+    @contextmanager
+    def _failing_lock(task_name, ttl_seconds=None):
+        raise TaskLockFailed('already locked')
 
-    with patch('appointment.tasks.zoom.get_redis', return_value=mock_redis):
-        with patch('appointment.tasks.zoom.acquire_task_lock', return_value=None):
-            with patch('appointment.tasks.zoom.release_task_lock') as mock_release_lock:
-                with patch('appointment.commands.refresh_zoom_tokens.run') as mock_run:
-                    refresh_zoom_tokens_task()
+    with patch('appointment.tasks.zoom.task_lock', side_effect=_failing_lock):
+        with patch('appointment.commands.refresh_zoom_tokens.run') as mock_run:
+            refresh_zoom_tokens_task()
 
     mock_run.assert_not_called()
-    mock_release_lock.assert_not_called()
 
 
-def test_refresh_zoom_tokens_task_releases_lock_after_run():
-    """Celery task should release lock after successful execution."""
-    from appointment.tasks.zoom import refresh_zoom_tokens as refresh_zoom_tokens_task
+def test_refresh_zoom_tokens_task_acquires_lock_for_run():
+    """Celery task should run inside the task_lock context manager."""
 
-    mock_redis = Mock()
+    lock_entered = False
 
-    with patch('appointment.tasks.zoom.get_redis', return_value=mock_redis):
-        with patch('appointment.tasks.zoom.acquire_task_lock', return_value='lock-123') as mock_acquire_lock:
-            with patch('appointment.tasks.zoom.release_task_lock') as mock_release_lock:
-                with patch('appointment.commands.refresh_zoom_tokens.run') as mock_run:
-                    refresh_zoom_tokens_task()
+    @contextmanager
+    def _tracking_lock(task_name, ttl_seconds=None):
+        nonlocal lock_entered
+        lock_entered = True
+        yield
 
-    mock_acquire_lock.assert_called_once()
+    with patch('appointment.tasks.zoom.task_lock', side_effect=_tracking_lock):
+        with patch('appointment.commands.refresh_zoom_tokens.run') as mock_run:
+            refresh_zoom_tokens_task()
+
+    assert lock_entered
     mock_run.assert_called_once()
-    mock_release_lock.assert_called_once_with(mock_redis, 'refresh_zoom_tokens', 'lock-123')
 
 
 def test_refresh_zoom_tokens_task_uses_function_name_for_lock():
     """Task should use its own function name as lock key scope."""
-    from appointment.tasks.zoom import refresh_zoom_tokens as refresh_zoom_tokens_task
 
-    mock_redis = Mock()
-    with patch('appointment.tasks.zoom.get_redis', return_value=mock_redis):
-        with patch('appointment.tasks.zoom.acquire_task_lock', return_value=None) as mock_acquire_lock:
-            refresh_zoom_tokens_task()
+    captured_name = None
 
-    assert mock_acquire_lock.call_args.args[1] == 'refresh_zoom_tokens'
+    @contextmanager
+    def _capture_lock(task_name, ttl_seconds=None):
+        nonlocal captured_name
+        captured_name = task_name
+        raise TaskLockFailed('test')
+
+    with patch('appointment.tasks.zoom.task_lock', side_effect=_capture_lock):
+        refresh_zoom_tokens_task()
+
+    assert captured_name == 'refresh_zoom_tokens'
 
 
 def _make_google_token():
