@@ -59,10 +59,14 @@ def task_lock(task_name: str, ttl_seconds: int = DEFAULT_LOCK_TTL_SECONDS):
 
     try:
         yield
+    except Exception as e:
+        logging.warning(f'{task_name} failed: {e}')
+        sentry_sdk.capture_exception(e)
+        raise
     finally:
         if lock_token is not None:
             try:
                 release_task_lock(redis_instance, task_name, lock_token)
             except Exception as e:
-                logging.error(f'Failed to release {task_name} lock: {e}')
+                logging.warning(f'Failed to release {task_name} lock: {e}')
                 sentry_sdk.capture_exception(e)
