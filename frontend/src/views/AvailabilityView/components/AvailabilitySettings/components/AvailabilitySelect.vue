@@ -64,20 +64,6 @@ const defaultAvailabilitySet = () => Object.fromEntries(isoWeekdays.map((d) => {
   return [d.iso, existing.length ? existing.sort(compareAvailabilityStart) : [defaultAvailability(d.iso)]];
 })) as AvailabilitySet;
 
-// Prefill existing availabilities from schedule
-onMounted(() => {
-  availabilitySet.value = defaultAvailabilitySet();
-});
-
-// Track schedule reset
-watch(
-  () => props.availabilities,
-  () => {
-    availabilitySet.value = defaultAvailabilitySet();
-    validationErrors.value = Object.fromEntries(isoWeekdays.map((d) => [d.iso, []]));
-  },
-);
-
 /**
  * Returns true, if validation was successful.
  */
@@ -217,7 +203,26 @@ const removeAvailability = (option: SelectOption, index: number) => {
   }
 };
 
+// Prefill existing availabilities from schedule when mounted
+onMounted(() => {
+  availabilitySet.value = defaultAvailabilitySet();
+  
+  // If we don't have any availabilities yet, e.g when the user activates
+  // custom availabilities for the first time, update the store with the
+  // default values.
+  if (props.availabilities.length === 0) {
+    update();
+  }
+});
 
+// Track schedule reset
+watch(
+  () => props.availabilities,
+  () => {
+    availabilitySet.value = defaultAvailabilitySet();
+    validationErrors.value = Object.fromEntries(isoWeekdays.map((d) => [d.iso, []]));
+  },
+);
 </script>
 
 <template>
