@@ -5,6 +5,7 @@ import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
 import { createFetch } from '@vueuse/core';
 import { BookingStatus } from '@/definitions';
+import { useUserStore } from '@/stores/user-store';
 import withSetup from '../utils/with-setup';
 
 const API_URL = 'http://localhost';
@@ -112,9 +113,11 @@ describe('Appointment Store', () => {
   });
 
   test('timezone', async () => {
+    const user = useUserStore();
+    user.data.settings.timezone = 'America/Vancouver';
     const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
     await apmt.fetch();
-    expect(apmt.appointments[0].slots[0].start.toISOString()).toBe('3000-01-01T02:00:00.000Z');
+    expect(apmt.appointments[0].slots[0].start.toISOString()).toBe('3000-01-01T01:00:00.000Z');
   });
 
   test('reset', async () => {
