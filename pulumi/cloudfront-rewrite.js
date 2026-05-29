@@ -21,13 +21,19 @@
       'stage.apt.mt': 'appointment-stage.tb.pro'
     }
 
-    // If we got a short URL, rewrite to the long domain with '/user' prepended
+    // Short URLs omit /user/; prepend it when redirecting booking paths to the long domain.
+    // Root requests (apt.mt/) should land on the main site home, not /user/.
     if (Object.keys(domainRewrites).includes(host)) {
+      const longHost = domainRewrites[host];
+      const location = request.uri === '/' || request.uri === ''
+        ? `https://${longHost}/`
+        : `https://${longHost}/user${request.uri}`;
+
       return {
         statusCode: 302,
         statusDescription: 'Found',
         headers: {
-          location: {value: `https://${domainRewrites[host]}/user${request.uri}`}
+          location: {value: location}
         }
       }
     }
