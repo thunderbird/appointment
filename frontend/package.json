@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "test": "vitest"
+    "test": "vitest",
+    "format": "npx prettier . --write"
   },
   "dependencies": {
     "@phosphor-icons/vue": "2.2.1",
@@ -53,6 +54,8 @@
     "postcss-custom-media": "12.0.0",
     "postcss-mixins": "12.1.2",
     "postcss-nesting": "14.0.0",
+    "prettier": "^3.8.3",
+    "prettier-plugin-sort-json": "^4.2.0",
     "typescript": "5.5.3",
     "vite-plugin-eslint": "1.8.1",
     "vitest": "4.0.18"
