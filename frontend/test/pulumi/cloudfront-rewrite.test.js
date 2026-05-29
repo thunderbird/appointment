@@ -52,34 +52,43 @@ describe('cloudfront-rewrite handler — short-domain redirects', () => {
 
   describe('query string preservation', () => {
     it('keeps a single query param', async () => {
-      expect(await locationOf(makeEvent('apt.mt', '/john', { month: { value: '2026-06' } })))
-        .toBe('https://appointment.tb.pro/user/john?month=2026-06');
+      expect(await locationOf(makeEvent('apt.mt', '/john', { month: { value: '2026-06' } }))).toBe(
+        'https://appointment.tb.pro/user/john?month=2026-06'
+      );
     });
 
     it('keeps multiple query params in order', async () => {
-      expect(await locationOf(makeEvent('apt.mt', '/john', { a: { value: '1' }, b: { value: '2' } })))
-        .toBe('https://appointment.tb.pro/user/john?a=1&b=2');
+      expect(await locationOf(makeEvent('apt.mt', '/john', { a: { value: '1' }, b: { value: '2' } }))).toBe(
+        'https://appointment.tb.pro/user/john?a=1&b=2'
+      );
     });
 
     it('keeps a valueless param as key= (AWS NoValue shape)', async () => {
-      expect(await locationOf(makeEvent('apt.mt', '/john', { NoValue: { value: '' } })))
-        .toBe('https://appointment.tb.pro/user/john?NoValue=');
+      expect(await locationOf(makeEvent('apt.mt', '/john', { NoValue: { value: '' } }))).toBe(
+        'https://appointment.tb.pro/user/john?NoValue='
+      );
     });
 
     it('expands a multiValue param into repeated keys', async () => {
-      expect(await locationOf(makeEvent('apt.mt', '/john', {
-        tag: { value: 'x', multiValue: [{ value: 'x' }, { value: 'y' }] },
-      }))).toBe('https://appointment.tb.pro/user/john?tag=x&tag=y');
+      expect(
+        await locationOf(
+          makeEvent('apt.mt', '/john', {
+            tag: { value: 'x', multiValue: [{ value: 'x' }, { value: 'y' }] },
+          })
+        )
+      ).toBe('https://appointment.tb.pro/user/john?tag=x&tag=y');
     });
 
     it('preserves already-encoded values without double-encoding', async () => {
-      expect(await locationOf(makeEvent('apt.mt', '/john', { q: { value: 'a%20b' } })))
-        .toBe('https://appointment.tb.pro/user/john?q=a%20b');
+      expect(await locationOf(makeEvent('apt.mt', '/john', { q: { value: 'a%20b' } }))).toBe(
+        'https://appointment.tb.pro/user/john?q=a%20b'
+      );
     });
 
     it('carries the query string through on the root redirect', async () => {
-      expect(await locationOf(makeEvent('apt.mt', '/', { ref: { value: 'newsletter' } })))
-        .toBe('https://appointment.tb.pro/?ref=newsletter');
+      expect(await locationOf(makeEvent('apt.mt', '/', { ref: { value: 'newsletter' } }))).toBe(
+        'https://appointment.tb.pro/?ref=newsletter'
+      );
     });
   });
 });
