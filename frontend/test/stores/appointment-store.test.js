@@ -20,7 +20,7 @@ const restHandlers = [
           title: 'title',
           duration: 180,
           location_type: 2,
-          slots: [{ start: '3000-01-01T09:00:00Z', duration: 60, booking_status: BookingStatus.None }],
+          slots: [{ start: '2024-02-01T09:00:00Z', duration: 60, booking_status: BookingStatus.None }],
         },
         {
           id: 2,
@@ -80,7 +80,6 @@ describe('Appointment Store', () => {
   beforeEach(() => {
     app = withSetup();
     app.use(createPinia());
-    vi.stubEnv('TZ', 'America/Vancouver');
   });
   // Start server before all tests
   beforeAll(() => server.listen());
@@ -118,7 +117,7 @@ describe('Appointment Store', () => {
     user.data.settings.timezone = 'America/Vancouver';
     const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
     await apmt.fetch();
-    expect(apmt.appointments[0].slots[0].start.toISOString()).toBe('3000-01-01T01:00:00.000Z');
+    expect(apmt.appointments[0].slots[0].start.toISOString()).toBe('2024-02-01T01:00:00.000Z');
   });
 
   test('reset', async () => {
