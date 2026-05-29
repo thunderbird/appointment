@@ -43,7 +43,8 @@ const { appointment } = storeToRefs(calendarStore);
   margin-block-end: 2rem;
   font-family: Inter, sans-serif;
 
-  p, strong {
+  p,
+  strong {
     line-height: 1.32;
     color: var(--colour-ti-base);
   }

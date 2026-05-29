@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue';
 import { timeFormat } from '@/utils';
-import { PhNote, PhClock, PhCalendarBlank, PhVideoCamera } from '@phosphor-icons/vue'
+import { PhNote, PhClock, PhCalendarBlank, PhVideoCamera } from '@phosphor-icons/vue';
 import { useI18n } from 'vue-i18n';
 import { Appointment } from '@/models';
 import { apiUrlKey, dayjsKey } from '@/keys';
@@ -21,7 +21,9 @@ const user = useUserStore();
 
 const meetingLinkURL = computed(() => props.appointment?.slots[0].meeting_link_url);
 const attendeesSlots = computed(() => props.appointment.slots.filter((s) => s.attendee));
-const downloadICSUrl = computed(() => `${apiUrl}/apmt/serve/ics/${props.appointment?.slug}/${props.appointment?.slots[0].id}`)
+const downloadICSUrl = computed(
+  () => `${apiUrl}/apmt/serve/ics/${props.appointment?.slug}/${props.appointment?.slots[0].id}`
+);
 </script>
 
 <template>
@@ -33,8 +35,10 @@ const downloadICSUrl = computed(() => `${apiUrl}/apmt/serve/ics/${props.appointm
           <div class="time-details">
             <p class="date">{{ dj(s.start).format('LL') }}</p>
             <div class="time-range">
-              {{ dj(s.start).format(timeFormat()) }} - {{ dj(s.start).add(s.duration, 'minutes').format(timeFormat()) }}
-              ({{ dj.duration(s.duration, 'minutes').humanize() }})
+              {{ dj(s.start).format(timeFormat()) }} -
+              {{ dj(s.start).add(s.duration, 'minutes').format(timeFormat()) }} ({{
+                dj.duration(s.duration, 'minutes').humanize()
+              }})
             </div>
           </div>
           <a class="download-ics-button" :href="downloadICSUrl" download="invite.ics">
@@ -263,7 +267,7 @@ const downloadICSUrl = computed(() => `${apiUrl}/apmt/serve/ics/${props.appointm
   & :first-child {
     flex-shrink: 0;
     color: var(--colour-ti-base);
-  }  
+  }
 }
 
 /* Notes section */

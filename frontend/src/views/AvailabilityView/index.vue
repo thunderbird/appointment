@@ -23,7 +23,7 @@ const call = inject(callKey);
 const userStore = useUserStore();
 const scheduleStore = createScheduleStore(call);
 const availabilityStore = createAvailabilityStore(call);
-const { currentState, isDirty } = storeToRefs(availabilityStore)
+const { currentState, isDirty } = storeToRefs(availabilityStore);
 
 const savingInProgress = ref(false);
 const validationError = ref<Alert>(null);
@@ -79,9 +79,7 @@ async function onSaveChanges() {
   }
 
   // create or update schedule data
-  const response = obj.id
-    ? await scheduleStore.updateSchedule(obj.id, obj)
-    : await scheduleStore.createSchedule(obj);
+  const response = obj.id ? await scheduleStore.updateSchedule(obj.id, obj) : await scheduleStore.createSchedule(obj);
 
   if (Object.prototype.hasOwnProperty.call(response, 'error')) {
     // error message is in data
@@ -106,8 +104,8 @@ async function onSaveChanges() {
 
   availabilityStore.$patch({
     initialState: { slug: userStore.mySlug },
-    currentState: { slug: userStore.mySlug }
-  })
+    currentState: { slug: userStore.mySlug },
+  });
 }
 
 function clearNotices() {
@@ -123,90 +121,60 @@ function onRevertChanges() {
 
 <script lang="ts">
 export default {
-  name: 'AvailabilityView'
-}
+  name: 'AvailabilityView',
+};
 </script>
 
 <template>
   <div class="availability-page-container">
-    <h1
-      class="page-title"
-      :class="{ 'isDirty': isDirty }"
-    >
+    <h1 class="page-title" :class="{ isDirty: isDirty }">
       {{ t('label.availability') }}
     </h1>
-  
-    <notice-bar
-      v-if="validationError"
-      :type="NoticeBarTypes.Critical"
-      class="notice-bar"
-    >
+
+    <notice-bar v-if="validationError" :type="NoticeBarTypes.Critical" class="notice-bar">
       {{ validationError.title }}
 
       <template #cta>
-        <icon-button
-          @click="clearNotices"
-          :title="t('label.close')"
-          class="btn-close"
-        >
+        <icon-button @click="clearNotices" :title="t('label.close')" class="btn-close">
           <ph-x />
         </icon-button>
       </template>
     </notice-bar>
 
-    <notice-bar
-      v-else-if="isDirty"
-      :type="NoticeBarTypes.Warning"
-      class="notice-bar"
-    >
+    <notice-bar v-else-if="isDirty" :type="NoticeBarTypes.Warning" class="notice-bar">
       {{ t('label.youHaveUnsavedChanges') }}
 
       <template #cta>
-        <link-button
-          @click="onRevertChanges"
-          :disabled="savingInProgress"
-        >
+        <link-button @click="onRevertChanges" :disabled="savingInProgress">
           {{ t('label.revertChanges') }}
         </link-button>
-        <primary-button
-          @click="onSaveChanges"
-          :disabled="savingInProgress"
-          size="small"
-        >
+        <primary-button @click="onSaveChanges" :disabled="savingInProgress" size="small">
           {{ t('label.saveChanges') }}
         </primary-button>
       </template>
     </notice-bar>
-  
-    <notice-bar
-      v-else-if="saveSuccess"
-      :type="NoticeBarTypes.Success"
-      class="notice-bar"
-    >
+
+    <notice-bar v-else-if="saveSuccess" :type="NoticeBarTypes.Success" class="notice-bar">
       {{ saveSuccess.title }}
 
       <template #cta>
-        <icon-button
-          @click="clearNotices"
-          :title="t('label.close')"
-          class="btn-close"
-        >
+        <icon-button @click="clearNotices" :title="t('label.close')" class="btn-close">
           <ph-x />
         </icon-button>
       </template>
     </notice-bar>
-  
+
     <form ref="availability-form" @submit.prevent>
       <div class="page-content">
         <section>
           <availability-settings />
         </section>
-    
+
         <div class="page-content-right">
           <section>
             <booking-page-details />
           </section>
-    
+
           <section>
             <booking-page-link />
           </section>
@@ -215,16 +183,10 @@ export default {
     </form>
 
     <div class="footer-save-panel" v-if="isDirty">
-      <link-button
-        @click="onRevertChanges"
-        :disabled="savingInProgress"
-      >
+      <link-button @click="onRevertChanges" :disabled="savingInProgress">
         {{ t('label.revertChanges') }}
       </link-button>
-      <primary-button
-        @click="onSaveChanges"
-        :disabled="savingInProgress"
-      >
+      <primary-button @click="onSaveChanges" :disabled="savingInProgress">
         {{ t('label.saveChanges') }}
       </primary-button>
     </div>

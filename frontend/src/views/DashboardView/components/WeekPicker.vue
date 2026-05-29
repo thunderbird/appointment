@@ -11,11 +11,11 @@ const dj = inject(dayjsKey);
 const userStore = useUserStore();
 
 const props = defineProps<{
-  onDateChange: (dateObj: TimeFormatted) => void,
+  onDateChange: (dateObj: TimeFormatted) => void;
   activeDateRange: {
-    start: string,
-    end: string
-  }
+    start: string;
+    end: string;
+  };
 }>();
 
 const { t } = useI18n();
@@ -108,24 +108,14 @@ function onKeyDown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <div
-    class="week-picker-container"
-    role="group"
-    :aria-label="t('label.weekPicker')"
-    tabindex="0"
-    @keydown="onKeyDown"
-  >
-    <button
-      @click="onPreviousWeekButtonClicked"
-      :aria-label="previousWeekLabel"
-      :title="previousWeekLabel"
-    >
+  <div class="week-picker-container" role="group" :aria-label="t('label.weekPicker')" tabindex="0" @keydown="onKeyDown">
+    <button @click="onPreviousWeekButtonClicked" :aria-label="previousWeekLabel" :title="previousWeekLabel">
       <ph-caret-left size="24" />
       <span class="screen-reader-only">{{ t('label.previousWeek') }}</span>
     </button>
 
     <button
-      class="week-picker-button" 
+      class="week-picker-button"
       @click="onWeekPickerClicked"
       :aria-label="t('label.selectWeek') + ': ' + currentWeekLabel"
       :title="t('label.selectWeek')"
@@ -133,11 +123,7 @@ function onKeyDown(event: KeyboardEvent) {
       {{ weekPickerButtonText }}
     </button>
 
-    <button
-      @click="onNextWeekButtonClicked"
-      :aria-label="nextWeekLabel"
-      :title="nextWeekLabel"
-    >
+    <button @click="onNextWeekButtonClicked" :aria-label="nextWeekLabel" :title="nextWeekLabel">
       <ph-caret-right size="24" />
       <span class="screen-reader-only">{{ t('label.nextWeek') }}</span>
     </button>

@@ -3,7 +3,7 @@ import tsLint from 'typescript-eslint';
 import importPlugin from 'eslint-plugin-import';
 import vueLint from 'eslint-plugin-vue';
 import vueTsEslintConfig from '@vue/eslint-config-typescript';
-import globals from "globals";
+import globals from 'globals';
 
 export default [
   jsLint.configs.recommended,
@@ -12,17 +12,7 @@ export default [
   ...vueLint.configs['flat/essential'],
   ...vueTsEslintConfig(),
   {
-    files: [
-      '**/*.vue',
-      '**/*.js',
-      '**/*.jsx',
-      '**/*.cjs',
-      '**/*.mjs',
-      '**/*.ts',
-      '**/*.tsx',
-      '**/*.cts',
-      '**/*.mts',
-    ],
+    files: ['**/*.vue', '**/*.js', '**/*.jsx', '**/*.cjs', '**/*.mjs', '**/*.ts', '**/*.tsx', '**/*.cts', '**/*.mts'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -32,15 +22,19 @@ export default [
       },
     },
     rules: {
-      'import/extensions': ['error', 'ignorePackages', {
-        '': 'never',
-        ts: 'never',
-        js: 'never',
-        vue: 'off',
-      }],
+      'import/extensions': [
+        'error',
+        'ignorePackages',
+        {
+          '': 'never',
+          ts: 'never',
+          js: 'never',
+          vue: 'off',
+        },
+      ],
       'no-param-reassign': 'off',
       'import/prefer-default-export': 'off',
-      'radix': 'off',
+      radix: 'off',
       'dot-notation': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       // Disable full warning, and customize the typescript one
@@ -63,12 +57,6 @@ export default [
     },
   },
   {
-    ignores: [
-      '**/.*',
-      'src/assets/*',
-      'src/elements/arts/*',
-      'src/locales/*',
-      'node_modules/*',
-    ],
-  }
+    ignores: ['**/.*', 'src/assets/*', 'src/elements/arts/*', 'src/locales/*', 'node_modules/*'],
+  },
 ];

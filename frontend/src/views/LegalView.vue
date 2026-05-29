@@ -21,7 +21,7 @@ watch(
     document.documentElement.scrollTop = 0;
     document.body.scrollTop = 0;
   },
-  { immediate: true },
+  { immediate: true }
 );
 </script>
 
@@ -42,7 +42,10 @@ watch(
 
 /* Needed for v-html */
 :deep {
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     color: var(--colour-ti-highlight);
   }
 

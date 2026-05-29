@@ -39,30 +39,30 @@ const emit = defineEmits(['update']);
 const model = defineModel<number[]>({ default: [] });
 
 // Model for availability data
-const defaultAvailability = (dayOfWeek: number) => (
-  { day_of_week: dayOfWeek, start_time: props.startTime, end_time: props.endTime } as Availability
-);
-const initialAvailabilitySet = Object.fromEntries(
-  isoWeekdays.map((d) => [d.iso, [defaultAvailability(d.iso)]]
-));
+const defaultAvailability = (dayOfWeek: number) =>
+  ({ day_of_week: dayOfWeek, start_time: props.startTime, end_time: props.endTime }) as Availability;
+const initialAvailabilitySet = Object.fromEntries(isoWeekdays.map((d) => [d.iso, [defaultAvailability(d.iso)]]));
 const availabilitySet = ref<AvailabilitySet>(initialAvailabilitySet);
-const validationErrors = ref<{[k: string]: string[]}>(Object.fromEntries(isoWeekdays.map((d) => [d.iso, []])));
-const validationErrorsExist = computed(
-  () => Object.values(validationErrors.value).some(e => e.filter(d => d == '').length)
+const validationErrors = ref<{ [k: string]: string[] }>(Object.fromEntries(isoWeekdays.map((d) => [d.iso, []])));
+const validationErrorsExist = computed(() =>
+  Object.values(validationErrors.value).some((e) => e.filter((d) => d == '').length)
 );
 
-const durationHumanized = computed(() => dj.duration(props.slotDuration, "minutes").humanize());
-const disabledWeekdays = computed(() => isoWeekdays.map(d => d.iso).filter(d => !model.value.includes(d)));
+const durationHumanized = computed(() => dj.duration(props.slotDuration, 'minutes').humanize());
+const disabledWeekdays = computed(() => isoWeekdays.map((d) => d.iso).filter((d) => !model.value.includes(d)));
 const validationAlert = { title: t('error.invalidTimeConfiguration', { value: durationHumanized.value }) } as Alert;
 
 /**
  * We create a set of availabilities, grouped by day of week. This ensures that we have every day of week available
  * and that existing availabilities are prefilled for the corresponding day.
  */
-const defaultAvailabilitySet = () => Object.fromEntries(isoWeekdays.map((d) => {
-  const existing = props.availabilities.filter((a) => a.day_of_week === d.iso);
-  return [d.iso, existing.length ? existing.sort(compareAvailabilityStart) : [defaultAvailability(d.iso)]];
-})) as AvailabilitySet;
+const defaultAvailabilitySet = () =>
+  Object.fromEntries(
+    isoWeekdays.map((d) => {
+      const existing = props.availabilities.filter((a) => a.day_of_week === d.iso);
+      return [d.iso, existing.length ? existing.sort(compareAvailabilityStart) : [defaultAvailability(d.iso)]];
+    })
+  ) as AvailabilitySet;
 
 /**
  * Returns true, if validation was successful.
@@ -76,11 +76,11 @@ const validateInput = () => {
       if (model.value.includes(a.day_of_week)) {
         if (
           // 1. Validate correct order of start and end and ensure the minimum duration
-          ((hhmmToMinutes(a.end_time) - hhmmToMinutes(a.start_time)) < props.slotDuration)
+          hhmmToMinutes(a.end_time) - hhmmToMinutes(a.start_time) < props.slotDuration ||
           // 2. Validate continuous availability times (start time after previous end time and end time before next
           // start time)
-          || (i > 0 && hhmmToMinutes(a.start_time) < hhmmToMinutes(s[i-1].end_time))
-          || (i < s.length-1 && hhmmToMinutes(a.end_time) > hhmmToMinutes(s[i+1].start_time))
+          (i > 0 && hhmmToMinutes(a.start_time) < hhmmToMinutes(s[i - 1].end_time)) ||
+          (i < s.length - 1 && hhmmToMinutes(a.end_time) > hhmmToMinutes(s[i + 1].start_time))
         ) {
           // We just use an empty string here to indicate an error on the input field without adding an error message
           // beneath it.
@@ -102,7 +102,9 @@ const validateInput = () => {
  */
 const update = () => {
   if (validateInput()) {
-    const list = Object.values(availabilitySet.value).flat().filter((a) => model.value.includes(a.day_of_week));
+    const list = Object.values(availabilitySet.value)
+      .flat()
+      .filter((a) => model.value.includes(a.day_of_week));
     emit('update', list);
   }
 };
@@ -128,10 +130,7 @@ const toggleBubble = (option: SelectOption) => {
     model.value = model.value.filter((value) => option.value !== value);
   } else {
     // We don't have the value, so mix it in
-    model.value = [
-      ...model.value,
-      option.value,
-    ];
+    model.value = [...model.value, option.value];
   }
 
   // Sort for niceness
@@ -147,13 +146,13 @@ const toggleBubble = (option: SelectOption) => {
  */
 const addAvailability = (option: SelectOption) => {
   // The start is the latest time that is currently set as availability
-  const start = Math.max(...availabilitySet.value[option.value].map(a => hhmmToMinutes(a.end_time)));
+  const start = Math.max(...availabilitySet.value[option.value].map((a) => hhmmToMinutes(a.end_time)));
   const end = start + props.slotDuration;
   const newEntry = {
     day_of_week: option.value,
     start_time: dj.duration(start, 'minutes').format('HH:mm'),
     end_time: dj.duration(end, 'minutes').format('HH:mm'),
-  } as Availability
+  } as Availability;
   // If the next computed availability flows into the next day, use the default setting (which most likely produces
   // a validation error, since it overlaps with existing entries)
   // TODO: Define UX flow for this
@@ -172,7 +171,7 @@ const copyAvailability = (option: SelectOption, template: CopyTemplate) => {
     if (c[1]) p.push(Number(c[0]));
     return p;
   }, [] as number[]);
-  
+
   targetWeekdays.forEach((d) => {
     const targetAvailabilities = [] as Availability[];
     sourceAvailabilities.forEach((sa) => {
@@ -181,7 +180,7 @@ const copyAvailability = (option: SelectOption, template: CopyTemplate) => {
       delete ta.id;
       targetAvailabilities.push(ta);
     });
-    
+
     availabilitySet.value[d] = targetAvailabilities;
   });
   update();
@@ -206,7 +205,7 @@ const removeAvailability = (option: SelectOption, index: number) => {
 // Prefill existing availabilities from schedule when mounted
 onMounted(() => {
   availabilitySet.value = defaultAvailabilitySet();
-  
+
   // If we don't have any availabilities yet, e.g when the user activates
   // custom availabilities for the first time, update the store with the
   // default values.
@@ -221,7 +220,7 @@ watch(
   () => {
     availabilitySet.value = defaultAvailabilitySet();
     validationErrors.value = Object.fromEntries(isoWeekdays.map((d) => [d.iso, []]));
-  },
+  }
 );
 </script>
 
@@ -234,10 +233,10 @@ watch(
           class="tbpro-bubble"
           type="button"
           :aria-pressed="isSelectedOption(option)"
-          :class="{ 'selected': isSelectedOption(option), disabled }"
+          :class="{ selected: isSelectedOption(option), disabled }"
           :title="option.label ?? String(option.value)"
           :data-testid="`availability-weekday-${option.value}-selection`"
-          @click="() => !disabled ? toggleBubble(option) : null"
+          @click="() => (!disabled ? toggleBubble(option) : null)"
         >
           {{ option.label }}
         </button>
@@ -270,14 +269,14 @@ watch(
                 @click="addAvailability(option)"
                 :title="t('label.addSlot')"
               >
-                <ph-plus aria-hidden="true"/>
+                <ph-plus aria-hidden="true" />
               </link-button>
             </span>
             <span>
               <availability-copy-dropdown
                 v-if="i === 0"
                 :disabled-weekdays="[option.value, ...disabledWeekdays]"
-                @copy="event => copyAvailability(option, event)"
+                @copy="(event) => copyAvailability(option, event)"
               />
             </span>
             <span>
@@ -287,7 +286,7 @@ watch(
                 @click="removeAvailability(option, i)"
                 :title="t('label.removeSlot')"
               >
-                <ph-trash aria-hidden="true"/>
+                <ph-trash aria-hidden="true" />
               </link-button>
             </span>
           </div>
@@ -310,7 +309,7 @@ watch(
 }
 
 .alert {
-  margin-bottom: .5rem;
+  margin-bottom: 0.5rem;
 }
 
 .bubble-list {
@@ -318,7 +317,7 @@ watch(
   display: grid;
   grid-template-columns: 2.75rem auto;
   row-gap: 1rem;
-  column-gap: .5rem;
+  column-gap: 0.5rem;
   align-items: center;
   color: var(--colour-ti-secondary);
 
@@ -375,7 +374,7 @@ watch(
 .bubble-content {
   display: flex;
   flex-direction: column;
-  gap: .5rem;
+  gap: 0.5rem;
 
   & > div {
     display: grid;
@@ -384,16 +383,16 @@ watch(
     gap: 1rem;
 
     :deep(label) .tbpro-input .tbpro-input-wrapper .tbpro-input-element {
-      padding-top: .5rem;
-      padding-bottom: .5rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
     }
-  
+
     .action-btn {
-      padding: .25rem .125rem;
+      padding: 0.25rem 0.125rem;
       width: 2rem;
       height: 2rem;
 
-      svg { 
+      svg {
         width: 1.5rem;
         height: 1.5rem;
       }

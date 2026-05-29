@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
 
   // Build watch options
   const watch = {
-    usePolling: env.VITE_SERVER_WATCH_POLLING === 'true'
+    usePolling: env.VITE_SERVER_WATCH_POLLING === 'true',
   } as WatchOptions;
   if (env.VITE_SERVER_WATCH_INTERVAL) {
     watch.interval = Number(env.VITE_SERVER_WATCH_INTERVAL);
@@ -47,5 +47,5 @@ export default defineConfig(({ mode }) => {
     build: {
       sourcemap: true,
     },
-  }
+  };
 });

@@ -18,23 +18,19 @@ const route = useRoute();
 const router = useRouter();
 
 const appointmentStore = useAppointmentStore();
-const { 
-  appointments,
-  selectedAppointment,
-  isLoading,
-} = storeToRefs(appointmentStore);
+const { appointments, selectedAppointment, isLoading } = storeToRefs(appointmentStore);
 
 /* Appointment Sliding Panel */
-const appointmentSlidingPanelRef = ref<InstanceType<typeof AppointmentSlidingPanel>>()
+const appointmentSlidingPanelRef = ref<InstanceType<typeof AppointmentSlidingPanel>>();
 
 const showAppointmentSlidingPanel = async (appointment) => {
   selectedAppointment.value = appointment;
-  appointmentSlidingPanelRef.value?.showPanel()
+  appointmentSlidingPanelRef.value?.showPanel();
 
   router.replace({
     name: 'bookings',
     params: { slug: appointment.slug },
-    query: route.query
+    query: route.query,
   });
 };
 
@@ -43,40 +39,47 @@ const handleCloseAppointmentSlidingPanel = () => {
 
   router.replace({
     path: '/bookings',
-    query: route.query
+    query: route.query,
   });
 };
 
 /* Filter Options */
-const filterOptions = [{
-  label: t('label.showAll'),
-  value: BookingsFilterOptions.All,
-}, {
-  label: t('label.unconfirmed'),
-  value: BookingsFilterOptions.Unconfirmed,
-}];
+const filterOptions = [
+  {
+    label: t('label.showAll'),
+    value: BookingsFilterOptions.All,
+  },
+  {
+    label: t('label.unconfirmed'),
+    value: BookingsFilterOptions.Unconfirmed,
+  },
+];
 
 const selectedFilter = ref<BookingsFilterOptions>(BookingsFilterOptions.All);
 
 /* Sort Option */
-const sortOptions = [{
-  label: t('label.dateRequested'),
-  value: BookingsSortOptions.DateRequested,
-}, {
-  label: t('label.meetingDate'),
-  value: BookingsSortOptions.MeetingDate,
-}];
+const sortOptions = [
+  {
+    label: t('label.dateRequested'),
+    value: BookingsSortOptions.DateRequested,
+  },
+  {
+    label: t('label.meetingDate'),
+    value: BookingsSortOptions.MeetingDate,
+  },
+];
 
 const selectedSort = ref<BookingsSortOptions>(BookingsSortOptions.DateRequested);
 
 const showNoUnconfirmedBookings = computed(() => {
-  return selectedFilter.value === BookingsFilterOptions.Unconfirmed
-    && appointments.value.filter((a) => isUnconfirmed(a)).length === 0;
+  return (
+    selectedFilter.value === BookingsFilterOptions.Unconfirmed &&
+    appointments.value.filter((a) => isUnconfirmed(a)).length === 0
+  );
 });
 
 const showNoBookings = computed(() => {
-  return selectedFilter.value !== BookingsFilterOptions.Unconfirmed
-    && appointments.value.length === 0;
+  return selectedFilter.value !== BookingsFilterOptions.Unconfirmed && appointments.value.length === 0;
 });
 
 onMounted(async () => {
@@ -93,33 +96,24 @@ onMounted(async () => {
 
 <script lang="ts">
 export default {
-  name: 'BookingsView'
-}
+  name: 'BookingsView',
+};
 </script>
 
 <template>
   <div class="bookings-page-container">
     <!-- page title area -->
     <h1>{{ t('label.appointments') }}</h1>
-  
+
     <div class="page-controls">
-      <segmented-control
-        name="unconfirmed-first"
-        :required="false"
-        :options="filterOptions"
-        v-model="selectedFilter"
-      />
+      <segmented-control name="unconfirmed-first" :required="false" :options="filterOptions" v-model="selectedFilter" />
 
       <div class="sort-by-container">
         <span>{{ t('label.sortBy') }}:</span>
-        <select-input
-          name="sort-select"
-          :options="sortOptions"
-          v-model="selectedSort"
-        />
+        <select-input name="sort-select" :options="sortOptions" v-model="selectedSort" />
       </div>
     </div>
-  
+
     <!-- page content -->
     <div class="page-content">
       <div class="appointments-container">

@@ -1,6 +1,4 @@
-import {
-  expect, test, beforeEach, describe, vi,
-} from 'vitest';
+import { expect, test, beforeEach, describe, vi } from 'vitest';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { createPinia, setActivePinia } from 'pinia';
 import { FtueStep } from '@/definitions';

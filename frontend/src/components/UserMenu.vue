@@ -55,47 +55,47 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-  .user-menu {
-    position: relative;
-    display: inline-block;
-    background: none;
-    border: none;
-    cursor: pointer;
+.user-menu {
+  position: relative;
+  display: inline-block;
+  background: none;
+  border: none;
+  cursor: pointer;
 
-    .avatar {
-      & :first-child {
-        color: var(--colour-ti-base-dark);
-      }
+  .avatar {
+    & :first-child {
+      color: var(--colour-ti-base-dark);
     }
+  }
 
-    .dropdown {
-      position: absolute;
-      right: 0;
-      margin-top: 0.5rem;
-      background: var(--colour-ti-base-light);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      border-radius: 0.5rem;
-      box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
-      padding: 0.5rem 0.25rem;
-      min-width: 150px;
+  .dropdown {
+    position: absolute;
+    right: 0;
+    margin-top: 0.5rem;
+    background: var(--colour-ti-base-light);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.5rem;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
+    padding: 0.5rem 0.25rem;
+    min-width: 150px;
 
-      a {
-        display: flex;
-        align-items: flex-end;
-        justify-content: space-between;
-        color: white;
-        text-decoration: none;
-        padding: 0.75rem 0.375rem;
-        font-family: metropolis;
-        font-size: 0.6875rem;
-        text-transform: uppercase;
-        font-weight: 500;
-        border-radius: 0.25rem;
+    a {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      color: white;
+      text-decoration: none;
+      padding: 0.75rem 0.375rem;
+      font-family: metropolis;
+      font-size: 0.6875rem;
+      text-transform: uppercase;
+      font-weight: 500;
+      border-radius: 0.25rem;
 
-        &:hover {
-          background: rgba(255, 255, 255, 0.06);
-        }
+      &:hover {
+        background: rgba(255, 255, 255, 0.06);
       }
     }
   }
+}
 </style>

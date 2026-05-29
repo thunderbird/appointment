@@ -19,28 +19,31 @@ const user = useUserStore();
 
 // component properties
 interface Props {
-  selectedEvent: Appointment & Slot,
-  attendee: Attendee,
-  requested: boolean, // True if we are requesting a booking, false if already confirmed
+  selectedEvent: Appointment & Slot;
+  attendee: Attendee;
+  requested: boolean; // True if we are requesting a booking, false if already confirmed
 }
 const props = defineProps<Props>();
 
-const heading = props.requested
-  ? t('info.bookingSuccessfullyRequested')
-  : t('info.bookingSuccessfullyConfirmed');
+const heading = props.requested ? t('info.bookingSuccessfullyRequested') : t('info.bookingSuccessfullyConfirmed');
 
 const description = props.requested
   ? t('text.hostHasBeenNotified')
-  : t('text.timeHasBeenConfirmed', {'email': props.attendee.email});
+  : t('text.timeHasBeenConfirmed', { email: props.attendee.email });
 
-const date = dj(props.selectedEvent.start).format('ddd') + ', '
-  + dj(props.selectedEvent.start).format('MMM D') + ' from '
-  + dj(props.selectedEvent.start).format(timeFormat()) + ' – '
-  + dj(props.selectedEvent.start).add(props.selectedEvent.duration, 'minutes').format(timeFormat())
-  + ' (' + dj.tz.guess() + ')';
+const date =
+  dj(props.selectedEvent.start).format('ddd') +
+  ', ' +
+  dj(props.selectedEvent.start).format('MMM D') +
+  ' from ' +
+  dj(props.selectedEvent.start).format(timeFormat()) +
+  ' – ' +
+  dj(props.selectedEvent.start).add(props.selectedEvent.duration, 'minutes').format(timeFormat()) +
+  ' (' +
+  dj.tz.guess() +
+  ')';
 
 const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${props.selectedEvent.id}`;
-
 </script>
 
 <template>
@@ -57,7 +60,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
       <div>
         {{ date }}
         <br />
-        {{ t('text.virtualMeetingWith', {name: attendee.name}) }}
+        {{ t('text.virtualMeetingWith', { name: attendee.name }) }}
       </div>
     </div>
     <div class="actions">
@@ -101,11 +104,11 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
     display: flex;
     align-items: center;
     gap: 0.5rem;
-  
+
     color: var(--colour-ti-highlight);
     font-size: 1.5rem;
     text-transform: capitalize;
-  
+
     svg {
       fill: var(--colour-ti-highlight);
     }
@@ -137,7 +140,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
     a {
       padding: 0;
       color: var(--colour-ti-highlight);
-      font-size: .75rem;
+      font-size: 0.75rem;
     }
 
     :deep(.base.link.filled) .icon,
@@ -168,7 +171,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
   color: var(--colour-neutral-lower-light);
   font-family: Inter, sans-serif;
   text-align: center;
-  
+
   .tagline {
     font-size: 2rem;
     font-weight: 300;
@@ -196,7 +199,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
       width: calc(100% - 2px);
       height: calc(100% - 2px);
       background-image: linear-gradient(353deg, #1373d9 -36%, #58c9ff);
-      border-radius: .5rem;
+      border-radius: 0.5rem;
     }
   }
 }

@@ -3,8 +3,12 @@ import { ref } from 'vue';
 import { vOnClickOutside } from '@vueuse/components';
 
 const open = ref(false);
-const toggle = () => { open.value = !open.value; };
-const close = () => { open.value = false; };
+const toggle = () => {
+  open.value = !open.value;
+};
+const close = () => {
+  open.value = false;
+};
 
 defineExpose({ close });
 </script>

@@ -1,0 +1,17 @@
+{
+  "overrides": [
+    {
+      "files": ["./src/locales/**"],
+      "options": {
+        "plugins": ["prettier-plugin-sort-json"],
+        "jsonRecursiveSort": true
+      }
+    }
+  ],
+  "plugins": ["prettier-plugin-sort-json"],
+  "printWidth": 120,
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5"
+}

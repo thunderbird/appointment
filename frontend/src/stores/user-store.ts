@@ -3,14 +3,21 @@ import { useLocalStorage } from '@vueuse/core';
 import { i18n } from '@/composables/i18n';
 import { computed, inject, ref } from 'vue';
 import {
-  Subscriber, User, Fetch, Error, BooleanResponse, SignatureResponse, SubscriberResponse, TokenResponse,
+  Subscriber,
+  User,
+  Fetch,
+  Error,
+  BooleanResponse,
+  SignatureResponse,
+  SubscriberResponse,
+  TokenResponse,
   UserConfig,
 } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { dayjsKey } from '@/keys';
 import { ColourSchemes } from '@/definitions';
-import { userManager } from "@/composables/oidcUserManager";
-import { isFxaAuth, isOidcAuth, isPasswordAuth } from "@/composables/authSchemes";
+import { userManager } from '@/composables/oidcUserManager';
+import { isFxaAuth, isOidcAuth, isPasswordAuth } from '@/composables/authSchemes';
 
 const initialUserConfigObject = {
   language: null,
@@ -67,7 +74,7 @@ export const useUserStore = defineStore('user', () => {
   } else {
     // We have a settings object? See if all keys exists and update only the missing ones
 
-    Object.keys(defaultSettings).forEach(key => {
+    Object.keys(defaultSettings).forEach((key) => {
       data.value.settings[key] = data.value.settings[key] ?? defaultSettings[key];
     });
   }
@@ -122,9 +129,7 @@ export const useUserStore = defineStore('user', () => {
         return ColourSchemes.Light;
       case 'system':
       default:
-        return window.matchMedia('(prefers-color-scheme: dark)').matches
-          ? ColourSchemes.Dark
-          : ColourSchemes.Light;
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? ColourSchemes.Dark : ColourSchemes.Light;
     }
   });
 
@@ -264,11 +269,14 @@ export const useUserStore = defineStore('user', () => {
       data.value.accessToken = tokenData.value.access_token;
     } else if (isFxaAuth) {
       // We get a one-time token back from the api, use it to fetch the real access token
-      const { error, data: tokenData }: TokenResponse = await call.value('fxa-token', {
-        headers: {
-          Authorization: `Bearer ${username}`,
-        }
-      }).post().json();
+      const { error, data: tokenData }: TokenResponse = await call
+        .value('fxa-token', {
+          headers: {
+            Authorization: `Bearer ${username}`,
+          },
+        })
+        .post()
+        .json();
 
       if (error.value || !tokenData.value.access_token) {
         return { error: tokenData.value ?? error.value };

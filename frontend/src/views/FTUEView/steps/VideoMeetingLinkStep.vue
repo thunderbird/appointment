@@ -60,7 +60,7 @@ const onContinueButtonClick = async () => {
   } finally {
     isLoading.value = false;
   }
-}
+};
 
 const onSkipButtonClick = async () => {
   ftueStore.clearMessages();
@@ -107,11 +107,7 @@ onMounted(async () => {
   <h3>{{ t('ftue.customVideoMeetingLink') }}</h3>
   <p>{{ t('ftue.customVideoMeetingLinkInfo') }}</p>
 
-  <text-input
-    name="customVideoMeetingLink"
-    placeholder="https://meet.jit.si/room"
-    v-model="customMeetingLink"
-  />
+  <text-input name="customVideoMeetingLink" placeholder="https://meet.jit.si/room" v-model="customMeetingLink" />
 
   <div class="buttons-container">
     <link-button :title="t('ftue.skipThisStep')" class="btn-skip" @click="onSkipButtonClick()" :disabled="isLoading">

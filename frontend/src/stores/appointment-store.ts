@@ -3,8 +3,13 @@ import { ref, computed, inject } from 'vue';
 import { BookingStatus, MetricEvents } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import {
-  Appointment, AppointmentListResponse, Fetch, Slot,
-  AvailabilitySlotResponse, PendingAppointmentsCount, PageMeta
+  Appointment,
+  AppointmentListResponse,
+  Fetch,
+  Slot,
+  AvailabilitySlotResponse,
+  PendingAppointmentsCount,
+  PageMeta,
 } from '@/models';
 import { dayjsKey, tzGuessKey } from '@/keys';
 import { usePosthog, posthog } from '@/composables/posthog';
@@ -27,35 +32,33 @@ export const useAppointmentStore = defineStore('appointments', () => {
   const appointments = ref<Appointment[]>([]);
   const selectedAppointment = ref<Appointment | null>(null);
 
-  const pendingAppointments = computed(
-    (): Appointment[] => appointments.value.filter((a) => a?.slots[0]?.booking_status === BookingStatus.Requested),
+  const pendingAppointments = computed((): Appointment[] =>
+    appointments.value.filter((a) => a?.slots[0]?.booking_status === BookingStatus.Requested)
   );
-  const appointmentsSortedByDateRequested = computed(
-    () => {
-      const today: Appointment[] = [];
-      const thisWeek: Appointment[] = [];
-      const thisMonth: Appointment[] = [];
-      const earlier: Appointment[] = [];
+  const appointmentsSortedByDateRequested = computed(() => {
+    const today: Appointment[] = [];
+    const thisWeek: Appointment[] = [];
+    const thisMonth: Appointment[] = [];
+    const earlier: Appointment[] = [];
 
-      const now = dj();
+    const now = dj();
 
-      for (const appointment of appointments.value) {
-        const start = dj(appointment.slots[0].start);
+    for (const appointment of appointments.value) {
+      const start = dj(appointment.slots[0].start);
 
-        if (start.isToday()) {
-          today.push(appointment);
-        } else if (start.isSame(now, 'week')) {
-          thisWeek.push(appointment);
-        } else if (start.isSame(now, 'month')) {
-          thisMonth.push(appointment);
-        } else {
-          earlier.push(appointment);
-        }
+      if (start.isToday()) {
+        today.push(appointment);
+      } else if (start.isSame(now, 'week')) {
+        thisWeek.push(appointment);
+      } else if (start.isSame(now, 'month')) {
+        thisMonth.push(appointment);
+      } else {
+        earlier.push(appointment);
       }
-
-      return { today, thisWeek, thisMonth, earlier };
     }
-  )
+
+    return { today, thisWeek, thisMonth, earlier };
+  });
 
   /**
    * Initialize store with data required at runtime
@@ -64,7 +67,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
    */
   const init = (fetch: Fetch) => {
     call.value = fetch;
-  }
+  };
 
   /**
    * Append additional data to retrieved appointments
@@ -76,7 +79,9 @@ export const useAppointmentStore = defineStore('appointments', () => {
       a.active = a.status !== BookingStatus.Booked;
       // convert start dates from UTC back to users timezone
       a.slots.forEach((s: Slot) => {
-        s.start = dj(s.start).utc(true).tz(userStore.data.settings.timezone ?? tzGuess);
+        s.start = dj(s.start)
+          .utc(true)
+          .tz(userStore.data.settings.timezone ?? tzGuess);
       });
     });
   };
@@ -96,7 +101,10 @@ export const useAppointmentStore = defineStore('appointments', () => {
         per_page: DEFAULT_PAGE_SIZE.toString(),
       });
 
-      const { data, error }: AppointmentListResponse = await call.value(`me/appointments?${queryParams.toString()}`).get().json();
+      const { data, error }: AppointmentListResponse = await call
+        .value(`me/appointments?${queryParams.toString()}`)
+        .get()
+        .json();
 
       if (!error.value && data.value) {
         const newAppointments = data.value.items;
@@ -150,9 +158,12 @@ export const useAppointmentStore = defineStore('appointments', () => {
   };
 
   const fetchPendingAppointmentsCount = async () => {
-    const { data, error }: PendingAppointmentsCount = await call.value('me/appointments_count_by_status?status=requested').get().json();
+    const { data, error }: PendingAppointmentsCount = await call
+      .value('me/appointments_count_by_status?status=requested')
+      .get()
+      .json();
     return { data, error };
-  }
+  };
 
   /**
    * Restore default state, empty and unload appointments
@@ -184,7 +195,10 @@ export const useAppointmentStore = defineStore('appointments', () => {
       owner_url: ownerUrl,
       confirmed,
     };
-    const { error, data }: AvailabilitySlotResponse = await call.value('schedule/public/availability/booking').put(obj).json();
+    const { error, data }: AvailabilitySlotResponse = await call
+      .value('schedule/public/availability/booking')
+      .put(obj)
+      .json();
 
     if (usePosthog && !error.value) {
       const event = confirmed ? MetricEvents.ConfirmBooking : MetricEvents.DenyBooking;

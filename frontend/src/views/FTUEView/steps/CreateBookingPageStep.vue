@@ -28,19 +28,21 @@ const bookingPageName = user.data.name || user.data.username.charAt(0).toUpperCa
 const bookingPageTitle = ref(
   scheduleStore.firstSchedule?.name ?? t('ftue.bookingPageInitialValue', { name: bookingPageName })
 );
-const calendarForNewAppointments = ref(
-  scheduleStore.firstSchedule?.calendar_id ?? calendars.value?.[0]?.id ?? 0
-);
+const calendarForNewAppointments = ref(scheduleStore.firstSchedule?.calendar_id ?? calendars.value?.[0]?.id ?? 0);
 const isLoading = ref(false);
 const errorMessage = ref(null);
 const formRef = useTemplateRef('formRef');
 
-const isContinueButtonDisabled = computed(() => !bookingPageTitle.value?.trim() || !calendarForNewAppointments.value || isLoading.value);
+const isContinueButtonDisabled = computed(
+  () => !bookingPageTitle.value?.trim() || !calendarForNewAppointments.value || isLoading.value
+);
 
-const calendarOptions = computed<SelectOption[]>(() => calendars.value.map((calendar) => ({
-  label: calendar.title,
-  value: calendar.id,
-})));
+const calendarOptions = computed<SelectOption[]>(() =>
+  calendars.value.map((calendar) => ({
+    label: calendar.title,
+    value: calendar.id,
+  }))
+);
 
 const onBackButtonClick = () => {
   ftueStore.moveToStep(FtueStep.ConnectCalendars, true);
@@ -52,7 +54,7 @@ const onContinueButtonClick = async () => {
   }
 
   isLoading.value = true;
- 
+
   try {
     // First, we need to connect / activate the selected calendar
     await calendarStore.connectCalendar(calendarForNewAppointments.value);
@@ -123,7 +125,7 @@ onMounted(async () => {
     >
       {{ t('ftue.bookingPageTitle') }}
     </text-input>
-  
+
     <select-input
       name="calendarForNewAppointments"
       :options="calendarOptions"
@@ -158,7 +160,7 @@ onMounted(async () => {
   display: flex;
   justify-content: end;
   gap: 1.5rem;
-  margin-block-start: 10.30rem;
+  margin-block-start: 10.3rem;
 
   button {
     min-width: 123px;

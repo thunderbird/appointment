@@ -79,7 +79,7 @@ label {
   }
 }
 
-input[type="radio"] {
+input[type='radio'] {
   position: absolute;
   opacity: 0;
   pointer-events: none;

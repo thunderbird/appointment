@@ -22,11 +22,11 @@ const copyButtonLabel = ref(t('label.copy'));
 const linkSlug = computed({
   get: () => currentState.value.slug || userStore.mySlug,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { slug: value } })
-  }
-})
+    availabilityStore.$patch({ currentState: { slug: value } });
+  },
+});
 
-const shortUrlWithoutProtocol = computed(() => userStore.data.userLink.replace(/https?:\/\//g, ''))
+const shortUrlWithoutProtocol = computed(() => userStore.data.userLink.replace(/https?:\/\//g, ''));
 
 async function refreshLinkConfirm() {
   await userStore.changeSignedUrl();
@@ -36,15 +36,15 @@ async function refreshLinkConfirm() {
   // We need to update both initialState and currentState for the isDirty comparison
   availabilityStore.$patch({
     initialState: { slug: userStore.mySlug },
-    currentState: { slug: userStore.mySlug }
-  })
+    currentState: { slug: userStore.mySlug },
+  });
 
   refreshLinkModalRef.value.hide();
 
   if (usePosthog) {
     posthog.capture(MetricEvents.RefreshLink);
   }
-};
+}
 
 async function copyLink() {
   await navigator.clipboard.writeText(userStore.myLink);
@@ -54,13 +54,13 @@ async function copyLink() {
   setTimeout(() => {
     copyButtonLabel.value = t('label.copy');
   }, 2000);
-};
+}
 </script>
 
 <script lang="ts">
 export default {
-  name: 'BookingPageLink'
-}
+  name: 'BookingPageLink',
+};
 </script>
 
 <template>
@@ -82,12 +82,7 @@ export default {
   </text-input>
 
   <!-- Share your link -->
-  <text-input
-    name="bookingPageLinkInput"
-    class="share-link-input"
-    :model-value="userStore.myLink"
-    readonly
-  >
+  <text-input name="bookingPageLinkInput" class="share-link-input" :model-value="userStore.myLink" readonly>
     {{ t('label.shareYourLink') }}:
     <link-button @click="copyLink">
       <template #iconLeft>

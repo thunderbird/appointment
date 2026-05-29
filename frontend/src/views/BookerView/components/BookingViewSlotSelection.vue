@@ -66,8 +66,7 @@ async function onDateChange(dateObj: TimeFormatted) {
   await calendarStore.getRemoteEvents(activeDate.value);
 
   isLoading.value = false;
-};
-
+}
 </script>
 
 <template>
@@ -75,10 +74,7 @@ async function onDateChange(dateObj: TimeFormatted) {
     <slot-selection-header />
 
     <div class="week-picker-container">
-      <week-picker
-        :active-date-range="activeDateRange"
-        :onDateChange="onDateChange"
-      />
+      <week-picker :active-date-range="activeDateRange" :onDateChange="onDateChange" />
     </div>
 
     <div class="booker-view-container">
@@ -133,5 +129,4 @@ async function onDateChange(dateObj: TimeFormatted) {
     align-items: flex-start;
   }
 }
-
 </style>

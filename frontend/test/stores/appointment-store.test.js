@@ -1,57 +1,52 @@
-import {
-  expect,
-  test,
-  beforeEach,
-  describe,
-  beforeAll,
-  afterAll,
-  afterEach,
-  vi,
-} from 'vitest';
+import { expect, test, beforeEach, describe, beforeAll, afterAll, afterEach, vi } from 'vitest';
 import { useAppointmentStore, createAppointmentStore } from '@/stores/appointment-store';
 import { createPinia } from 'pinia';
 import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
 import { createFetch } from '@vueuse/core';
 import { BookingStatus } from '@/definitions';
+import { useUserStore } from '@/stores/user-store';
 import withSetup from '../utils/with-setup';
 
 const API_URL = 'http://localhost';
 
 const restHandlers = [
-  http.get(`${API_URL}/me/appointments`, async () => HttpResponse.json({
-    items: [
-      {
-        id: 1,
-        calendar_id: 1,
-        title: 'title',
-        duration: 180,
-        location_type: 2,
-        slots: [
-          { start: '3000-01-01T09:00:00Z', duration: 60, booking_status: BookingStatus.None },
-        ],
+  http.get(`${API_URL}/me/appointments`, async () =>
+    HttpResponse.json({
+      items: [
+        {
+          id: 1,
+          calendar_id: 1,
+          title: 'title',
+          duration: 180,
+          location_type: 2,
+          slots: [{ start: '2024-02-01T09:00:00Z', duration: 60, booking_status: BookingStatus.None }],
+        },
+        {
+          id: 2,
+          calendar_id: 1,
+          title: 'title',
+          duration: 180,
+          location_type: 2,
+          slots: [
+            {
+              start: '2024-01-01T09:00:00Z',
+              duration: 60,
+              attendee_id: 1,
+              booking_status: BookingStatus.Requested,
+            },
+          ],
+        },
+      ],
+      page_meta: {
+        current_page: 1,
+        per_page: 10,
+        total_items: 2,
+        total_pages: 1,
       },
-      {
-        id: 2,
-        calendar_id: 1,
-        title: 'title',
-        duration: 180,
-        location_type: 2,
-        slots: [
-          {
-            start: '2024-01-01T09:00:00Z', duration: 60, attendee_id: 1, booking_status: BookingStatus.Requested,
-          },
-        ],
-      },
-    ],
-    page_meta: {
-      current_page: 1,
-      per_page: 10,
-      total_items: 2,
-      total_pages: 1,
-    },
-  })),
-  http.post(`${API_URL}/apmt/:id/cancel`, async () => { }),
+    })
+  ),
+  http.post(`${API_URL}/apmt/:id/cancel`, async () => {}),
   http.put(`${API_URL}/schedule/public/availability/booking`, async ({ request }) => {
     const body = await request.json();
     return HttpResponse.json({
@@ -118,9 +113,11 @@ describe('Appointment Store', () => {
   });
 
   test('timezone', async () => {
+    const user = useUserStore();
+    user.data.settings.timezone = 'America/Vancouver';
     const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
     await apmt.fetch();
-    expect(apmt.appointments[0].slots[0].start.toISOString()).toBe('3000-01-01T01:00:00.000Z');
+    expect(apmt.appointments[0].slots[0].start.toISOString()).toBe('2024-02-01T01:00:00.000Z');
   });
 
   test('reset', async () => {

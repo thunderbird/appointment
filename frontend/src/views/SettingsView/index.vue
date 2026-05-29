@@ -38,7 +38,7 @@ const calendarStore = useCalendarStore();
 const scheduleStore = useScheduleStore();
 const settingsStore = createSettingsStore(call);
 const externalConnectionsStore = useExternalConnectionsStore();
-const { currentState, isDirty } = storeToRefs(settingsStore)
+const { currentState, isDirty } = storeToRefs(settingsStore);
 
 const scrollToSection = (key: string) => {
   router.push({ name: route.name, hash: `#${key}` });
@@ -76,7 +76,7 @@ async function updatePreferences() {
     colour_scheme: userStore.data.settings.colourScheme,
     time_mode: userStore.data.settings.timeFormat,
     start_of_week: userStore.data.settings.startOfWeek,
-  }
+  };
 
   // Don't call the API if nothing hasn't changed
   if (JSON.stringify(obj) === JSON.stringify(originalValues)) {
@@ -129,9 +129,9 @@ async function updateCalendarConnections() {
     const nCalendarId = parseInt(calendarId, 10);
 
     if (currentState.value.changedCalendars[calendarId]) {
-      calendarPromises.push(calendarStore.connectCalendar(nCalendarId))
+      calendarPromises.push(calendarStore.connectCalendar(nCalendarId));
     } else {
-      calendarPromises.push(calendarStore.disconnectCalendar(nCalendarId))
+      calendarPromises.push(calendarStore.disconnectCalendar(nCalendarId));
     }
   });
 
@@ -151,7 +151,7 @@ async function updateScheduleDefaultCalendar() {
   if (scheduleStore.firstSchedule.calendar_id !== currentState.value.defaultCalendarId) {
     await scheduleStore.updateSchedule(firstScheduleId, {
       ...scheduleStore.firstSchedule,
-      calendar_id: currentState.value.defaultCalendarId
+      calendar_id: currentState.value.defaultCalendarId,
     });
   }
 }
@@ -162,14 +162,16 @@ async function updateCalendarColors() {
   Object.keys(currentState.value.changedCalendarColors).forEach((calendarId) => {
     const calendar = calendarStore.calendarById(parseInt(calendarId, 10));
 
-    calendarPromises.push(calendarStore.updateCalendar({
-      ...calendar,
-      // TODO: API expects a complete calendar object but we were always sending
-      // the password as empty before :thinking-face:
-      password: '',
-      color: currentState.value.changedCalendarColors[calendarId]
-    }))
-  })
+    calendarPromises.push(
+      calendarStore.updateCalendar({
+        ...calendar,
+        // TODO: API expects a complete calendar object but we were always sending
+        // the password as empty before :thinking-face:
+        password: '',
+        color: currentState.value.changedCalendarColors[calendarId],
+      })
+    );
+  });
 
   await Promise.all(calendarPromises);
 }
@@ -211,9 +213,12 @@ function onRevertChanges() {
 onMounted(() => {
   if (!userStore?.data.isSetup) {
     // If we're not setup watch (and initially apply) the view param
-    watch(() => route.params.view, (val) => {
-      redirectSetupUsers(val as string);
-    });
+    watch(
+      () => route.params.view,
+      (val) => {
+        redirectSetupUsers(val as string);
+      }
+    );
     redirectSetupUsers(route.params.view as string);
 
     // Restrict settings to just the account settings
@@ -226,8 +231,8 @@ onMounted(() => {
 
 <script lang="ts">
 export default {
-  name: 'SettingsView'
-}
+  name: 'SettingsView',
+};
 </script>
 
 <template>
@@ -236,59 +241,34 @@ export default {
       <h2>{{ t('label.settings') }}</h2>
     </header>
 
-    <notice-bar
-      v-if="isDirty"
-      :type="NoticeBarTypes.Warning"
-      class="notice-bar"
-    >
+    <notice-bar v-if="isDirty" :type="NoticeBarTypes.Warning" class="notice-bar">
       {{ t('label.youHaveUnsavedChanges') }}
 
       <template #cta>
-        <link-button
-          @click="onRevertChanges"
-          :disabled="savingInProgress"
-        >
+        <link-button @click="onRevertChanges" :disabled="savingInProgress">
           {{ t('label.revertChanges') }}
         </link-button>
-        <primary-button
-          @click="onSaveChanges"
-          :disabled="savingInProgress"
-          size="small"
-        >
+        <primary-button @click="onSaveChanges" :disabled="savingInProgress" size="small">
           {{ t('label.saveChanges') }}
         </primary-button>
       </template>
     </notice-bar>
 
-    <notice-bar
-      v-else-if="validationError"
-      class="notice-bar"
-      :type="NoticeBarTypes.Critical"
-    >
+    <notice-bar v-else-if="validationError" class="notice-bar" :type="NoticeBarTypes.Critical">
       {{ validationError.title }}
 
       <template #cta>
-        <icon-button
-          @click="clearNotices"
-          :title="t('label.close')"
-        >
+        <icon-button @click="clearNotices" :title="t('label.close')">
           <ph-x />
         </icon-button>
       </template>
     </notice-bar>
 
-    <notice-bar
-      v-else-if="saveSuccess"
-      class="notice-bar"
-      :type="NoticeBarTypes.Success"
-    >
+    <notice-bar v-else-if="saveSuccess" class="notice-bar" :type="NoticeBarTypes.Success">
       {{ saveSuccess.title }}
 
       <template #cta>
-        <icon-button
-          @click="clearNotices"
-          :title="t('label.close')"
-        >
+        <icon-button @click="clearNotices" :title="t('label.close')">
           <ph-x />
         </icon-button>
       </template>
@@ -324,16 +304,10 @@ export default {
     </div>
 
     <div class="footer-save-panel" v-if="isDirty">
-      <link-button
-        @click="onRevertChanges"
-        :disabled="savingInProgress"
-      >
+      <link-button @click="onRevertChanges" :disabled="savingInProgress">
         {{ t('label.revertChanges') }}
       </link-button>
-      <primary-button
-        @click="onSaveChanges"
-        :disabled="savingInProgress"
-      >
+      <primary-button @click="onSaveChanges" :disabled="savingInProgress">
         {{ t('label.saveChanges') }}
       </primary-button>
     </div>

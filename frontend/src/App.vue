@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { createFetch } from '@vueuse/core';
-import {
-  inject, provide, computed, onMounted,
-} from 'vue';
+import { inject, provide, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { UAParser } from 'ua-parser-js';
@@ -21,8 +19,8 @@ import { useUserStore } from '@/stores/user-store';
 import { createCalendarStore } from '@/stores/calendar-store';
 import { createAppointmentStore } from '@/stores/appointment-store';
 import { createScheduleStore } from '@/stores/schedule-store';
-import {userManager} from "@/composables/oidcUserManager";
-import { isOidcAuth } from "@/composables/authSchemes";
+import { userManager } from '@/composables/oidcUserManager';
+import { isOidcAuth } from '@/composables/authSchemes';
 import NavBarMobile from './components/NavBarMobile.vue';
 
 // component constants
@@ -43,11 +41,7 @@ provide(accountsTbProfileUrlKey, import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL);
 provide(tbProUrlKey, import.meta.env.VITE_TB_PRO_URL);
 provide(supportUrlKey, import.meta.env.VITE_SUPPORT_URL);
 
-const {
-  isSame: isSameNotification,
-  show: showNotification,
-  lock: lockNotification,
-} = siteNotificationStore;
+const { isSame: isSameNotification, show: showNotification, lock: lockNotification } = siteNotificationStore;
 
 if (isOidcAuth) {
   /**
@@ -56,7 +50,7 @@ if (isOidcAuth) {
    */
   userManager.events.addUserLoaded(async () => {
     const newAccessToken = (await userManager.getUser())?.access_token;
-    console.debug('[userManager] User Loaded Evt, is new token the same?', newAccessToken === user.data.accessToken)
+    console.debug('[userManager] User Loaded Evt, is new token the same?', newAccessToken === user.data.accessToken);
     user.data.accessToken = newAccessToken;
   });
 }
@@ -77,10 +71,7 @@ const call = createFetch({
     async onFetchError(context) {
       const { data, response } = context;
       // Catch any google refresh error that may occur
-      if (
-        data?.detail?.id === 'GOOGLE_REFRESH_ERROR'
-        && !isSameNotification('GOOGLE_REFRESH_ERROR')
-      ) {
+      if (data?.detail?.id === 'GOOGLE_REFRESH_ERROR' && !isSameNotification('GOOGLE_REFRESH_ERROR')) {
         // Ensure other async calls don't reach here
         lockNotification(data.detail.error);
 
@@ -93,7 +84,7 @@ const call = createFetch({
           data.detail.error,
           'Action needed!',
           data.detail?.message || 'Please re-connect with Google',
-          url,
+          url
         );
       } else if (response && response.status === 401 && data?.detail?.id === 'INVALID_TOKEN') {
         // Clear current user data, and ship them to the login screen!
@@ -118,12 +109,7 @@ user.init(call);
 provide(callKey, call);
 
 // menu items for main navigation
-const navItems = [
-  'dashboard',
-  'availability',
-  'bookings',
-  'settings',
-];
+const navItems = ['dashboard', 'availability', 'bookings', 'settings'];
 
 // db tables
 const calendarStore = createCalendarStore(call);
@@ -131,42 +117,21 @@ const appointmentStore = createAppointmentStore(call);
 const scheduleStore = createScheduleStore(call);
 
 // true if route can be accessed without authentication
-const routeIsPublic = computed(
-  () => !!route.meta?.isPublic,
-);
-const routeIsHome = computed(
-  () => ['home'].includes(typeof route.name === 'string' ? route.name : ''),
-);
-const routeIsLogin = computed(
-  () => ['login'].includes(typeof route.name === 'string' ? route.name : ''),
-);
-const routeHasModal = computed(
-  () => ['login'].includes(typeof route.name === 'string' ? route.name : ''),
-);
-const routeIsFTUE = computed(
-  () => ['setup'].includes(typeof route.name === 'string' ? route.name : ''),
-);
-const routeIsPostLogin = computed(
-  () => ['post-login'].includes(typeof route.name === 'string' ? route.name : ''),
-);
-const routeIsLogout = computed(
-  () => ['logout'].includes(typeof route.name === 'string' ? route.name : ''),
-);
+const routeIsPublic = computed(() => !!route.meta?.isPublic);
+const routeIsHome = computed(() => ['home'].includes(typeof route.name === 'string' ? route.name : ''));
+const routeIsLogin = computed(() => ['login'].includes(typeof route.name === 'string' ? route.name : ''));
+const routeHasModal = computed(() => ['login'].includes(typeof route.name === 'string' ? route.name : ''));
+const routeIsFTUE = computed(() => ['setup'].includes(typeof route.name === 'string' ? route.name : ''));
+const routeIsPostLogin = computed(() => ['post-login'].includes(typeof route.name === 'string' ? route.name : ''));
+const routeIsLogout = computed(() => ['logout'].includes(typeof route.name === 'string' ? route.name : ''));
 // The router.ts file has a beforeEach guard that redirects to the OIDC login
-// but we are flashing a NotFoundView briefly which is uh... not ideal 
-const routeNameUndefinedDueToAbortedNav = computed(
-  () => !route.name && !user?.authenticated && isOidcAuth,
-);
+// but we are flashing a NotFoundView briefly which is uh... not ideal
+const routeNameUndefinedDueToAbortedNav = computed(() => !route.name && !user?.authenticated && isOidcAuth);
 
 // retrieve calendars and appointments after checking login and persisting user to db
 const getDbData = async () => {
   if (user?.authenticated) {
-    await Promise.all([
-      user.profile(),
-      calendarStore.fetch(true),
-      appointmentStore.fetch(),
-      scheduleStore.fetch(true),
-    ]);
+    await Promise.all([user.profile(), calendarStore.fetch(true), appointmentStore.fetch(), scheduleStore.fetch(true)]);
   }
 };
 
@@ -205,10 +170,12 @@ const onPageLoad = async () => {
   const browser = parser.getBrowser();
   const os = parser.getOS();
 
-  const response = await call('metrics/get-id').post({
-    browser_version: `${browser.name}:${browser.version}`,
-    os_version: `${os.name}:${os.version}`,
-  }).json();
+  const response = await call('metrics/get-id')
+    .post({
+      browser_version: `${browser.name}:${browser.version}`,
+      os_version: `${os.name}:${os.version}`,
+    })
+    .json();
   const { data } = response;
   return data.value?.id ?? false;
 };
@@ -270,7 +237,10 @@ onMounted(async () => {
           let json = JSON.stringify(properties);
           // replaceAll that typescript won't complain about...
           if (properties?.$current_url) {
-            json = json.replace(new RegExp(properties.$current_url, 'gi'), properties.$current_url.replace(oldPath, vuePath));
+            json = json.replace(
+              new RegExp(properties.$current_url, 'gi'),
+              properties.$current_url.replace(oldPath, vuePath)
+            );
           }
           if (properties?.$pathname) {
             json = json.replace(new RegExp(properties.$pathname, 'gi'), vuePath);
@@ -320,13 +290,12 @@ onMounted(async () => {
     }
   }
 });
-
 </script>
 
 <template>
   <!-- Home page is actually just a redirect to another route -->
   <template v-if="routeIsHome || (routeIsLogin && isOidcAuth) || routeIsFTUE || routeIsPostLogin || routeIsLogout">
-    <router-view/>
+    <router-view />
   </template>
 
   <!-- authenticated subscriber content -->
@@ -340,7 +309,7 @@ onMounted(async () => {
     </site-notification>
 
     <!-- Desktop NavBar show / hide is handled in CSS land -->
-    <nav-bar :nav-items="navItems"/>
+    <nav-bar :nav-items="navItems" />
 
     <!-- Mobile NavBar show / hide is handled in CSS land -->
     <nav-bar-mobile />
@@ -351,18 +320,18 @@ onMounted(async () => {
         'public-route': routeIsPublic && !routeHasModal,
       }"
     >
-      <router-view/>
+      <router-view />
     </main>
-    <footer-bar/>
+    <footer-bar />
   </template>
   <template v-else-if="router.hasRoute(route.name) && !routeIsPublic">
-    <not-authenticated-view/>
+    <not-authenticated-view />
   </template>
   <template v-else-if="routeNameUndefinedDueToAbortedNav">
     <div />
   </template>
   <template v-else>
-    <route-not-found-view/>
+    <route-not-found-view />
   </template>
 </template>
 

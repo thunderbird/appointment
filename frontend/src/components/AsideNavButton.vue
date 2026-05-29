@@ -22,51 +22,24 @@ export default {
 </script>
 
 <template>
-  <router-link
-    v-if="to"
-    :to="to"
-    class="aside-nav-button"
-    :data-testid="testId"
-  >
+  <router-link v-if="to" :to="to" class="aside-nav-button" :data-testid="testId">
     <slot name="icon">
-      <ph-warning-circle
-        v-if="showWarning"
-        class="warning-icon"
-        weight="fill"
-      />
+      <ph-warning-circle v-if="showWarning" class="warning-icon" weight="fill" />
     </slot>
 
     <span class="label">{{ label }}</span>
 
-    <ph-arrow-right
-      v-if="showArrow !== false"
-      class="arrow-icon"
-      size="16"
-    />
+    <ph-arrow-right v-if="showArrow !== false" class="arrow-icon" size="16" />
   </router-link>
 
-  <button
-    v-else
-    type="button"
-    class="aside-nav-button"
-    :data-testid="testId"
-    @click="$emit('click')"
-  >
+  <button v-else type="button" class="aside-nav-button" :data-testid="testId" @click="$emit('click')">
     <slot name="icon">
-      <ph-warning-circle
-        v-if="showWarning"
-        class="warning-icon"
-        weight="fill"
-      />
+      <ph-warning-circle v-if="showWarning" class="warning-icon" weight="fill" />
     </slot>
 
     <span class="label">{{ label }}</span>
 
-    <ph-arrow-right
-      v-if="showArrow !== false"
-      class="arrow-icon"
-      size="16"
-    />
+    <ph-arrow-right v-if="showArrow !== false" class="arrow-icon" size="16" />
   </button>
 </template>
 

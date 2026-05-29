@@ -1,12 +1,4 @@
-import {
-  expect,
-  test,
-  beforeEach,
-  describe,
-  beforeAll,
-  afterAll,
-  afterEach,
-} from 'vitest';
+import { expect, test, beforeEach, describe, beforeAll, afterAll, afterEach } from 'vitest';
 import { useScheduleStore, createScheduleStore } from '@/stores/schedule-store';
 import { createPinia } from 'pinia';
 import { setupServer } from 'msw/node';
@@ -18,33 +10,35 @@ import withSetup from '../utils/with-setup';
 const API_URL = 'http://localhost';
 
 const restHandlers = [
-  http.get(`${API_URL}/schedule`, async () => HttpResponse.json([
-    {
-      active: false,
-      name: '',
-      calendar_id: 0,
-      location_type: EventLocationType.InPerson,
-      location_url: '',
-      details: '',
-      start_date: '2022-02-02',
-      end_date: null,
-      start_time: '09:00',
-      end_time: '17:00',
-      earliest_booking: 1440,
-      farthest_booking: 20160,
-      weekdays: [1, 2, 3, 4, 5],
-      slot_duration: DEFAULT_SLOT_DURATION,
-      meeting_link_provider: MeetingLinkProviderType.None,
-      booking_confirmation: true,
-      calendar: {
-        id: 1,
-        title: 'Cal',
-        color: '#000',
-        connected: true,
+  http.get(`${API_URL}/schedule`, async () =>
+    HttpResponse.json([
+      {
+        active: false,
+        name: '',
+        calendar_id: 0,
+        location_type: EventLocationType.InPerson,
+        location_url: '',
+        details: '',
+        start_date: '2022-02-02',
+        end_date: null,
+        start_time: '09:00',
+        end_time: '17:00',
+        earliest_booking: 1440,
+        farthest_booking: 20160,
+        weekdays: [1, 2, 3, 4, 5],
+        slot_duration: DEFAULT_SLOT_DURATION,
+        meeting_link_provider: MeetingLinkProviderType.None,
+        booking_confirmation: true,
+        calendar: {
+          id: 1,
+          title: 'Cal',
+          color: '#000',
+          connected: true,
+        },
+        time_updated: '1970-01-01T00:00:00',
       },
-      time_updated: '1970-01-01T00:00:00',
-    },
-  ])),
+    ])
+  ),
 ];
 
 const server = setupServer(...restHandlers);

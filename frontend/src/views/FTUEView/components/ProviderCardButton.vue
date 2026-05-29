@@ -10,10 +10,10 @@ defineProps<{
 
 <template>
   <button>
-    <img :src="iconSrc" :alt="iconAlt" :title="iconAlt"/>
+    <img :src="iconSrc" :alt="iconAlt" :title="iconAlt" />
 
     <div>
-      <h3 :class="{ 'withDescription' : showDescription }">{{ title }}</h3>
+      <h3 :class="{ withDescription: showDescription }">{{ title }}</h3>
       <p v-if="showDescription">{{ description }}</p>
     </div>
   </button>
@@ -30,7 +30,7 @@ button {
   align-items: center;
   width: 100%;
 
-  img { 
+  img {
     width: 2.25rem;
     height: 2.25rem;
   }

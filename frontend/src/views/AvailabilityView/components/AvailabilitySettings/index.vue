@@ -26,39 +26,39 @@ const { currentState } = storeToRefs(availabilityStore);
 const isBookable = computed({
   get: () => currentState.value.active,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { active: value } })
-  }
-})
+    availabilityStore.$patch({ currentState: { active: value } });
+  },
+});
 
-// The database stores a boolean, if booking requests should have manual confirmation. However, since we offer 
+// The database stores a boolean, if booking requests should have manual confirmation. However, since we offer
 // an "automatic confirmation" toggle in the UI, we need to negate the value from the database here.
 const autoConfirmBookings = computed({
   get: () => !currentState.value.booking_confirmation,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { booking_confirmation: !value } })
-  }
-})
+    availabilityStore.$patch({ currentState: { booking_confirmation: !value } });
+  },
+});
 
 const startTime = computed({
   get: () => currentState.value.start_time,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { start_time: value } })
-  }
-})
+    availabilityStore.$patch({ currentState: { start_time: value } });
+  },
+});
 
 const endTime = computed({
   get: () => currentState.value.end_time,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { end_time: value } })
-  }
-})
+    availabilityStore.$patch({ currentState: { end_time: value } });
+  },
+});
 
 const weekDays = computed({
   get: () => currentState.value.weekdays,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { weekdays: value } })
-  }
-})
+    availabilityStore.$patch({ currentState: { weekdays: value } });
+  },
+});
 
 const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   label: day.short.toUpperCase(),
@@ -68,29 +68,29 @@ const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
 const useCustomAvailabilities = computed({
   get: () => currentState.value.use_custom_availabilities,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { use_custom_availabilities: value } })
-  }
-})
+    availabilityStore.$patch({ currentState: { use_custom_availabilities: value } });
+  },
+});
 
 const slotDuration = computed({
   get: () => currentState.value.slot_duration,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { slot_duration: value } })
-  }
-})
+    availabilityStore.$patch({ currentState: { slot_duration: value } });
+  },
+});
 
 function onAvailabilitySelectUpdated(availabilities: Availability[]) {
   /* Create a single array of availabilities from the list grouped by day of week
      Only take valid availabilities and filter placeholder availabilities out */
   const validAvailabilities = availabilities.map((a) => ({ ...a, schedule_id: currentState.value.id }));
-  availabilityStore.$patch({ currentState: { availabilities: validAvailabilities } })
+  availabilityStore.$patch({ currentState: { availabilities: validAvailabilities } });
 }
 </script>
 
 <script lang="ts">
 export default {
-  name: "AvailabilitySettings"
-}
+  name: 'AvailabilitySettings',
+};
 </script>
 
 <template>
@@ -173,10 +173,10 @@ export default {
           v-model="startTime"
           :disabled="!currentState.active"
         >
-          {{ t("label.startTime") }}
+          {{ t('label.startTime') }}
         </text-input>
 
-        <span class="to-span">{{ t("label.to") }}</span>
+        <span class="to-span">{{ t('label.to') }}</span>
 
         <text-input
           type="time"
@@ -185,10 +185,9 @@ export default {
           v-model="endTime"
           :disabled="!currentState.active"
         >
-          {{ t("label.endTime") }}
+          {{ t('label.endTime') }}
         </text-input>
       </div>
-
     </div>
 
     <div class="segmented-controls-container">

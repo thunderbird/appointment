@@ -12,16 +12,16 @@ const { t } = useI18n();
 const appointmentStore = useAppointmentStore();
 
 const props = defineProps<{
-  appointment: Appointment | null
-}>()
+  appointment: Appointment | null;
+}>();
 
 const emit = defineEmits<{
-  (e: 'close'): void,
-  (e: 'click:backButton'): void,
+  (e: 'close'): void;
+  (e: 'click:backButton'): void;
 }>();
 
 const confirmCancel = ref<boolean>(false);
-const isError = ref<boolean|null>(null);
+const isError = ref<boolean | null>(null);
 
 async function cancelAppointment() {
   confirmCancel.value = true;

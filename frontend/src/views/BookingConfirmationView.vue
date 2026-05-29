@@ -20,8 +20,8 @@ const slotId = Number(route.params.slot);
 const slotToken = route.params.token;
 const confirmed = parseInt(route.params.confirmed as string) === 1;
 
-const isError = ref<boolean|null>(null);
-const attendeeEmail = ref<string|null>(null);
+const isError = ref<boolean | null>(null);
+const attendeeEmail = ref<string | null>(null);
 
 // initially load data when component gets remounted
 onMounted(async () => {
@@ -64,14 +64,14 @@ onMounted(async () => {
       <template v-if="confirmed">
         <h1>{{ t('info.bookingSuccessfullyConfirmed') }}</h1>
         <p>
-          {{ t('info.eventWasCreated') }}<br>
-          {{ t('text.invitationSentToAddress', { 'address': attendeeEmail }) }}
+          {{ t('info.eventWasCreated') }}<br />
+          {{ t('text.invitationSentToAddress', { address: attendeeEmail }) }}
         </p>
       </template>
       <template v-else>
         <h1>{{ t('info.bookingSuccessfullyDenied') }}</h1>
         <p>
-          {{ t('text.denialSentToAddress', { 'address': attendeeEmail }) }}<br>
+          {{ t('text.denialSentToAddress', { address: attendeeEmail }) }}<br />
           {{ t('info.slotIsAvailableAgain') }}
         </p>
       </template>

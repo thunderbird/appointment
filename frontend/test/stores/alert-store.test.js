@@ -1,6 +1,4 @@
-import {
-  expect, test, beforeEach, describe,
-} from 'vitest';
+import { expect, test, beforeEach, describe } from 'vitest';
 import { useSiteNotificationStore } from '@/stores/alert-store';
 import { createPinia, setActivePinia } from 'pinia';
 
