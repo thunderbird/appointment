@@ -5,7 +5,6 @@ import { dayjsKey } from '@/keys';
 import { Dayjs } from 'dayjs';
 import { DateFormatStrings } from '@/definitions';
 
- 
 export const useCalendarStore = defineStore('calendars', () => {
   const dj = inject(dayjsKey);
   const call = ref(null);
@@ -31,7 +30,7 @@ export const useCalendarStore = defineStore('calendars', () => {
    */
   const init = (fetch: Fetch) => {
     call.value = fetch;
-  }
+  };
 
   const connectGoogleCalendar = async () => {
     const googleUrl = await call.value('google/auth').get();
@@ -91,20 +90,22 @@ export const useCalendarStore = defineStore('calendars', () => {
     const calendarEvents = force ? [] : [...remoteEvents.value];
 
     // Only retrieve remote events if we don't have this month already cached
-    await Promise.all(connectedCalendars.value.map(async (calendar) => {
-      const url = force
-        ? `rmt/cal/${calendar.id}/${from}/${to}?force_refresh=true`
-        : `rmt/cal/${calendar.id}/${from}/${to}`;
-      const { data }: RemoteEventListResponse = await call.value(url).get().json();
-      if (Array.isArray(data.value)) {
-        calendarEvents.push(
-          ...data.value.map((event) => ({
-            ...event,
-            duration: dj(event.end).diff(dj(event.start), 'minutes'),
-          })),
-        );
-      }
-    }));
+    await Promise.all(
+      connectedCalendars.value.map(async (calendar) => {
+        const url = force
+          ? `rmt/cal/${calendar.id}/${from}/${to}?force_refresh=true`
+          : `rmt/cal/${calendar.id}/${from}/${to}`;
+        const { data }: RemoteEventListResponse = await call.value(url).get().json();
+        if (Array.isArray(data.value)) {
+          calendarEvents.push(
+            ...data.value.map((event) => ({
+              ...event,
+              duration: dj(event.end).diff(dj(event.start), 'minutes'),
+            }))
+          );
+        }
+      })
+    );
 
     // Remember month
     remoteMonthsRetrieved.value.push(month);
@@ -131,7 +132,7 @@ export const useCalendarStore = defineStore('calendars', () => {
 
   const updateCalendar = async (calendarData: Calendar) => {
     await call.value(`cal/${calendarData.id}`).put(calendarData);
-  }
+  };
 
   const syncCalendars = async () => {
     await call.value('rmt/sync').post();

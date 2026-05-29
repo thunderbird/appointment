@@ -2,24 +2,21 @@ import { computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 /*
-*  For using queryParams as state. It uses the standard
-*  format of ?paramName=value and supports arrays too. Ex: 
-*
-*   URL:
-*     ?filters=a&filters=b 
-*   Code:
-*     const selectedFilters = useQueryParamState('filters', ['pending', 'confirmed'])
-*     selectedFilters.value = ['pending', 'confirmed']
-*
-*/
+ *  For using queryParams as state. It uses the standard
+ *  format of ?paramName=value and supports arrays too. Ex:
+ *
+ *   URL:
+ *     ?filters=a&filters=b
+ *   Code:
+ *     const selectedFilters = useQueryParamState('filters', ['pending', 'confirmed'])
+ *     selectedFilters.value = ['pending', 'confirmed']
+ *
+ */
 
 type QueryPrimitive = string | number | boolean;
 type QueryValue = QueryPrimitive | QueryPrimitive[];
 
-export function useQueryParamState<T extends QueryValue>(
-  paramName: string,
-  defaultValue: T
-) {
+export function useQueryParamState<T extends QueryValue>(paramName: string, defaultValue: T) {
   const route = useRoute();
   const router = useRouter();
 
@@ -73,10 +70,7 @@ export function useQueryParamState<T extends QueryValue>(
   onMounted(() => {
     const current = param.value;
 
-    if (
-      (isArray && (current as QueryPrimitive[]).length === 0) ||
-      (!isArray && current === undefined)
-    ) {
+    if ((isArray && (current as QueryPrimitive[]).length === 0) || (!isArray && current === undefined)) {
       param.value = defaultValue;
     }
   });

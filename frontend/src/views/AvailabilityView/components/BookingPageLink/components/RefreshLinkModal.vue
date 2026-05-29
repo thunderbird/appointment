@@ -18,7 +18,7 @@ const hide = () => {
   modal.value?.hide();
 };
 
-defineExpose({ show, hide })
+defineExpose({ show, hide });
 </script>
 
 <template>

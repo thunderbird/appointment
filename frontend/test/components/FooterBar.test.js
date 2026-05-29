@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
 import i18ninstance from '@/composables/i18n';
 import router from '@/router';
@@ -8,7 +8,6 @@ import { useUserStore } from '@/stores/user-store';
 import { RouterLink } from 'vue-router';
 import FooterBar from '@/components/FooterBar.vue';
 import { supportUrlKey, tbProUrlKey } from '@/keys';
-
 
 describe('FooterBar', () => {
   var app;
@@ -68,7 +67,7 @@ describe('FooterBar', () => {
           [supportUrlKey]: import.meta.env.VITE_SUPPORT_URL,
         },
       },
-    }); 
+    });
 
     // verify all expected router-link child components were rendered
     const expectedLinks = ['dashboard', 'bookings', 'availability', 'settings', '/privacy', '/terms'];

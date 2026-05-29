@@ -1,73 +1,70 @@
 <script setup lang="ts">
-import { computed, useTemplateRef } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { PhX } from '@phosphor-icons/vue'
+import { computed, useTemplateRef } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { PhX } from '@phosphor-icons/vue';
 
 const { t } = useI18n();
 
-const props = withDefaults(defineProps<{
-  title?: string
-  closeOnScrimClick?: boolean
-  side?: 'left' | 'right'
-}>(), {
-  closeOnScrimClick: true,
-  side: 'right'
-})
+const props = withDefaults(
+  defineProps<{
+    title?: string;
+    closeOnScrimClick?: boolean;
+    side?: 'left' | 'right';
+  }>(),
+  {
+    closeOnScrimClick: true,
+    side: 'right',
+  }
+);
 
 const emit = defineEmits<{
-  (e: 'open'): void
-  (e: 'close'): void
-}>()
+  (e: 'open'): void;
+  (e: 'close'): void;
+}>();
 
-const panelRef = useTemplateRef<HTMLDialogElement>('panel')
-const contentRef = useTemplateRef<HTMLDivElement>('content')
+const panelRef = useTemplateRef<HTMLDialogElement>('panel');
+const contentRef = useTemplateRef<HTMLDivElement>('content');
 
-const panelClasses = computed(() => [
-  'sliding-panel',
-  `sliding-panel--${props.side}-side`
-])
+const panelClasses = computed(() => ['sliding-panel', `sliding-panel--${props.side}-side`]);
 
-const headerClasses = computed(() => [
-  'header',
-  `header--${props.side}-side`
-])
+const headerClasses = computed(() => ['header', `header--${props.side}-side`]);
 
 const handleDialogClick = (event: MouseEvent) => {
   if (event.target === panelRef.value && props.closeOnScrimClick) {
-    closePanel()
+    closePanel();
   }
-}
+};
 
 const closePanel = () => {
   // Calling the HTML dialog's close method
   // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog#methods
-  panelRef.value?.close()
+  panelRef.value?.close();
 
-  emit('close')
-}
+  emit('close');
+};
 
 const showPanel = () => {
   // Calling the HTML dialog's showModal method
   // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog#methods
-  panelRef.value?.showModal()
+  panelRef.value?.showModal();
 
-  emit('open')
-}
+  emit('open');
+};
 
 const focusOnContentTop = () => {
   const firstFocusableElement = contentRef.value?.querySelector<HTMLElement>(
     'button, [href], input, select, textarea, [tabindex]'
-  )
+  );
 
   if (firstFocusableElement) {
     firstFocusableElement.focus();
   }
-}
+};
 
 defineExpose({
   showPanel,
-  closePanel
-})
+  closePanel,
+});
 </script>
 
 <template>
@@ -79,11 +76,7 @@ defineExpose({
           {{ title }}
         </slot>
       </div>
-      <button
-        class="close-btn"
-        @click="closePanel"
-        :aria-label="t('label.closePanel')"
-      >
+      <button class="close-btn" @click="closePanel" :aria-label="t('label.closePanel')">
         <ph-x size="24" />
       </button>
     </div>
@@ -92,11 +85,7 @@ defineExpose({
     <div ref="content" class="content" tabindex="-1">
       <slot />
 
-      <button
-        class="screen-reader-only"
-        @click="focusOnContentTop"
-        :aria-label="t('label.backToTop')"
-      />
+      <button class="screen-reader-only" @click="focusOnContentTop" :aria-label="t('label.backToTop')" />
 
       <slot name="cta" />
     </div>
@@ -107,7 +96,7 @@ defineExpose({
 .sliding-panel {
   /* Override browser defaults */
   max-height: 100dvh;
-  max-width: 100dvw;  
+  max-width: 100dvw;
 
   &[open] {
     display: flex;

@@ -7,8 +7,8 @@ import { dayjsKey, callKey } from '@/keys';
 import { BooleanResponse, AuthUrlResponse, AuthUrl, Error, PydanticException, Alert } from '@/models';
 import { PrimaryButton, TextInput, NoticeBar, NoticeBarTypes, IconButton } from '@thunderbirdops/services-ui';
 import { handleFormError } from '@/utils';
-import { userManager } from "@/composables/oidcUserManager";
-import { isFxaAuth, isOidcAuth, isPasswordAuth } from "@/composables/authSchemes";
+import { userManager } from '@/composables/oidcUserManager';
+import { isFxaAuth, isOidcAuth, isPasswordAuth } from '@/composables/authSchemes';
 import { PhX } from '@phosphor-icons/vue';
 
 // component constants
@@ -21,7 +21,6 @@ const user = createUserStore(call);
 
 const isLoading = ref(false);
 const formRef = ref();
-
 
 enum LoginSteps {
   Login = 1,
@@ -55,15 +54,16 @@ onMounted(async () => {
   }
 });
 
-
 const login = async () => {
   isLoading.value = true;
 
   // If they come here the first time we check if they're allowed to login
   if (loginStep.value === LoginSteps.Login) {
-    const { data: canLogin, error }: BooleanResponse = await call('can-login').post({
-      email: email.value,
-    }).json();
+    const { data: canLogin, error }: BooleanResponse = await call('can-login')
+      .post({
+        email: email.value,
+      })
+      .json();
 
     if (error?.value) {
       // Handle error
@@ -72,7 +72,6 @@ const login = async () => {
       return;
     }
   }
-
 
   if (isOidcAuth) {
     await userManager.signinRedirect({
@@ -153,12 +152,7 @@ const onEnter = () => {
       @submit.prevent
       @keyup.enter="() => onEnter()"
     >
-      <text-input
-        name="email"
-        v-model="email"
-        :required="true"
-        data-testid="login-email-input"
-      >
+      <text-input name="email" v-model="email" :required="true" data-testid="login-email-input">
         {{ t('login.form.email') }}
       </text-input>
 
@@ -172,7 +166,7 @@ const onEnter = () => {
       >
         {{ t('label.password') }}
       </text-input>
-      
+
       <primary-button
         class="btn-continue"
         :title="t('label.login')"
@@ -183,7 +177,6 @@ const onEnter = () => {
         {{ t('label.logIn') }}
       </primary-button>
     </form>
-
   </div>
 </template>
 <style scoped>

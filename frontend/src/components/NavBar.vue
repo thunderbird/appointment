@@ -20,7 +20,7 @@ const { t } = useI18n();
 
 // component properties
 interface Props {
-  navItems: string[], // list of route names that are also lang keys (format: label.<key>), used as nav items
+  navItems: string[]; // list of route names that are also lang keys (format: label.<key>), used as nav items
 }
 defineProps<Props>();
 
@@ -52,10 +52,7 @@ const copyLink = async () => {
 
 <template>
   <header class="header-desktop">
-    <router-link
-      class="appointment-logo"
-      :to="{ name: user?.authenticated ? 'dashboard' : 'home' }"
-    >
+    <router-link class="appointment-logo" :to="{ name: user?.authenticated ? 'dashboard' : 'home' }">
       <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
     </router-link>
 
@@ -73,16 +70,9 @@ const copyLink = async () => {
 
       <div class="nav-items-right-container">
         <div v-if="user.myLink" class="nav-copy-link-button-container">
-          <button
-            class="nav-copy-link-button"
-            @click="copyLink"
-            aria-labelledby="copy-meeting-link-button"
-          >
+          <button class="nav-copy-link-button" @click="copyLink" aria-labelledby="copy-meeting-link-button">
             <ph-link-simple id="copy-meeting-link-button" :size="24" />
-            <tool-tip
-              :position="TooltipPosition.Top"
-              class="nav-copy-link-tooltip"
-            >
+            <tool-tip :position="TooltipPosition.Top" class="nav-copy-link-tooltip">
               {{ myLinkTooltip }}
             </tool-tip>
           </button>
@@ -135,7 +125,9 @@ const copyLink = async () => {
     width: 100%;
     height: 68px;
     padding-inline: 1rem;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    box-shadow:
+      0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
     overflow: visible;
     background-image: linear-gradient(to top, #1a202c, #1c3f47); /* one-off colours to approximate Zeplin gradient */
     z-index: 50;

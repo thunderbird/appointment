@@ -6,7 +6,7 @@ const props = defineProps<{
   name: string;
   disabled?: boolean;
   options: SelectOption<string | number>[];
-}>()
+}>();
 
 const model = defineModel<string | number>();
 </script>
@@ -16,11 +16,7 @@ const model = defineModel<string | number>();
     <legend>{{ props.legend }}:</legend>
 
     <div class="pill-container">
-      <div
-        v-for="option in props.options"
-        :key="option.value"
-        class="pill-item"
-      >
+      <div v-for="option in props.options" :key="option.value" class="pill-item">
         <input
           type="radio"
           :id="`${props.name}-${option.value}`"
@@ -51,7 +47,7 @@ legend {
   border: 1px solid var(--colour-apmt-primary);
   border-radius: 999px;
 
-  &:has(input[type="radio"]:disabled) {
+  &:has(input[type='radio']:disabled) {
     border: 1px solid var(--colour-ti-muted);
   }
 }
@@ -63,7 +59,7 @@ legend {
   padding: 0.25rem 0.5rem;
   cursor: pointer;
 
-  input[type="radio"] {
+  input[type='radio'] {
     transition: none;
     color: var(--colour-apmt-soft);
     width: 0.5rem;
@@ -79,17 +75,17 @@ legend {
   &:not(:last-child) {
     border-inline-end: 1px solid var(--colour-apmt-primary);
 
-    &:has(input[type="radio"]:disabled) {
+    &:has(input[type='radio']:disabled) {
       border-inline-end: 1px solid var(--colour-ti-muted);
     }
   }
 
-  &:has(input[type="radio"]:checked) {
+  &:has(input[type='radio']:checked) {
     background-color: var(--colour-apmt-primary);
     color: var(--colour-neutral-base);
   }
 
-  &:has(input[type="radio"]:checked)&:has(input[type="radio"]:disabled) {
+  &:has(input[type='radio']:checked)&:has(input[type='radio']:disabled) {
     background-color: var(--colour-ti-muted);
     color: var(--colour-neutral-base);
   }

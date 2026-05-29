@@ -14,9 +14,7 @@ const userStore = useUserStore();
 
 const { authenticated: isAuthenticated } = storeToRefs(userStore);
 
-const appointmentNotLoggedInNavItems = [
-  { route: tbProUrl, i18nKey: 'exploreThunderbirdPro', external: true },
-];
+const appointmentNotLoggedInNavItems = [{ route: tbProUrl, i18nKey: 'exploreThunderbirdPro', external: true }];
 
 const appointmentLoggedInNavItems = [
   { route: 'dashboard', i18nKey: 'dashboard' },
@@ -27,9 +25,7 @@ const appointmentLoggedInNavItems = [
 </script>
 
 <template>
-  <StandardFooter
-    contributeToThisSiteUrl="https://github.com/thunderbird/appointment"
-  >
+  <StandardFooter contributeToThisSiteUrl="https://github.com/thunderbird/appointment">
     <template #default>
       <nav class="appointment-navigation">
         <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
@@ -41,13 +37,13 @@ const appointmentLoggedInNavItems = [
               </router-link>
             </li>
           </ul>
-  
+
           <ul v-else>
             <li v-for="navItem in appointmentNotLoggedInNavItems" :key="navItem.route">
               <a v-if="navItem.external" :href="navItem.route">
                 {{ t(`label.${navItem.i18nKey}`) }}
               </a>
-  
+
               <router-link v-else :to="navItem.route">
                 {{ t(`label.${navItem.i18nKey}`) }}
               </router-link>

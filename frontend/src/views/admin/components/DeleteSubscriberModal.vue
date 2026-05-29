@@ -12,7 +12,7 @@ const emit = defineEmits(['deleted']);
 const modal = useTemplateRef('modal');
 
 const props = defineProps<{
-  subscriberId?: number|null,
+  subscriberId?: number | null;
 }>();
 
 /**
@@ -42,7 +42,7 @@ const hardDeleteSubscriber = async () => {
   hide();
 };
 
-defineExpose({ show, hide })
+defineExpose({ show, hide });
 </script>
 
 <template>

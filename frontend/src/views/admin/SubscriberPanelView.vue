@@ -8,9 +8,7 @@ import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import DeleteSubscriberModal from './components/DeleteSubscriberModal.vue';
 import { TextInput } from '@thunderbirdops/services-ui';
 import { dayjsKey, callKey } from '@/keys';
-import {
-  Subscriber, BooleanResponse, TableDataRow, TableDataColumn, Alert,
-} from '@/models';
+import { Subscriber, BooleanResponse, TableDataRow, TableDataColumn, Alert } from '@/models';
 import { useUserStore } from '@/stores/user-store';
 import { AlertSchemes, TableDataButtonType, TableDataType } from '@/definitions';
 import { staggerRetrieve } from '@/utils';
@@ -41,45 +39,50 @@ const subscriberList = computed(() => {
   return subscribers.value;
 });
 
-const filteredSubscribers = computed(() => subscriberList.value.map((subscriber) => ({
-  id: {
-    type: TableDataType.Text,
-    value: subscriber.id,
-  },
-  username: {
-    type: TableDataType.Text,
-    value: subscriber.username,
-  },
-  email: {
-    type: TableDataType.Text,
-    value: subscriber.email,
-  },
-  timeCreated: {
-    type: TableDataType.Text,
-    value: dj(subscriber.time_created).format('ll LTS'),
-  },
-  timeDeleted: {
-    type: TableDataType.Text,
-    value: subscriber.time_deleted ? dj(subscriber.time_deleted).format('ll LTS') : '',
-  },
-  timezone: {
-    type: TableDataType.Text,
-    value: subscriber.timezone ?? t('label.unset'),
-  },
-  disable: {
-    type: TableDataType.Button,
-    buttonType: subscriber.time_deleted ? TableDataButtonType.Primary : TableDataButtonType.Caution,
-    value: subscriber.time_deleted ? t('label.enable') : t('label.disable'),
-    disabled: !subscriber.time_deleted && subscriber.email === user.data.email,
-  },
-  hardDelete: {
-    type: TableDataType.Button,
-    buttonType: TableDataButtonType.Caution,
-    value: t('label.hardDelete'),
-    disabled: !subscriber.time_deleted || subscriber.email === user.data.email,
-    tooltip: `${t('text.admin.completelyRemoveUser')} ${t('text.admin.disableAccountFirst')}`,
-  },
-} as TableDataRow)));
+const filteredSubscribers = computed(() =>
+  subscriberList.value.map(
+    (subscriber) =>
+      ({
+        id: {
+          type: TableDataType.Text,
+          value: subscriber.id,
+        },
+        username: {
+          type: TableDataType.Text,
+          value: subscriber.username,
+        },
+        email: {
+          type: TableDataType.Text,
+          value: subscriber.email,
+        },
+        timeCreated: {
+          type: TableDataType.Text,
+          value: dj(subscriber.time_created).format('ll LTS'),
+        },
+        timeDeleted: {
+          type: TableDataType.Text,
+          value: subscriber.time_deleted ? dj(subscriber.time_deleted).format('ll LTS') : '',
+        },
+        timezone: {
+          type: TableDataType.Text,
+          value: subscriber.timezone ?? t('label.unset'),
+        },
+        disable: {
+          type: TableDataType.Button,
+          buttonType: subscriber.time_deleted ? TableDataButtonType.Primary : TableDataButtonType.Caution,
+          value: subscriber.time_deleted ? t('label.enable') : t('label.disable'),
+          disabled: !subscriber.time_deleted && subscriber.email === user.data.email,
+        },
+        hardDelete: {
+          type: TableDataType.Button,
+          buttonType: TableDataButtonType.Caution,
+          value: t('label.hardDelete'),
+          disabled: !subscriber.time_deleted || subscriber.email === user.data.email,
+          tooltip: `${t('text.admin.completelyRemoveUser')} ${t('text.admin.disableAccountFirst')}`,
+        },
+      }) as TableDataRow
+  )
+);
 const columns = [
   {
     key: 'id',
@@ -115,7 +118,6 @@ const columns = [
   },
 ] as TableDataColumn[];
 
-
 /**
  * Retrieve list of all existing subscribers
  */
@@ -125,7 +127,7 @@ const getSubscribers = async () => {
   subscribers.value = await staggerRetrieve(
     (payload: object) => call('subscriber/').post(payload).json(),
     250,
-    pageError,
+    pageError
   );
 };
 
@@ -182,7 +184,6 @@ onMounted(async () => {
   displayPage.value = true;
   await refresh();
 });
-
 </script>
 
 <template>
@@ -193,11 +194,7 @@ onMounted(async () => {
       :scheme="AlertSchemes.Success"
       @close="pageNotification = null"
     />
-    <alert-box
-      v-if="pageError"
-      :alert="pageError"
-      @close="pageError = null"
-    />
+    <alert-box v-if="pageError" :alert="pageError" @close="pageError = null" />
   </div>
   <div v-if="displayPage">
     <data-table
@@ -219,19 +216,14 @@ onMounted(async () => {
           placeholder="Search"
         />
       </template>
-
     </data-table>
   </div>
   <div v-else class="panel-loading">
-    <loading-spinner/>
+    <loading-spinner />
   </div>
 
   <!-- Refresh link confirmation modal -->
-  <delete-subscriber-modal
-    ref="subscriberDeleteModalRef"
-    :subscriber-id="hardDeleteModalContext"
-    @deleted="refresh"
-  />
+  <delete-subscriber-modal ref="subscriberDeleteModalRef" :subscriber-id="hardDeleteModalContext" @deleted="refresh" />
 </template>
 
 <style scoped>

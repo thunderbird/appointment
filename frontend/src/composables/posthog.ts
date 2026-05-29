@@ -1,4 +1,3 @@
- 
 import { default as ph } from 'posthog-js';
 
 /**

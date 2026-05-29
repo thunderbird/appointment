@@ -4,7 +4,16 @@ import { useI18n } from 'vue-i18n';
 import { callKey, supportUrlKey } from '@/keys';
 import { createUserStore } from '@/stores/user-store';
 import { useRouter } from 'vue-router';
-import { TextInput, IconButton, ModalDialog, DangerButton, LinkButton, CheckboxInput, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
+import {
+  TextInput,
+  IconButton,
+  ModalDialog,
+  DangerButton,
+  LinkButton,
+  CheckboxInput,
+  NoticeBar,
+  NoticeBarTypes,
+} from '@thunderbirdops/services-ui';
 import { PhX } from '@phosphor-icons/vue';
 import { Alert, BooleanResponse, Exception } from '@/models';
 import { posthog, usePosthog } from '@/composables/posthog';
@@ -43,9 +52,11 @@ const resetData = () => {
 const actuallyDeleteAccount = async () => {
   const pw = confirmPassword.value;
 
-  const { data, error }: BooleanResponse = await call('account/delete').delete({
-    password: pw,
-  }).json();
+  const { data, error }: BooleanResponse = await call('account/delete')
+    .delete({
+      password: pw,
+    })
+    .json();
 
   if (usePosthog) {
     posthog.capture(MetricEvents.DeleteAccount);
@@ -61,7 +72,7 @@ const actuallyDeleteAccount = async () => {
   await router.push('/');
 };
 
-defineExpose({ show })
+defineExpose({ show });
 </script>
 
 <template>
@@ -80,8 +91,10 @@ defineExpose({ show })
           </icon-button>
         </template>
       </notice-bar>
-      
-      <p><strong>{{ t('text.settings.account.delete.permanenceHint') }}</strong></p>
+
+      <p>
+        <strong>{{ t('text.settings.account.delete.permanenceHint') }}</strong>
+      </p>
       <p>{{ t('text.settings.account.delete.impactHint') }}</p>
       <p>{{ t('text.settings.account.delete.tbproHint') }}</p>
       <p>
@@ -93,7 +106,7 @@ defineExpose({ show })
           data-testid="account-data-deletion-consent-checkbox"
         />
       </p>
-  
+
       <div class="password-confirmation">
         <text-input
           name="confirm-password"
@@ -145,8 +158,8 @@ defineExpose({ show })
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    padding-bottom: .25rem;
-    
+    padding-bottom: 0.25rem;
+
     :deep(.checkbox-control) {
       flex-shrink: 0;
     }
@@ -159,14 +172,13 @@ defineExpose({ show })
       label {
         flex-grow: 0.5;
       }
-  
+
       button {
         align-self: flex-start;
         /* margin-top: 1.75rem; */
         line-height: 1.25;
       }
     }
-  
   }
   .modal-actions .base.cancel-button {
     color: var(--colour-ti-highlight);
@@ -178,7 +190,7 @@ defineExpose({ show })
     .delete-modal-container {
       .password-confirmation {
         flex-direction: row;
-    
+
         button {
           margin-top: 1.75rem;
         }

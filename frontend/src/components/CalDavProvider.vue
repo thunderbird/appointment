@@ -1,13 +1,8 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import {
-  computed, inject, ref,
-  useTemplateRef,
-} from 'vue';
+import { computed, inject, ref, useTemplateRef } from 'vue';
 import { callKey } from '@/keys';
-import {
-  CalendarListResponse, PydanticException,
-} from '@/models';
+import { CalendarListResponse, PydanticException } from '@/models';
 import { clearFormErrors, handleFormError } from '@/utils';
 import { PrimaryButton, TextInput } from '@thunderbirdops/services-ui';
 
@@ -33,8 +28,8 @@ const locationPreview = computed(() => {
 
 // component properties
 interface Props {
-  showPrevious?: boolean,
-  showSwitch?: boolean,
+  showPrevious?: boolean;
+  showSwitch?: boolean;
 }
 withDefaults(defineProps<Props>(), {
   showPrevious: false,
@@ -113,16 +108,14 @@ const onSubmit = async () => {
     </form>
     <div class="buttons">
       <primary-button variant="outline" class="btn-switch" @click="emits('switch')" v-if="showSwitch">
-      {{ t('calDAVForm.switchToGoogleCalendar') }}
+        {{ t('calDAVForm.switchToGoogleCalendar') }}
       </primary-button>
       <primary-button variant="outline" @click="emits('previous')" v-if="showPrevious">
-      {{ t('label.back') }}
+        {{ t('label.back') }}
       </primary-button>
-      <primary-button
-        :label="t('label.connect')"
-        :disabled="isLoading"
-        @click="onSubmit"
-      >{{ t('label.connect') }}</primary-button>
+      <primary-button :label="t('label.connect')" :disabled="isLoading" @click="onSubmit">{{
+        t('label.connect')
+      }}</primary-button>
     </div>
   </div>
 </template>

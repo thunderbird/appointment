@@ -13,7 +13,7 @@ import { useUserStore } from '@/stores/user-store';
 const loading = defineModel<boolean>('loading', { required: true });
 
 const props = defineProps<{
-  activeDate: Dayjs,
+  activeDate: Dayjs;
 }>();
 
 const refresh = inject(refreshKey);
@@ -33,8 +33,8 @@ const timeAgo = computed(() =>
 );
 
 const scheduleCalendar = computed(() => {
-  return calendarStore.calendarById(firstSchedule.value?.calendar_id)
-})
+  return calendarStore.calendarById(firstSchedule.value?.calendar_id);
+});
 
 async function onSyncCalendarButtonClicked() {
   loading.value = true;
@@ -58,7 +58,7 @@ async function onSyncCalendarButtonClicked() {
         <p class="user-updated-at">{{ t('label.updated') }} {{ timeAgo }}</p>
       </div>
 
-      <button @click="onSyncCalendarButtonClicked" :disabled="loading" :class="{ 'loading': loading }">
+      <button @click="onSyncCalendarButtonClicked" :disabled="loading" :class="{ loading: loading }">
         <ph-arrow-clockwise size="24" />
       </button>
     </template>

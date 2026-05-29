@@ -55,17 +55,17 @@ export enum BookingStatus {
   Booked = 3,
   Declined = 4,
   Cancelled = 5,
-  Modified = 6
+  Modified = 6,
 }
 
 export enum BookingsFilterOptions {
   All = 'all',
-  Unconfirmed = 'unconfirmed'
+  Unconfirmed = 'unconfirmed',
 }
 
 export enum BookingsSortOptions {
   DateRequested = 'date-requested',
-  MeetingDate = 'meeting-date'
+  MeetingDate = 'meeting-date',
 }
 
 /**

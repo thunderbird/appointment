@@ -1,12 +1,12 @@
-import { computed, ref, toRefs } from "vue";
-import { defineStore } from "pinia";
-import { Fetch, SettingsForm } from "@/models";
-import { deepClone } from "@/utils";
+import { computed, ref, toRefs } from 'vue';
+import { defineStore } from 'pinia';
+import { Fetch, SettingsForm } from '@/models';
+import { deepClone } from '@/utils';
 
-import { createCalendarStore } from "./calendar-store";
-import { createUserStore } from "./user-store";
-import { createExternalConnectionsStore } from "./external-connections-store";
-import { createScheduleStore } from "./schedule-store";
+import { createCalendarStore } from './calendar-store';
+import { createUserStore } from './user-store';
+import { createExternalConnectionsStore } from './external-connections-store';
+import { createScheduleStore } from './schedule-store';
 
 export const useSettingsStore = defineStore('settings', () => {
   const call = ref(null);
@@ -15,9 +15,7 @@ export const useSettingsStore = defineStore('settings', () => {
   const initialState = ref<SettingsForm>({});
   const currentState = ref<SettingsForm>({});
 
-  const isDirty = computed(() => (
-    JSON.stringify(initialState.value) !== JSON.stringify(currentState.value)
-  ))
+  const isDirty = computed(() => JSON.stringify(initialState.value) !== JSON.stringify(currentState.value));
 
   /**
    * Initialize store with data required at runtime
@@ -66,34 +64,32 @@ export const useSettingsStore = defineStore('settings', () => {
     initialState.value.changedCalendarColors = {};
 
     // Copy initialState
-    currentState.value = deepClone({ ...initialState.value }); 
+    currentState.value = deepClone({ ...initialState.value });
 
     isLoaded.value = true;
-  }
+  };
 
   const revertChanges = () => {
     currentState.value = deepClone({ ...initialState.value });
-  }
+  };
 
   const connectZoom = async () => {
     const { data } = await call.value('zoom/auth').get().json();
 
     // Ship them to the auth link
     window.location.href = data.value.url;
-  }
-  
+  };
+
   const updateCalendarConnected = (calendarId: number, value: boolean, originalValue: boolean) => {
     const { [calendarId]: _, ...rest } = currentState.value.changedCalendars ?? {};
-    currentState.value.changedCalendars = value === originalValue
-      ? rest
-      : { ...rest, [calendarId]: value };
+    currentState.value.changedCalendars = value === originalValue ? rest : { ...rest, [calendarId]: value };
   };
 
   const $reset = async () => {
     isLoaded.value = false;
 
     await init(call.value);
-  }
+  };
 
   return {
     init,
@@ -105,7 +101,7 @@ export const useSettingsStore = defineStore('settings', () => {
     revertChanges,
     updateCalendarConnected,
     $reset,
-  }
+  };
 });
 
 export const createSettingsStore = (call: Fetch) => {

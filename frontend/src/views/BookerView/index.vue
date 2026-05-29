@@ -5,9 +5,7 @@ import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { dayjsKey, callKey } from '@/keys';
-import {
-  Appointment, Slot, Exception, ExceptionDetail, AppointmentResponse
-} from '@/models';
+import { Appointment, Slot, Exception, ExceptionDetail, AppointmentResponse } from '@/models';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import BookingViewSlotSelection from './components/BookingViewSlotSelection.vue';
 import BookingViewSuccess from './components/BookingViewSuccess.vue';
@@ -22,13 +20,7 @@ const { t } = useI18n();
 const errorHeading = ref<string>(null);
 const errorBody = ref<string>(null);
 
-const {
-  appointment,
-  activeView,
-  activeDate,
-  attendee,
-  selectedEvent,
-} = storeToRefs(bookingViewStore);
+const { appointment, activeView, activeDate, attendee, selectedEvent } = storeToRefs(bookingViewStore);
 
 // check if slots are distributed over different months, weeks, days or only on a single day
 const getViewBySlotDistribution = (slots: Slot[]) => {
@@ -89,7 +81,7 @@ const handleError = (data: Exception) => {
  * Retrieve the appointment from either availability or booking routes.
  * Returns null if there was an error, or the Appointment object if it was successful.
  */
-const getAppointment = async (): Promise<Appointment|null> => {
+const getAppointment = async (): Promise<Appointment | null> => {
   const url = window.location.href.split('#')[0];
   const request: AppointmentResponse = call('schedule/public/availability').post({ url });
 
@@ -127,33 +119,21 @@ onMounted(async () => {
 
 <script lang="ts">
 export default {
-  name: 'BookerView'
-}
+  name: 'BookerView',
+};
 </script>
 
 <template>
   <!-- booking page content: loading -->
-  <main
-    v-if="activeView === BookingCalendarView.Loading"
-    class="booking-loading-container"
-  >
-    <loading-spinner/>
+  <main v-if="activeView === BookingCalendarView.Loading" class="booking-loading-container">
+    <loading-spinner />
   </main>
   <!-- booking page content: invalid link -->
-  <main
-    v-else-if="activeView === BookingCalendarView.Invalid"
-    class="booking-invalid-container"
-  >
-    <booking-view-error
-      :heading="errorHeading"
-      :body="errorBody"
-    />
+  <main v-else-if="activeView === BookingCalendarView.Invalid" class="booking-invalid-container">
+    <booking-view-error :heading="errorHeading" :body="errorBody" />
   </main>
   <!-- booking page content: successful booking -->
-  <main
-    v-else-if="activeView === BookingCalendarView.Success"
-    class="booking-success-container"
-  >
+  <main v-else-if="activeView === BookingCalendarView.Success" class="booking-success-container">
     <booking-view-success
       :selected-event="selectedEvent"
       :attendee="attendee"
@@ -161,10 +141,7 @@ export default {
     />
   </main>
   <!-- booking page content: time slot selection -->
-  <main
-    v-else
-    class="booking-slot-selection-container"
-  >
+  <main v-else class="booking-slot-selection-container">
     <booking-view-slot-selection />
   </main>
 </template>

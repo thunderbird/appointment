@@ -1,7 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
- 
 export const useSiteNotificationStore = defineStore('siteNotification', () => {
   // State
   const isVisible = ref(false);
@@ -22,7 +21,9 @@ export const useSiteNotificationStore = defineStore('siteNotification', () => {
    * Lock the given id
    * @param lockId notification id to lock in
    */
-  const lock = (lockId: string) => { id.value = lockId; };
+  const lock = (lockId: string) => {
+    id.value = lockId;
+  };
 
   /**
    * Make a notification with given configuration appear
@@ -51,6 +52,13 @@ export const useSiteNotificationStore = defineStore('siteNotification', () => {
   };
 
   return {
-    isVisible, title, actionUrl, message, isSame, lock, show, $reset,
+    isVisible,
+    title,
+    actionUrl,
+    message,
+    isSame,
+    lock,
+    show,
+    $reset,
   };
 });

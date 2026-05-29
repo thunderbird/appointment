@@ -2,11 +2,7 @@
 import { computed, inject, ref, useTemplateRef } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import {
-  PhCalendarBlank,
-  PhClock,
-  PhMapPin
-} from '@phosphor-icons/vue';
+import { PhCalendarBlank, PhClock, PhMapPin } from '@phosphor-icons/vue';
 import { TextInput, PrimaryButton } from '@thunderbirdops/services-ui';
 import { dayjsKey, callKey } from '@/keys';
 import { SlotResponse } from '@/models';
@@ -22,12 +18,7 @@ const dj = inject(dayjsKey);
 const call = inject(callKey);
 
 const userStore = useUserStore();
-const {
-  appointment,
-  selectedEvent,
-  attendee,
-  activeView
-} = storeToRefs(useBookingViewStore());
+const { appointment, selectedEvent, attendee, activeView } = storeToRefs(useBookingViewStore());
 
 const userInfoForm = useTemplateRef<HTMLFormElement>('userInfoForm');
 
@@ -37,16 +28,14 @@ const guestUserName = ref<string>(userStore.authenticated ? userStore.data.name 
 const guestUserEmail = ref<string>(userStore.authenticated ? userStore.data.email : '');
 
 const timezone = computed(() => dj.tz.guess());
-const selectedSlotDate = computed(() => dj(selectedEvent.value?.start).format('LL'))
+const selectedSlotDate = computed(() => dj(selectedEvent.value?.start).format('LL'));
 const selectedSlotDateDayOfWeek = computed(() => dj(selectedEvent.value?.start).format('dddd'));
 const selectedSlotTimeDuration = computed(() => {
   const startTime = dj(selectedEvent.value?.start).format('LT');
-  const endTime = dj(selectedEvent.value?.start)
-    .add(selectedEvent.value?.slot_duration, 'minutes')
-    .format('LT');
+  const endTime = dj(selectedEvent.value?.start).add(selectedEvent.value?.slot_duration, 'minutes').format('LT');
 
   return `${startTime} ${t('label.to')} ${endTime}`;
-})
+});
 
 /**
  * Book or request to book a selected time.
@@ -65,7 +54,7 @@ const bookEvent = async () => {
     name: guestUserName.value,
     timezone: timezone.value,
     language: locale.value,
-  }
+  };
 
   const obj = {
     slot: {
@@ -104,8 +93,10 @@ const bookEvent = async () => {
 
   if (usePosthog) {
     // Not chained because it's the inverse of booking_confirmation, and it defaults to false.
-    const autoConfirmed = appointment && appointment.value.booking_confirmation !== undefined
-      ? !appointment.value.booking_confirmation : false;
+    const autoConfirmed =
+      appointment && appointment.value.booking_confirmation !== undefined
+        ? !appointment.value.booking_confirmation
+        : false;
     posthog.capture(MetricEvents.RequestBooking, {
       autoConfirmed,
     });
@@ -122,25 +113,25 @@ const bookEvent = async () => {
         <header>{{ selectedEvent.title }}</header>
         <div class="appointment-card-inner-details">
           <div class="appointment-card-inner-details-item">
-            <ph-calendar-blank size="20"/>
+            <ph-calendar-blank size="20" />
             <div class="appointment-card-inner-details-item-details">
               <p>{{ selectedSlotDateDayOfWeek }}</p>
               <span>{{ selectedSlotDate }}</span>
             </div>
           </div>
           <div class="appointment-card-inner-details-item">
-            <ph-clock size="20"/>
+            <ph-clock size="20" />
             <div class="appointment-card-inner-details-item-details">
               <p>{{ timezone }}</p>
               <span>{{ selectedSlotTimeDuration }}</span>
             </div>
           </div>
           <div class="appointment-card-inner-details-item">
-            <ph-clock size="20"/>
+            <ph-clock size="20" />
             <span>{{ t('units.minutes', { value: selectedEvent.slot_duration }) }}</span>
           </div>
           <div class="appointment-card-inner-details-item">
-            <ph-map-pin size="20"/>
+            <ph-map-pin size="20" />
             <!-- TODO: We are currently only allowing for events to be online but the backend defaults to in person -->
             <!-- <span>{{ selectedEvent.location_type === EventLocationType.Online ? t('label.virtual') : t('label.inPerson') }}</span> -->
             <span>{{ t('label.virtual') }}</span>
@@ -178,10 +169,7 @@ const bookEvent = async () => {
         </primary-button>
       </form>
 
-      <p
-        v-if="selectedEvent && !appointment.booking_confirmation"
-        class="confirmation-footer-note"
-      >
+      <p v-if="selectedEvent && !appointment.booking_confirmation" class="confirmation-footer-note">
         {{ t('label.yourAppointmentWillBeConfirmedAutomatically') }}
       </p>
     </template>
@@ -298,7 +286,7 @@ aside {
     .book-appointment-button {
       text-transform: capitalize;
     }
-  } 
+  }
 
   .booking-request-error {
     margin-block: 1rem;

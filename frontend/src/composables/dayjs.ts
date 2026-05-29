@@ -18,10 +18,10 @@ import { dayjsKey, isoWeekdaysKey, tzGuessKey } from '@/keys';
 import { arrayRotate } from '@/utils';
 
 export type IsoWeekday = {
-  iso: number,
-  long: string,
-  short: string,
-  min: string,
+  iso: number;
+  long: string;
+  short: string;
+  min: string;
 };
 
 export default function useDayJS(app: App<Element>, locale: string) {
@@ -52,9 +52,9 @@ export default function useDayJS(app: App<Element>, locale: string) {
   // taking locale first day of week into account
   const isoWeekdays = [] as IsoWeekday[];
   // Generate order list for all starting days
-  const defaultWeekdays = [1,2,3,4,5,6,7];
+  const defaultWeekdays = [1, 2, 3, 4, 5, 6, 7];
   const orderedWeekdays = arrayRotate(defaultWeekdays, -defaultWeekdays.indexOf(firstDayOfWeek));
-      
+
   orderedWeekdays.forEach((i) => {
     const n = i === 7 ? 0 : i;
     isoWeekdays.push({

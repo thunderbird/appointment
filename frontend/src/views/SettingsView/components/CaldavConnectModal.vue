@@ -30,7 +30,7 @@ async function afterCalDavConnect() {
   emit('connected');
 }
 
-defineExpose({ show, hide })
+defineExpose({ show, hide });
 </script>
 
 <template>
@@ -49,7 +49,7 @@ defineExpose({ show, hide })
           </icon-button>
         </template>
       </notice-bar>
-      <cal-dav-provider @next="afterCalDavConnect()" @error="(alert: Alert) => errorMessage = alert" />
+      <cal-dav-provider @next="afterCalDavConnect()" @error="(alert: Alert) => (errorMessage = alert)" />
     </div>
   </modal-dialog>
 </template>
@@ -57,7 +57,7 @@ defineExpose({ show, hide })
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
 
-.caldav-connect-modal  {
+.caldav-connect-modal {
   &:deep(.modal-header) {
     text-align: center;
   }

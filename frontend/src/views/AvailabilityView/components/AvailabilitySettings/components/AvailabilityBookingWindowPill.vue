@@ -16,13 +16,13 @@ const { currentState } = storeToRefs(availabilityStore);
 const bookingWindow = computed({
   get: () => currentState.value.farthest_booking,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { farthest_booking: value }})
-  }
-})
+    availabilityStore.$patch({ currentState: { farthest_booking: value } });
+  },
+});
 
 const bookingWindowOptions: SelectOption[] = [1, 2, 3, 4].map((d) => ({
   label: dj.duration(d, 'weeks').humanize(),
-  value: (d * 60 * 24 * 7),
+  value: d * 60 * 24 * 7,
 }));
 </script>
 

@@ -45,7 +45,7 @@ const handleTryAgainClicked = () => {
   isSuccess.value = false;
   isError.value = false;
   emit('update:hideModifyFieldsAndCTA', false);
-}
+};
 
 const handleModifyFormSubmit = async () => {
   try {
@@ -53,7 +53,8 @@ const handleModifyFormSubmit = async () => {
 
     const slotTimeInUTC = dj(selectedBookingSlot.value)
       .tz(user.data.settings.timezone ?? dj.tz.guess(), true)
-      .utc().format()
+      .utc()
+      .format();
 
     const payload = {
       appointmentId: props.appointment?.id,
@@ -80,7 +81,7 @@ const handleModifyFormSubmit = async () => {
   } catch (error) {
     console.error('Failed to update appointment:', error);
   }
-}
+};
 
 // Mini calendar refs and functions
 const activeDate = ref(dj(props.appointment?.slots[0].start));
@@ -105,11 +106,11 @@ const populateTimeSlots = async () => {
   // If no available slots are returned, pre-select the "No bookings available" option
   // otherwise, pre-select the first available slot
   if (!availableSlots.value.length) {
-    selectedBookingSlot.value = null
+    selectedBookingSlot.value = null;
   } else {
-    selectedBookingSlot.value = availableSlots.value[0].start
+    selectedBookingSlot.value = availableSlots.value[0].start;
   }
-}
+};
 
 // Booking slot refs and functions
 const isLoadingSlots = ref<boolean>(false);
@@ -130,10 +131,10 @@ const earliestOptions = computed<SelectOption[]>(() => {
 
 onMounted(async () => {
   await populateTimeSlots();
-})
+});
 
 defineExpose({
-  handleModifyFormSubmit
+  handleModifyFormSubmit,
 });
 </script>
 
@@ -153,18 +154,16 @@ defineExpose({
           />
         </div>
       </div>
-  
+
       <div class="attendees-section">
-        <div class="attendees-header">
-          {{ t('label.attendees') }}:
-        </div>
+        <div class="attendees-header">{{ t('label.attendees') }}:</div>
         <template v-for="s in attendeesSlots" :key="String(s.start)">
           <div class="attendee-item">
             {{ s.attendee.email }}
           </div>
         </template>
       </div>
-  
+
       <form id="appointment-modify-form" class="notes-form" @submit.prevent="handleModifyFormSubmit">
         <text-area
           name="notes"
@@ -198,12 +197,12 @@ defineExpose({
           @click="handleTryAgainClicked()"
           :title="t('label.tryAgain')"
         >
-        {{ t('label.tryAgain') }}
+          {{ t('label.tryAgain') }}
         </primary-button>
       </div>
     </div>
   </template>
-  
+
   <!-- Success state -->
   <template v-else-if="isSuccess">
     <div class="confirmation-container">

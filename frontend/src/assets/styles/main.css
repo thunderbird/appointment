@@ -15,7 +15,8 @@
 }
 
 /* Use a consistent sensible line-height in all browsers. */
-html, :host {
+html,
+:host {
   line-height: 1.5;
   tab-size: 4;
   -webkit-text-size-adjust: 100%;
@@ -23,7 +24,12 @@ html, :host {
 }
 
 /* Reset headings */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-size: inherit;
   font-weight: inherit;
 }
@@ -36,12 +42,16 @@ a {
 }
 
 /* Add the correct font weight in Edge and Safari. */
-b, strong {
+b,
+strong {
   font-weight: bolder;
 }
 
 /* Correct the odd `em` font sizing in all browsers. */
-code, kbd, samp, pre {
+code,
+kbd,
+samp,
+pre {
   font-size: 1em;
 }
 
@@ -53,7 +63,9 @@ table {
 }
 
 /* Reset lists */
-ol, ul, menu {
+ol,
+ul,
+menu {
   list-style: none;
 }
 
@@ -64,16 +76,29 @@ hr {
 }
 
 /* Reset display for media elements */
-img, svg, video, canvas, audio, iframe, embed, object {
+img,
+svg,
+video,
+canvas,
+audio,
+iframe,
+embed,
+object {
   display: block;
 }
-img, video {
+img,
+video {
   max-width: 100%;
   height: auto;
 }
 
 /* Reset form input elements */
-button, input, select, optgroup, textarea, ::file-selector-button {
+button,
+input,
+select,
+optgroup,
+textarea,
+::file-selector-button {
   font: inherit;
   font-feature-settings: inherit;
   font-variation-settings: inherit;
@@ -109,8 +134,6 @@ input:where([type='button'], [type='reset'], [type='submit']),
   height: auto;
 }
 
-
-
 /* Vue specific classes */
 .v-enter-active,
 .v-leave-active {
@@ -143,7 +166,8 @@ body:has(dialog[open]) {
 }
 
 /* Full height so that the footer is at the bottom regardless of main content's height */
-html, body {
+html,
+body {
   height: 100%;
 }
 
@@ -153,7 +177,9 @@ body {
   background-color: var(--colour-neutral-lower);
   color: var(--colour-ti-secondary);
 
-  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-family:
+    'Inter', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
 }
 
 #app {

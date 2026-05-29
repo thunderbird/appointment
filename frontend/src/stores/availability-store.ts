@@ -1,13 +1,13 @@
-import { computed, ref, toRefs } from "vue";
-import { defineStore } from "pinia";
-import { Fetch, AvailabilityFormFields } from "@/models";
-import { deepClone } from "@/utils";
-import { DEFAULT_SLOT_DURATION } from "@/definitions";
+import { computed, ref, toRefs } from 'vue';
+import { defineStore } from 'pinia';
+import { Fetch, AvailabilityFormFields } from '@/models';
+import { deepClone } from '@/utils';
+import { DEFAULT_SLOT_DURATION } from '@/definitions';
 
-import { createCalendarStore } from "./calendar-store";
-import { createUserStore } from "./user-store";
-import { createScheduleStore } from "./schedule-store";
-import { createExternalConnectionsStore } from "./external-connections-store";
+import { createCalendarStore } from './calendar-store';
+import { createUserStore } from './user-store';
+import { createScheduleStore } from './schedule-store';
+import { createExternalConnectionsStore } from './external-connections-store';
 
 export const useAvailabilityStore = defineStore('availability', () => {
   const call = ref(null);
@@ -17,9 +17,7 @@ export const useAvailabilityStore = defineStore('availability', () => {
   const initialState = ref<AvailabilityFormFields>({});
   const currentState = ref<AvailabilityFormFields>({});
 
-  const isDirty = computed(() => (
-    JSON.stringify(initialState.value) !== JSON.stringify(currentState.value)
-  ))
+  const isDirty = computed(() => JSON.stringify(initialState.value) !== JSON.stringify(currentState.value));
 
   /**
    * Initialize store with data required at runtime
@@ -56,11 +54,23 @@ export const useAvailabilityStore = defineStore('availability', () => {
       initialState.value = deepClone({ ...firstSchedule.value });
 
       // Calculate utc back to user timezone
-      initialState.value.start_time = scheduleStore.timeToFrontendTime(initialState.value.start_time, initialState.value.time_updated);
-      initialState.value.end_time = scheduleStore.timeToFrontendTime(initialState.value.end_time, initialState.value.time_updated);
+      initialState.value.start_time = scheduleStore.timeToFrontendTime(
+        initialState.value.start_time,
+        initialState.value.time_updated
+      );
+      initialState.value.end_time = scheduleStore.timeToFrontendTime(
+        initialState.value.end_time,
+        initialState.value.time_updated
+      );
       initialState.value.availabilities?.forEach((a, i) => {
-        initialState.value.availabilities[i].start_time = scheduleStore.timeToFrontendTime(a.start_time, initialState.value.time_updated);
-        initialState.value.availabilities[i].end_time = scheduleStore.timeToFrontendTime(a.end_time, initialState.value.time_updated);
+        initialState.value.availabilities[i].start_time = scheduleStore.timeToFrontendTime(
+          a.start_time,
+          initialState.value.time_updated
+        );
+        initialState.value.availabilities[i].end_time = scheduleStore.timeToFrontendTime(
+          a.end_time,
+          initialState.value.time_updated
+        );
       });
 
       // Adjust the default calendar if the one attached is not connected.
@@ -79,11 +89,11 @@ export const useAvailabilityStore = defineStore('availability', () => {
         end_time: '17:00',
         slot_duration: DEFAULT_SLOT_DURATION,
         booking_confirmation: true,
-        earliest_booking:	1440,
+        earliest_booking: 1440,
         farthest_booking: 20160,
         weekdays: [1, 2, 3, 4, 5],
         details: '',
-      }
+      };
     }
 
     // Booking Page Details data
@@ -93,20 +103,20 @@ export const useAvailabilityStore = defineStore('availability', () => {
     initialState.value.slug = userStore.mySlug;
 
     // Copy initialState
-    currentState.value = deepClone({ ...initialState.value }); 
+    currentState.value = deepClone({ ...initialState.value });
 
     isLoaded.value = true;
-  }
+  };
 
   const revertChanges = () => {
-    currentState.value = deepClone({ ...initialState.value }); 
-  }
+    currentState.value = deepClone({ ...initialState.value });
+  };
 
   const $reset = async () => {
     isLoaded.value = false;
 
     await init(call.value);
-  }
+  };
 
   return {
     init,
@@ -117,7 +127,7 @@ export const useAvailabilityStore = defineStore('availability', () => {
     currentState,
     revertChanges,
     $reset,
-  }
+  };
 });
 
 export const createAvailabilityStore = (call: Fetch) => {

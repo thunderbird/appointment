@@ -181,16 +181,16 @@ const router = createRouter({
         el: to.hash,
         behavior: noPrefersReducedMotion ? 'smooth' : 'auto',
         top: 68 + 16, // Account for the navigation header height (68px) + 16px for some padding
-      }
+      };
     }
-  }
+  },
 });
 
 router.beforeEach(async (to, _from) => {
   const toMeta: ApmtRouteMeta = to?.meta ?? {};
   const user = useUserStore();
 
-  if (!toMeta?.isPublic && !['setup', 'contact', 'settings', 'logout', 'undefined'].includes(String(to.name))) {    
+  if (!toMeta?.isPublic && !['setup', 'contact', 'settings', 'logout', 'undefined'].includes(String(to.name))) {
     if (user && user.data?.email && !user.data.isSetup) {
       return { ...to, name: 'setup' };
     }

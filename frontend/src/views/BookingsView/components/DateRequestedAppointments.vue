@@ -9,7 +9,7 @@ import DateRequestedAppointmentItem from './DateRequestedAppointmentItem.vue';
 import { isUnconfirmed } from '@/utils';
 
 interface Props {
-  filter: BookingsFilterOptions,
+  filter: BookingsFilterOptions;
 }
 const props = withDefaults(defineProps<Props>(), {
   filter: BookingsFilterOptions.All,

@@ -1,11 +1,13 @@
 import {
-  ExternalConnection, ExternalConnectionCollection, ExternalConnectionCollectionResponse, Fetch,
+  ExternalConnection,
+  ExternalConnectionCollection,
+  ExternalConnectionCollectionResponse,
+  Fetch,
 } from '@/models';
 import { ExternalConnectionProviders } from '@/definitions';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
- 
 export const useExternalConnectionsStore = defineStore('externalConnections', () => {
   // State
   const isLoaded = ref(false);
@@ -16,14 +18,16 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
   const fxa = ref<ExternalConnection[]>([]);
   const google = ref<ExternalConnection[]>([]);
   const caldav = ref<ExternalConnection[]>([]);
-  const connections = computed((): ExternalConnectionCollection => ({
-    // FXA should be at the top since it represents the Appointment subscriber.
-    oidc: oidc.value,
-    fxa: fxa.value,
-    google: google.value,
-    zoom: zoom.value,
-    caldav: caldav.value,
-  }));
+  const connections = computed(
+    (): ExternalConnectionCollection => ({
+      // FXA should be at the top since it represents the Appointment subscriber.
+      oidc: oidc.value,
+      fxa: fxa.value,
+      google: google.value,
+      zoom: zoom.value,
+      caldav: caldav.value,
+    })
+  );
 
   /**
    * Whether any checkable external connection (zoom, google, caldav) has an error status.
@@ -42,7 +46,7 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
    */
   const init = (fetch: Fetch) => {
     call.value = fetch;
-  }
+  };
 
   /**
    * Get all external connections for current user
@@ -53,7 +57,10 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
       return;
     }
 
-    const { data }: ExternalConnectionCollectionResponse = await call.value('account/external-connections').get().json();
+    const { data }: ExternalConnectionCollectionResponse = await call
+      .value('account/external-connections')
+      .get()
+      .json();
 
     oidc.value = data.value?.oidc ?? [];
     zoom.value = data.value?.zoom ?? [];
@@ -100,7 +107,10 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
       return;
     }
 
-    const { data }: ExternalConnectionCollectionResponse = await call.value('account/external-connections/check-status').post().json();
+    const { data }: ExternalConnectionCollectionResponse = await call
+      .value('account/external-connections/check-status')
+      .post()
+      .json();
 
     if (data.value) {
       oidc.value = data.value?.oidc ?? oidc.value;
@@ -147,7 +157,6 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     disconnect,
   };
 });
-
 
 export const createExternalConnectionsStore = (call: Fetch) => {
   const store = useExternalConnectionsStore();

@@ -5,9 +5,9 @@ import { createUserStore } from '@/stores/user-store';
 import { createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { LOGIN_REDIRECT_KEY } from '@/definitions';
 import { callKey, dayjsKey } from '@/keys';
-import { userManager } from "@/composables/oidcUserManager";
-import { BooleanResponse } from "@/models";
-import { isFxaAuth, isOidcAuth } from "@/composables/authSchemes";
+import { userManager } from '@/composables/oidcUserManager';
+import { BooleanResponse } from '@/models';
+import { isFxaAuth, isOidcAuth } from '@/composables/authSchemes';
 
 const route = useRoute();
 const router = useRouter();
@@ -30,13 +30,15 @@ onMounted(async () => {
     const userData = await userManager.signinCallback(window.location.href);
     const timezone = userData?.profile?.zoneinfo ?? dj.tz.guess();
 
-    const { error, data }: BooleanResponse = await call('oidc/token').post({
-      'access_token': userData.access_token,
-      'timezone': timezone,
-    }).json();
+    const { error, data }: BooleanResponse = await call('oidc/token')
+      .post({
+        access_token: userData.access_token,
+        timezone: timezone,
+      })
+      .json();
 
     if (error.value) {
-      console.error("Err", data.value);
+      console.error('Err', data.value);
       return;
     }
   } else if (!isFxaAuth) {

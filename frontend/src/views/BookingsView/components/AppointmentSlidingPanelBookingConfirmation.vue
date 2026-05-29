@@ -9,18 +9,18 @@ import { useAppointmentStore } from '@/stores/appointment-store';
 const { t } = useI18n();
 
 const props = defineProps<{
-  signedUrl: string,
-  slotId: number,
+  signedUrl: string;
+  slotId: number;
   slotToken: string;
   confirmed: boolean;
-}>()
-
-const emit = defineEmits<{
-  (e: 'close'): void
 }>();
 
-const isError = ref<boolean|null>(null);
-const attendeeEmail = ref<string|null>(null);
+const emit = defineEmits<{
+  (e: 'close'): void;
+}>();
+
+const isError = ref<boolean | null>(null);
+const attendeeEmail = ref<string | null>(null);
 
 const appointmentStore = useAppointmentStore();
 
@@ -68,8 +68,8 @@ onMounted(async () => {
           {{ t('info.bookingSuccessfullyConfirmed') }}
         </div>
         <div class="success-message">
-          {{ t('info.eventWasCreated') }}<br>
-          {{ t('text.invitationSentToAddress', { 'address': attendeeEmail }) }}
+          {{ t('info.eventWasCreated') }}<br />
+          {{ t('text.invitationSentToAddress', { address: attendeeEmail }) }}
         </div>
       </template>
       <template v-else>
@@ -77,7 +77,7 @@ onMounted(async () => {
           {{ t('info.bookingSuccessfullyDenied') }}
         </div>
         <div class="success-message">
-          {{ t('text.denialSentToAddress', { 'address': attendeeEmail }) }}<br>
+          {{ t('text.denialSentToAddress', { address: attendeeEmail }) }}<br />
           {{ t('info.slotIsAvailableAgain') }}
         </div>
       </template>

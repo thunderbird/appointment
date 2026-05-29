@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="" data-tbpro-service="apmt">
   <head>
     <meta charset="UTF-8" />
@@ -14,9 +14,9 @@
       const browserPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
       if (
-        (user.settings?.colourScheme === 'dark'
-        || (user.settings?.colourScheme === 'system' && browserPrefersDark)
-        || (!user.settings?.colourScheme && browserPrefersDark))
+        user.settings?.colourScheme === 'dark' ||
+        (user.settings?.colourScheme === 'system' && browserPrefersDark) ||
+        (!user.settings?.colourScheme && browserPrefersDark)
       ) {
         document.documentElement.classList.add('dark');
       } else {
@@ -27,12 +27,10 @@
   <body>
     <noscript>
       <strong>
-        We're sorry but this application doesn't work properly without JavaScript enabled.
-        Please enable it to continue.
+        We're sorry but this application doesn't work properly without JavaScript enabled. Please enable it to continue.
       </strong>
     </noscript>
     <div id="app"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
-
 </html>

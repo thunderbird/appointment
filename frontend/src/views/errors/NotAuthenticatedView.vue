@@ -14,7 +14,6 @@ const goToLogin = () => {
   window.sessionStorage?.setItem(LOGIN_REDIRECT_KEY, route.fullPath);
   router.push('/login');
 };
-
 </script>
 
 <template>

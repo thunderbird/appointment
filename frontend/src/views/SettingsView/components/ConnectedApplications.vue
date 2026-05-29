@@ -48,9 +48,7 @@ const zoomAccount = computed(() => externalConnectionStore.zoom[0]);
 // grouped by external connection for display purposes.
 // Should be treated as immutable since it represents the current backend state.
 const groupedCalendars = computed(() => {
-  const defaultCalendar = calendars.value?.find(
-    (calendar) => calendar.id === initialState.value.defaultCalendarId
-  );
+  const defaultCalendar = calendars.value?.find((calendar) => calendar.id === initialState.value.defaultCalendarId);
   const defaultExternalConnectionId = defaultCalendar?.external_connection_id;
 
   const calendarProviders = [
@@ -58,28 +56,28 @@ const groupedCalendars = computed(() => {
     ['caldav', CalendarProviders.Caldav],
   ];
 
-  return calendarProviders.flatMap(([providerKey, provider]) => {
-    const connections = externalConnectionStore.connections[providerKey] ?? [];
-    const providerName = ProviderDisplayName[providerKey] ?? providerKey;
+  return calendarProviders
+    .flatMap(([providerKey, provider]) => {
+      const connections = externalConnectionStore.connections[providerKey] ?? [];
+      const providerName = ProviderDisplayName[providerKey] ?? providerKey;
 
-    return connections.map((connection: ExternalConnection) => ({
-      connectionId: connection.id,
-      connectionName: connection.name ?? '',
-      connectionStatus: connection.status,
-      providerName,
-      provider,
-      typeId: connection.type_id,
-      sharesDefaultConnection: connection.id === defaultExternalConnectionId,
-      calendars: (calendars.value ?? [])
-        .filter((cal) => cal.external_connection_id === connection.id)
-        .sort((a, b) => a.title.localeCompare(b.title)),
-    }));
-  }).filter((group) => group.calendars.length > 0);
+      return connections.map((connection: ExternalConnection) => ({
+        connectionId: connection.id,
+        connectionName: connection.name ?? '',
+        connectionStatus: connection.status,
+        providerName,
+        provider,
+        typeId: connection.type_id,
+        sharesDefaultConnection: connection.id === defaultExternalConnectionId,
+        calendars: (calendars.value ?? [])
+          .filter((cal) => cal.external_connection_id === connection.id)
+          .sort((a, b) => a.title.localeCompare(b.title)),
+      }));
+    })
+    .filter((group) => group.calendars.length > 0);
 });
 
-const calendarCount = computed(() =>
-  groupedCalendars.value.reduce((sum, group) => sum + group.calendars.length, 0)
-);
+const calendarCount = computed(() => groupedCalendars.value.reduce((sum, group) => sum + group.calendars.length, 0));
 
 async function connectGoogleCalendar() {
   await calendarStore.connectGoogleCalendar();
@@ -89,7 +87,7 @@ function displayDisconnectModal(
   provider: ExternalConnectionProviders | CalendarProviders,
   typeId: string | null = null,
   connectionName: string | null = null,
-  isCalendar: boolean = false,
+  isCalendar: boolean = false
 ) {
   disconnectTypeId.value = typeId;
   disconnectConnectionName.value = connectionName;
@@ -105,23 +103,26 @@ function displayDisconnectModal(
       disconnectZoomModal.value.show();
     }
   }
-};
+}
 
 function calendarConnected(calendarId: number) {
   if (!calendarConnectedMap.has(calendarId)) {
-    calendarConnectedMap.set(calendarId, computed({
-      get: () => {
-        const calendar = groupedCalendars.value.flatMap(g => g.calendars).find(c => c.id === calendarId);
-        return currentState.value.changedCalendars?.[calendarId] !== undefined
-          ? currentState.value.changedCalendars[calendarId]
-          : calendar?.connected ?? false;
-      },
-      set: (value: boolean) => {
-        const calendar = groupedCalendars.value.flatMap(g => g.calendars).find(c => c.id === calendarId);
-        const originalValue = calendar?.connected ?? false;
-        settingsStore.updateCalendarConnected(calendarId, value, originalValue);
-      }
-    }));
+    calendarConnectedMap.set(
+      calendarId,
+      computed({
+        get: () => {
+          const calendar = groupedCalendars.value.flatMap((g) => g.calendars).find((c) => c.id === calendarId);
+          return currentState.value.changedCalendars?.[calendarId] !== undefined
+            ? currentState.value.changedCalendars[calendarId]
+            : (calendar?.connected ?? false);
+        },
+        set: (value: boolean) => {
+          const calendar = groupedCalendars.value.flatMap((g) => g.calendars).find((c) => c.id === calendarId);
+          const originalValue = calendar?.connected ?? false;
+          settingsStore.updateCalendarConnected(calendarId, value, originalValue);
+        },
+      })
+    );
   }
 
   return calendarConnectedMap.get(calendarId)!;
@@ -130,7 +131,7 @@ function calendarConnected(calendarId: number) {
 function onSetAsDefaultClicked(calendarId: number) {
   // Only update local state, the actual schedule's calendar change
   // happens on save changes in SettingsView/index.vue
-  settingsStore.$patch({ currentState: { defaultCalendarId: calendarId }});
+  settingsStore.$patch({ currentState: { defaultCalendarId: calendarId } });
   // Update the current availability too, otherwise it will be out
   // of sync until the user refreshes the page
   availabilityStore.$patch({
@@ -146,13 +147,16 @@ function onCalendarColorChanged(event: HTMLInputElementEvent, calendarId: number
     currentState: {
       changedCalendarColors: {
         ...currentState.value.changedCalendarColors,
-        [calendarId]: event.target.value
-      }
-    }
-  })
+        [calendarId]: event.target.value,
+      },
+    },
+  });
 }
 
-function reconnectExternalConnection(provider: ExternalConnectionProviders | CalendarProviders, isCalendar: boolean = false) {
+function reconnectExternalConnection(
+  provider: ExternalConnectionProviders | CalendarProviders,
+  isCalendar: boolean = false
+) {
   if (isCalendar) {
     if (provider === CalendarProviders.Google) {
       connectGoogleCalendar();
@@ -179,11 +183,11 @@ async function refreshData() {
     // Need to update userStore in case they used an attached email
     userStore.profile(),
   ]);
-};
+}
 
 onMounted(async () => {
   await externalConnectionStore.checkStatus();
-})
+});
 </script>
 
 <template>
@@ -197,7 +201,7 @@ onMounted(async () => {
       <label for="videoMeeting" class="video-label">
         {{ t('label.videoMeeting') }}
       </label>
-  
+
       <hr class="divider" />
 
       <template v-if="zoomAccount">
@@ -239,7 +243,7 @@ onMounted(async () => {
           </drop-down>
         </div>
       </template>
-  
+
       <template v-else>
         <i18n-t keypath="text.generateZoomMeetingHelpDisabled.text" tag="p" scope="global" class="video-not-connected">
           <template v-slot:link>
@@ -256,7 +260,7 @@ onMounted(async () => {
       <label for="calendars" class="calendars-label">
         {{ t('label.calendar', calendarCount) }}
       </label>
-  
+
       <hr class="divider" />
 
       <template v-if="groupedCalendars.length > 0">
@@ -270,7 +274,7 @@ onMounted(async () => {
             <p class="connection-provider">{{ group.providerName }}</p>
             <drop-down
               class="dropdown"
-              :ref="(el) => connectionDropdownRefs[group.connectionId] = el"
+              :ref="(el) => (connectionDropdownRefs[group.connectionId] = el)"
               v-if="!group.sharesDefaultConnection || group.connectionStatus === ExternalConnectionStatus.error"
             >
               <template #trigger>
@@ -302,10 +306,18 @@ onMounted(async () => {
                 <ph-warning-circle weight="fill" size="24" />
 
                 <template v-if="group.sharesDefaultConnection">
-                  {{ t('text.settings.connectedApplications.connectionUnreachableDefault', { providerName: group.providerName }) }}
+                  {{
+                    t('text.settings.connectedApplications.connectionUnreachableDefault', {
+                      providerName: group.providerName,
+                    })
+                  }}
                 </template>
                 <template v-else>
-                  {{ t('text.settings.connectedApplications.connectionUnreachableNonDefault', { providerName: group.providerName }) }}
+                  {{
+                    t('text.settings.connectedApplications.connectionUnreachableNonDefault', {
+                      providerName: group.providerName,
+                    })
+                  }}
                 </template>
               </p>
             </template>
@@ -340,8 +352,11 @@ onMounted(async () => {
 
               <drop-down
                 class="dropdown"
-                :ref="(el) => calendarDropdownRefs[calendar.id] = el"
-                v-if="calendar.id !== initialState.defaultCalendarId && (calendar.connected || !group.sharesDefaultConnection)"
+                :ref="(el) => (calendarDropdownRefs[calendar.id] = el)"
+                v-if="
+                  calendar.id !== initialState.defaultCalendarId &&
+                  (calendar.connected || !group.sharesDefaultConnection)
+                "
               >
                 <template #trigger>
                   <ph-dots-three size="24" />
@@ -395,18 +410,10 @@ onMounted(async () => {
   />
 
   <!-- Disconnect CalDav Modal -->
-  <caldav-disconnect-modal
-    ref="disconnectCaldavModal"
-    :type-id="disconnectTypeId"
-    @disconnected="refreshData"
-  />
+  <caldav-disconnect-modal ref="disconnectCaldavModal" :type-id="disconnectTypeId" @disconnected="refreshData" />
 
   <!-- Disconnect Zoom Modal -->
-  <zoom-disconnect-modal
-    ref="disconnectZoomModal"
-    :type-id="disconnectTypeId"
-    @disconnected="refreshData"
-  />
+  <zoom-disconnect-modal ref="disconnectZoomModal" :type-id="disconnectTypeId" @disconnected="refreshData" />
 </template>
 
 <style scoped>
@@ -434,7 +441,8 @@ h2 {
   gap: 1.5rem;
   margin-block-end: 2rem;
 
-  .calendars-label, .video-label {
+  .calendars-label,
+  .video-label {
     display: block;
     color: var(--colour-ti-secondary);
     letter-spacing: 0.48px;
@@ -442,7 +450,7 @@ h2 {
   }
 
   .connection-provider {
-    font-weight: 500; 
+    font-weight: 500;
   }
 
   .video-meeting-container {
@@ -527,7 +535,9 @@ h2 {
       padding: 0.5rem;
       min-width: max-content;
       background-color: var(--colour-neutral-base);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      box-shadow:
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
       z-index: 2;
 
       button {

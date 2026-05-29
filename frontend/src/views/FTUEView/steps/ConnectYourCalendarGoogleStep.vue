@@ -139,16 +139,8 @@ onMounted(async () => {
     </div>
   </div>
 
-  <i18n-t
-    :keypath="`ftue.googlePermissionDisclaimer`"
-    tag="p"
-    :for="`ftue.googlePermissionDisclaimer`"
-  >
-    <a
-      class="underline"
-      href="https://developers.google.com/terms/api-services-user-data-policy"
-      target="_blank"
-    >
+  <i18n-t :keypath="`ftue.googlePermissionDisclaimer`" tag="p" :for="`ftue.googlePermissionDisclaimer`">
+    <a class="underline" href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank">
       {{ t(`text.settings.connectedApplications.connect.googleLegal.link`) }}
     </a>
   </i18n-t>

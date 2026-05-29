@@ -56,8 +56,8 @@ export const getEndOfWeek = (date: Dayjs, startOfWeekIso: number): Dayjs => {
 };
 
 /**
-* Lowercases the first character of a string
-*/
+ * Lowercases the first character of a string
+ */
 export const lcFirst = (s: string): string => {
   if (typeof s !== 'string' || !s) {
     return '';
@@ -68,14 +68,16 @@ export const lcFirst = (s: string): string => {
 
 // Rotate the elements of an array for <n> steps. Works in both directions (n can be negative).
 export const arrayRotate = <T>(a: T[], n: number): T[] => {
-  a.push(...a.splice(0, (-n % a.length + a.length) % a.length));
+  a.push(...a.splice(0, ((-n % a.length) + a.length) % a.length));
   return a;
-}
+};
 
 // Convert a numeric enum to an object for key-value iteration
 export const enumToObject = (e: object): { [key in string]: number } => {
   const o = {};
-  Object.keys(e).filter((v) => isNaN(Number(v))).forEach((k) => o[lcFirst(k)] = e[k]);
+  Object.keys(e)
+    .filter((v) => isNaN(Number(v)))
+    .forEach((k) => (o[lcFirst(k)] = e[k]));
   return o;
 };
 
@@ -89,8 +91,9 @@ export const timeFormat = (): string => {
 
   let use12HourTime = null;
   try {
-    use12HourTime = Intl.DateTimeFormat(window.navigator.language, { hour: 'numeric' }).resolvedOptions()?.hour12 ?? null;
-  } catch (_e: RangeError|any) {
+    use12HourTime =
+      Intl.DateTimeFormat(window.navigator.language, { hour: 'numeric' }).resolvedOptions()?.hour12 ?? null;
+  } catch (_e: RangeError | any) {
     // Catch any range error raised by invalid language/locale codes and pass
   }
 
@@ -236,7 +239,8 @@ export const handleFormError = (i18n: i18nType, formRef: Ref, errObj: PydanticEx
         fields[name].setCustomValidity(msg);
       }
     });
-  } else if (typeof detail === 'string') { // HttpException errors are just strings
+  } else if (typeof detail === 'string') {
+    // HttpException errors are just strings
     return { title: detail };
   } else {
     return {
@@ -267,7 +271,10 @@ export const clearFormErrors = (formRef: Ref) => {
  * @param timeMs milliseconds to wait
  * @returns Promise
  */
-export const sleep = async (timeMs: number) => new Promise((resolve) => { window.setTimeout(resolve, timeMs); });
+export const sleep = async (timeMs: number) =>
+  new Promise((resolve) => {
+    window.setTimeout(resolve, timeMs);
+  });
 
 /**
  * Retrieve all the items from a ListResponse route staggered by 250ms per page.
@@ -298,14 +305,16 @@ export const staggerRetrieve = async (requestFn: any, perPage: number, pageError
   const promises = [];
   // Queue up the remainder of the pages as promises
   for (let i = page + 1; i < totalPages + 1; i += 1) {
-    promises.push((async () => {
-      // Stagger calls to avoid overloading the db
-      await sleep(250 * i);
-      return requestFn({
-        page: i,
-        per_page: perPage,
-      });
-    })());
+    promises.push(
+      (async () => {
+        // Stagger calls to avoid overloading the db
+        await sleep(250 * i);
+        return requestFn({
+          page: i,
+          per_page: perPage,
+        });
+      })()
+    );
   }
 
   // Execute them all at once
@@ -335,14 +344,14 @@ export const hhmmToMinutes = (formattedTime: string | Dayjs): number => {
     formattedTime = formattedTime.format('HH:mm');
   }
   const [hours, minutes] = formattedTime.split(':');
-  return (Number(hours) * 60 + Number(minutes));
+  return Number(hours) * 60 + Number(minutes);
 };
 
 /**
  * Compare two availabilities by their start time
  */
 export const compareAvailabilityStart = (a: Availability, b: Availability) => {
-  return hhmmToMinutes(a.start_time) - hhmmToMinutes(b.start_time)
+  return hhmmToMinutes(a.start_time) - hhmmToMinutes(b.start_time);
 };
 
 /**

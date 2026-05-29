@@ -12,7 +12,7 @@ import MeetingDateAppointmentItem from './MeetingDateAppointmentItem.vue';
 import { isUnconfirmed } from '@/utils';
 
 interface Props {
-  filter: BookingsFilterOptions,
+  filter: BookingsFilterOptions;
 }
 const props = withDefaults(defineProps<Props>(), {
   filter: BookingsFilterOptions.All,
@@ -43,7 +43,7 @@ const groupedAppointments = computed(() => {
       day,
       label: dj(day).format('dddd, MMM D'),
       appointments: appts
-        .filter((a) => props.filter === BookingsFilterOptions.Unconfirmed ? isUnconfirmed(a) : true)
+        .filter((a) => (props.filter === BookingsFilterOptions.Unconfirmed ? isUnconfirmed(a) : true))
         .sort((a, b) => dj(a.slots[0].start).valueOf() - dj(b.slots[0].start).valueOf()),
     }));
 });
@@ -71,7 +71,8 @@ const emit = defineEmits(['select-appointment']);
       <h2>{{ group.label }}</h2>
       <div class="item-container">
         <meeting-date-appointment-item
-          v-for="monthlyAppt in group.appointments" :key="monthlyAppt.id"
+          v-for="monthlyAppt in group.appointments"
+          :key="monthlyAppt.id"
           :appointment="monthlyAppt"
           @select-appointment="emit('select-appointment', $event)"
         />

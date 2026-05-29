@@ -5,11 +5,7 @@ import { timeFormat } from '@/utils';
 import { CalendarEvent } from '@/models';
 
 // icons
-import {
-  PhCalendarBlank,
-  PhClock,
-  PhUsers,
-} from '@phosphor-icons/vue';
+import { PhCalendarBlank, PhClock, PhUsers } from '@phosphor-icons/vue';
 import { dayjsKey } from '@/keys';
 
 // component constants
@@ -18,31 +14,29 @@ const dj = inject(dayjsKey);
 
 // component properties
 interface Props {
-  event?: CalendarEvent, // event to show details in popup for
-  position?: string, // Popup position relative to the trigger element
+  event?: CalendarEvent; // event to show details in popup for
+  position?: string; // Popup position relative to the trigger element
 }
 const props = defineProps<Props>();
 
 const { event } = toRefs(props);
 
 // format datetime of event
-const eventDateTime = computed(
-  () => {
-    const dateTimeParts = [];
-    if (props.event) {
-      // calculate date for active event
-      const start = dj(props.event.time.start);
-      dateTimeParts.push(start.format('dddd L'));
-      if (!props.event.customData.all_day) {
-        // add time if it's not an all day event
-        const end = dj(props.event.time.end);
-        dateTimeParts.push(start.format(`, ${timeFormat()} - `));
-        dateTimeParts.push(end.format(timeFormat()));
-      }
+const eventDateTime = computed(() => {
+  const dateTimeParts = [];
+  if (props.event) {
+    // calculate date for active event
+    const start = dj(props.event.time.start);
+    dateTimeParts.push(start.format('dddd L'));
+    if (!props.event.customData.all_day) {
+      // add time if it's not an all day event
+      const end = dj(props.event.time.end);
+      dateTimeParts.push(start.format(`, ${timeFormat()} - `));
+      dateTimeParts.push(end.format(timeFormat()));
     }
-    return dateTimeParts.join('');
-  },
-);
+  }
+  return dateTimeParts.join('');
+});
 </script>
 
 <template>
@@ -50,7 +44,7 @@ const eventDateTime = computed(
     class="event-popup"
     :class="{
       'position-left': position === 'left',
-      'position-top': position === 'top'
+      'position-top': position === 'top',
     }"
   >
     <div
@@ -73,7 +67,7 @@ const eventDateTime = computed(
       </div>
       <div v-if="event?.customData?.attendee" class="event-detail">
         <ph-users class="detail-icon" />
-        {{ t('label.guest', { 'count': 1 }) }}
+        {{ t('label.guest', { count: 1 }) }}
       </div>
     </div>
   </div>
@@ -87,7 +81,9 @@ const eventDateTime = computed(
   border-radius: 0.375rem;
   background-color: var(--colour-neutral-base);
   padding: 0.75rem;
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
   transition: all 0.15s ease;
 
   &.position-left {

@@ -20,7 +20,7 @@ const appointmentItem = computed(() => {
     requestDate: props.appointment.time_created,
     meetingDate: props.appointment.slots[0].start,
     needsConfirmation: isUnconfirmed(props.appointment),
-  }
+  };
 });
 
 const formattedRequestDate = computed(() => dj(appointmentItem.value.requestDate).format('L, LT'));

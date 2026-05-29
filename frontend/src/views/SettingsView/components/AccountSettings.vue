@@ -26,9 +26,9 @@ const deleteModal = useTemplateRef('deleteModal');
 const displayName = computed({
   get: () => currentState.value.displayName,
   set: (value) => {
-    settingsStore.$patch({ currentState: { displayName: value } })
-  }
-})
+    settingsStore.$patch({ currentState: { displayName: value } });
+  },
+});
 
 // Link copy
 const copyLink = async () => {
@@ -77,8 +77,13 @@ const actuallyDownloadData = async () => {
       {{ t('label.bookingPageLinkLabel') }}
     </text-input>
 
-    <icon-button aria-labelledby="copy-booking-page-url-button" @click="copyLink" :tooltip="copyLinkTooltip"
-      class="copy-url-button" size="medium">
+    <icon-button
+      aria-labelledby="copy-booking-page-url-button"
+      @click="copyLink"
+      :tooltip="copyLinkTooltip"
+      class="copy-url-button"
+      size="medium"
+    >
       <ph-copy-simple id="copy-booking-page-url-button" :aria-label="t('label.copy')" />
     </icon-button>
 
@@ -89,8 +94,13 @@ const actuallyDownloadData = async () => {
   </div>
 
   <div class="account-settings-buttons-container">
-    <button :title="t('label.download')" variant="outline" @click="actuallyDownloadData"
-      data-testid="settings-account-download-data-btn" class="download-appointment-data-button">
+    <button
+      :title="t('label.download')"
+      variant="outline"
+      @click="actuallyDownloadData"
+      data-testid="settings-account-download-data-btn"
+      class="download-appointment-data-button"
+    >
       <ph-download-simple size="16" />
       {{ t('label.downloadMyData') }}
     </button>
