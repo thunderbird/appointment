@@ -16,8 +16,11 @@ export default defineConfig((configEnv) =>
         setupFiles: ['/test/setup/fix-fetch.js'],
         globals: true,
         environment: 'jsdom',
-        globalSetup: './vitest.global-setup.ts',
+        // globalSetup: './vitest.global-setup.ts',
         root: fileURLToPath(new URL('./', import.meta.url)),
+        env: {
+          TZ: 'America/Vancouver',
+        },
       },
     })
   )
