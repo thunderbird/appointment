@@ -21,13 +21,31 @@
       'stage.apt.mt': 'appointment-stage.tb.pro'
     }
 
+    // Rebuild the request's query string into a redirectable string. CloudFront Functions
+    // expose request.querystring as an object (not a string), so we serialize it ourselves
+    // and preserve raw values (they arrive already URL-encoded). Returns '' when empty.
+    const buildQueryString = (querystring) => {
+      const params = [];
+      Object.keys(querystring).forEach((key) => {
+        const param = querystring[key];
+        if (param.multiValue) {
+          param.multiValue.forEach((entry) => params.push(`${key}=${entry.value}`));
+        } else {
+          params.push(`${key}=${param.value}`);
+        }
+      });
+      return params.length ? `?${params.join('&')}` : '';
+    };
+
     // Short URLs omit /user/; prepend it when redirecting booking paths to the long domain.
     // Root requests (apt.mt/) should land on the main site home, not /user/.
     if (Object.keys(domainRewrites).includes(host)) {
       const longHost = domainRewrites[host];
-      const location = request.uri === '/' || request.uri === ''
-        ? `https://${longHost}/`
-        : `https://${longHost}/user${request.uri}`;
+      const queryString = buildQueryString(request.querystring);
+      const path = request.uri === '/' || request.uri === ''
+        ? '/'
+        : `/user${request.uri}`;
+      const location = `https://${longHost}${path}${queryString}`;
 
       return {
         statusCode: 302,
