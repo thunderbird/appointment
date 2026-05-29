@@ -1091,3 +1091,66 @@ class TestOIDCToken:
             subscriber = repo.subscriber.get_by_email(db, email)
             assert subscriber is not None
             assert subscriber.username == expected_username
+
+    def test_oidc_token_prefers_email_claim(self, with_db, with_client, faker):
+        """A new subscriber's email comes from the standard `email` claim, not `preferred_username`.
+
+        Per OIDC Core 1.0 §5.1, `preferred_username` is a display/login handle and is not
+        guaranteed to be an email address, so the dedicated `email` claim must win.
+        """
+        os.environ['AUTH_SCHEME'] = 'oidc'
+
+        email = faker.email()
+        preferred_username = faker.user_name()  # a display handle, not an email
+        oidc_id = 'new-oidc-id-prefers-email'
+
+        with patch('appointment.controller.apis.oidc_client.OIDCClient.introspect_token') as mock_introspect:
+            mock_introspect.return_value = {
+                'sub': oidc_id,
+                'email': email,
+                'preferred_username': preferred_username,
+                'username': preferred_username,
+                'name': 'OIDC User',
+            }
+
+            response = with_client.post(
+                '/oidc/token', json={'access_token': 'valid_token', 'timezone': 'America/Vancouver'}
+            )
+
+        assert response.status_code == 200, response.text
+        assert response.json() is True
+
+        with with_db() as db:
+            subscriber = repo.subscriber.get_by_email(db, email)
+            assert subscriber is not None
+            assert subscriber.email == email.lower()
+
+    def test_oidc_token_falls_back_to_preferred_username(self, with_db, with_client, faker):
+        """When the `email` claim is absent, fall back to `preferred_username`.
+
+        This preserves Thunderbird Accounts compatibility, where `preferred_username`
+        is the (@thundermail.com) email address.
+        """
+        os.environ['AUTH_SCHEME'] = 'oidc'
+
+        email = faker.email()  # supplied via preferred_username, no `email` claim
+        oidc_id = 'new-oidc-id-fallback-preferred-username'
+
+        with patch('appointment.controller.apis.oidc_client.OIDCClient.introspect_token') as mock_introspect:
+            mock_introspect.return_value = {
+                'sub': oidc_id,
+                'preferred_username': email,
+                'name': 'OIDC User',
+            }
+
+            response = with_client.post(
+                '/oidc/token', json={'access_token': 'valid_token', 'timezone': 'America/Vancouver'}
+            )
+
+        assert response.status_code == 200, response.text
+        assert response.json() is True
+
+        with with_db() as db:
+            subscriber = repo.subscriber.get_by_email(db, email)
+            assert subscriber is not None
+            assert subscriber.email == email.lower()
