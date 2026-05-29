@@ -22,6 +22,3 @@ logs
 # Environment files
 .env
 .env.*
-
-/.pnpm-store/
-.pnpm-lock.yaml
