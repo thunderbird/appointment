@@ -1,4 +1,7 @@
-.vscode
+.vscode/*
+!.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
 __pycache__
 .pytest_cache
 dist
