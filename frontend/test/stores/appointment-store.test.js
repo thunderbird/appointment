@@ -80,6 +80,7 @@ describe('Appointment Store', () => {
   beforeEach(() => {
     app = withSetup();
     app.use(createPinia());
+    vi.stubEnv('TZ', 'America/Vancouver');
   });
   // Start server before all tests
   beforeAll(() => server.listen());
