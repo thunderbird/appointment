@@ -18,9 +18,6 @@ export default defineConfig((configEnv) =>
         environment: 'jsdom',
         // globalSetup: './vitest.global-setup.ts',
         root: fileURLToPath(new URL('./', import.meta.url)),
-        env: {
-          TZ: 'America/Vancouver',
-        },
       },
     })
   )
