@@ -7,7 +7,7 @@ import { dayjsKey } from '@/keys';
 /**
  * Store for BookingView and its tightly coupled components.
  */
- 
+
 export const useBookingViewStore = defineStore('bookingView', () => {
   const dj = inject(dayjsKey);
 

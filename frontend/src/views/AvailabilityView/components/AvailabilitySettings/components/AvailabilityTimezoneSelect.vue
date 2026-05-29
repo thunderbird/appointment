@@ -21,9 +21,9 @@ const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone: string
 const timezone = computed({
   get: () => currentState.value.timezone,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { timezone: value }})
-  }
-})
+    availabilityStore.$patch({ currentState: { timezone: value } });
+  },
+});
 </script>
 
 <template>

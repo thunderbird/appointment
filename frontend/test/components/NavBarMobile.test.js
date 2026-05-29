@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
 import i18ninstance from '@/composables/i18n';
 import router from '@/router';
@@ -7,7 +7,6 @@ import withSetup from '../utils/with-setup';
 import { useUserStore } from '@/stores/user-store';
 import { RouterLink } from 'vue-router';
 import NavBarMobile from '@/components/NavBarMobile.vue';
-
 
 describe('NavBarMobile', () => {
   var app;
@@ -78,13 +77,13 @@ describe('NavBarMobile', () => {
       'bookings',
       'availability',
       'settings',
-      'logout'
+      'logout',
     ];
 
     const allRouterLinks = wrapper.findAllComponents(RouterLink);
     var foundLinks = [];
     for (let link of allRouterLinks) {
-      if(link.props().to.name) {
+      if (link.props().to.name) {
         foundLinks.push(link.props().to.name);
       } else {
         foundLinks.push(link.props().to);

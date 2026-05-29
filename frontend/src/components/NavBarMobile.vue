@@ -37,12 +37,12 @@ const myLinkTooltip = ref(t('navBar.shareMyLink'));
 function onMenuOpen() {
   menuOpen.value = true;
   // Hide body scroll when the menu is open so content underneath is not scrollable
-  document.body.style.overflow = 'hidden'
+  document.body.style.overflow = 'hidden';
 }
 
 function onMenuClose() {
   menuOpen.value = false;
-  document.body.style.overflow = 'inherit'
+  document.body.style.overflow = 'inherit';
 }
 
 async function copyLink() {
@@ -53,7 +53,7 @@ async function copyLink() {
   setTimeout(() => {
     myLinkTooltip.value = t('navBar.shareMyLink');
   }, 2000);
-};
+}
 </script>
 
 <template>
@@ -186,7 +186,9 @@ nav {
     flex-direction: column;
     width: 75%;
     height: 100%;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    box-shadow:
+      0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1);
     background-color: #262d3b; /* Forced dark mode as we don't have light mode for logo yet */
     color: #d9d9de; /* Forced dark mode as we don't have light mode for logo yet */
     z-index: 2;
@@ -199,7 +201,7 @@ nav {
       gap: 1rem;
       margin-block-end: 2rem;
 
-      &>svg {
+      & > svg {
         height: 48px;
         width: min-content;
         margin: 0 auto;

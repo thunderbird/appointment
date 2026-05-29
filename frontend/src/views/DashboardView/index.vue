@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import {
-  ref, inject, onMounted, computed,
-} from 'vue';
+import { ref, inject, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { storeToRefs } from 'pinia';
 import { dayjsKey, refreshKey } from '@/keys';
@@ -54,7 +52,7 @@ async function onDateChange(dateObj: TimeFormatted) {
   await calendarStore.getRemoteEvents(activeDate.value);
 
   isLoading.value = false;
-};
+}
 
 onMounted(async () => {
   isLoading.value = true;
@@ -73,20 +71,17 @@ onMounted(async () => {
 
 <script lang="ts">
 export default {
-  name: 'DashboardView'
-}
+  name: 'DashboardView',
+};
 </script>
 
 <template>
   <div class="main-container">
     <quick-actions-side-bar />
-  
+
     <div class="main-calendar-container">
       <div class="calendar-header-container">
-        <week-picker
-          :active-date-range="activeDateRange"
-          :onDateChange="onDateChange"
-        />
+        <week-picker :active-date-range="activeDateRange" :onDateChange="onDateChange" />
 
         <user-calendar-sync v-model:loading="isLoading" :active-date="activeDate" />
       </div>

@@ -1,7 +1,5 @@
 <script setup lang="ts">
-import {
-  onMounted, ref,
-} from 'vue';
+import { onMounted, ref } from 'vue';
 /* eslint import/no-unresolved: [2, { ignore: ['\\.html'] }] */
 import usingZoom from '@/assets/docs/en/using-zoom.html?raw';
 
@@ -37,7 +35,10 @@ onMounted(async () => {
 
 /* Needed for v-html */
 :deep {
-  h1, h2, h3, h4 {
+  h1,
+  h2,
+  h3,
+  h4 {
     color: var(--colour-ti-highlight);
   }
   h1 {
@@ -69,8 +70,8 @@ onMounted(async () => {
   }
 
   p {
-    padding-top: .5rem;
-    padding-bottom: .5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
     line-height: 1.625;
   }
 
@@ -99,6 +100,5 @@ onMounted(async () => {
     margin-left: 2rem;
     list-style: decimal;
   }
-
 }
 </style>

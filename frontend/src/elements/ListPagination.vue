@@ -36,40 +36,41 @@ const goto = (index: number) => {
   emit('update', currentPage.value);
 };
 
-const isVisibleInnerPage = (p: number) => (currentPage.value === 0 && p === 3)
-    || ((currentPage.value === 0 || currentPage.value === 1) && p === 4)
-    || (p > currentPage.value - 1 && p < currentPage.value + 3)
-    || ((currentPage.value === pageCount.value - 1 || currentPage.value === pageCount.value - 2) && p === pageCount.value - 3)
-    || (currentPage.value === pageCount.value - 1 && p === pageCount.value - 2)
-    || p === pageCount.value;
+const isVisibleInnerPage = (p: number) =>
+  (currentPage.value === 0 && p === 3) ||
+  ((currentPage.value === 0 || currentPage.value === 1) && p === 4) ||
+  (p > currentPage.value - 1 && p < currentPage.value + 3) ||
+  ((currentPage.value === pageCount.value - 1 || currentPage.value === pageCount.value - 2) &&
+    p === pageCount.value - 3) ||
+  (currentPage.value === pageCount.value - 1 && p === pageCount.value - 2) ||
+  p === pageCount.value;
 
-const showPageItem = (p: number) => pageCount.value < 6 || p === 1 || p === 2 || isVisibleInnerPage(p) || p === pageCount.value - 1;
+const showPageItem = (p: number) =>
+  pageCount.value < 6 || p === 1 || p === 2 || isVisibleInnerPage(p) || p === pageCount.value - 1;
 const showFirstEllipsis = (p: number) => pageCount.value >= 6 && currentPage.value > 2 && p === 2;
 const showPageItemLink = (p: number) => pageCount.value < 6 || p === 1 || isVisibleInnerPage(p);
-const showLastEllipsis = (p: number) => pageCount.value >= 6 && currentPage.value < pageCount.value - 3 && p === pageCount.value - 1;
+const showLastEllipsis = (p: number) =>
+  pageCount.value >= 6 && currentPage.value < pageCount.value - 3 && p === pageCount.value - 1;
 </script>
 
 <template>
   <nav class="pagination">
-    <button @click="prev" :disabled="isFirstPage" class="btn-back" :class="{ 'disabled': isFirstPage }">
+    <button @click="prev" :disabled="isFirstPage" class="btn-back" :class="{ disabled: isFirstPage }">
       <ph-caret-left :size="20" />
     </button>
-    <div
-      v-for="(p, i) in pageCount" :key="i"
-      v-show="showPageItem(p)"
-    >
+    <div v-for="(p, i) in pageCount" :key="i" v-show="showPageItem(p)">
       <div v-show="showFirstEllipsis(p)">&hellip;</div>
       <button
         class="btn-jump"
-        :class="{ 'disabled': (p-1) === currentPage }"
+        :class="{ disabled: p - 1 === currentPage }"
         v-show="showPageItemLink(p)"
-        @click="goto(p-1)"
+        @click="goto(p - 1)"
       >
         {{ p }}
       </button>
       <div v-show="showLastEllipsis(p)">&hellip;</div>
     </div>
-    <button @click="next" :disabled="isLastPage" class="btn-forward" :class="{ 'disabled': isLastPage }">
+    <button @click="next" :disabled="isLastPage" class="btn-forward" :class="{ disabled: isLastPage }">
       <ph-caret-right :size="20" />
     </button>
   </nav>
@@ -80,13 +81,13 @@ const showLastEllipsis = (p: number) => pageCount.value >= 6 && currentPage.valu
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  gap: .5rem;
+  gap: 0.5rem;
 
   button {
     cursor: pointer;
 
     &.btn-jump {
-      padding: .25rem .5rem;
+      padding: 0.25rem 0.5rem;
     }
 
     &.disabled {

@@ -1,11 +1,6 @@
 import { Dayjs } from 'dayjs';
 import { UseFetchReturn } from '@vueuse/core';
-import {
-  EventLocationType,
-  CalendarProviders,
-  TableDataButtonType,
-  TableDataType,
-} from './definitions';
+import { EventLocationType, CalendarProviders, TableDataButtonType, TableDataType } from './definitions';
 
 export type Attendee = {
   id?: number;
@@ -16,7 +11,7 @@ export type Attendee = {
 
 export type Slot = {
   id: number;
-  start: Dayjs|string;
+  start: Dayjs | string;
   duration: number;
   attendee_id: number;
   booking_tkn?: string;
@@ -78,7 +73,7 @@ export type CustomEventData = {
 };
 
 export type CalendarEvent = {
-  id: number|string;
+  id: number | string;
   title: string;
   colourScheme: string;
   time?: TimeFormatted;
@@ -122,10 +117,10 @@ export type RemoteEvent = {
 export type EventPopup = {
   event?: CalendarEvent;
   display: string;
-  top: string|number;
-  left: string|number;
-  right?: string|number;
-  bottom?: string|number;
+  top: string | number;
+  left: string | number;
+  right?: string | number;
+  bottom?: string | number;
   position?: string;
 };
 
@@ -175,8 +170,8 @@ export type Availability = {
 };
 
 export type AvailabilitySet = {
-  [key:number]: Availability[];
-}
+  [key: number]: Availability[];
+};
 
 export type AvailabilityFormFields = {
   active?: boolean;
@@ -198,7 +193,7 @@ export type AvailabilityFormFields = {
   time_updated?: string;
   use_custom_availabilities?: boolean;
   weekdays?: number[];
-}
+};
 
 export type Schedule = {
   active: boolean;
@@ -239,7 +234,7 @@ export type User = {
   accessToken: string;
   userLink: string;
   scheduleSlugs: object;
-  isSetup: boolean,
+  isSetup: boolean;
   uniqueHash: string;
 };
 
@@ -253,16 +248,16 @@ export type SettingsForm = {
   timeFormat?: number;
   changedCalendars?: { [id: number]: boolean };
   changedCalendarColors?: { [id: number]: string };
-}
+};
 
 /**
  * User settings to customize the application
  * Used to store language, theme, time format and such.
  */
 export type UserConfig = {
-  language: string,
-  colourScheme: string,
-  timeFormat: number,
+  language: string;
+  colourScheme: string;
+  timeFormat: number;
   timezone: string;
   startOfWeek: number;
 };
@@ -287,7 +282,7 @@ export type Subscriber = {
   secondary_email?: string;
   time_created?: string;
   time_deleted?: string;
-}
+};
 
 export type Signature = {
   url: string;
@@ -299,30 +294,30 @@ export type Alert = {
   details?: string;
 };
 export type Error = {
-  error: boolean|string|null;
+  error: boolean | string | null;
   message?: string;
 };
 export type ExceptionDetail = {
   id?: string;
   message?: string;
   status?: number;
-}
+};
 export type PydanticExceptionDetail = {
-  ctx: { reason: string, ge?: string, max_length?: number },
-  input: string,
-  loc: string[],
-  msg: string,
-  type: string
-}
+  ctx: { reason: string; ge?: string; max_length?: number };
+  input: string;
+  loc: string[];
+  msg: string;
+  type: string;
+};
 export type FormExceptionDetail = {
-  id: string,
-  message: string,
-  reason: string,
-  status: number
-}
+  id: string;
+  message: string;
+  reason: string;
+  status: number;
+};
 export type PydanticException = {
-  detail?: string|FormExceptionDetail|PydanticExceptionDetail[];
-}
+  detail?: string | FormExceptionDetail | PydanticExceptionDetail[];
+};
 export type Exception = {
   status_code?: number;
   detail?: ExceptionDetail | PydanticExceptionDetail[];
@@ -336,51 +331,51 @@ export type AuthUrl = {
   url: string;
 };
 export type PageMeta = {
-  page: number,
-  total_pages: number
-  per_page: number,
-  count: number,
-}
+  page: number;
+  total_pages: number;
+  per_page: number;
+  count: number;
+};
 
 // Types and aliases used for our custom createFetch API calls and return types
-export type AuthUrlResponse = UseFetchReturn<AuthUrl|Exception>;
+export type AuthUrlResponse = UseFetchReturn<AuthUrl | Exception>;
 export type AppointmentListResponse = UseFetchReturn<{
-  page_meta: PageMeta,
-  items: Appointment[]
+  page_meta: PageMeta;
+  items: Appointment[];
 }>;
 export type PendingAppointmentsCount = UseFetchReturn<{ count: number }>;
 export type AppointmentResponse = UseFetchReturn<Appointment>;
 export type AvailabilitySlotResponse = UseFetchReturn<SlotAttendee>;
-export type BooleanResponse = UseFetchReturn<boolean|Exception>;
+export type BooleanResponse = UseFetchReturn<boolean | Exception>;
 export type BlobResponse = UseFetchReturn<Blob>;
 export type CalendarListResponse = UseFetchReturn<Calendar[]>;
 export type ExternalConnectionCollectionResponse = UseFetchReturn<ExternalConnectionCollection>;
 export type Fetch = (url: string) => UseFetchReturn<any> & PromiseLike<UseFetchReturn<any>>;
 export type Refresh = () => Promise<void>;
 export type RemoteEventListResponse = UseFetchReturn<RemoteEvent[]>;
-export type ScheduleResponse = UseFetchReturn<Schedule|Exception>;
+export type ScheduleResponse = UseFetchReturn<Schedule | Exception>;
 export type ScheduleListResponse = UseFetchReturn<Schedule[]>;
 export type SignatureResponse = UseFetchReturn<Signature>;
-export type SlotResponse = UseFetchReturn<Slot & Appointment|Exception>;
-export type StringResponse = UseFetchReturn<string|Exception>;
+export type SlotResponse = UseFetchReturn<(Slot & Appointment) | Exception>;
+export type StringResponse = UseFetchReturn<string | Exception>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
 export type TokenResponse = UseFetchReturn<Token>;
 export type ListResponse = UseFetchReturn<{
-  page_meta: PageMeta,
-  items: any[]
+  page_meta: PageMeta;
+  items: any[];
 }>;
 
 // Table types
 export type TableDataField = {
   type: TableDataType;
-  value: string|number|boolean;
+  value: string | number | boolean;
   link?: string;
   buttonType?: TableDataButtonType;
   disabled?: boolean;
   tooltip?: string;
 };
 export type TableDataRow = {
-  [key:string]: TableDataField
+  [key: string]: TableDataField;
 };
 export type TableDataColumn = {
   name: string;
@@ -418,25 +413,25 @@ export type HTMLInputElementEvent = Event & {
 };
 
 export type CopyTemplate = {
-  [key:number]: boolean;
-}
+  [key: number]: boolean;
+};
 
 export type HourPeriod = {
-  startHour: number,
-  endHour: number,
-}
+  startHour: number;
+  endHour: number;
+};
 
 export type GridElement = {
-  id: number|string,
-  gridColumn: number,
-  gridRowStart: number,
-  topOffset?: string,
-  height?: string,
-}
+  id: number | string;
+  gridColumn: number;
+  gridRowStart: number;
+  topOffset?: string;
+  height?: string;
+};
 
 export type GridTimeSlot = {
-  text: string,
-  startTime: string,
-  gridRowStart: number,
-  gridRowEnd: number,
- }
+  text: string;
+  startTime: string;
+  gridRowStart: number;
+  gridRowEnd: number;
+};

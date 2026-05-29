@@ -21,14 +21,14 @@ enum Weekday {
 
 interface Props {
   activeDateRange: {
-    start: string,
-    end: string
-  },
-  events?: RemoteEvent[],
-  pendingAppointments?: Appointment[],
-  selectableSlots?: Slot[],
-  isLoading?: boolean,
-  disabled?: boolean,
+    start: string;
+    end: string;
+  };
+  events?: RemoteEvent[];
+  pendingAppointments?: Appointment[];
+  selectableSlots?: Slot[];
+  isLoading?: boolean;
+  disabled?: boolean;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -39,7 +39,7 @@ const props = withDefaults(defineProps<Props>(), {
   disabled: false,
 });
 
-const emit = defineEmits(['event-selected'])
+const emit = defineEmits(['event-selected']);
 
 const dj = inject(dayjsKey);
 
@@ -100,14 +100,14 @@ function onRemoteEventMouseEnter(event: MouseEvent, remoteEvent) {
     ...remoteEvent,
     time: {
       start: remoteEvent.start,
-      end: remoteEvent.end
+      end: remoteEvent.end,
     },
     customData: {
       calendar_title: remoteEvent.calendar_title,
-    }
-  }
+    },
+  };
 
-  popup.value = showEventPopup(event as any, popupEvent, 'right')
+  popup.value = showEventPopup(event as any, popupEvent, 'right');
 }
 
 function onRemoteEventMouseLeave() {
@@ -118,7 +118,13 @@ function onRemoteEventMouseLeave() {
  * Calculates grid positioning for calendar events
  * Returns position info including calculated height based on duration
  */
-function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots: GridTimeSlot[], gap = 2, topOffset = 0): GridElement {
+function calculateEventGridPosition(
+  eventStart: Dayjs,
+  eventEnd: Dayjs,
+  slots: GridTimeSlot[],
+  gap = 2,
+  topOffset = 0
+): GridElement {
   if (!slots.length) return null;
 
   // 1. Calculate grid column based on the event's position within the week
@@ -142,14 +148,14 @@ function calculateEventGridPosition(eventStart: Dayjs, eventEnd: Dayjs, slots: G
 
   // 3. Calculate vertical offset within the starting row (for events not starting on the hour)
   const startMinutes = eventStart.minute();
-  const calculatedTopOffset = ((startMinutes / 60) * ROW_HEIGHT_PX) + topOffset;
+  const calculatedTopOffset = (startMinutes / 60) * ROW_HEIGHT_PX + topOffset;
 
   // 4. Calculate event duration and height
   // Handle events that cross midnight
   let durationMinutes = eventEnd.diff(eventStart, 'minute');
   if (durationMinutes <= 0) {
     // Event crosses midnight, calculate duration to end of day
-    durationMinutes = (24 * 60) - (startHour * 60 + startMinutes);
+    durationMinutes = 24 * 60 - (startHour * 60 + startMinutes);
   }
 
   // Height based on duration with minimum of 1.25rem (approximately 20px, 1rem for text and 0.25rem for padding)
@@ -190,7 +196,7 @@ const weekdays = computed(() => {
   while (!currentDate.isAfter(endDate, 'day')) {
     days.push([
       currentDate.format('ddd').toUpperCase(), // Format to 'SUN', 'MON', etc.
-      currentDate.date() // Get the day of the month (e.g., 17)
+      currentDate.date(), // Get the day of the month (e.g., 17)
     ]);
 
     // Move to the next day
@@ -198,7 +204,7 @@ const weekdays = computed(() => {
   }
 
   return days;
-})
+});
 
 /**
  * Generates an array of time slot objects for a full 24-hour day with grid positioning info
@@ -248,26 +254,28 @@ const filteredPendingAppointmentsForGrid = computed(() => {
     return appointmentStart.isBetween(start, end, 'day', '[]');
   });
 
-  return pendingAppointmentsWithinActiveWeek.map(appointment => {
-    const appointmentStart = dj(appointment.slots[0].start);
-    const appointmentEnd = appointmentStart.add(appointment.duration, 'minute');
+  return pendingAppointmentsWithinActiveWeek
+    .map((appointment) => {
+      const appointmentStart = dj(appointment.slots[0].start);
+      const appointmentEnd = appointmentStart.add(appointment.duration, 'minute');
 
-    const gridPosition = calculateEventGridPosition(appointmentStart, appointmentEnd, slots, 2, 0);
+      const gridPosition = calculateEventGridPosition(appointmentStart, appointmentEnd, slots, 2, 0);
 
-    if (gridPosition) {
-      return {
-        ...appointment,
-        ...gridPosition,
+      if (gridPosition) {
+        return {
+          ...appointment,
+          ...gridPosition,
 
-        // Add properties to match the remote event structure for consistent rendering
-        title: appointment.title,
-        start: appointment.slots[0].start,
-        end: appointmentEnd.format(),
-        calendar_title: appointment.calendar_title,
-        calendar_color: appointment.calendar_color,
-      };
-    }
-  }).filter(Boolean)
+          // Add properties to match the remote event structure for consistent rendering
+          title: appointment.title,
+          start: appointment.slots[0].start,
+          end: appointmentEnd.format(),
+          calendar_title: appointment.calendar_title,
+          calendar_color: appointment.calendar_color,
+        };
+      }
+    })
+    .filter(Boolean);
 });
 
 /**
@@ -279,26 +287,30 @@ const filteredRemoteEventsForGrid = computed(() => {
   if (!slots.length) return [];
 
   const { start, end } = props.activeDateRange;
-  const remoteEventsWithinActiveWeek = props.events.filter((remoteEvent) => dj(remoteEvent.start).isBetween(start, end))
+  const remoteEventsWithinActiveWeek = props.events.filter((remoteEvent) =>
+    dj(remoteEvent.start).isBetween(start, end)
+  );
 
-  return remoteEventsWithinActiveWeek.map(remoteEvent => {
-    const eventStart = dj(remoteEvent.start);
-    const eventEnd = dj(remoteEvent.end);
+  return remoteEventsWithinActiveWeek
+    .map((remoteEvent) => {
+      const eventStart = dj(remoteEvent.start);
+      const eventEnd = dj(remoteEvent.end);
 
-    const gridPosition = calculateEventGridPosition(eventStart, eventEnd, slots, 2, 0);
-    const hasPendingPlaceholder = filteredPendingAppointmentsForGrid.value.find(
-      (a) => a.title === remoteEvent.title && eventStart.isSame(a.start)
-    );
+      const gridPosition = calculateEventGridPosition(eventStart, eventEnd, slots, 2, 0);
+      const hasPendingPlaceholder = filteredPendingAppointmentsForGrid.value.find(
+        (a) => a.title === remoteEvent.title && eventStart.isSame(a.start)
+      );
 
-    // Only show remote event, if we have a valid grid position and if we don't already have calculated
-    // a placeholder for a pending (HOLD) event
-    if (gridPosition && !hasPendingPlaceholder) {
-      return {
-        ...remoteEvent,
-        ...gridPosition,
-      };
-    }
-  }).filter(Boolean);
+      // Only show remote event, if we have a valid grid position and if we don't already have calculated
+      // a placeholder for a pending (HOLD) event
+      if (gridPosition && !hasPendingPlaceholder) {
+        return {
+          ...remoteEvent,
+          ...gridPosition,
+        };
+      }
+    })
+    .filter(Boolean);
 });
 
 /**
@@ -316,25 +328,27 @@ const filteredSelectableSlotsForGrid = computed(() => {
     })
     .filter((slot) => slot.booking_status !== BookingStatus.Booked);
 
-  return selectableSlotsWithinActiveWeek.map(slot => {
-    const slotStart = dj(slot.start);
-    const slotEnd = slotStart.add(slot.duration, 'minute');
+  return selectableSlotsWithinActiveWeek
+    .map((slot) => {
+      const slotStart = dj(slot.start);
+      const slotEnd = slotStart.add(slot.duration, 'minute');
 
-    const gridPosition = calculateEventGridPosition(slotStart, slotEnd, slots, 0, 0);
+      const gridPosition = calculateEventGridPosition(slotStart, slotEnd, slots, 0, 0);
 
-    if (gridPosition) {
-      return {
-        ...slot,
-        ...gridPosition,
+      if (gridPosition) {
+        return {
+          ...slot,
+          ...gridPosition,
 
-        // Add properties to match the remote event structure for consistent rendering
-        title: slotStart.format('LT'),
-        start: slot.start,
-        end: slotEnd.format(),
-        calendar_title: '',
-      };
-    }
-  }).filter(Boolean)
+          // Add properties to match the remote event structure for consistent rendering
+          title: slotStart.format('LT'),
+          start: slot.start,
+          end: slotEnd.format(),
+          calendar_title: '',
+        };
+      }
+    })
+    .filter(Boolean);
 });
 
 /**
@@ -357,7 +371,6 @@ const blockerPlaceholderForGrid = computed(() => {
         height: `${ROW_HEIGHT_PX - borderWidth}px`,
       });
     }
-   
   }
 
   return slots;
@@ -395,7 +408,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="calendar-wrapper" :class="{ 'loading': isLoading, 'disabled': disabled }">
+  <div class="calendar-wrapper" :class="{ loading: isLoading, disabled: disabled }">
     <div class="calendar-loading" v-if="isLoading">
       <loading-spinner />
     </div>
@@ -440,7 +453,7 @@ onMounted(() => {
         v-for="blocker in blockerPlaceholderForGrid"
         :key="blocker?.id"
         class="event-item blocker-slot"
-        :class="{ 'dark': isDarkMode }"
+        :class="{ dark: isDarkMode }"
         :style="{
           gridColumn: blocker?.gridColumn,
           gridRowStart: blocker?.gridRowStart,
@@ -455,7 +468,7 @@ onMounted(() => {
         v-for="remoteEvent in filteredRemoteEventsForGrid"
         :key="remoteEvent?.start"
         class="event-item remote-event"
-        :class="{ 'dark': isDarkMode }"
+        :class="{ dark: isDarkMode }"
         :style="{
           gridColumn: remoteEvent?.gridColumn,
           gridRowStart: remoteEvent?.gridRowStart,
@@ -474,7 +487,7 @@ onMounted(() => {
         v-for="pendingAppointment in filteredPendingAppointmentsForGrid"
         :key="pendingAppointment?.id"
         class="event-item pending-appointment"
-        :class="{ 'dark': isDarkMode }"
+        :class="{ dark: isDarkMode }"
         :style="{
           gridColumn: pendingAppointment?.gridColumn,
           gridRowStart: pendingAppointment?.gridRowStart,
@@ -493,7 +506,7 @@ onMounted(() => {
         v-for="slot in filteredSelectableSlotsForGrid"
         :key="slot?.id"
         class="event-item selectable-slot"
-        :class="{ 'dark': isDarkMode, 'selected': (selectedEvent?.start as Dayjs)?.isSame(slot?.start) }"
+        :class="{ dark: isDarkMode, selected: (selectedEvent?.start as Dayjs)?.isSame(slot?.start) }"
         :style="{
           gridColumn: slot?.gridColumn,
           gridRowStart: slot?.gridRowStart,
@@ -508,7 +521,7 @@ onMounted(() => {
 
       <!-- Event popup (appears on remote event hover) -->
       <event-popup
-        v-if="(popup.event)"
+        v-if="popup.event"
         :style="{
           display: popup.display,
           top: popup.top,
@@ -757,7 +770,7 @@ onMounted(() => {
 
   &.dark {
     --stripe: var(--colour-neutral-base);
-    background-color:  color-mix(in srgb, var(--colour-neutral-lower) 66%, transparent);
+    background-color: color-mix(in srgb, var(--colour-neutral-lower) 66%, transparent);
   }
 }
 

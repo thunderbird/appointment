@@ -1,12 +1,4 @@
-import {
-  expect,
-  test,
-  beforeEach,
-  describe,
-  beforeAll,
-  afterAll,
-  afterEach,
-} from 'vitest';
+import { expect, test, beforeEach, describe, beforeAll, afterAll, afterEach } from 'vitest';
 import { useUserStore, createUserStore } from '@/stores/user-store';
 import { createPinia } from 'pinia';
 import { setupServer } from 'msw/node';
@@ -32,9 +24,12 @@ const restHandlers = [
 
     // Send mock error if the username/password don't match our test username/password
     if (formData.get('username') !== TEST_USERNAME || formData.get('password') !== TEST_PASSWORD) {
-      return HttpResponse.json({
-        detail: 'User credentials mismatch',
-      }, { status: 403 });
+      return HttpResponse.json(
+        {
+          detail: 'User credentials mismatch',
+        },
+        { status: 403 }
+      );
     }
 
     return HttpResponse.json({
@@ -46,9 +41,12 @@ const restHandlers = [
 
     // Fail without an access token
     if (!headers.get('authorization')) {
-      return HttpResponse.json({
-        detail: 'Not authenticated',
-      }, { status: 403 });
+      return HttpResponse.json(
+        {
+          detail: 'Not authenticated',
+        },
+        { status: 403 }
+      );
     }
 
     return HttpResponse.json({
@@ -69,9 +67,12 @@ const restHandlers = [
 
     // Fail without an access token
     if (!headers.get('authorization')) {
-      return HttpResponse.json({
-        detail: 'Not authenticated',
-      }, { status: 403 });
+      return HttpResponse.json(
+        {
+          detail: 'Not authenticated',
+        },
+        { status: 403 }
+      );
     }
 
     return HttpResponse.json({
@@ -141,9 +142,11 @@ describe('User Store', () => {
   });
 
   test('login fails', async () => {
-    const user = createUserStore(createFetch({
-      baseUrl: API_URL,
-    }));
+    const user = createUserStore(
+      createFetch({
+        baseUrl: API_URL,
+      })
+    );
 
     const response = await user.login(TEST_USERNAME, `${TEST_PASSWORD}_thispasswordisnolongerokay`);
     expect(response === false);
@@ -151,12 +154,14 @@ describe('User Store', () => {
 
   test('login successful', async () => {
     // This will call profile() as well!
-    const user = createUserStore(createFetch({
-      baseUrl: API_URL,
-      options: {
-        beforeFetch: async ({ options }) => beforeFetch(options, user),
-      },
-    }));
+    const user = createUserStore(
+      createFetch({
+        baseUrl: API_URL,
+        options: {
+          beforeFetch: async ({ options }) => beforeFetch(options, user),
+        },
+      })
+    );
 
     const response = await user.login(TEST_USERNAME, `${TEST_PASSWORD}`);
 

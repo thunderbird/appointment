@@ -28,9 +28,9 @@ const alertSchemeToNoticeBarType = computed(() => {
     [AlertSchemes.Info]: NoticeBarTypes.Info,
     [AlertSchemes.Error]: NoticeBarTypes.Critical,
     [AlertSchemes.Success]: NoticeBarTypes.Success,
-    [AlertSchemes.Warning]: NoticeBarTypes.Warning
-  }
-})
+    [AlertSchemes.Warning]: NoticeBarTypes.Warning,
+  };
+});
 
 const open = ref(false);
 const toggleDetails = () => {

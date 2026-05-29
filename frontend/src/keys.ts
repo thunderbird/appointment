@@ -10,11 +10,11 @@ import { IsoWeekday } from '@/composables/dayjs';
 
 // Provides Dayjs class functionality as well as the timezone plugin, customParseFormat and related keys
 type DayjsType = ((_?: ConfigType) => Dayjs) & {
-  tz: DayjsTimezone,
-  max: (...dayjs: Dayjs[]) => Dayjs | null,
-  min: (...dayjs: Dayjs[]) => Dayjs | null,
-  duration: CreateDurationType,
-  locale: (preset?: string) => string,
+  tz: DayjsTimezone;
+  max: (...dayjs: Dayjs[]) => Dayjs | null;
+  min: (...dayjs: Dayjs[]) => Dayjs | null;
+  duration: CreateDurationType;
+  locale: (preset?: string) => string;
 } & ((objToParse: any, format: string) => Dayjs);
 export const dayjsKey = Symbol('dayjs') as InjectionKey<DayjsType>;
 export const isoWeekdaysKey = Symbol('isoWeekdays') as InjectionKey<IsoWeekday[]>;

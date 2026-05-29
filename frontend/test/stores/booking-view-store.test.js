@@ -1,12 +1,4 @@
-import {
-  expect,
-  test,
-  beforeEach,
-  describe,
-  beforeAll,
-  afterAll,
-  afterEach,
-} from 'vitest';
+import { expect, test, beforeEach, describe, beforeAll, afterAll, afterEach } from 'vitest';
 import { setupServer } from 'msw/node';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { createPinia } from 'pinia';

@@ -1,9 +1,7 @@
 <template>
   <div class="wrapper">
     <div class="logo"></div>
-    <h1 class="title" aria-label="Thunderbird Pro Appointment.">
-      <span>Thunderbird Pro</span> Appointment
-    </h1>
+    <h1 class="title" aria-label="Thunderbird Pro Appointment."><span>Thunderbird Pro</span> Appointment</h1>
   </div>
 </template>
 

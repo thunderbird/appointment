@@ -1,8 +1,6 @@
 import { i18n } from '@/composables/i18n';
 import { defineStore } from 'pinia';
-import {
-  ref, computed, inject, Ref,
-} from 'vue';
+import { ref, computed, inject, Ref } from 'vue';
 import { useUserStore } from '@/stores/user-store';
 import {
   DateFormatStrings,
@@ -12,14 +10,21 @@ import {
   MeetingLinkProviderType,
 } from '@/definitions';
 import {
-  Error, Fetch, Schedule, ScheduleListResponse, ScheduleResponse, Exception, ExceptionDetail, HourPeriod, Slot,
+  Error,
+  Fetch,
+  Schedule,
+  ScheduleListResponse,
+  ScheduleResponse,
+  Exception,
+  ExceptionDetail,
+  HourPeriod,
+  Slot,
 } from '@/models';
 import { dayjsKey } from '@/keys';
 import { posthog, usePosthog } from '@/composables/posthog';
 import { arrayRotate, getStartOfWeek, timeFormat } from '@/utils';
 import { Dayjs } from 'dayjs';
 
- 
 export const useScheduleStore = defineStore('schedules', () => {
   const dj = inject(dayjsKey);
 
@@ -69,7 +74,7 @@ export const useScheduleStore = defineStore('schedules', () => {
    */
   const init = (fetch: Fetch) => {
     call.value = fetch;
-  }
+  };
 
   /**
    * Get all schedules for current user
@@ -142,7 +147,7 @@ export const useScheduleStore = defineStore('schedules', () => {
           message = message.replace('{value}', timeZoned.format(timeFormat()));
         } else if (err.type === 'string_too_long') {
           const maxLength = err.ctx.max_length;
-          message = i18n.t('error.fieldIsTooLong', { field: fieldLocalized, value: maxLength })
+          message = i18n.t('error.fieldIsTooLong', { field: fieldLocalized, value: maxLength });
         }
 
         return message;
@@ -197,7 +202,7 @@ export const useScheduleStore = defineStore('schedules', () => {
 
   /**
    * Update the slug of the first schedule
-   * 
+   *
    * @param slug new slug
    */
   const updateFirstSlug = async (slug: string) => {
@@ -230,7 +235,7 @@ export const useScheduleStore = defineStore('schedules', () => {
    * Takes the current schedule configuration and generates an array of time slots that are available, meaning they are
    * within the time slots the user defined with their availability settings.
    * This is the client-side implementation of controller/calendar.py::available_slots_from_schedule
-   * 
+   *
    * @param date The date object indicating the week to calculate available time slots for
    */
   const availableTimeSlots = (date: Dayjs) => {
@@ -244,21 +249,25 @@ export const useScheduleStore = defineStore('schedules', () => {
 
     // Normalise availability to a list of weekdays with their general time window or, if set, custom availability
     // Format: {[weekday]: [{startHour, endHour}, ...]}
-    const weeklyTimes = {} as {[key:number]: HourPeriod[]};
+    const weeklyTimes = {} as { [key: number]: HourPeriod[] };
     s.weekdays.forEach((weekday) => {
       if (s.use_custom_availabilities) {
-        s.availabilities.filter((a) => a.day_of_week === weekday).forEach((a) => {
-          if (!(weekday in weeklyTimes)) weeklyTimes[weekday] = [];
-          weeklyTimes[weekday].push({
-            startHour: parseInt(timeToFrontendTime(a.start_time, s.time_updated).slice(0, 2)),
-            endHour: parseInt(timeToFrontendTime(a.end_time, s.time_updated).slice(0, 2)),
+        s.availabilities
+          .filter((a) => a.day_of_week === weekday)
+          .forEach((a) => {
+            if (!(weekday in weeklyTimes)) weeklyTimes[weekday] = [];
+            weeklyTimes[weekday].push({
+              startHour: parseInt(timeToFrontendTime(a.start_time, s.time_updated).slice(0, 2)),
+              endHour: parseInt(timeToFrontendTime(a.end_time, s.time_updated).slice(0, 2)),
+            });
           });
-        });
       } else {
-        weeklyTimes[weekday] = [{
-          startHour: startHour,
-          endHour: endHour,
-        }];
+        weeklyTimes[weekday] = [
+          {
+            startHour: startHour,
+            endHour: endHour,
+          },
+        ];
       }
     });
 
@@ -271,7 +280,7 @@ export const useScheduleStore = defineStore('schedules', () => {
     const slots = [] as Slot[];
 
     // Iterate over each day of week ordered by users preference
-    const defaultWeekdays = [1,2,3,4,5,6,7];
+    const defaultWeekdays = [1, 2, 3, 4, 5, 6, 7];
     const orderedWeekdays = arrayRotate(defaultWeekdays, -defaultWeekdays.indexOf(startOfWeek));
 
     orderedWeekdays.forEach((day, index) => {

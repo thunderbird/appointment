@@ -16,7 +16,7 @@ import i18ninstance from '@/composables/i18n';
 
 // init basic css with services-ui styles
 import '@/assets/styles/main.css';
-import "@thunderbirdops/services-ui/style.css";
+import '@thunderbirdops/services-ui/style.css';
 
 // init sentry
 import * as Sentry from '@sentry/vue';
@@ -57,7 +57,14 @@ if (useSentry) {
     // errors occur.
     replaysOnErrorSampleRate: 1.0,
     // Set `tracePropagationTargets` to control for which URLs distributed tracing should be enabled
-    tracePropagationTargets: ['localhost', 'https://stage.appointment.day', 'https://appointment-stage.tb.pro', 'https://appointment.tp.pro', 'https://apmt.day', 'https://apt.mt'],
+    tracePropagationTargets: [
+      'localhost',
+      'https://stage.appointment.day',
+      'https://appointment-stage.tb.pro',
+      'https://appointment.tp.pro',
+      'https://apmt.day',
+      'https://apt.mt',
+    ],
     sendDefaultPii: false,
   });
 }

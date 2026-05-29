@@ -1,0 +1,24 @@
+# Dependency directories
+node_modules
+/dist
+public/fonts
+
+# Filetypes to keep as is
+*.svg
+
+# Version control and IDEs
+.git
+.github
+.vscode
+
+# Build outputs
+*.min.js
+*.min.css
+
+# Logs
+logs
+*.log
+
+# Environment files
+.env
+.env.*

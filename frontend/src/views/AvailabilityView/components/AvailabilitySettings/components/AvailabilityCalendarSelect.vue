@@ -14,23 +14,25 @@ const availabilityStore = useAvailabilityStore();
 const { currentState } = storeToRefs(availabilityStore);
 const { isLoaded, connectedCalendars } = storeToRefs(calendarStore);
 
-const calendarOptions = computed<SelectOption[]>(() => connectedCalendars.value.map((calendar) => ({
-  label: calendar.title,
-  value: calendar.id,
-})));
+const calendarOptions = computed<SelectOption[]>(() =>
+  connectedCalendars.value.map((calendar) => ({
+    label: calendar.title,
+    value: calendar.id,
+  }))
+);
 
 const selectedCalendar = computed({
   get: () => currentState.value.calendar_id,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { calendar_id: value } })
-  }
-})
+    availabilityStore.$patch({ currentState: { calendar_id: value } });
+  },
+});
 
 onMounted(async () => {
   if (!isLoaded.value) {
     await calendarStore.fetch();
   }
-})
+});
 </script>
 
 <template>
@@ -41,7 +43,7 @@ onMounted(async () => {
     v-model="selectedCalendar"
     :disabled="!currentState.active"
   >
-    {{ t("label.bookingTo") }}
+    {{ t('label.bookingTo') }}
   </select-input>
 </template>
 

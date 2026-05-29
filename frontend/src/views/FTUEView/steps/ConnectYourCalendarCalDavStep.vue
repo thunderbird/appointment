@@ -38,7 +38,7 @@ const onContinueButtonClick = async () => {
   calendarUrlErrorMessage.value = null;
 
   try {
-    const payload =  noSignInCredentialsRequired.value
+    const payload = noSignInCredentialsRequired.value
       ? { url: calendarUrl.value }
       : { url: calendarUrl.value, user: username.value, password: password.value };
 
@@ -53,7 +53,10 @@ const onContinueButtonClick = async () => {
         calendarUrlErrorMessage.value = t('ftue.calendarUrlErrorMessage');
         return;
       } else if (formExceptionDetail?.id === 'REMOTE_CALENDAR_AUTHENTICATION_ERROR') {
-        errorMessage.value = { boldSegment: t('ftue.calendarUrlCantSignIn'), title: t('ftue.calendarCheckCredentials') };
+        errorMessage.value = {
+          boldSegment: t('ftue.calendarUrlCantSignIn'),
+          title: t('ftue.calendarCheckCredentials'),
+        };
         return;
       }
 
@@ -100,7 +103,8 @@ const onContinueButtonClick = async () => {
 
   <step-title :title="t('ftue.connectWithCalDav')" />
 
-  <p class="info-text">{{ t('ftue.connectWithCalDavInfo') }} 
+  <p class="info-text">
+    {{ t('ftue.connectWithCalDavInfo') }}
     <a href="https://support.tb.pro/hc/articles/43161616587027" target="_blank">
       {{ t('label.learnMore') }}
     </a>
@@ -140,7 +144,8 @@ const onContinueButtonClick = async () => {
         {{ t('label.appPassword') }}
       </text-input>
 
-      <p class="app-password-info-text">{{ t('ftue.calDavAppPasswordInfo') }} 
+      <p class="app-password-info-text">
+        {{ t('ftue.calDavAppPasswordInfo') }}
         <a href="https://support.tb.pro/hc/articles/46805020320275" target="_blank">
           {{ t('ftue.calDavLearnMoreAppPassword') }}
         </a>
@@ -201,7 +206,8 @@ form {
     width: 100%;
   }
 
-  .username-input, .app-password-info-text {
+  .username-input,
+  .app-password-info-text {
     margin-block-end: 1rem;
   }
 

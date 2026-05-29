@@ -1,5 +1,5 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { mount } from '@vue/test-utils'
+import { mount } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
 import i18ninstance from '@/composables/i18n';
 import router from '@/router';
@@ -8,17 +8,13 @@ import { useUserStore } from '@/stores/user-store';
 import { RouterLink } from 'vue-router';
 import NavBar from '@/components/NavBar.vue';
 
-
 describe('NavBar', () => {
   var app;
   var wrapper;
 
   // list of route names that are also lang keys (format: label.<key>), used as nav items
   // these routes are added in addition to the routes already specified in NavBar.vue
-  var navItems = [
-    'schedule',
-    'bookings',
-  ];
+  var navItems = ['schedule', 'bookings'];
   const ourProps = {
     navItems: navItems,
   };

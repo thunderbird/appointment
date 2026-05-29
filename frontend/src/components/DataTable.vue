@@ -5,22 +5,20 @@
 import { useI18n } from 'vue-i18n';
 import { computed, ref, toRefs } from 'vue';
 import { TableDataButtonType, TableDataType } from '@/definitions';
-import {
-  TableDataRow, TableDataColumn, TableFilter, HTMLInputElementEvent,
-} from '@/models';
+import { TableDataRow, TableDataColumn, TableFilter, HTMLInputElementEvent } from '@/models';
 import ListPagination from '@/elements/ListPagination.vue';
 import { PrimaryButton, DangerButton } from '@thunderbirdops/services-ui';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 
 // component properties
 interface Props {
-  allowMultiSelect: boolean, // Displays checkboxes next to each row, and emits the `fieldSelect` event with a list of currently selected rows
-  dataName: string, // The name for the object being represented on the table
-  dataKey: string, // A property to use as the list key
-  columns: TableDataColumn[], // List of columns to be displayed (these don't filter data, filter that yourself!)
-  dataList: TableDataRow[], // List of data to be displayed
-  filters?: TableFilter[], // List of filters to be displayed
-  loading: boolean, // Displays a loading spinner
+  allowMultiSelect: boolean; // Displays checkboxes next to each row, and emits the `fieldSelect` event with a list of currently selected rows
+  dataName: string; // The name for the object being represented on the table
+  dataKey: string; // A property to use as the list key
+  columns: TableDataColumn[]; // List of columns to be displayed (these don't filter data, filter that yourself!)
+  dataList: TableDataRow[]; // List of data to be displayed
+  filters?: TableFilter[]; // List of filters to be displayed
+  loading: boolean; // Displays a loading spinner
   showPagination?: boolean;
 }
 
@@ -29,9 +27,7 @@ const props = withDefaults(defineProps<Props>(), {
   showPagination: true,
 });
 
-const {
-  dataList, dataKey, columns, dataName, allowMultiSelect, loading,
-} = toRefs(props);
+const { dataList, dataKey, columns, dataName, allowMultiSelect, loading } = toRefs(props);
 
 const { t } = useI18n();
 const emit = defineEmits(['fieldSelect', 'fieldClick']);
@@ -43,7 +39,7 @@ const updatePage = (index: number) => {
   currentPage.value = index;
 };
 
-const columnSpan = computed(() => (columns.value.length + (allowMultiSelect.value ? 1 : 0)));
+const columnSpan = computed(() => columns.value.length + (allowMultiSelect.value ? 1 : 0));
 const selectedRows = ref<TableDataRow[]>([]);
 const mutableDataList = ref<TableDataRow[]>(null);
 const selectedFilters = {};
@@ -138,7 +134,6 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
     mutableDataList.value = null;
   }
 };
-
 </script>
 
 <template>
@@ -175,17 +170,19 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
                 id="select-page-input"
                 type="checkbox"
               />
-              <label for="select-page-input">
-                Select Page
-              </label>
+              <label for="select-page-input"> Select Page </label>
             </th>
             <th v-for="column in columns" :key="column.key">{{ column.name }}</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(datum) in paginatedDataList" :key="datum[dataKey] as unknown as string">
+          <tr v-for="datum in paginatedDataList" :key="datum[dataKey] as unknown as string">
             <td v-if="allowMultiSelect">
-              <input :checked="selectedRows.includes(datum)" type="checkbox" @change="(evt) => onFieldSelect(evt, datum)" />
+              <input
+                :checked="selectedRows.includes(datum)"
+                type="checkbox"
+                @change="(evt) => onFieldSelect(evt, datum)"
+              />
             </td>
             <td v-for="(fieldData, fieldKey) in datum" :key="fieldKey" :class="`column-${fieldKey}`">
               <span v-if="fieldData.type === TableDataType.Text">
@@ -233,12 +230,12 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
           <tr v-if="loading">
             <td :colspan="columnSpan" class="loading">
               <div>
-                <loading-spinner/>
+                <loading-spinner />
               </div>
             </td>
           </tr>
           <tr v-else-if="paginatedDataList.length === 0">
-            <td :colspan="columnSpan">{{ t('error.dataSourceIsEmpty', {name: dataName}) }}</td>
+            <td :colspan="columnSpan">{{ t('error.dataSourceIsEmpty', { name: dataName }) }}</td>
           </tr>
         </tbody>
         <tfoot>
@@ -279,7 +276,7 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
       white-space: nowrap;
 
       select {
-        border-radius: 0.375rem
+        border-radius: 0.375rem;
       }
     }
   }
@@ -302,7 +299,8 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
       line-height: 1.25rem;
     }
 
-    thead, tfoot {
+    thead,
+    tfoot {
       color: var(--colour-ti-muted);
     }
 
@@ -313,10 +311,10 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
     }
     thead th {
       padding-bottom: 1rem;
-      padding-top: .5rem;
+      padding-top: 0.5rem;
     }
     tfoot th {
-      padding-bottom: .5rem;
+      padding-bottom: 0.5rem;
       padding-top: 1rem;
     }
     td {

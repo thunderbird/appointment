@@ -23,7 +23,7 @@ onMounted(async () => {
 
   // Hard reload to dashboard after a delay so that
   // we initialize all the stores and data properly
-  setTimeout(() => window.location.href = '/dashboard', 5000);
+  setTimeout(() => (window.location.href = '/dashboard'), 5000);
 });
 </script>
 

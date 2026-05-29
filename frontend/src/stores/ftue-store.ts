@@ -27,7 +27,7 @@ export const useFTUEStore = defineStore('FTUE', () => {
    */
   const init = (fetch: Fetch) => {
     call.value = fetch;
-  }
+  };
 
   const clearMessages = () => {
     infoMessage.value = null;

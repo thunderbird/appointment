@@ -1,12 +1,4 @@
-import {
-  expect,
-  test,
-  beforeEach,
-  describe,
-  beforeAll,
-  afterAll,
-  afterEach,
-} from 'vitest';
+import { expect, test, beforeEach, describe, beforeAll, afterAll, afterEach } from 'vitest';
 import { useExternalConnectionsStore, createExternalConnectionsStore } from '@/stores/external-connections-store';
 import { createPinia } from 'pinia';
 import { setupServer } from 'msw/node';
@@ -18,35 +10,47 @@ import withSetup from '../utils/with-setup';
 const API_URL = 'http://localhost';
 
 const restHandlers = [
-  http.get(`${API_URL}/account/external-connections`, async () => HttpResponse.json({
-    fxa: [{
-      owner_id: 1,
-      name: 'MozillaAccount1',
-      type: 'fxa',
-      type_id: 'f',
-    }],
-    google: [{
-      owner_id: 1,
-      name: 'GoogleAccount1',
-      type: 'google',
-      type_id: 'g',
-    }],
-    zoom: [{
-      owner_id: 1,
-      name: 'ZoomAccount1',
-      type: 'zoom',
-      type_id: 'z',
-    }],
-    caldav: [{
-      owner_id: 1,
-      name: 'CalDAVAccount1',
-      type: 'caldav',
-      type_id: 'c',
-    }],
-  })),
-  http.get(`${API_URL}/zoom/auth`, async () => HttpResponse.json({
-    url: 'https://example.org',
-  })),
+  http.get(`${API_URL}/account/external-connections`, async () =>
+    HttpResponse.json({
+      fxa: [
+        {
+          owner_id: 1,
+          name: 'MozillaAccount1',
+          type: 'fxa',
+          type_id: 'f',
+        },
+      ],
+      google: [
+        {
+          owner_id: 1,
+          name: 'GoogleAccount1',
+          type: 'google',
+          type_id: 'g',
+        },
+      ],
+      zoom: [
+        {
+          owner_id: 1,
+          name: 'ZoomAccount1',
+          type: 'zoom',
+          type_id: 'z',
+        },
+      ],
+      caldav: [
+        {
+          owner_id: 1,
+          name: 'CalDAVAccount1',
+          type: 'caldav',
+          type_id: 'c',
+        },
+      ],
+    })
+  ),
+  http.get(`${API_URL}/zoom/auth`, async () =>
+    HttpResponse.json({
+      url: 'https://example.org',
+    })
+  ),
   http.post(`${API_URL}/zoom/disconnect`, async () => true),
   http.post(`${API_URL}/google/disconnect`, async ({ request }) => {
     const body = await request.json();

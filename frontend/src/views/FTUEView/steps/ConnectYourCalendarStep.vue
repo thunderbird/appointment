@@ -104,7 +104,11 @@ const onContinueButtonClick = async () => {
   </div>
 
   <div class="buttons-container">
-    <primary-button :title="t('label.continue')" @click="onContinueButtonClick" :disabled="!calendarProvider || isLoading">
+    <primary-button
+      :title="t('label.continue')"
+      @click="onContinueButtonClick"
+      :disabled="!calendarProvider || isLoading"
+    >
       {{ isLoading ? t('label.connecting') : t('label.continue') }}
     </primary-button>
   </div>

@@ -3,8 +3,8 @@ import { PhCaretRight } from '@phosphor-icons/vue';
 
 // component properties
 interface Props {
-  title: string,
-  actionUrl: string,
+  title: string;
+  actionUrl: string;
 }
 defineProps<Props>();
 </script>
@@ -33,24 +33,26 @@ defineProps<Props>();
   z-index: 19999;
   margin-top: 0.625rem;
   margin-bottom: 0.625rem;
-  padding: .5rem;
-  border-radius: .5rem;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
 
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: .75rem;
+  gap: 0.75rem;
 
   line-height: 1;
   color: var(--colour-ti-base-dark);
   background-color: var(--colour-danger-hover);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 
   .notification-title {
-    border-radius: .25rem;
+    border-radius: 0.25rem;
     background-color: var(--colour-ti-critical);
     text-transform: uppercase;
-    padding: .25rem .5rem;
+    padding: 0.25rem 0.5rem;
     font-size: 0.75rem;
     font-weight: bold;
     line-height: 1rem;

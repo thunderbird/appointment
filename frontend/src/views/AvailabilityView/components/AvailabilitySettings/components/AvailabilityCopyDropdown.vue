@@ -30,7 +30,6 @@ const copy = () => {
   copyDropdown.value.close();
 };
 
-
 // Handle bulk checking all weekdays
 watch(
   () => allDaysSelected.value,
@@ -38,23 +37,22 @@ watch(
     Object.keys(selectedDays.value).forEach((k) => {
       selectedDays.value[Number(k)] = props.disabledWeekdays.includes(Number(k)) ? false : value;
     });
-  },
+  }
 );
-
 </script>
 
 <template>
   <drop-down class="drop-down-wrapper" ref="copyDropdown">
     <template #trigger>
       <link-button size="large" class="action-btn action-copy" :title="t('label.copyAvailability')">
-        <ph-copy aria-hidden="true"/>
+        <ph-copy aria-hidden="true" />
       </link-button>
     </template>
     <template #default>
       <container-box class="selection-container">
         <label>{{ t('label.copyTimesTo') }}</label>
         <checkbox-input name="all" :label="t('label.selectAll')" v-model="allDaysSelected" />
-        <hr>
+        <hr />
         <checkbox-input
           v-for="d in isoWeekdays"
           v-model="selectedDays[d.iso]"
@@ -65,7 +63,7 @@ watch(
           v-bind="disabledWeekdays.includes(d.iso) ? { disabled: true } : {}"
           :data-testid="`availability-copy-to-${d.long.toLowerCase()}-input`"
         />
-        <hr>
+        <hr />
         <primary-button @click="copy" :title="t('label.copyAvailability')">
           {{ t('label.apply') }}
         </primary-button>
@@ -91,23 +89,23 @@ watch(
     color: var(--colour-ti-secondary);
   }
 
-  :deep(.checkbox-wrapper) label{
+  :deep(.checkbox-wrapper) label {
     font-size: 0.875rem;
   }
 
   :deep(button) {
-    padding-top: .625rem;
-    padding-bottom: .625rem;
+    padding-top: 0.625rem;
+    padding-bottom: 0.625rem;
   }
 }
 
 .action-copy.base.link.filled {
   color: var(--colour-ti-base);
-  padding: .25rem .125rem;
+  padding: 0.25rem 0.125rem;
   width: 2rem;
   height: 2rem;
 
-  svg { 
+  svg {
     width: 1.5rem;
     height: 1.5rem;
   }

@@ -12,7 +12,7 @@
   background-color: var(--colour-neutral-base);
   font-family: 'Inter', sans-serif;
   color: var(--colour-ti-base);
-  padding: .75rem .75rem;
+  padding: 0.75rem 0.75rem;
   z-index: 50;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.14);
 }

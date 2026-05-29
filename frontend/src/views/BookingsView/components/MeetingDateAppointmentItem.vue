@@ -18,8 +18,8 @@ const appointmentItem = computed(() => {
     startTime: props.appointment.slots[0].start,
     duration: props.appointment.slots[0].duration,
     needsConfirmation: isUnconfirmed(props.appointment),
-  }
-})
+  };
+});
 
 const emit = defineEmits(['select-appointment']);
 </script>
@@ -32,7 +32,8 @@ const emit = defineEmits(['select-appointment']);
     </div>
 
     <div class="time-range">
-      <span>{{ dj(appointmentItem.startTime).format('LT') }}</span> - <span>{{ dj(appointmentItem.startTime).add(appointmentItem.duration, 'minutes').format('LT') }}</span>
+      <span>{{ dj(appointmentItem.startTime).format('LT') }}</span> -
+      <span>{{ dj(appointmentItem.startTime).add(appointmentItem.duration, 'minutes').format('LT') }}</span>
     </div>
 
     <div class="badge-column">

@@ -16,30 +16,34 @@ const settingsStore = useSettingsStore();
 const { currentState } = storeToRefs(settingsStore);
 
 // Theme / Colour Scheme
-const colourSchemeOptions = computed(() => Object.values(ColourSchemes).map((c) => ({
-  label: t(`label.${c}`),
-  value: c,
-})));
+const colourSchemeOptions = computed(() =>
+  Object.values(ColourSchemes).map((c) => ({
+    label: t(`label.${c}`),
+    value: c,
+  }))
+);
 
 const colourScheme = computed({
   get: () => currentState.value.colourScheme,
   set: (value) => {
-    settingsStore.$patch({ currentState: { colourScheme: value }})
-  }
-})
+    settingsStore.$patch({ currentState: { colourScheme: value } });
+  },
+});
 
 // Language / Locale
-const localeOptions = computed(() => availableLocales.map((l) => ({
-  label: `${l.toUpperCase()} — ${t(`locales.${l}`)}`,
-  value: l,
-})));
+const localeOptions = computed(() =>
+  availableLocales.map((l) => ({
+    label: `${l.toUpperCase()} — ${t(`locales.${l}`)}`,
+    value: l,
+  }))
+);
 
 const language = computed({
   get: () => currentState.value.language,
   set: (value) => {
-    settingsStore.$patch({ currentState: { language: value }})
-  }
-})
+    settingsStore.$patch({ currentState: { language: value } });
+  },
+});
 
 // Default Time Zone
 // @ts-expect-error ignore type err
@@ -52,25 +56,28 @@ const timezoneOptions = Intl.supportedValuesOf('timeZone').map((timezone: string
 const defaultTimeZone = computed({
   get: () => currentState.value.defaultTimeZone,
   set: (value) => {
-    settingsStore.$patch({ currentState: { defaultTimeZone: value }})
-  }
-})
+    settingsStore.$patch({ currentState: { defaultTimeZone: value } });
+  },
+});
 
 // Time Format
-const timeFormatOptions = computed(() => [{
-  label: t('label.12hAmPm'),
-  value: 12
-}, {
-  label: t('label.24h'),
-  value: 24
-}])
+const timeFormatOptions = computed(() => [
+  {
+    label: t('label.12hAmPm'),
+    value: 12,
+  },
+  {
+    label: t('label.24h'),
+    value: 24,
+  },
+]);
 
 const timeFormat = computed({
   get: () => currentState.value.timeFormat,
   set: (value) => {
-    settingsStore.$patch({ currentState: { timeFormat: value }})
-  }
-})
+    settingsStore.$patch({ currentState: { timeFormat: value } });
+  },
+});
 
 // Start of Week
 // Generate options dynamically using dayjs to respect current locale
@@ -98,18 +105,18 @@ const availableStartOfTheWeekOptions = computed(() => {
 
 const startOfWeek = computed({
   get: () => {
-    return [currentState.value.startOfWeek]
+    return [currentState.value.startOfWeek];
   },
   set: (value) => {
-    settingsStore.$patch({ currentState: { startOfWeek: value[0] }})
-  }
-})
+    settingsStore.$patch({ currentState: { startOfWeek: value[0] } });
+  },
+});
 </script>
 
 <script lang="ts">
 export default {
-  name: 'SettingsViewPreferences'
-}
+  name: 'SettingsViewPreferences',
+};
 </script>
 
 <template>
@@ -145,11 +152,7 @@ export default {
       {{ t('label.defaultTimeZone') }}
     </select-input>
 
-    <segmented-control
-      name="time-format"
-      v-model="timeFormat"
-      :options="timeFormatOptions"
-    >
+    <segmented-control name="time-format" v-model="timeFormat" :options="timeFormatOptions">
       {{ t('label.timeFormat') }}
     </segmented-control>
 

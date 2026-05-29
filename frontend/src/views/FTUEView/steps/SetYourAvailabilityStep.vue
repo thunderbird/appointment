@@ -1,7 +1,14 @@
 <script setup lang="ts">
 import { ref, inject, useTemplateRef, computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { BubbleSelect, PrimaryButton, SelectInput, TextInput, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
+import {
+  BubbleSelect,
+  PrimaryButton,
+  SelectInput,
+  TextInput,
+  NoticeBar,
+  NoticeBarTypes,
+} from '@thunderbirdops/services-ui';
 import { useFTUEStore } from '@/stores/ftue-store';
 import { useScheduleStore } from '@/stores/schedule-store';
 import { isoWeekdaysKey } from '@/keys';
@@ -17,13 +24,17 @@ const ftueStore = useFTUEStore();
 const scheduleStore = useScheduleStore();
 const { timeToFrontendTime, timeToBackendTime } = scheduleStore;
 
-const startTime = ref(scheduleStore.firstSchedule
-  ? timeToFrontendTime(scheduleStore.firstSchedule?.start_time, scheduleStore.firstSchedule?.time_updated)
-  : '09:00');
+const startTime = ref(
+  scheduleStore.firstSchedule
+    ? timeToFrontendTime(scheduleStore.firstSchedule?.start_time, scheduleStore.firstSchedule?.time_updated)
+    : '09:00'
+);
 
-const endTime = ref(scheduleStore.firstSchedule
-  ? timeToFrontendTime(scheduleStore.firstSchedule?.end_time, scheduleStore.firstSchedule?.time_updated)
-  : '17:00');
+const endTime = ref(
+  scheduleStore.firstSchedule
+    ? timeToFrontendTime(scheduleStore.firstSchedule?.end_time, scheduleStore.firstSchedule?.time_updated)
+    : '17:00'
+);
 
 const duration = ref(scheduleStore.firstSchedule?.slot_duration ?? DEFAULT_SLOT_DURATION);
 const weekdays = ref(scheduleStore.firstSchedule?.weekdays ?? [1, 2, 3, 4, 5]);
@@ -31,7 +42,9 @@ const isLoading = ref(false);
 const errorMessage = ref(null);
 const formRef = useTemplateRef('formRef');
 
-const isContinueButtonDisabled = computed(() => !weekdays.value.length || !startTime.value || !endTime.value || !duration.value || isLoading.value);
+const isContinueButtonDisabled = computed(
+  () => !weekdays.value.length || !startTime.value || !endTime.value || !duration.value || isLoading.value
+);
 
 const scheduleDayOptions: SelectOption[] = isoWeekdays.map((day) => ({
   label: day.min[0],
@@ -87,15 +100,10 @@ const onContinueButtonClick = async () => {
   <step-title :title="t('ftue.setYourAvailability')" />
 
   <form ref="formRef" @submit.prevent @keyup.enter="onContinueButtonClick" class="availability-container">
-    <bubble-select
-      name="selectDays"
-      :options="scheduleDayOptions"
-      required
-      v-model="weekdays"
-    >
+    <bubble-select name="selectDays" :options="scheduleDayOptions" required v-model="weekdays">
       {{ t('ftue.selectDays') }}
     </bubble-select>
-  
+
     <div class="time-container">
       <text-input type="time" name="startTime" required class="time-input" v-model="startTime">
         {{ t('ftue.startTime') }}
@@ -104,13 +112,8 @@ const onContinueButtonClick = async () => {
         {{ t('ftue.endTime') }}
       </text-input>
     </div>
-  
-    <select-input
-      name="bookingDuration"
-      :options="bookingDurationOptions"
-      required
-      v-model="duration"
-    >
+
+    <select-input name="bookingDuration" :options="bookingDurationOptions" required v-model="duration">
       {{ t('ftue.bookingDuration') }}
     </select-input>
   </form>

@@ -18,11 +18,11 @@ const copyLink = async () => {
   await navigator.clipboard.writeText(user.myLink);
 
   copyBookingLinkLabel.value = t('info.copiedToClipboard');
-  hasCopied.value = true
+  hasCopied.value = true;
 
   setTimeout(() => {
     copyBookingLinkLabel.value = t('label.copyBookingLink');
-    hasCopied.value = false
+    hasCopied.value = false;
   }, 2000);
 };
 
@@ -32,7 +32,7 @@ onMounted(async () => {
   if (!error.value) {
     pendingAppointmentsCount.value = data.value.count;
   }
-})
+});
 </script>
 
 <template>
@@ -42,7 +42,7 @@ onMounted(async () => {
       :label="t('label.pendingRequests', pendingAppointmentsCount)"
       :to="{
         name: 'bookings',
-        query: { unconfirmed: 'true' }
+        query: { unconfirmed: 'true' },
       }"
       test-id="link-pending-requests"
     >
@@ -51,9 +51,7 @@ onMounted(async () => {
       </template>
     </aside-nav-button>
 
-    <h2
-      :class="{ 'has-pending-requests': pendingAppointmentsCount }"
-    >
+    <h2 :class="{ 'has-pending-requests': pendingAppointmentsCount }">
       {{ t('label.whatDoYouWantToDoToday') }}
     </h2>
 
@@ -118,7 +116,7 @@ h2 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #A0C7F0; /* TODO: pending final colour / not yet in colours.css */
+  background-color: #a0c7f0; /* TODO: pending final colour / not yet in colours.css */
   color: #1a202c;
   border-radius: 9999px;
   width: 1.5rem;

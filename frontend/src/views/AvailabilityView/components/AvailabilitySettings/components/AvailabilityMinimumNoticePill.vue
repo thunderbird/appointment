@@ -16,9 +16,9 @@ const { currentState } = storeToRefs(availabilityStore);
 const minimumNotice = computed({
   get: () => currentState.value.earliest_booking,
   set: (value) => {
-    availabilityStore.$patch({ currentState: { earliest_booking: value }})
-  }
-})
+    availabilityStore.$patch({ currentState: { earliest_booking: value } });
+  },
+});
 
 const earliestOptions: SelectOption[] = [0, 0.5, 1, 2, 3, 4, 5].map((d) => {
   // Special case to avoid "in a few seconds"
@@ -31,7 +31,7 @@ const earliestOptions: SelectOption[] = [0, 0.5, 1, 2, 3, 4, 5].map((d) => {
 
   return {
     label: dj.duration(d, 'days').humanize(),
-    value: (d * 60 * 24),
+    value: d * 60 * 24,
   };
 });
 </script>

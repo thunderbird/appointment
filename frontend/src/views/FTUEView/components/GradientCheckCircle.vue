@@ -8,7 +8,7 @@ import { PhCheckCircle } from '@phosphor-icons/vue';
       Defining the gradient here allows us to use it in the icon fill.
       We use a fixed ID, so if multiple instances are present, they all share the same gradient definition.
     -->
-    <svg width="0" height="0" style="position: absolute; pointer-events: none; opacity: 0;">
+    <svg width="0" height="0" style="position: absolute; pointer-events: none; opacity: 0">
       <defs>
         <linearGradient id="ftue-check-gradient" gradientTransform="rotate(76 .5 .5)">
           <stop offset="0%" stop-color="#66a47a" />
@@ -28,4 +28,3 @@ import { PhCheckCircle } from '@phosphor-icons/vue';
   fill: url(#ftue-check-gradient);
 }
 </style>
-

@@ -5,6 +5,6 @@ html {
   --font-sans: 'Inter', 'sans-serif';
 
   --transition: all 250ms ease-out;
-  --transition-transform: .15s transform ease-in-out;
-  --transition-opacity: .15s opacity ease-in-out;
+  --transition-transform: 0.15s transform ease-in-out;
+  --transition-opacity: 0.15s opacity ease-in-out;
 }

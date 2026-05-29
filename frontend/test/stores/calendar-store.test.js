@@ -1,12 +1,4 @@
-import {
-  expect,
-  test,
-  beforeEach,
-  describe,
-  beforeAll,
-  afterAll,
-  afterEach,
-} from 'vitest';
+import { expect, test, beforeEach, describe, beforeAll, afterAll, afterEach } from 'vitest';
 import { useCalendarStore, createCalendarStore } from '@/stores/calendar-store';
 import { createPinia, setActivePinia } from 'pinia';
 import { setupServer } from 'msw/node';
@@ -16,20 +8,22 @@ import { createFetch } from '@vueuse/core';
 const API_URL = 'http://localhost';
 
 const restHandlers = [
-  http.get(`${API_URL}/me/calendars`, async () => HttpResponse.json([
-    {
-      id: 1,
-      title: 'title',
-      color: '#123456',
-      connected: true,
-    },
-    {
-      id: 2,
-      title: 'title',
-      color: '#123456',
-      connected: false,
-    },
-  ])),
+  http.get(`${API_URL}/me/calendars`, async () =>
+    HttpResponse.json([
+      {
+        id: 1,
+        title: 'title',
+        color: '#123456',
+        connected: true,
+      },
+      {
+        id: 2,
+        title: 'title',
+        color: '#123456',
+        connected: false,
+      },
+    ])
+  ),
 ];
 
 const server = setupServer(...restHandlers);

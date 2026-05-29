@@ -1,6 +1,13 @@
 <script setup lang="ts">
 import { Alert } from '@/models';
-import { IconButton, ModalDialog, NoticeBar, NoticeBarTypes, PrimaryButton, DangerButton } from '@thunderbirdops/services-ui';
+import {
+  IconButton,
+  ModalDialog,
+  NoticeBar,
+  NoticeBarTypes,
+  PrimaryButton,
+  DangerButton,
+} from '@thunderbirdops/services-ui';
 import { PhX } from '@phosphor-icons/vue';
 import { ref, useTemplateRef } from 'vue';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
@@ -15,7 +22,7 @@ const modal = useTemplateRef('modal');
 const errorMessage = ref<Alert>(null);
 
 const props = defineProps<{
-  typeId: string|null,
+  typeId: string | null;
 }>();
 
 /**
@@ -35,7 +42,7 @@ async function disconnect() {
   emit('disconnected');
 }
 
-defineExpose({ show, hide })
+defineExpose({ show, hide });
 </script>
 
 <template>
