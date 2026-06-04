@@ -52,7 +52,7 @@
     }
   },
   "footer": {
-    "copywrite": "Thunderbird gehört zu {mzlaLink}, einer vollständigen Tochtergesellschaft der Mozilla Foundation. Teile dieses Inhalts unterliegen dem Copyright ©1998-{currentYear} einzelner Mitwirkender. Der Inhalt ist unter einer {creativeCommonsLink} verfügbar.",
+    "copywrite": "Thunderbird gehört zu {mzlaLink}, einer vollständigen Tochtergesellschaft der Nonprofit-Organisation Mozilla.org. Teile dieses Inhalts unterliegen dem Copyright ©1998-{currentYear} einzelner Mitwirkender. Der Inhalt ist unter einer {creativeCommonsLink} verfügbar.",
     "creativeCommonsLinkText": "Creative-Commons-Lizenz",
     "mzlaLinkText": "MZLA Technologies Corporation"
   },
