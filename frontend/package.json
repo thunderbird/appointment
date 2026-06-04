@@ -58,7 +58,7 @@
     "prettier-plugin-sort-json": "4.2.0",
     "typescript": "5.5.3",
     "vite-plugin-eslint": "1.8.1",
-    "vitest": "4.0.18"
+    "vitest": "4.1.0"
   },
   "postcss": {
     "plugins": {
