@@ -1,6 +1,8 @@
 import uuid
 from unittest.mock import patch
 
+from sqlalchemy.exc import IntegrityError
+
 from appointment.database import repo
 from defines import TEST_USER_ID
 
@@ -82,3 +84,26 @@ class TestScheduleSlug:
                 result = repo.schedule.generate_slug(db, schedule.id)
 
         assert result is None
+
+    def test_generate_slug_retries_on_integrity_error(self, with_db, make_schedule):
+        schedule = make_schedule(slug=None)
+        unique_uuid = uuid.UUID('00000000-0000-0000-0000-0000cafebabe')
+
+        with patch('appointment.database.repo.schedule.slug_exists', return_value=False):
+            with patch('appointment.database.repo.schedule.uuid.uuid4', return_value=unique_uuid):
+                with with_db() as db:
+                    real_commit = db.commit
+                    attempts = 0
+
+                    def commit_once_then_succeed():
+                        nonlocal attempts
+                        attempts += 1
+                        if attempts == 1:
+                            raise IntegrityError('insert', {}, Exception('duplicate key'))
+                        return real_commit()
+
+                    with patch.object(db, 'commit', side_effect=commit_once_then_succeed):
+                        result = repo.schedule.generate_slug(db, schedule.id)
+
+        assert result == 'cafebabe'
+        assert attempts == 2

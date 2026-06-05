@@ -7,6 +7,7 @@ import uuid
 import zoneinfo
 
 from datetime import datetime, time, timezone
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from .. import models, schemas, repo
 from ... import utils
@@ -152,22 +153,24 @@ def generate_slug(db: Session, schedule_id: int) -> str | None:
     if schedule.slug:
         return schedule.slug
 
-    # If slug isn't provided, give them the last 8 characters from a uuid4
-    # Try up-to-3 times to create a unique slug
+    # If slug isn't provided, give them the last 8 characters from a uuid4.
+    # Try up-to-3 times to create a unique slug.
     for _ in range(3):
         slug = uuid.uuid4().hex[-8:]
-        if not slug_exists(db, slug):
-            schedule.slug = slug
-            break
+        if slug_exists(db, slug):
+            continue
 
-    # Could not create slug due to randomness overlap
-    if schedule.slug is None:
-        return None
+        schedule.slug = slug
+        db.add(schedule)
 
-    db.add(schedule)
-    db.commit()
+        try:
+            db.commit()
+            return schedule.slug
+        except IntegrityError:
+            db.rollback()
+            schedule.slug = None
 
-    return schedule.slug
+    return None
 
 
 def hard_delete(db: Session, schedule_id: int):
