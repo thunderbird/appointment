@@ -35,6 +35,7 @@ slot-not-auth = Keine Berechtigung, dieses Zeitfenster zu sehen oder zu ändern.
 account-delete-fail = Bei der Löschung der Daten ist ein Problem aufgetreten. Dieser Vorfall wurde protokolliert und die Daten werden manuell gelöscht.
 protected-route-fail = Keine gültigen Authentifizierungsdaten angegeben.
 username-not-available = Dieser Benutzername ist bereits vergeben.
+schedule-slug-taken = Dieser Link-Slug ist bereits vergeben. Bitte einen anderen wählen.
 invalid-link = Dieser Link ist nicht mehr gültig.
 calendar-sync-fail = Bei der Synchronisierung von Kalendern ist ein Fehler aufgetreten. Bitte später noch einmal versuchen.
 calendar-not-active = Der Kalender ist nicht verbunden.

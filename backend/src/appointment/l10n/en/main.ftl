@@ -35,6 +35,7 @@ slot-not-auth = You are not authorized to view or modify this time slot.
 account-delete-fail = There was a problem deleting your data. This incident has been logged and your data will manually be removed.
 protected-route-fail = No valid authentication credentials provided.
 username-not-available = This username has already been taken.
+schedule-slug-taken = This link slug is already in use. Please choose a different one.
 invalid-link = This link is no longer valid.
 calendar-sync-fail = An error occurred while syncing calendars. Please try again later.
 calendar-not-active = The calendar connection is not active.
