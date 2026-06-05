@@ -176,7 +176,7 @@ export default {
           </section>
 
           <section>
-            <booking-page-link />
+            <booking-page-link @link-refreshed="clearNotices" />
           </section>
         </div>
       </div>

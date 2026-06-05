@@ -16,6 +16,8 @@ const userStore = useUserStore();
 const availabilityStore = useAvailabilityStore();
 const { currentState } = storeToRefs(availabilityStore);
 
+const emit = defineEmits<{ 'link-refreshed': [] }>();
+
 const refreshLinkModalRef = useTemplateRef('refreshLinkModalRef');
 const copyButtonLabel = ref(t('label.copy'));
 
@@ -40,6 +42,7 @@ async function refreshLinkConfirm() {
   });
 
   refreshLinkModalRef.value.hide();
+  emit('link-refreshed');
 
   if (usePosthog) {
     posthog.capture(MetricEvents.RefreshLink);
