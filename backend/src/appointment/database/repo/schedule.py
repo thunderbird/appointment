@@ -43,6 +43,14 @@ def get_by_slug(db: Session, slug: str, subscriber_id: int) -> models.Schedule |
     )
 
 
+def slug_exists(db: Session, slug: str) -> bool:
+    """Check if a slug is already in use (globally unique in the database)."""
+    return (
+        db.query(models.Schedule)
+        .filter(models.Schedule.slug == slug)
+        .first() is not None
+    )
+
 def get(db: Session, schedule_id: int):
     """retrieve schedule by id"""
     if schedule_id:
@@ -144,14 +152,11 @@ def generate_slug(db: Session, schedule_id: int) -> str | None:
     if schedule.slug:
         return schedule.slug
 
-    owner_id = schedule.owner.id
-
     # If slug isn't provided, give them the last 8 characters from a uuid4
     # Try up-to-3 times to create a unique slug
     for _ in range(3):
         slug = uuid.uuid4().hex[-8:]
-        exists = repo.schedule.get_by_slug(db, slug, owner_id)
-        if not exists:
+        if not slug_exists(db, slug):
             schedule.slug = slug
             break
 
