@@ -198,6 +198,54 @@ class TestSchedule:
         response = with_client.get(f'/schedule/{generated_schedule.id}', headers=auth_headers)
         assert response.status_code == 403, response.text
 
+    def test_update_schedule_rejects_duplicate_slug(
+        self, with_client, make_caldav_calendar, make_schedule, schedule_input
+    ):
+        calendar = make_caldav_calendar(connected=True)
+        make_schedule(slug='my-booking', calendar_id=calendar.id)
+        other_schedule = make_schedule(slug='other-link', calendar_id=calendar.id)
+
+        response = with_client.put(
+            f'/schedule/{other_schedule.id}',
+            json={
+                'calendar_id': other_schedule.calendar_id,
+                'slug': 'my-booking',
+                **schedule_input,
+            },
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 400, response.text
+        data = response.json()
+        assert data['detail']['id'] == 'SCHEDULE_SLUG_TAKEN'
+
+    def test_update_schedule_allows_unchanged_slug(self, with_client, make_schedule):
+        generated_schedule = make_schedule(slug='my-booking')
+
+        response = with_client.put(
+            f'/schedule/{generated_schedule.id}',
+            json={
+                'calendar_id': generated_schedule.calendar_id,
+                'name': 'Schedulex',
+                'location_type': 1,
+                'location_url': 'https://testx.org',
+                'details': 'Lorem Ipsumx',
+                'start_date': DAY2,
+                'end_date': DAY5,
+                'start_time': '09:00',
+                'end_time': '17:00',
+                'earliest_booking': 1000,
+                'farthest_booking': 20000,
+                'weekdays': [2, 4, 6],
+                'slot_duration': 60,
+                'slug': 'my-booking',
+            },
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 200, response.text
+        assert response.json()['slug'] == 'my-booking'
+
     def test_update_existing_schedule(self, with_client, make_schedule):
         generated_schedule = make_schedule()
 

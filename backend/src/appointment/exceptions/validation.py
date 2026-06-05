@@ -171,6 +171,16 @@ class ScheduleCreationException(APIException):
         return l10n('unknown-error')
 
 
+class ScheduleSlugTakenException(APIException):
+    """Raise when a schedule slug is already in use."""
+
+    id_code = 'SCHEDULE_SLUG_TAKEN'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('schedule-slug-taken')
+
+
 class InvalidAvailabilityException(APIException):
     """Raise when any custom availability is invalid, e.g. start time after end time."""
 

@@ -209,6 +209,9 @@ def update_schedule(
     if schedule.use_custom_availabilities and not repo.schedule.all_availability_is_valid(schedule):
         raise validation.InvalidAvailabilityException()
 
+    if schedule.slug and not repo.schedule.slug_available_for_schedule(db, schedule.slug, id):
+        raise validation.ScheduleSlugTakenException()
+
     result = repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
 
     if os.getenv('GOOGLE_INVITE_ENABLED') == 'True':

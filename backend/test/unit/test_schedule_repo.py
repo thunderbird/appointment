@@ -8,15 +8,28 @@ from defines import TEST_USER_ID
 
 
 class TestScheduleSlug:
-    def test_slug_exists_returns_false_when_unused(self, with_db):
+    def test_slug_taken_returns_false_when_unused(self, with_db):
         with with_db() as db:
-            assert repo.schedule.slug_exists(db, 'unused01') is False
+            assert repo.schedule.slug_taken(db, 'unused01') is False
 
-    def test_slug_exists_returns_true_when_slug_is_taken(self, with_db, make_schedule):
+    def test_slug_taken_returns_true_when_slug_is_in_use(self, with_db, make_schedule):
         make_schedule(slug='taken001')
 
         with with_db() as db:
-            assert repo.schedule.slug_exists(db, 'taken001') is True
+            assert repo.schedule.slug_taken(db, 'taken001') is True
+
+    def test_slug_available_for_schedule_allows_unchanged_slug(self, with_db, make_schedule):
+        schedule = make_schedule(slug='taken001')
+
+        with with_db() as db:
+            assert repo.schedule.slug_available_for_schedule(db, 'taken001', schedule.id) is True
+
+    def test_slug_available_for_schedule_rejects_other_schedule_slug(self, with_db, make_schedule):
+        make_schedule(slug='taken001')
+        other = make_schedule(slug='other001')
+
+        with with_db() as db:
+            assert repo.schedule.slug_available_for_schedule(db, 'taken001', other.id) is False
 
     def test_get_by_slug_is_scoped_to_owner(
         self, with_db, make_schedule, make_pro_subscriber, make_caldav_calendar
@@ -30,7 +43,7 @@ class TestScheduleSlug:
         with with_db() as db:
             assert repo.schedule.get_by_slug(db, slug, TEST_USER_ID) is not None
             assert repo.schedule.get_by_slug(db, slug, other_subscriber.id) is None
-            assert repo.schedule.slug_exists(db, slug) is True
+            assert repo.schedule.slug_taken(db, slug) is True
 
     def test_generate_slug_returns_existing_slug(self, with_db, make_schedule):
         schedule = make_schedule(slug='existing1')
@@ -89,7 +102,7 @@ class TestScheduleSlug:
         schedule = make_schedule(slug=None)
         unique_uuid = uuid.UUID('00000000-0000-0000-0000-0000cafebabe')
 
-        with patch('appointment.database.repo.schedule.slug_exists', return_value=False):
+        with patch('appointment.database.repo.schedule.slug_taken', return_value=False):
             with patch('appointment.database.repo.schedule.uuid.uuid4', return_value=unique_uuid):
                 with with_db() as db:
                     real_commit = db.commit
