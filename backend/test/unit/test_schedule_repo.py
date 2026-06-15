@@ -10,13 +10,27 @@ from defines import TEST_USER_ID
 class TestScheduleSlug:
     def test_slug_taken_returns_false_when_unused(self, with_db):
         with with_db() as db:
-            assert repo.schedule.slug_taken(db, 'unused01') is False
+            assert repo.schedule.slug_taken(db, 'unused01', TEST_USER_ID) is False
 
     def test_slug_taken_returns_true_when_slug_is_in_use(self, with_db, make_schedule):
         make_schedule(slug='taken001')
 
         with with_db() as db:
-            assert repo.schedule.slug_taken(db, 'taken001') is True
+            assert repo.schedule.slug_taken(db, 'taken001', TEST_USER_ID) is True
+
+    def test_slug_taken_allows_same_slug_for_different_owners(
+        self, with_db, make_schedule, make_pro_subscriber, make_caldav_calendar
+    ):
+        slug = 'consult'
+        make_schedule(slug=slug)
+
+        other_subscriber = make_pro_subscriber()
+        other_calendar = make_caldav_calendar(subscriber_id=other_subscriber.id, connected=True)
+        make_schedule(slug=slug, calendar_id=other_calendar.id)
+
+        with with_db() as db:
+            assert repo.schedule.slug_taken(db, slug, TEST_USER_ID) is True
+            assert repo.schedule.slug_taken(db, slug, other_subscriber.id) is True
 
     def test_slug_available_for_schedule_allows_unchanged_slug(self, with_db, make_schedule):
         schedule = make_schedule(slug='taken001')
@@ -31,6 +45,19 @@ class TestScheduleSlug:
         with with_db() as db:
             assert repo.schedule.slug_available_for_schedule(db, 'taken001', other.id) is False
 
+    def test_slug_available_for_schedule_allows_slug_used_by_other_owner(
+        self, with_db, make_schedule, make_pro_subscriber, make_caldav_calendar
+    ):
+        slug = 'shared01'
+        make_schedule(slug=slug)
+
+        other_subscriber = make_pro_subscriber()
+        other_calendar = make_caldav_calendar(subscriber_id=other_subscriber.id, connected=True)
+        other_schedule = make_schedule(slug='other001', calendar_id=other_calendar.id)
+
+        with with_db() as db:
+            assert repo.schedule.slug_available_for_schedule(db, slug, other_schedule.id) is True
+
     def test_get_by_slug_is_scoped_to_owner(
         self, with_db, make_schedule, make_pro_subscriber, make_caldav_calendar
     ):
@@ -43,7 +70,8 @@ class TestScheduleSlug:
         with with_db() as db:
             assert repo.schedule.get_by_slug(db, slug, TEST_USER_ID) is not None
             assert repo.schedule.get_by_slug(db, slug, other_subscriber.id) is None
-            assert repo.schedule.slug_taken(db, slug) is True
+            assert repo.schedule.slug_taken(db, slug, TEST_USER_ID) is True
+            assert repo.schedule.slug_taken(db, slug, other_subscriber.id) is False
 
     def test_generate_slug_returns_existing_slug(self, with_db, make_schedule):
         schedule = make_schedule(slug='existing1')
@@ -66,7 +94,7 @@ class TestScheduleSlug:
             saved = repo.schedule.get(db, schedule.id)
             assert saved.slug == result
 
-    def test_generate_slug_avoids_cross_owner_collision(
+    def test_generate_slug_allows_same_slug_across_owners(
         self, with_db, make_schedule, make_pro_subscriber, make_caldav_calendar
     ):
         make_schedule(slug='deadbeef')
@@ -76,15 +104,12 @@ class TestScheduleSlug:
         other_schedule = make_schedule(slug=None, calendar_id=other_calendar.id)
 
         collision_uuid = uuid.UUID('00000000-0000-0000-0000-0000deadbeef')
-        unique_uuid = uuid.UUID('00000000-0000-0000-0000-0000cafebabe')
 
-        with patch('appointment.database.repo.schedule.uuid.uuid4') as mock_uuid:
-            mock_uuid.side_effect = [collision_uuid, unique_uuid]
-
+        with patch('appointment.database.repo.schedule.uuid.uuid4', return_value=collision_uuid):
             with with_db() as db:
                 result = repo.schedule.generate_slug(db, other_schedule.id)
 
-        assert result == 'cafebabe'
+        assert result == 'deadbeef'
 
     def test_generate_slug_returns_none_when_all_attempts_collide(self, with_db, make_schedule):
         make_schedule(slug='deadbeef')

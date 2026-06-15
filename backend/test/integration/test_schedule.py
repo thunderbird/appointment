@@ -3,6 +3,7 @@ from datetime import date, time, datetime, timedelta, timezone, UTC
 from unittest.mock import patch, Mock
 
 import pytest
+from fastapi import Request
 from freezegun import freeze_time
 
 from appointment import defines
@@ -11,6 +12,7 @@ from appointment.controller.auth import signed_url_by_subscriber
 from appointment.controller.calendar import CalDavConnector
 from appointment.database import schemas, models, repo
 from appointment.exceptions import validation
+from appointment.dependencies import auth
 from defines import DAY1, DAY5, DAY14, DAY2, TEST_USER_ID, auth_headers
 
 
@@ -218,6 +220,60 @@ class TestSchedule:
         assert response.status_code == 400, response.text
         data = response.json()
         assert data['detail']['id'] == 'SCHEDULE_SLUG_TAKEN'
+
+    def test_create_schedule_rejects_duplicate_slug(
+        self, with_client, make_caldav_calendar, make_schedule, schedule_input
+    ):
+        calendar = make_caldav_calendar(connected=True)
+        make_schedule(slug='my-booking', calendar_id=calendar.id)
+
+        response = with_client.post(
+            '/schedule',
+            json={'calendar_id': calendar.id, 'slug': 'my-booking', **schedule_input},
+            headers=auth_headers,
+        )
+
+        assert response.status_code == 400, response.text
+        data = response.json()
+        assert data['detail']['id'] == 'SCHEDULE_SLUG_TAKEN'
+
+    def test_update_schedule_allows_slug_used_by_other_owner(
+        self,
+        with_client,
+        with_db,
+        make_schedule,
+        make_pro_subscriber,
+        make_caldav_calendar,
+        schedule_input,
+    ):
+        make_schedule(slug='my-booking')
+        other_subscriber = make_pro_subscriber()
+        other_calendar = make_caldav_calendar(subscriber_id=other_subscriber.id, connected=True)
+        other_schedule = make_schedule(slug='other-link', calendar_id=other_calendar.id)
+
+        def override_other_subscriber(request: Request):
+            if 'authorization' not in request.headers:
+                raise validation.InvalidTokenException()
+            db = with_db()
+            return repo.subscriber.get(db, other_subscriber.id)
+
+        original_override = with_client.app.dependency_overrides[auth.get_subscriber]
+        with_client.app.dependency_overrides[auth.get_subscriber] = override_other_subscriber
+
+        try:
+            response = with_client.put(
+                f'/schedule/{other_schedule.id}',
+                json={
+                    'calendar_id': other_schedule.calendar_id,
+                    'slug': 'my-booking',
+                    **schedule_input,
+                },
+                headers=auth_headers,
+            )
+            assert response.status_code == 200, response.text
+            assert response.json()['slug'] == 'my-booking'
+        finally:
+            with_client.app.dependency_overrides[auth.get_subscriber] = original_override
 
     def test_update_schedule_allows_unchanged_slug(self, with_client, make_schedule):
         generated_schedule = make_schedule(slug='my-booking')
