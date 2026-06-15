@@ -34,7 +34,7 @@
     "vue-router": "5.0.2"
   },
   "devDependencies": {
-    "@babel/core": "7.29.6",
+    "@babel/core": "7.29.7",
     "@babel/eslint-parser": "7.12.16",
     "@pinia/testing": "1.0.2",
     "@typescript-eslint/eslint-plugin": "8.28.0",
