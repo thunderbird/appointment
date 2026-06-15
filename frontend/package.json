@@ -1,6 +1,6 @@
 {
   "name": "thunderbird-appointment",
-  "version": "1.4.6",
+  "version": "1.4.7",
   "private": true,
   "license": "MPL-2.0",
   "scripts": {
@@ -58,7 +58,10 @@
     "prettier-plugin-sort-json": "4.2.0",
     "typescript": "5.5.3",
     "vite-plugin-eslint": "1.8.1",
-    "vitest": "4.1.0"
+    "vitest": "4.1.8"
+  },
+  "overrides": {
+    "esbuild": "0.28.1"
   },
   "postcss": {
     "plugins": {
