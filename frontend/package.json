@@ -19,7 +19,7 @@
     "@sentry/vue": "10.38.0",
     "@thunderbirdops/services-ui": "1.6.1",
     "@types/ua-parser-js": "0.7.39",
-    "@vitejs/plugin-vue": "6.0.1",
+    "@vitejs/plugin-vue": "6.0.7",
     "@vueuse/components": "14.2.0",
     "@vueuse/core": "14.2.0",
     "core-js": "3.8.3",
@@ -28,7 +28,7 @@
     "pinia": "3.0.4",
     "posthog-js": "1.373.5",
     "ua-parser-js": "2.0.3",
-    "vite": "7.3.2",
+    "vite": "8.0.16",
     "vue": "3.5.12",
     "vue-i18n": "11.1.10",
     "vue-router": "5.0.2"
