@@ -16,7 +16,8 @@ from ...controller.auth import signed_url_by_subscriber
 
 def create(db: Session, schedule: schemas.ScheduleBase):
     """create a new schedule with slots for calendar"""
-    db_schedule = models.Schedule(**schedule.model_dump())
+    calendar = repo.calendar.get(db, schedule.calendar_id)
+    db_schedule = models.Schedule(**schedule.model_dump(), owner_id=calendar.owner_id)
     db.add(db_schedule)
     db.commit()
     db.refresh(db_schedule)
@@ -44,16 +45,29 @@ def get_by_slug(db: Session, slug: str, subscriber_id: int) -> models.Schedule |
     )
 
 
-def slug_taken(db: Session, slug: str) -> bool:
-    """True if any schedule already uses this slug."""
-    return db.query(models.Schedule).filter(models.Schedule.slug == slug).first() is not None
+def slug_taken(db: Session, slug: str, owner_id: int) -> bool:
+    """True if the owner already has a schedule using this slug."""
+    return (
+        db.query(models.Schedule)
+        .filter(models.Schedule.slug == slug, models.Schedule.owner_id == owner_id)
+        .first()
+        is not None
+    )
 
 
 def slug_available_for_schedule(db: Session, slug: str, schedule_id: int) -> bool:
-    """True if this slug is unused or already belongs to the given schedule."""
+    """True if this slug is unused or already belongs to the given schedule for the same owner."""
+    schedule = get(db, schedule_id)
+    if not schedule:
+        return False
+
     return (
         db.query(models.Schedule)
-        .filter(models.Schedule.slug == slug, models.Schedule.id != schedule_id)
+        .filter(
+            models.Schedule.slug == slug,
+            models.Schedule.id != schedule_id,
+            models.Schedule.owner_id == schedule.owner_id,
+        )
         .first()
         is None
     )
@@ -160,11 +174,13 @@ def generate_slug(db: Session, schedule_id: int) -> str | None:
     if schedule.slug:
         return schedule.slug
 
+    owner_id = schedule.owner_id
+
     # If slug isn't provided, give them the last 8 characters from a uuid4.
-    # Try up-to-3 times to create a unique slug.
+    # Try up-to-3 times to create a unique slug for this owner.
     for _ in range(3):
         slug = uuid.uuid4().hex[-8:]
-        if slug_taken(db, slug):
+        if slug_taken(db, slug, owner_id):
             continue
 
         schedule.slug = slug
