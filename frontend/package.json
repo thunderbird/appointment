@@ -60,9 +60,6 @@
     "vite-plugin-eslint": "1.8.1",
     "vitest": "4.1.8"
   },
-  "overrides": {
-    "esbuild": "0.28.1"
-  },
   "postcss": {
     "plugins": {
       "autoprefixer": {},
