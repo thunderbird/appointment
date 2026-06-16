@@ -184,14 +184,14 @@ class TestAppointment:
             assert isinstance(event.all_day, bool)
             assert isinstance(event.tentative, bool)
 
-    def test_get_remote_caldav_events_invalid_calendar(self, with_client, make_appointment):
+    def test_get_remote_caldav_events_unauthorized_calendar(self, with_client, make_appointment):
         generated_appointment = make_appointment()
 
         path = f'/rmt/cal/{generated_appointment.calendar_id + 999}/' + DAY1 + '/' + DAY3
         response = with_client.get(path, headers=auth_headers)
-        assert response.status_code == 404, response.text
+        assert response.status_code == 403, response.text
         data = response.json()
-        assert data['detail']['id'] == 'CALENDAR_NOT_FOUND'
+        assert data['detail']['id'] == 'CALENDAR_NOT_AUTH'
 
     def test_get_invitation_ics_file(self, with_client, make_appointment):
         generated_appointment = make_appointment()
