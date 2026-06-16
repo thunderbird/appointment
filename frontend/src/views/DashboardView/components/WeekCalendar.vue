@@ -288,7 +288,7 @@ const filteredRemoteEventsForGrid = computed(() => {
 
   const { start, end } = props.activeDateRange;
   const remoteEventsWithinActiveWeek = props.events.filter((remoteEvent) =>
-    dj(remoteEvent.start).isBetween(start, end)
+    dj(remoteEvent.start).isBetween(start, end, 'day', '[]')
   );
 
   return remoteEventsWithinActiveWeek
