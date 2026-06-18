@@ -437,7 +437,8 @@ onMounted(() => {
         <p>{{ weekday.date() }}</p>
         <div class="calendar-all-day-events">
           <div
-            v-for="allDayEvent in filteredRemoteAllDayEvents[index]"
+            v-for="(allDayEvent, j) in filteredRemoteAllDayEvents[index]"
+            :key="j"
             class="all-day-event-item"
             @mouseenter="(event) => onRemoteEventMouseEnter(event, allDayEvent)"
             @mouseleave="onRemoteEventMouseLeave"
