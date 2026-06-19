@@ -404,8 +404,10 @@ def read_remote_events(
     redis_instance: Redis | RedisCluster | None = Depends(get_redis),
 ):
     """endpoint to get events in a given date range from a remote calendar"""
-    db_calendar = repo.calendar.get(db, calendar_id=id)
+    if not repo.calendar.is_owned(db, calendar_id=id, subscriber_id=subscriber.id):
+        raise validation.CalendarNotAuthorizedException()
 
+    db_calendar = repo.calendar.get(db, calendar_id=id)
     if db_calendar is None:
         raise validation.CalendarNotFoundException()
 
