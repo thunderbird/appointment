@@ -11,7 +11,20 @@ import uuid
 import zoneinfo
 from functools import cached_property
 
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Enum, Boolean, JSON, Date, Time, Uuid
+from sqlalchemy import (
+    Column,
+    ForeignKey,
+    Integer,
+    String,
+    DateTime,
+    Enum,
+    Boolean,
+    JSON,
+    Date,
+    Time,
+    Uuid,
+    UniqueConstraint,
+)
 from sqlalchemy_utils import StringEncryptedType, ChoiceType
 from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 from sqlalchemy.orm import relationship, as_declarative, declared_attr, Mapped
@@ -338,12 +351,14 @@ class Schedule(Base):
     """
 
     __tablename__ = 'schedules'
+    __table_args__ = (UniqueConstraint('owner_id', 'slug', name='uq_schedules_owner_slug'),)
 
     id: int = Column(Integer, primary_key=True, index=True)
     calendar_id: int = Column(Integer, ForeignKey('calendars.id'))
+    owner_id: int = Column(Integer, ForeignKey('subscribers.id'), index=True, nullable=False)
     active: bool = Column(Boolean, index=True, default=True)
     name: str = Column(encrypted_type(String), index=True)
-    slug: str = Column(encrypted_type(String), index=True, unique=True)
+    slug: str = Column(encrypted_type(String), index=True)
     location_type: LocationType = Column(Enum(LocationType), default=LocationType.inperson)
     location_url: str = Column(encrypted_type(String, length=2048))
     details: str = Column(encrypted_type(String))

@@ -140,6 +140,8 @@ def create_calendar_schedule(
         raise validation.CalendarNotAuthorizedException()
     if not repo.calendar.is_connected(db, calendar_id=schedule.calendar_id):
         raise validation.CalendarNotConnectedException()
+    if schedule.slug and repo.schedule.slug_taken(db, schedule.slug, subscriber.id):
+        raise validation.ScheduleSlugTakenException()
 
     db_schedule = repo.schedule.create(db=db, schedule=schedule)
 
