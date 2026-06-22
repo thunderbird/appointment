@@ -1,6 +1,6 @@
 {
   "name": "thunderbird-appointment",
-  "version": "1.4.8",
+  "version": "1.5.0",
   "private": true,
   "license": "MPL-2.0",
   "scripts": {
