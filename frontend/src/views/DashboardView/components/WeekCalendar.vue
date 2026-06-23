@@ -14,11 +14,6 @@ import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 // Constants for grid calculations
 const ROW_HEIGHT_PX = 60; // Matches minmax(60px, min-content) in grid-template-rows
 
-enum Weekday {
-  DayOfTheWeek = 0,
-  DayOfTheMonth = 1,
-}
-
 interface Props {
   activeDateRange: {
     start: string;
@@ -104,6 +99,7 @@ function onRemoteEventMouseEnter(event: MouseEvent, remoteEvent) {
     },
     customData: {
       calendar_title: remoteEvent.calendar_title,
+      all_day: remoteEvent.all_day,
     },
   };
 
@@ -176,7 +172,7 @@ function calculateEventGridPosition(
 }
 
 /**
- * Weekdays is an array of arrays like [["SUN", 17], ["MON", 18], ..., ["SAT", 23]]
+ * Weekdays is an array of date objects representing the current week
  */
 const weekdays = computed(() => {
   const { start, end } = props.activeDateRange;
@@ -189,15 +185,12 @@ const weekdays = computed(() => {
   const startDate = dj(start);
   const endDate = dj(end);
 
-  const days = [];
+  const days = [] as Dayjs[];
   let currentDate = startDate;
 
   // Loop from the start date until it's the same as the end date, inclusive
   while (!currentDate.isAfter(endDate, 'day')) {
-    days.push([
-      currentDate.format('ddd').toUpperCase(), // Format to 'SUN', 'MON', etc.
-      currentDate.date(), // Get the day of the month (e.g., 17)
-    ]);
+    days.push(currentDate);
 
     // Move to the next day
     currentDate = currentDate.add(1, 'day');
@@ -279,7 +272,8 @@ const filteredPendingAppointmentsForGrid = computed(() => {
 });
 
 /**
- * Generates an array of remote events that fall within the active week with grid positioning info
+ * Generates an array of remote events that fall within the active week with grid positioning info.
+ * This intentionally excludes all-day events since those are not rendered inside the grid.
  * Note we are still fetching monthly events to reduce the roundtrips
  */
 const filteredRemoteEventsForGrid = computed(() => {
@@ -287,8 +281,8 @@ const filteredRemoteEventsForGrid = computed(() => {
   if (!slots.length) return [];
 
   const { start, end } = props.activeDateRange;
-  const remoteEventsWithinActiveWeek = props.events.filter((remoteEvent) =>
-    dj(remoteEvent.start).isBetween(start, end, 'day', '[]')
+  const remoteEventsWithinActiveWeek = props.events.filter(
+    (remoteEvent) => dj(remoteEvent.start).isBetween(start, end, 'day', '[]') && !remoteEvent.all_day
   );
 
   return remoteEventsWithinActiveWeek
@@ -311,6 +305,23 @@ const filteredRemoteEventsForGrid = computed(() => {
       }
     })
     .filter(Boolean);
+});
+
+/**
+ * Generates an array of all-day remote events per weekday that fall within the active week.
+ */
+const filteredRemoteAllDayEvents = computed(() => {
+  const slots = timeSlotsForGrid.value;
+  if (!slots.length) return [];
+
+  const { start, end } = props.activeDateRange;
+  const remoteAllDayEventsWithinActiveWeek = props.events.filter(
+    (remoteEvent) => dj(remoteEvent.start).isBetween(start, end, 'day', '[]') && remoteEvent.all_day
+  );
+
+  return weekdays.value.map((day) => {
+    return remoteAllDayEventsWithinActiveWeek.filter((remoteEvent) => dj(remoteEvent.start).isSame(day, 'day'));
+  });
 });
 
 /**
@@ -419,11 +430,22 @@ onMounted(() => {
       <div
         class="calendar-weekday-header"
         v-for="(weekday, index) in weekdays"
-        :key="weekday[Weekday.DayOfTheMonth]"
+        :key="weekday.toISOString()"
         :style="{ gridColumn: index + 2 }"
       >
-        <p>{{ weekday[Weekday.DayOfTheWeek] }}</p>
-        <p>{{ weekday[Weekday.DayOfTheMonth] }}</p>
+        <p>{{ weekday.format('ddd').toUpperCase() }}</p>
+        <p>{{ weekday.date() }}</p>
+        <div class="calendar-all-day-events">
+          <div
+            v-for="(allDayEvent, j) in filteredRemoteAllDayEvents[index]"
+            :key="j"
+            class="all-day-event-item"
+            @mouseenter="(event) => onRemoteEventMouseEnter(event, allDayEvent)"
+            @mouseleave="onRemoteEventMouseLeave"
+          >
+            {{ allDayEvent.title }}
+          </div>
+        </div>
       </div>
     </div>
 
@@ -610,7 +632,6 @@ onMounted(() => {
 
 .calendar-weekday-header {
   padding-block-start: 2rem;
-  padding-block-end: 1rem;
   text-align: center;
   font-weight: bold;
   width: 100%;
@@ -620,9 +641,14 @@ onMounted(() => {
   border-block-end: 1px solid var(--colour-neutral-border);
 
   /* Weekday */
-  & :first-child {
+  p:first-child {
     font-weight: normal;
     font-size: 0.68rem;
+  }
+
+  /* All day events */
+  .calendar-all-day-events {
+    padding-block: 0.5rem;
   }
 }
 
@@ -700,6 +726,21 @@ onMounted(() => {
   &.dark {
     background-color: var(--colour-neutral-raised);
   }
+}
+
+.all-day-event-item {
+  width: 95%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  background: var(--colour-primary-default);
+  color: var(--colour-ti-base-dark);
+  border-radius: 0.1875rem; /* 3px */
+  box-sizing: border-box;
+  padding-inline-start: 0.25rem;
+  font-weight: normal;
+  font-size: 0.68rem;
+  margin-block-end: 0.125rem;
 }
 
 .pending-appointment {
