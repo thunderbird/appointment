@@ -1058,7 +1058,7 @@ class Tools:
         now = datetime.now()
 
         earliest_booking = now + timedelta(minutes=schedule.earliest_booking)
-        farthest_booking = now + timedelta(minutes=schedule.farthest_booking)
+        farthest_booking = now + timedelta(days=1, minutes=schedule.farthest_booking)
 
         start = max([datetime.combine(schedule.start_date, schedule.start_time), earliest_booking])
         end = (
