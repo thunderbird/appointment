@@ -147,8 +147,7 @@ h2 {
   .copy-url-button {
     position: absolute;
     right: 0.5rem;
-    top: 2.25rem;
-    background-color: var(--colour-neutral-base);
+    top: 1.75rem;
     color: var(--colour-ti-secondary);
 
     :deep(.tooltip) {

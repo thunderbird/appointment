@@ -345,7 +345,6 @@ section {
   position: sticky;
   top: 5rem;
   z-index: 50;
-  height: 72px;
 
   .btn-close {
     height: 2.375rem;
