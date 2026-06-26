@@ -201,4 +201,8 @@ h3 {
     line-height: 1rem;
   }
 }
+
+:deep(.segment-list) {
+  flex-wrap: wrap;
+}
 </style>
