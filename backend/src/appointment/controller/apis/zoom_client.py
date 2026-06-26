@@ -39,13 +39,15 @@ class ZoomClient:
         """Returns the appropriate scopes"""
         return self.SCOPES
 
-    def check_expiry(self, token: dict | None):
-        """Checks expires_at and if expired sets expires_in to a negative number to trigger refresh"""
+    def check_expiry(self, token: dict | None, threshold: float):
+        """Checks expires_at and sets expires_in to a negative number to trigger refresh
+           if already expired or within the given renewal threshold
+        """
         if not token:
             return token
 
         expires_at = token.get('expires_at')
-        if expires_at and expires_at <= time.time():
+        if expires_at and expires_at <= (time.time() + threshold):
             token['expires_in'] = -100
         elif not expires_at:
             # We shouldn't have to handle this but just in case alert us!
@@ -53,12 +55,12 @@ class ZoomClient:
 
         return token
 
-    def setup(self, subscriber_id=None, token=None):
-        """Setup our oAuth session"""
+    def setup(self, subscriber_id=None, token=None, threshold=0.0):
+        """Setup our OAuth session"""
         if isinstance(token, str):
             token = json.loads(token)
 
-        token = self.check_expiry(token)
+        token = self.check_expiry(token, threshold)
 
         self.subscriber_id = subscriber_id
         self.client = OAuth2Session(
