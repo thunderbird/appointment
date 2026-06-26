@@ -127,7 +127,7 @@ h3 {
     position: absolute;
     z-index: 9;
     right: 0.875rem;
-    bottom: 0.875rem;
+    bottom: 0.6875rem;
     color: var(--colour-ti-secondary);
   }
 }
@@ -143,10 +143,14 @@ h3 {
     gap: 0.5rem;
     padding: 0.25rem 0.5rem;
     right: 0.25rem;
-    bottom: 1rem;
+    bottom: 0;
     color: var(--colour-ti-secondary);
     font-size: 0.75rem;
     z-index: 9;
   }
+}
+
+.share-link-input :deep(.tbpro-input-wrapper) {
+  width: 84%;
 }
 </style>

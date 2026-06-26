@@ -43,5 +43,6 @@ const bookingWindowOptions: SelectOption[] = [1, 2, 3, 4].map((d) => ({
 <style>
 .booking-window-segmented-control ul {
   font-size: 0.875rem;
+  flex-wrap: wrap;
 }
 </style>

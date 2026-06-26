@@ -17,7 +17,7 @@
     "@rushstack/eslint-patch": "1.11.0",
     "@sentry/vite-plugin": "4.0.2",
     "@sentry/vue": "10.38.0",
-    "@thunderbirdops/services-ui": "1.6.1",
+    "@thunderbirdops/services-ui": "1.6.4",
     "@types/ua-parser-js": "0.7.39",
     "@vitejs/plugin-vue": "6.0.7",
     "@vueuse/components": "14.2.0",
@@ -29,7 +29,7 @@
     "posthog-js": "1.391.9",
     "ua-parser-js": "2.0.10",
     "vite": "8.0.16",
-    "vue": "3.5.12",
+    "vue": "3.5.32",
     "vue-i18n": "11.1.10",
     "vue-router": "5.0.2"
   },

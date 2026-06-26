@@ -53,6 +53,7 @@ const earliestOptions: SelectOption[] = [0, 0.5, 1, 2, 3, 4, 5].map((d) => {
 <style>
 .minimum-notice-segmented-control ul {
   font-size: 0.875rem;
+  flex-wrap: wrap;
 
   li:first-child button {
     text-transform: capitalize;

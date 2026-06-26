@@ -243,6 +243,7 @@ h3 {
     gap: 1rem;
     margin-block-end: 1.5rem;
     width: 100%;
+    flex-wrap: wrap;
   }
 
   .available-days-and-times-container {
@@ -267,6 +268,7 @@ h3 {
     display: flex;
     align-items: center;
     gap: 1rem;
+    flex-wrap: wrap;
 
     .time-text-input {
       max-width: 172px;
@@ -286,5 +288,9 @@ h3 {
     flex-wrap: wrap;
     gap: 1.5rem;
   }
+}
+
+:deep(.bubble-list) {
+  flex-wrap: wrap;
 }
 </style>

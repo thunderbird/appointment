@@ -188,11 +188,13 @@ h2 {
   gap: 1.5rem;
 }
 
-.start-of-week-bubble-select {
-  /* Fix for BubbleSelect component as we can't target .bubble-list */
-  & > :last-child {
-    justify-content: flex-start;
-    gap: 0.5rem;
-  }
+:deep(.bubble-list) {
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+:deep(.segment-list) {
+  flex-wrap: wrap;
 }
 </style>
