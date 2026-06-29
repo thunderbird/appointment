@@ -6,6 +6,7 @@ import { FtueStep } from '@/definitions';
 import { callKey, refreshKey } from '@/keys';
 import { inject, watch, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
 // Steps
 import ConnectYourCalendarStep from './steps/ConnectYourCalendarStep.vue';
@@ -32,6 +33,7 @@ const refresh = inject(refreshKey);
 const ftueStore = createFTUEStore(call);
 const { currentStep } = storeToRefs(ftueStore);
 const route = useRoute();
+const { t } = useI18n();
 
 // Sync step from query parameter on mount and when route changes
 onMounted(async () => {
@@ -83,6 +85,19 @@ export default {
       <div class="right-side">
         <div class="panel">
           <component :is="STEPS[currentStep]" />
+
+          <i18n-t
+            v-if="currentStep !== FtueStep.SetupComplete"
+            keypath="ftue.needHelpVisitSupport"
+            tag="p"
+            class="support-link"
+          >
+            <template #supportLink>
+              <a href="https://support.tb.pro/hc/articles/43161368859667" target="_blank" rel="noopener noreferrer">
+                {{ t('ftue.supportLink') }}
+              </a>
+            </template>
+          </i18n-t>
         </div>
       </div>
     </div>
@@ -128,6 +143,17 @@ section {
       &:has(.notice-bar) {
         padding: 6rem 2rem;
       }
+
+      .support-link {
+        font-size: 0.75rem;
+        text-align: right;
+        margin-block-start: 2rem;
+
+        a {
+          text-decoration: underline;
+          color: var(--colour-ti-highlight);
+        }
+      }
     }
   }
 }
@@ -140,7 +166,8 @@ section {
         flex: 1;
         max-width: 556px;
         min-height: 100vh;
-        background-color: #1a202c; /* --colour-ti-base forced on light mode */
+        background-color: #1a202c;
+        /* --colour-ti-base forced on light mode */
 
         .appointment-splash {
           display: block;
@@ -160,7 +187,8 @@ section {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background-color: #1a202c; /* --colour-ti-base forced on light mode */
+    background-color: #1a202c;
+    /* --colour-ti-base forced on light mode */
     padding: 1rem;
 
     .card {
