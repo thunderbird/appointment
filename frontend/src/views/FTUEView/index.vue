@@ -166,8 +166,7 @@ section {
         flex: 1;
         max-width: 556px;
         min-height: 100vh;
-        background-color: #1a202c;
-        /* --colour-ti-base forced on light mode */
+        background-color: #1a202c; /* --colour-ti-base forced on light mode */
 
         .appointment-splash {
           display: block;
@@ -187,8 +186,7 @@ section {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background-color: #1a202c;
-    /* --colour-ti-base forced on light mode */
+    background-color: #1a202c; /* --colour-ti-base forced on light mode */
     padding: 1rem;
 
     .card {
