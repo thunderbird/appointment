@@ -95,6 +95,7 @@
     "googlePermissionOneTitle": "Anzeigen und Bearbeiten von Terminen in allen Kalendern",
     "googlePermissionTwoDescription": "Thunderbird Appointment benötigt diese Berechtigung, um eine Liste von Kalendern anzuzeigen, die verbunden werden können.",
     "googlePermissionTwoTitle": "Anzeigen und Herunterladen von Terminen mit Google Calendar",
+    "needHelpVisitSupport": "Benötigst du Hilfe? Schau dir diesen {supportLink} an.",
     "noSignInCredentialsRequired": "Dieser Kalender benötigt keine Anmeldeinformationen",
     "redirectingToDashboard": "Du wirst weitergeleitet zum Appointment Dashboard.",
     "selectDays": "Tage auswählen",
@@ -102,6 +103,7 @@
     "setupComplete": "Konto-Setup abgeschlossen",
     "skipThisStep": "diesen Schritt überspringen",
     "startTime": "Startzeit",
+    "supportLink": "Support-Artikel",
     "thunderbirdAppointmentIsReady": "Thunderbird Appointment ist bereit!",
     "videoMeetingLink": "Video-Meeting Link",
     "zoomIcon": "Zoom"

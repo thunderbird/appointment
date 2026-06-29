@@ -98,6 +98,7 @@
     "googlePermissionOneTitle": "View and edit events on all your calendars",
     "googlePermissionTwoDescription": "Thunderbird Appointment requires this permission to display a list of calendars you can connect with.",
     "googlePermissionTwoTitle": "See and download events using Google Calendar",
+    "needHelpVisitSupport": "Need help? Check out this {supportLink}.",
     "noSignInCredentialsRequired": "This calendar doesn't require sign-in credentials",
     "redirectingToDashboard": "Redirecting you to the Appointment Dashboard.",
     "selectDays": "Select Days",
@@ -105,6 +106,7 @@
     "setupComplete": "Account setup complete",
     "skipThisStep": "skip this step",
     "startTime": "Start Time",
+    "supportLink": "support article",
     "thunderbirdAppointmentIsReady": "Thunderbird Appointment is ready!",
     "videoMeetingLink": "Video meeting link",
     "zoomIcon": "Zoom"
