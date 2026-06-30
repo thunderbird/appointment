@@ -581,8 +581,12 @@ def oidc_token(
     oidc_id = token_data.get('sub')
     name = token_data.get('name')
 
-    # preferred_username is the thundermail address (@thundermail.com)
-    email = token_data.get('preferred_username', token_data.get('username'))
+    # Per OIDC Core 1.0 §5.1, the standard `email` claim is the authoritative email
+    # address, while `preferred_username` is only a display/login handle (it MUST NOT
+    # be relied upon to hold an email). Prefer `email`, falling back to
+    # `preferred_username`/`username` for Thunderbird Accounts, where the username is
+    # the (@thundermail.com) email address.
+    email = token_data.get('email') or token_data.get('preferred_username') or token_data.get('username')
 
     # the local part of the email should already be unique
     # so we can strip out the domain portion for a better Booking Link URL
