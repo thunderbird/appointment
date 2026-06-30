@@ -5,6 +5,7 @@ Repository providing CRUD functions for external_connection database models.
 
 import logging
 import os
+from datetime import UTC, datetime
 import sentry_sdk
 from sqlalchemy.orm import Session
 from .. import models
@@ -36,7 +37,14 @@ def update_token(
     if db_results is None or len(db_results) == 0:
         return None
 
-    db_external_connection = db_results[0]
+    return update_token_by_connection(db, token, db_results[0])
+
+
+def update_token_by_connection(
+    db: Session,
+    token: str,
+    db_external_connection: models.ExternalConnections,
+):
     db_external_connection.token = token
     db.commit()
     db.refresh(db_external_connection)
@@ -51,6 +59,12 @@ def delete_by_type(db: Session, subscriber_id: int, type: models.ExternalConnect
         db.delete(connection)
     db.commit()
 
+    return True
+
+
+def delete(db: Session, db_external_connection: models.ExternalConnections):
+    db.delete(db_external_connection)
+    db.commit()
     return True
 
 
@@ -144,6 +158,18 @@ def update_name(db: Session, db_external_connection: models.ExternalConnections,
     return db_external_connection
 
 
+def update_status(
+    db: Session,
+    db_external_connection: models.ExternalConnections,
+    status: models.ExternalConnectionStatus,
+):
+    db_external_connection.status = status
+    db_external_connection.status_checked_at = datetime.now(UTC)
+    db.commit()
+    db.refresh(db_external_connection)
+    return db_external_connection
+
+
 def get_subscriber_without_oidc_by_email(db: Session, email: str):
     """Return a subscriber by the OIDC recovery email address without an OIDC connection"""
     # Subquery to check if a subscriber has an OIDC external connection
@@ -158,3 +184,15 @@ def get_subscriber_without_oidc_by_email(db: Session, email: str):
     query = db.query(models.Subscriber).filter(~oidc_exists).filter(models.Subscriber.email == email)
 
     return query.first()
+
+
+def get_zoom(db: Session) -> list[models.ExternalConnections] | None:
+    """Return all external connections by Zoom type"""
+    query = (
+        db.query(models.ExternalConnections)
+        .filter(models.ExternalConnections.type == models.ExternalConnectionType.zoom)
+    )
+
+    result = query.all()
+
+    return result
