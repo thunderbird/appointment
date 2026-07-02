@@ -1,5 +1,6 @@
 // utility functions that may be used by any tests
 import { TBAcctsPage } from "../pages/tb-accts-page";
+import { SettingsPage } from '../pages/settings-page';
 import { expect, type Page } from '@playwright/test';
 import path from 'path';
 
@@ -7,7 +8,6 @@ import {
   APPT_TARGET_ENV,
   APPT_URL,
   APPT_PAGE_TITLE,
-  APPT_SETTINGS_PAGE,
   APPT_DISPLAY_NAME,
   APPT_TIMEZONE_SETTING_PRIMARY,
   APPT_BROWSER_STORE_LANGUAGE_EN,
@@ -93,8 +93,6 @@ export const setDefaultUserSettingsLocalStore = async (page: Page, setTimeZone: 
   if (setTimeZone == 'UTC')
      setTimeZone = 'Europe/Dublin';
 
-  console.log(`setting Appointment timezone setting to: ${setTimeZone}`);
-
   // now set them
   localUserStoreData['name'] = APPT_DISPLAY_NAME;
   localUserStoreData['settings'] = {
@@ -105,13 +103,13 @@ export const setDefaultUserSettingsLocalStore = async (page: Page, setTimeZone: 
       "startOfWeek": APPT_BROWSER_STORE_START_WEEK_SUN,
   }
 
+  console.log(`setting user settings in local browser store to: ${JSON.stringify(localUserStoreData['settings'])}`);
   await page.evaluate(`localStorage.setItem('tba/user', '${JSON.stringify(localUserStoreData)}')`);
   await page.waitForTimeout(TIMEOUT_1_SECOND);
 
   // get them again and verify were set
   var updatedLocalUserStoreData = JSON.parse(await page.evaluate("localStorage.getItem('tba/user')"));
-
-  console.log(`updated user settings from local browser store: ${JSON.stringify(updatedLocalUserStoreData['settings'])}`);
+  console.log(`user settings from local browser store are now: ${JSON.stringify(updatedLocalUserStoreData['settings'])}`);
   expect(updatedLocalUserStoreData['settings']).toStrictEqual(localUserStoreData['settings']);
 }
 
@@ -124,9 +122,9 @@ export const mobileSignInAndSetup = async (page: Page, testProjectName: string) 
   await navigateToAppointmentAndSignIn(page, testProjectName);
   // ensure our settings are set to what the tests expect as default (in case a
   // previous test run failed and left the settings in an incorrect state)
-  await page.goto(APPT_SETTINGS_PAGE);
+  const settingsPage = new SettingsPage(page);
+  await settingsPage.gotoAccountSettings();
   await page.waitForTimeout(TIMEOUT_5_SECONDS);
-  await page.waitForURL(APPT_SETTINGS_PAGE);
   await setDefaultUserSettingsLocalStore(page);
   await page.waitForTimeout(TIMEOUT_2_SECONDS);
 }

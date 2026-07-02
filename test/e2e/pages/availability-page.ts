@@ -95,13 +95,21 @@ export class AvailabilityPage {
     await this.page.goto(APPT_AVAILABILITY_PAGE, { timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
 
-    // the bookable toggle especially seems to take a long time to load in BrowserStack
-    if (! await this.bookableToggle.isEnabled()) {
-      await this.page.waitForTimeout(TIMEOUT_10_SECONDS);
-    }
+    // ensure that the bookable toggle is loaded/enabled
+    await expect
+      .poll(async () => (await this.bookableToggle.isEnabled()), {
+        timeout: TIMEOUT_30_SECONDS,
+        message: 'Waiting for bookable toggle to be populated',
+      })
+      .toBe(true);
 
     // the timezone field also sometimes takes a long time to populate in BrowserStack
-    await this.timeZoneSelect.waitFor({ state: 'visible', timeout: TIMEOUT_30_SECONDS });
+    await expect
+      .poll(async () => (await this.timeZoneSelect.inputValue()).trim(), {
+        timeout: TIMEOUT_30_SECONDS,
+        message: 'Waiting for timezone field to be populated',
+      })
+      .not.toBe('');
 
     await this.bookableToggleContainer.waitFor({ timeout: TIMEOUT_30_SECONDS });
     await this.allStartTimeInput.waitFor({ timeout: TIMEOUT_30_SECONDS });

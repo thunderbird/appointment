@@ -1,17 +1,17 @@
 import { test as setup, expect } from '@playwright/test';
 import { AvailabilityPage } from '../../pages/availability-page';
+import { SettingsPage } from '../../pages/settings-page';
 import path from 'path';
 
 import { navigateToAppointmentAndSignIn, setDefaultUserSettingsLocalStore } from '../../utils/utils';
 
 import {
     APPT_DASHBOARD_HOME_PAGE,
-    APPT_SETTINGS_PAGE,
     APPT_TIMEZONE_SETTING_PRIMARY,
     TIMEOUT_1_SECOND,
     TIMEOUT_2_SECONDS,
-    TIMEOUT_30_SECONDS,
     TIMEOUT_5_SECONDS,
+    TIMEOUT_30_SECONDS,
 } from "../../const/constants";
 
 const fs = require('fs');
@@ -48,7 +48,8 @@ setup('desktop browser authenticate', async ({ page }) => {
 
   // ensure our settings are set to what the tests expect as default (in case a
   // previous test run failed and left the settings in an incorrect state)
-  await page.goto(APPT_SETTINGS_PAGE);
+  const settingsPage = new SettingsPage(page);
+  await settingsPage.gotoAccountSettings();
   await page.waitForTimeout(TIMEOUT_5_SECONDS);
   await setDefaultUserSettingsLocalStore(page);
   await page.waitForTimeout(TIMEOUT_2_SECONDS);
