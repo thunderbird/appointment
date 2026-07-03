@@ -6,10 +6,11 @@ import {
   TIMEOUT_1_SECOND,
   TIMEOUT_2_SECONDS,
   TIMEOUT_5_SECONDS,
+  TIMEOUT_10_SECONDS,
   TIMEOUT_30_SECONDS,
   APPT_LANGUAGE_SETTING_EN,
   APPT_START_OF_WEEK_MON,
-  } from '../const/constants';
+} from '../const/constants';
 
 
 export class SettingsPage {
@@ -124,9 +125,19 @@ export class SettingsPage {
   async gotoAccountSettings() {
     await this.page.goto(APPT_SETTINGS_PAGE);
     await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
+    await this.page.waitForURL(APPT_SETTINGS_PAGE, { timeout: TIMEOUT_30_SECONDS });
     await this.scrollIntoView(this.accountSettingsBtn);
     await this.accountSettingsBtn.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+    // settings seems to take awhile to populate on prod, especially BrowserStack, so let's
+    // ensure that the settings are loaded i.e. the 'Display Name' field is not blank
+    await expect(this.displayNameInput).toBeEnabled({ timeout: TIMEOUT_10_SECONDS });
+    await expect
+      .poll(async () => (await this.displayNameInput.inputValue()).trim(), {
+        timeout: TIMEOUT_30_SECONDS,
+        message: 'Waiting for display name field to be populated',
+      })
+      .not.toBe('');
   }
 
   /**
@@ -135,9 +146,19 @@ export class SettingsPage {
   async gotoPreferencesSettings() {
     await this.page.goto(APPT_SETTINGS_PAGE);
     await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
+    await this.page.waitForURL(APPT_SETTINGS_PAGE, { timeout: TIMEOUT_30_SECONDS });    
     await this.scrollIntoView(this.preferencesBtn, TIMEOUT_30_SECONDS);
     await this.preferencesBtn.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
+    // settings seems to take awhile to populate on prod, especially BrowserStack, so let's
+    // ensure that the settings are loaded i.e. the 'Theme' field is not blank
+    await expect(this.themeSelect).toBeEnabled({ timeout: TIMEOUT_10_SECONDS });
+    await expect
+      .poll(async () => (await this.themeSelect.inputValue()).trim(), {
+        timeout: TIMEOUT_30_SECONDS,
+        message: 'Waiting for theme field to be populated',
+      })
+      .not.toBe('');
   }
 
   /**
