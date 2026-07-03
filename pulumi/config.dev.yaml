@@ -13,6 +13,7 @@
 .frontend_url: &VAR_FRONTEND_URL {name: "FRONTEND_URL", value: "https://appointment-dev.tb.pro"}
 .fxa_callback: &VAR_FXA_CALLBACK {name: "FXA_CALLBACK", value: "https://appointment-dev.tb.pro/fxa"}
 .google_auth_callback: &VAR_GOOGLE_AUTH_CALLBACK {name: "GOOGLE_AUTH_CALLBACK", value: "https://appointment-dev.tb.pro/api/v1/google/callback"}
+.google_invite_enabled: &VAR_GOOGLE_INVITE_ENABLED {name: "GOOGLE_INVITE_ENABLED", value: "True"}
 .jwt_algo: &VAR_JWT_ALGO {name: "JWT_ALGO", value: "HS256"}
 .jwt_expire_in_mins: &VAR_JWT_EXPIRE_IN_MINS {name: "JWT_EXPIRE_IN_MINS", value: "10000"}
 .log_level: &VAR_LOG_LEVEL {name: "LOG_LEVEL", value: "ERROR"}
@@ -259,6 +260,7 @@ resources:
               - *VAR_TIER_BASIC_CALENDAR_LIMIT
               - *VAR_TIER_PLUS_CALENDAR_LIMIT
               - *VAR_TIER_PRO_CALENDAR_LIMIT
+              - *VAR_GOOGLE_INVITE_ENABLED
               - *VAR_ZOOM_API_ENABLED
               - *VAR_ZOOM_AUTH_CALLBACK
               - name: CONTAINER_ROLE
@@ -320,6 +322,7 @@ resources:
                 - *VAR_TIER_BASIC_CALENDAR_LIMIT
                 - *VAR_TIER_PLUS_CALENDAR_LIMIT
                 - *VAR_TIER_PRO_CALENDAR_LIMIT
+                - *VAR_GOOGLE_INVITE_ENABLED
                 - *VAR_ZOOM_API_ENABLED
                 - *VAR_ZOOM_AUTH_CALLBACK
                 - name: CONTAINER_ROLE
@@ -367,6 +370,7 @@ resources:
                 - *VAR_TIER_BASIC_CALENDAR_LIMIT
                 - *VAR_TIER_PLUS_CALENDAR_LIMIT
                 - *VAR_TIER_PRO_CALENDAR_LIMIT
+                - *VAR_GOOGLE_INVITE_ENABLED
                 - *VAR_ZOOM_API_ENABLED
                 - *VAR_ZOOM_AUTH_CALLBACK
                 - name: CONTAINER_ROLE
