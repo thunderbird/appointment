@@ -7,6 +7,7 @@ from uuid import uuid4
 from unittest.mock import patch
 
 from appointment.dependencies import auth
+from appointment.dependencies.auth import get_accounts_client
 from appointment.routes.auth import create_access_token
 from defines import FXA_CLIENT_PATCH, auth_headers, TEST_USER_ID
 from appointment.database import repo, models
@@ -1091,3 +1092,48 @@ class TestOIDCToken:
             subscriber = repo.subscriber.get_by_email(db, email)
             assert subscriber is not None
             assert subscriber.username == expected_username
+
+
+class TestWaffleFlags:
+    """Tests for the /auth/waffle-flags endpoint."""
+
+    @pytest.fixture(autouse=True)
+    def setup_teardown(self):
+        """Save and restore AUTH_SCHEME for each test"""
+        saved_scheme = os.environ.get('AUTH_SCHEME', 'password')
+        yield
+        os.environ['AUTH_SCHEME'] = saved_scheme
+
+    def test_waffle_flags_fails_due_to_invalid_auth_scheme(self, with_client):
+        os.environ['AUTH_SCHEME'] = 'password'
+
+        response = with_client.get('/auth/waffle-flags', headers=auth_headers)
+
+        assert response.status_code == 405, response.text
+
+    def test_waffle_flags_fails_without_authentication(self, with_client):
+        os.environ['AUTH_SCHEME'] = 'oidc'
+
+        response = with_client.get('/auth/waffle-flags')
+
+        assert response.status_code == 401, response.text
+
+    def test_waffle_flags_forwards_callers_bearer_token(self, with_client):
+        os.environ['AUTH_SCHEME'] = 'oidc'
+
+        mock_flags = {'flags': {'new-dashboard': True, 'beta-feature': False}}
+        captured_tokens = []
+
+        class MockAccountsClient:
+            def get_waffle_flags(self, token):
+                captured_tokens.append(token)
+                return mock_flags
+
+        with_client.app.dependency_overrides[get_accounts_client] = lambda: MockAccountsClient()
+
+        response = with_client.get('/auth/waffle-flags', headers=auth_headers)
+
+        assert response.status_code == 200, response.text
+        assert response.json() == mock_flags
+        # auth_headers is `Bearer testtokenplsignore`
+        assert captured_tokens == ['testtokenplsignore']
