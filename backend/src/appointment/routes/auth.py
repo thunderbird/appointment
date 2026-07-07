@@ -32,6 +32,7 @@ from ..dependencies.auth import (
     get_admin_subscriber,
     get_subscriber_from_onetime_token,
     get_accounts_client,
+    get_bearer_token,
 )
 
 from ..controller import auth
@@ -522,6 +523,18 @@ def logout(
     auth.logout(db, subscriber, auth_client, deny_previous_tokens=False)
 
     return True
+
+
+@router.get('/auth/waffle-flags')
+def waffle_flags(
+    token: str = Depends(get_bearer_token),
+    accounts_client: AccountsClient = Depends(get_accounts_client),
+):
+    """Retrieve waffle feature flags for the current subscriber from Accounts."""
+    if not AuthScheme.is_oidc():
+        raise HTTPException(status_code=405)
+
+    return accounts_client.get_waffle_flags(token)
 
 
 @router.get('/me', response_model=schemas.SubscriberMeOut)
