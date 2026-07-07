@@ -61,7 +61,7 @@ if (useSentry) {
       'localhost',
       'https://stage.appointment.day',
       'https://appointment-stage.tb.pro',
-      'https://appointment.tp.pro',
+      'https://appointment.tb.pro',
       'https://apmt.day',
       'https://apt.mt',
     ],

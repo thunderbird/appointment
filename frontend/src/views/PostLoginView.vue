@@ -55,6 +55,12 @@ onMounted(async () => {
   // Run health checks on external connections in the background
   externalConnectionsStore.checkStatus();
 
+  // Fetch waffle feature flags and store them on the user
+  const { error: featureFlagsError } = await user.updateFeatureFlags();
+  if (featureFlagsError) {
+    console.error('Could not retrieve waffle flags', featureFlagsError);
+  }
+
   // If we don't have a redirectTo or it's to logout then push to dashboard!
   if (!redirectTo || redirectTo === '/logout') {
     await router.push('/dashboard');

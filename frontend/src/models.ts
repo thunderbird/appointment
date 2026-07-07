@@ -236,6 +236,7 @@ export type User = {
   scheduleSlugs: object;
   isSetup: boolean;
   uniqueHash: string;
+  featureFlags: WaffleFlags;
 };
 
 export type SettingsForm = {
@@ -360,6 +361,8 @@ export type SlotResponse = UseFetchReturn<(Slot & Appointment) | Exception>;
 export type StringResponse = UseFetchReturn<string | Exception>;
 export type SubscriberResponse = UseFetchReturn<Subscriber>;
 export type TokenResponse = UseFetchReturn<Token>;
+export type WaffleFlags = Record<string, boolean>;
+export type WaffleFlagsResponse = UseFetchReturn<{ flags: WaffleFlags }>;
 export type ListResponse = UseFetchReturn<{
   page_meta: PageMeta;
   items: any[];

@@ -12,6 +12,7 @@ import {
   SubscriberResponse,
   TokenResponse,
   UserConfig,
+  WaffleFlagsResponse,
 } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { dayjsKey } from '@/keys';
@@ -41,6 +42,7 @@ const initialUserObject = {
   scheduleSlugs: {},
   isSetup: false,
   uniqueHash: null,
+  featureFlags: {},
 } as User;
 
 export const useUserStore = defineStore('user', () => {
@@ -187,6 +189,21 @@ export const useUserStore = defineStore('user', () => {
   };
 
   /**
+   * Retrieve the current waffle feature flags and update store
+   */
+  const updateFeatureFlags = async (): Promise<Error> => {
+    const { error, data: flagsData }: WaffleFlagsResponse = await call.value('auth/waffle-flags').get().json();
+
+    if (error.value) {
+      return { error: flagsData.value ?? error.value };
+    }
+
+    data.value.featureFlags = flagsData.value?.flags ?? {};
+
+    return { error: false };
+  };
+
+  /**
    * Retrieve the current signed url and update store
    * @param inputData Subscriber data to throw into the db
    */
@@ -318,6 +335,7 @@ export const useUserStore = defineStore('user', () => {
     authenticated,
     $reset,
     updateSignedUrl,
+    updateFeatureFlags,
     profile,
     updateProfile,
     changeSignedUrl,
