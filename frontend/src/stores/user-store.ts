@@ -198,6 +198,8 @@ export const useUserStore = defineStore('user', () => {
       return { error: flagsData.value ?? error.value };
     }
 
+    // We are getting flags, samples and switches from django-waffle in Accounts
+    // but we only care about flags for now
     data.value.featureFlags = flagsData.value?.flags ?? {};
 
     return { error: false };

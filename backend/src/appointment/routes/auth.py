@@ -527,12 +527,15 @@ def logout(
 
 @router.get('/auth/waffle-flags')
 def waffle_flags(
-    token: str = Depends(get_bearer_token),
+    token: str | None = Depends(get_bearer_token),
     accounts_client: AccountsClient = Depends(get_accounts_client),
 ):
     """Retrieve waffle feature flags for the current subscriber from Accounts."""
     if not AuthScheme.is_oidc():
         raise HTTPException(status_code=405)
+
+    if token is None:
+        raise validation.InvalidTokenException()
 
     return accounts_client.get_waffle_flags(token)
 
