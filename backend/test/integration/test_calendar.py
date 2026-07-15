@@ -1,6 +1,7 @@
 import os
 from datetime import date, datetime, timedelta
 from unittest.mock import MagicMock
+from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -736,6 +737,59 @@ class TestCaldavListEventsMidnightSpanWorkaround:
 
         assert len(events) == 1
         assert not events[0].all_day
+
+    def test_midnight_span_event_with_timezone_aware_datetimes_is_treated_as_all_day(self):
+        """The midnight check reads the wall-clock hour/minute/second of the datetime as-is,
+        so a tz-aware midnight-to-midnight event must be picked up regardless of its timezone,
+        and the fix strips the tzinfo so it renders as a plain all-day date."""
+        tz = ZoneInfo('America/New_York')
+        vevent = MockVEvent(
+            dtstart=datetime(2024, 6, 1, 0, 0, 0, tzinfo=tz), dtend=datetime(2024, 6, 2, 0, 0, 0, tzinfo=tz)
+        )
+        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
+
+        events = connector.list_events('2024-06-01', '2024-06-02')
+
+        assert len(events) == 1
+        assert events[0].all_day
+        assert events[0].start == datetime(2024, 6, 1, 0, 0, 0)
+        assert events[0].end == datetime(2024, 6, 2, 0, 0, 0)
+        assert events[0].start.tzinfo is None
+        assert events[0].end.tzinfo is None
+
+    @pytest.mark.parametrize(
+        'tz_name', ['UTC', 'America/New_York', 'Europe/Berlin', 'Asia/Tokyo', 'Pacific/Kiritimati']
+    )
+    def test_midnight_span_event_is_treated_as_all_day_regardless_of_timezone(self, tz_name):
+        tz = ZoneInfo(tz_name)
+        vevent = MockVEvent(
+            dtstart=datetime(2024, 6, 1, 0, 0, 0, tzinfo=tz), dtend=datetime(2024, 6, 2, 0, 0, 0, tzinfo=tz)
+        )
+        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
+
+        events = connector.list_events('2024-06-01', '2024-06-02')
+
+        assert len(events) == 1
+        assert events[0].all_day, f'Expected midnight span in {tz_name} to be treated as all day'
+
+    def test_non_midnight_timezone_aware_event_on_thundermail_keeps_its_timezone(self):
+        """When the workaround doesn't apply, a tz-aware event must be passed through untouched."""
+        tz = ZoneInfo('Europe/Berlin')
+        dtstart = datetime(2024, 6, 1, 9, 0, 0, tzinfo=tz)
+        dtend = datetime(2024, 6, 1, 17, 0, 0, tzinfo=tz)
+        vevent = MockVEvent(dtstart=dtstart, dtend=dtend)
+        event = MockCaldavEvent(vevent, duration=timedelta(hours=8))
+        connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
+
+        events = connector.list_events('2024-06-01', '2024-06-02')
+
+        assert len(events) == 1
+        assert not events[0].all_day
+        assert events[0].start == dtstart
+        assert events[0].end == dtend
+        assert events[0].start.tzinfo is not None
 
     def test_midnight_span_check_handles_event_without_dtend(self):
         """Events that only expose a duration (no dtend attribute at all) must not crash
