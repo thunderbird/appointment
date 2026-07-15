@@ -28,7 +28,7 @@ from enum import Enum
 from sqlalchemy.orm import Session
 
 from .. import utils
-from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE
+from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE, APP_ENV_DEV
 from .apis.google_client import EventStatus, GoogleClient, ResponseStatus, SendUpdates
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
@@ -612,7 +612,12 @@ class CalDavConnector(BaseConnector):
             # as datetime spanning from midnight to midnight. This WILL FAIL, if a DST happens
             # in between start and end times.
             # -- fix start --
+            MIDNIGHT_SPAN_DOMAIN_WHITELIST = ('thundermail.com', 'stage-thundermail.com')
+
             def is_midnight_one_day_span(vevent):
+                """For a given vevent object, check if it is an event spanning from midnight
+                   to midnight for exactly 24h.
+                """
                 dtstart = vevent.dtstart.value
                 dtend = vevent.dtend.value if hasattr(vevent, 'dtend') else None
 
@@ -633,13 +638,19 @@ class CalDavConnector(BaseConnector):
 
                 return starts_at_midnight and ends_at_midnight and exactly_one_day
             
-            def has_domain(url, domain):
+            def has_domain(url, whitelist):
+                """Return True if the given url contains a whitelisted domain.
+                   Always True for development environments.
+                """
+                if os.getenv('APP_ENV') == APP_ENV_DEV:
+                    return True
+
                 hostname = urlparse(url).hostname
                 if hostname is None:
                     return False
-                return hostname == domain or hostname.endswith('.' + domain)
-            
-            if not all_day and is_midnight_one_day_span(vevent) and has_domain(self.url, 'thundermail.com'):
+                return any(hostname == domain or hostname.endswith('.' + domain) for domain in whitelist)
+
+            if is_midnight_one_day_span(vevent) and has_domain(self.url, MIDNIGHT_SPAN_DOMAIN_WHITELIST):
                 all_day = True
             # -- fix end --
 

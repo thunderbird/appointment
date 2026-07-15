@@ -690,6 +690,18 @@ class TestCaldavListEventsMidnightSpanWorkaround:
         assert len(events) == 1
         assert events[0].all_day
 
+    def test_midnight_span_event_matches_any_domain_in_a_multi_domain_whitelist(self):
+        """has_domain() must match against every entry of the whitelist, not just the first."""
+        for url in ('https://caldav.thundermail.com/dav/john/', 'https://caldav.stage-thundermail.com/dav/john/'):
+            vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 0, 0, 0), dtend=datetime(2024, 1, 2, 0, 0, 0))
+            event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+            connector = make_caldav_connector([event], url=url)
+
+            events = connector.list_events('2024-01-01', '2024-01-02')
+
+            assert len(events) == 1
+            assert events[0].all_day, f'Expected {url} to match the whitelist'
+
     def test_midnight_span_event_on_other_server_is_not_treated_as_all_day(self):
         """The workaround is scoped to thundermail.com; other CalDAV servers keep the
         (technically correct, per RFC) datetime-based event untouched."""
