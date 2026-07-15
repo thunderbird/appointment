@@ -608,6 +608,41 @@ class CalDavConnector(BaseConnector):
             # if start doesn't hold time information (no datetime), it's a whole day
             all_day = not isinstance(start, datetime)
 
+            # FIXME: Temporary Workaround for known CalDAV servers returning all day events
+            # as datetime spanning from midnight to midnight. This WILL FAIL, if a DST happens
+            # in between start and end times.
+            # -- fix start --
+            def is_midnight_one_day_span(vevent):
+                dtstart = vevent.dtstart.value
+                dtend = vevent.dtend.value
+
+                # Must both be actual datetimes (not plain dates) to have a meaningful "time"
+                if not isinstance(dtstart, datetime) or not isinstance(dtend, datetime):
+                    return False
+
+                starts_at_midnight = (
+                    dtstart.hour == 0 and dtstart.minute == 0 and
+                    dtstart.second == 0 and dtstart.microsecond == 0
+                )
+                ends_at_midnight = (
+                    dtend.hour == 0 and dtend.minute == 0 and
+                    dtend.second == 0 and dtend.microsecond == 0
+                )
+
+                exactly_one_day = (dtend - dtstart) == timedelta(days=1)
+
+                return starts_at_midnight and ends_at_midnight and exactly_one_day
+            
+            def has_domain(url, domain):
+                hostname = urlparse(url).hostname
+                if hostname is None:
+                    return False
+                return hostname == domain or hostname.endswith('.' + domain)
+            
+            if not all_day and is_midnight_one_day_span(vevent) and has_domain(self.url, 'thundermail.com'):
+                all_day = True
+            # -- fix end --
+
             events.append(
                 schemas.Event(
                     title=title,
