@@ -614,10 +614,10 @@ class CalDavConnector(BaseConnector):
             # -- fix start --
             def is_midnight_one_day_span(vevent):
                 dtstart = vevent.dtstart.value
-                dtend = vevent.dtend.value
+                dtend = vevent.dtend.value if hasattr(vevent, 'dtend') else None
 
-                # Must both be actual datetimes (not plain dates) to have a meaningful "time"
-                if not isinstance(dtstart, datetime) or not isinstance(dtend, datetime):
+                # Must both be actual datetimes (not plain dates) and end must exist
+                if not dtend or not isinstance(dtstart, datetime) or not isinstance(dtend, datetime):
                     return False
 
                 starts_at_midnight = (
