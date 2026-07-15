@@ -1,4 +1,6 @@
 import os
+from datetime import date, datetime, timedelta
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -511,6 +513,229 @@ class TestCaldav:
             calendar_titles = [cal.title for cal in calendars]
             assert 'Test Calendar 1' in calendar_titles
             assert 'Test Calendar 2' in calendar_titles
+
+
+class MockVEvent:
+    """A fake vobject vevent exposing only the attributes list_events() reads.
+    Attributes are only set if a value is passed in, so tests can exercise the
+    hasattr()-guarded "missing property" branches in list_events()."""
+
+    def __init__(self, dtstart=None, dtend=None, duration=None, summary=None):
+        if dtstart is not None:
+            self.dtstart = MagicMock()
+            self.dtstart.value = dtstart
+
+        if dtend is not None:
+            self.dtend = MagicMock()
+            self.dtend.value = dtend
+
+        if duration is not None:
+            self.duration = MagicMock()
+            self.duration.value = duration
+
+        if summary is not None:
+            self.summary = MagicMock()
+            self.summary.value = summary
+
+
+class MockVObjectInstance:
+    def __init__(self, vevent):
+        self.vevent = vevent
+
+
+class MockCaldavEvent:
+    """A fake caldav event, as returned by calendar.search()."""
+
+    def __init__(self, vevent, status='confirmed', transp=None, description=None, duration=timedelta(hours=1)):
+        self.icalendar_component = {'status': status}
+        if transp is not None:
+            self.icalendar_component['transp'] = transp
+        if description is not None:
+            self.icalendar_component['description'] = description
+
+        self.vobject_instance = MockVObjectInstance(vevent)
+        self._duration = duration
+
+    def get_duration(self):
+        return self._duration
+
+
+def make_caldav_connector(events, url='https://test.com/caldav'):
+    """Build a CalDavConnector whose remote client is mocked to return the given events,
+    and whose redis cache is mocked out (no redis instance in tests)."""
+
+    def mock_search(start, end, event=True, expand=True):
+        return events
+
+    def mock_calendar(url):
+        calendar_mock = MagicMock()
+        calendar_mock.search = mock_search
+        return calendar_mock
+
+    connector = CalDavConnector(
+        db=None,
+        subscriber_id=1,
+        calendar_id=1,
+        redis_instance=None,
+        url=url,
+        user='test',
+        password='test',
+    )
+    connector.client = MagicMock()
+    connector.client.calendar = MagicMock(side_effect=mock_calendar)
+    connector.get_cached_events = MagicMock(return_value=None)
+    connector.put_cached_events = MagicMock()
+
+    return connector
+
+
+class TestCaldavListEvents:
+    """Tests for CalDavConnector.list_events()"""
+
+    def test_list_events_returns_basic_event(self):
+        vevent = MockVEvent(
+            dtstart=datetime(2024, 1, 1, 9, 0, 0), dtend=datetime(2024, 1, 1, 10, 0, 0), summary='Standup'
+        )
+        event = MockCaldavEvent(vevent, description='Daily standup', duration=timedelta(hours=1))
+        connector = make_caldav_connector([event])
+
+        events = connector.list_events('2024-01-01', '2024-01-02')
+
+        assert len(events) == 1
+        assert events[0].title == 'Standup'
+        assert events[0].start == datetime(2024, 1, 1, 9, 0, 0)
+        assert events[0].end == datetime(2024, 1, 1, 10, 0, 0)
+        assert events[0].description == 'Daily standup'
+        assert not events[0].all_day
+        assert not events[0].tentative
+
+    def test_list_events_uses_cache_when_available(self):
+        connector = make_caldav_connector([])
+        cached_events = [schemas.Event(title='Cached event', start=datetime(2024, 1, 1), end=datetime(2024, 1, 1, 1))]
+        connector.get_cached_events = MagicMock(return_value=cached_events)
+
+        events = connector.list_events('2024-01-01', '2024-01-02')
+
+        assert events == cached_events
+        connector.client.calendar.assert_not_called()
+
+    def test_list_events_ignores_cancelled_and_transparent_events(self):
+        cancelled_vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 9), dtend=datetime(2024, 1, 1, 10))
+        cancelled_event = MockCaldavEvent(cancelled_vevent, status='cancelled')
+
+        transparent_vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 9), dtend=datetime(2024, 1, 1, 10))
+        transparent_event = MockCaldavEvent(transparent_vevent, transp='transparent')
+
+        connector = make_caldav_connector([cancelled_event, transparent_event])
+
+        events = connector.list_events('2024-01-01', '2024-01-02')
+
+        assert events == []
+
+    def test_list_events_marks_tentative_events(self):
+        vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 9), dtend=datetime(2024, 1, 1, 10))
+        event = MockCaldavEvent(vevent, status='tentative')
+        connector = make_caldav_connector([event])
+
+        events = connector.list_events('2024-01-01', '2024-01-02')
+
+        assert len(events) == 1
+        assert events[0].tentative
+
+    def test_list_events_whole_day_event_uses_date_values(self):
+        """A properly formed whole-day event uses date (not datetime) dtstart/dtend values
+        and should be marked all_day on its own, without the thundermail workaround below."""
+        vevent = MockVEvent(dtstart=date(2024, 1, 1), dtend=date(2024, 1, 2))
+        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        connector = make_caldav_connector([event])
+
+        events = connector.list_events('2024-01-01', '2024-01-02')
+
+        assert len(events) == 1
+        assert events[0].all_day
+
+    def test_list_events_caches_the_result(self):
+        vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 9), dtend=datetime(2024, 1, 1, 10))
+        event = MockCaldavEvent(vevent)
+        connector = make_caldav_connector([event])
+
+        events = connector.list_events('2024-01-01', '2024-01-02')
+
+        connector.put_cached_events.assert_called_once_with('2024-01-01_2024-01-02', events)
+
+
+class TestCaldavListEventsMidnightSpanWorkaround:
+    """Tests for the temporary FIXME workaround in CalDavConnector.list_events() that
+    treats midnight-to-midnight one-day datetime events from known CalDAV servers
+    (thundermail.com) as all-day events."""
+
+    def test_midnight_span_event_on_thundermail_is_treated_as_all_day(self):
+        vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 0, 0, 0), dtend=datetime(2024, 1, 2, 0, 0, 0))
+        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
+
+        events = connector.list_events('2024-01-01', '2024-01-02')
+
+        assert len(events) == 1
+        assert events[0].all_day
+
+    def test_midnight_span_event_on_thundermail_subdomain_is_treated_as_all_day(self):
+        """has_domain() matches subdomains of thundermail.com too."""
+        vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 0, 0, 0), dtend=datetime(2024, 1, 2, 0, 0, 0))
+        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        connector = make_caldav_connector([event], url='https://eu.thundermail.com/dav/john/')
+
+        events = connector.list_events('2024-01-01', '2024-01-02')
+
+        assert len(events) == 1
+        assert events[0].all_day
+
+    def test_midnight_span_event_on_other_server_is_not_treated_as_all_day(self):
+        """The workaround is scoped to thundermail.com; other CalDAV servers keep the
+        (technically correct, per RFC) datetime-based event untouched."""
+        vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 0, 0, 0), dtend=datetime(2024, 1, 2, 0, 0, 0))
+        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        connector = make_caldav_connector([event], url='https://caldav.example.com/dav/john/')
+
+        events = connector.list_events('2024-01-01', '2024-01-02')
+
+        assert len(events) == 1
+        assert not events[0].all_day
+
+    def test_non_midnight_event_on_thundermail_is_not_treated_as_all_day(self):
+        """Only events that start and end exactly at midnight are affected."""
+        vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 9, 0, 0), dtend=datetime(2024, 1, 1, 17, 0, 0))
+        event = MockCaldavEvent(vevent, duration=timedelta(hours=8))
+        connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
+
+        events = connector.list_events('2024-01-01', '2024-01-02')
+
+        assert len(events) == 1
+        assert not events[0].all_day
+
+    def test_multi_day_midnight_span_on_thundermail_is_not_treated_as_all_day(self):
+        """The workaround only applies to an exact one-day span; a DST-safe guard against
+        misclassifying genuinely multi-day timed events."""
+        vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 0, 0, 0), dtend=datetime(2024, 1, 3, 0, 0, 0))
+        event = MockCaldavEvent(vevent, duration=timedelta(days=2))
+        connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
+
+        events = connector.list_events('2024-01-01', '2024-01-03')
+
+        assert len(events) == 1
+        assert not events[0].all_day
+
+    def test_midnight_span_check_handles_event_without_dtend(self):
+        """Events that only expose a duration (no dtend attribute at all) must not crash
+        is_midnight_one_day_span() - it should treat them as not matching the workaround."""
+        vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 0, 0, 0), duration='P1D')
+        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
+
+        events = connector.list_events('2024-01-01', '2024-01-02')
+
+        assert len(events) == 1
+        assert not events[0].all_day
 
 
 class TestCalendarUpdateOrCreate:
