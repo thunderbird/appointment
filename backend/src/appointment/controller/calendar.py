@@ -28,7 +28,7 @@ from enum import Enum
 from sqlalchemy.orm import Session
 
 from .. import utils
-from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE
+from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE, APP_ENV_DEV
 from .apis.google_client import EventStatus, GoogleClient, ResponseStatus, SendUpdates
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
@@ -607,6 +607,54 @@ class CalDavConnector(BaseConnector):
             end = start + e.get_duration()
             # if start doesn't hold time information (no datetime), it's a whole day
             all_day = not isinstance(start, datetime)
+
+            # FIXME: Temporary Workaround for known CalDAV servers returning all day events
+            # as datetime spanning from midnight to midnight. This WILL FAIL, if a DST happens
+            # in between start and end times.
+            # -- fix start --
+            MIDNIGHT_SPAN_DOMAIN_WHITELIST = ('thundermail.com', 'stage-thundermail.com')
+
+            def is_midnight_one_day_span(vevent):
+                """For a given vevent object, check if it is an event spanning from midnight
+                   to midnight for exactly 24h.
+                """
+                dtstart = vevent.dtstart.value
+                dtend = vevent.dtend.value if hasattr(vevent, 'dtend') else None
+
+                # Must both be actual datetimes (not plain dates) and end must exist
+                if not dtend or not isinstance(dtstart, datetime) or not isinstance(dtend, datetime):
+                    return False
+
+                starts_at_midnight = (
+                    dtstart.hour == 0 and dtstart.minute == 0 and
+                    dtstart.second == 0 and dtstart.microsecond == 0
+                )
+                ends_at_midnight = (
+                    dtend.hour == 0 and dtend.minute == 0 and
+                    dtend.second == 0 and dtend.microsecond == 0
+                )
+
+                exactly_one_day = (dtend - dtstart) == timedelta(days=1)
+
+                return starts_at_midnight and ends_at_midnight and exactly_one_day
+            
+            def has_domain(url, whitelist):
+                """Return True if the given url contains a whitelisted domain.
+                   Always True for development environments.
+                """
+                if os.getenv('APP_ENV') == APP_ENV_DEV:
+                    return True
+
+                hostname = urlparse(url).hostname
+                if hostname is None:
+                    return False
+                return any(hostname == domain or hostname.endswith('.' + domain) for domain in whitelist)
+
+            if is_midnight_one_day_span(vevent) and has_domain(self.url, MIDNIGHT_SPAN_DOMAIN_WHITELIST):
+                all_day = True
+                start = start.replace(tzinfo=None)
+                end = end.replace(tzinfo=None)
+            # -- fix end --
 
             events.append(
                 schemas.Event(
