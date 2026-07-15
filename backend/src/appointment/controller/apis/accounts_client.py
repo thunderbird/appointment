@@ -104,6 +104,23 @@ class AccountsClient:
             logging.error(f'Could not retrieve profile, error occurred: {e.response.status_code} - {e.response.text}')
             raise e
 
+    def get_waffle_flags(self, token):
+        """Retrieve the waffle feature flags for the authenticated user."""
+        try:
+            response = requests.get(
+                url=f'{self.accounts_url}/api/v1/auth/waffle-flags/',
+                headers={'Accept': 'application/json', 'Authorization': f'Bearer {token}'},
+            )
+
+            response.raise_for_status()
+
+            return response.json()
+        except requests.HTTPError as e:
+            logging.error(
+                f'Could not retrieve waffle flags, error occurred: {e.response.status_code} - {e.response.text}'
+            )
+            raise e
+
     def logout(self):
         """Invalidate the current refresh token"""
         try:
