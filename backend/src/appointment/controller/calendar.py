@@ -652,6 +652,8 @@ class CalDavConnector(BaseConnector):
 
             if is_midnight_one_day_span(vevent) and has_domain(self.url, MIDNIGHT_SPAN_DOMAIN_WHITELIST):
                 all_day = True
+                start = start.replace(tzinfo=None)
+                end = end.replace(tzinfo=None)
             # -- fix end --
 
             events.append(
