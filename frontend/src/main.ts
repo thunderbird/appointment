@@ -3,6 +3,7 @@ import App from '@/App.vue';
 import { createApp } from 'vue';
 import { apiUrlKey, shortUrlKey } from '@/keys';
 import { defaultLocale } from '@/utils';
+import { config } from '@/config';
 
 // pinia state management
 import { createPinia } from 'pinia';
@@ -22,7 +23,7 @@ import '@thunderbirdops/services-ui/style.css';
 import * as Sentry from '@sentry/vue';
 
 const app = createApp(App);
-const useSentry = !!import.meta.env.VITE_SENTRY_DSN;
+const useSentry = !!config.sentryDsn;
 
 // The modes we use -> short names for sorting
 const environmentMap = {
@@ -38,7 +39,7 @@ if (useSentry) {
   Sentry.init({
     app,
     environment,
-    dsn: import.meta.env.VITE_SENTRY_DSN,
+    dsn: config.sentryDsn,
     integrations: [
       Sentry.browserTracingIntegration({
         router,
@@ -74,11 +75,11 @@ app.use(pinia);
 app.use(router);
 
 // init urls
-const protocol = import.meta.env.VITE_API_SECURE === 'true' ? 'https' : 'http';
-const port = import.meta.env.VITE_API_PORT !== undefined ? `:${import.meta.env.VITE_API_PORT}` : '';
-const apiUrl = `${protocol}://${import.meta.env.VITE_API_URL}${port}`;
+const protocol = config.apiSecure === 'true' ? 'https' : 'http';
+const port = config.apiPort ? `:${config.apiPort}` : '';
+const apiUrl = `${protocol}://${config.apiUrl}${port}`;
 app.provide(apiUrlKey, apiUrl);
-app.provide(shortUrlKey, `${protocol}://${import.meta.env.VITE_SHORT_BASE_URL}`);
+app.provide(shortUrlKey, `${protocol}://${config.shortBaseUrl}`);
 
 app.use(i18ninstance);
 useDayJS(app, defaultLocale());

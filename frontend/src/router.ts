@@ -10,6 +10,7 @@ import LogoutView from '@/views/LogoutView.vue';
 import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
 import { isOidcAuth } from '@/composables/authSchemes';
 import { userManager } from '@/composables/oidcUserManager';
+import { config } from '@/config';
 import { LOGIN_REDIRECT_KEY } from '@/definitions';
 
 // lazy loaded components
@@ -27,7 +28,7 @@ type ApmtRouteMeta = {
   disableMetrics?: boolean; // Disable all metric capturing for this page. FIXME: Not Impl
 };
 
-const redirectUrl = import.meta.env?.VITE_SUPPORT_URL;
+const redirectUrl = config.supportUrl;
 
 /**
  * Defined routes for Thunderbird Appointment

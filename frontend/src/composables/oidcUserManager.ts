@@ -1,8 +1,9 @@
 import { UserManager, UserManagerSettings } from 'oidc-client-ts';
+import { config } from '@/config';
 
 const settings: UserManagerSettings = {
-  authority: import.meta.env?.VITE_OIDC_ROOT_URL,
-  client_id: import.meta.env?.VITE_OIDC_CLIENT_ID,
+  authority: config.oidcRootUrl,
+  client_id: config.oidcClientId,
   redirect_uri: `${window.location.origin}/post-login/`,
 };
 
