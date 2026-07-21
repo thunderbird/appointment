@@ -1,0 +1,3 @@
+allowBuilds:
+  aws-sdk: true
+  protobufjs: true

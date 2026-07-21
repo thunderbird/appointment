@@ -1,0 +1,5 @@
+allowBuilds:
+  '@sentry/cli': true
+  core-js: true
+  msw: true
+  unrs-resolver: true
