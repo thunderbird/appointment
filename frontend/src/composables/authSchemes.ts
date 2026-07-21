@@ -1,5 +1,6 @@
 import { AuthSchemes } from '@/definitions';
+import { config } from '@/config';
 
-export const isOidcAuth = import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Oidc;
-export const isFxaAuth = import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Fxa;
-export const isPasswordAuth = import.meta.env?.VITE_AUTH_SCHEME === AuthSchemes.Password;
+export const isOidcAuth = config.authScheme === AuthSchemes.Oidc;
+export const isFxaAuth = config.authScheme === AuthSchemes.Fxa;
+export const isPasswordAuth = config.authScheme === AuthSchemes.Password;

@@ -12,6 +12,7 @@ import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
 import { accountsTbProfileUrlKey, apiUrlKey, callKey, refreshKey, supportUrlKey, tbProUrlKey } from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
+import { config } from '@/config';
 
 // stores
 import { useSiteNotificationStore } from '@/stores/alert-store';
@@ -37,9 +38,9 @@ const {
   message: notificationMessage,
 } = storeToRefs(siteNotificationStore);
 
-provide(accountsTbProfileUrlKey, import.meta.env.VITE_TB_ACCOUNT_DASHBOARD_URL);
-provide(tbProUrlKey, import.meta.env.VITE_TB_PRO_URL);
-provide(supportUrlKey, import.meta.env.VITE_SUPPORT_URL);
+provide(accountsTbProfileUrlKey, config.tbAccountDashboardUrl);
+provide(tbProUrlKey, config.tbProUrl);
+provide(supportUrlKey, config.supportUrl);
 
 const { isSame: isSameNotification, show: showNotification, lock: lockNotification } = siteNotificationStore;
 
@@ -210,9 +211,9 @@ onMounted(async () => {
       return dataSetOnce;
     };
 
-    posthog.init(import.meta.env.VITE_POSTHOG_PROJECT_KEY, {
-      api_host: import.meta.env.VITE_POSTHOG_HOST,
-      ui_host: import.meta.env.VITE_POSTHOG_UI_HOST,
+    posthog.init(config.posthogProjectKey, {
+      api_host: config.posthogHost,
+      ui_host: config.posthogUiHost,
       person_profiles: 'identified_only',
       persistence: 'memory',
       mask_all_text: true,

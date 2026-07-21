@@ -1,0 +1,73 @@
+---
+# Additive image-publish pipeline. On merge to main it builds the appointment
+# backend and frontend (nginx SPA) images as native multi-arch (amd64 + arm64)
+# manifest lists and pushes them to GHCR, tagged :<sha>, :v<version>, :latest.
+#
+# This is INDEPENDENT of the existing deploy pipeline (deploy-staging.yml /
+# deploy-production.yml): it uses no cloud credentials, runs no Pulumi, touches
+# no S3/ECS, and deploys nothing -- it only publishes images for the EKS/Kargo
+# path. The env-specific S3/CloudFront + ECS builds are left untouched.
+#
+# The frontend image is configured at RUNTIME (window.__APP_CONFIG__ via
+# /config.js), so one built bundle runs in every environment. See src/config.ts.
+name: publish-images
+
+concurrency:
+  group: publish-images-${{ github.ref }}
+  # Serialize (don't cancel) so every merged commit's :<sha> image gets published.
+  cancel-in-progress: false
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # Read the repo version once. NOTE: both images are versioned from
+  # frontend/package.json (single monorepo version); a backend-only change still
+  # publishes under that version.
+  version:
+    runs-on: ubuntu-latest
+    outputs:
+      value: ${{ steps.read-version.outputs.value }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Read version from frontend/package.json
+        id: read-version
+        run: |
+          set -euo pipefail
+          v="$(jq -er .version frontend/package.json)"
+          [ -n "$v" ] && [ "$v" != "null" ] || { echo "::error::empty/invalid version in frontend/package.json"; exit 1; }
+          echo "value=$v" >> "$GITHUB_OUTPUT"
+
+  # Build BOTH images on every push/dispatch so both always carry the same :<sha>.
+  # The matched-set invariant (Kargo Freight = {backend@sha, frontend@sha} for the
+  # exact HEAD sha) requires both :<sha> refs to exist, so we do NOT path-filter.
+  # Moving tags (:latest, :v<version>) are published only from the main branch.
+  backend:
+    needs: version
+    uses: ./.github/workflows/build-multiarch-image.yml
+    with:
+      image: ghcr.io/thunderbird/thunderbird-appointment
+      dockerfile: backend/Dockerfile
+      context: backend
+      version: ${{ needs.version.outputs.value }}
+      artifact-prefix: backend
+      moving-tags: ${{ github.ref == 'refs/heads/main' }}
+
+  frontend:
+    needs: version
+    uses: ./.github/workflows/build-multiarch-image.yml
+    with:
+      image: ghcr.io/thunderbird/thunderbird-appointment-frontend
+      dockerfile: frontend/deploy.dockerfile
+      context: frontend
+      version: ${{ needs.version.outputs.value }}
+      artifact-prefix: frontend
+      moving-tags: ${{ github.ref == 'refs/heads/main' }}

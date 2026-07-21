@@ -31,6 +31,9 @@
       </strong>
     </noscript>
     <div id="app"></div>
+    <!-- Runtime config: sets window.__APP_CONFIG__ BEFORE the app bundle loads.
+         Replaced per-environment at deploy/run time (not rebuilt). See public/config.js. -->
+    <script src="/config.js"></script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

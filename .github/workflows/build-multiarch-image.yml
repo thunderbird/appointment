@@ -1,0 +1,180 @@
+---
+# Reusable workflow: build ONE container image for linux/amd64 and linux/arm64
+# on NATIVE runners (no QEMU), push each arch to GHCR by digest, then stitch the
+# digests into a single multi-arch manifest list tagged :<sha>, :v<version> and
+# :latest. Callers get the fully-qualified :<sha> reference back via the `image`
+# output. Invoked by publish-images.yml for the appointment backend + frontend.
+#
+# Mirrors thunderbird/thunderbird-accounts build-multiarch-image.yml. Auth is
+# GHCR + the automatic GITHUB_TOKEN (packages: write) -- no cloud credentials,
+# which keeps this pipeline fully decoupled from the existing ECR/Pulumi/S3
+# deploy (deploy-staging.yml / deploy-production.yml stay untouched).
+name: build-multiarch-image
+
+on:
+  workflow_call:
+    inputs:
+      image:
+        description: Fully-qualified GHCR image name WITHOUT a tag (e.g. ghcr.io/owner/name).
+        required: true
+        type: string
+      dockerfile:
+        description: Path to the Dockerfile to build (relative to the repo root).
+        required: false
+        type: string
+        default: Dockerfile
+      context:
+        description: Build context directory (relative to the repo root).
+        required: false
+        type: string
+        default: .
+      version:
+        description: Semantic version (no leading v) published as the :v<version> tag.
+        required: true
+        type: string
+      artifact-prefix:
+        description: >-
+          Unique prefix for this image's digest artifacts. Distinct images built
+          in the same run (backend, frontend) MUST use different prefixes so
+          their per-arch digest artifacts don't collide.
+        required: true
+        type: string
+      moving-tags:
+        description: >-
+          Publish the moving tags (:latest and :v<version>) in addition to the
+          immutable :<sha>. Pass true only from the default branch; false (default)
+          publishes only :<sha> so a workflow_dispatch from a feature branch cannot
+          re-point :latest at unreviewed content.
+        required: false
+        type: boolean
+        default: false
+    outputs:
+      image:
+        description: The :<sha>-tagged multi-arch image reference that was pushed.
+        value: ${{ jobs.merge.outputs.image }}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # One job per architecture, each on its matching native runner. Each pushes an
+  # anonymous (tag-less) image to GHCR and records its digest as an artifact.
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux/amd64
+            arch: amd64
+            runner: ubuntu-24.04
+          - platform: linux/arm64
+            arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Log in to GHCR
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Build and push image by digest
+        id: build
+        env:
+          IMAGE: ${{ inputs.image }}
+          DOCKERFILE: ${{ inputs.dockerfile }}
+          CONTEXT: ${{ inputs.context }}
+          SCOPE: ${{ inputs.artifact-prefix }}-${{ matrix.arch }}
+          PLATFORM: ${{ matrix.platform }}
+          # RELEASE_VERSION is consumed by backend/Dockerfile; harmless (unused) for the frontend build.
+          RELEASE_VERSION: ${{ github.sha }}
+        run: |
+          # Build this single platform and push to GHCR by digest only (no tag).
+          # push-by-digest keeps the pushed image anonymous so both arch runners
+          # push concurrently without clobbering a shared tag; the merge job
+          # assigns the real tags. --provenance=false keeps each per-arch push a
+          # single plain manifest so the merged list has exactly two entries.
+          docker buildx build \
+            -f "$DOCKERFILE" \
+            --platform "$PLATFORM" \
+            --provenance=false \
+            --build-arg "RELEASE_VERSION=$RELEASE_VERSION" \
+            --cache-from "type=gha,scope=$SCOPE" \
+            --cache-to "type=gha,mode=max,scope=$SCOPE" \
+            --output "type=image,name=$IMAGE,push-by-digest=true,name-canonical=true,push=true" \
+            --metadata-file metadata.json \
+            "$CONTEXT"
+          digest="$(jq -r '."containerimage.digest"' metadata.json)"
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+
+      - name: Export digest
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          mkdir -p "${{ runner.temp }}/digests"
+          touch "${{ runner.temp }}/digests/${DIGEST#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: digests-${{ inputs.artifact-prefix }}-${{ matrix.arch }}
+          path: ${{ runner.temp }}/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  # Combine the per-arch digests into one manifest list under all three tags.
+  merge:
+    needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.merge.outputs.image }}
+    steps:
+      - name: Log in to GHCR
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Download digests
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: ${{ runner.temp }}/digests
+          pattern: digests-${{ inputs.artifact-prefix }}-*
+          merge-multiple: true
+
+      - name: Create manifest list and push
+        id: merge
+        env:
+          IMAGE: ${{ inputs.image }}
+          VERSION: ${{ inputs.version }}
+          SHA: ${{ github.sha }}
+          MOVING_TAGS: ${{ inputs.moving-tags }}
+          DIGESTS_DIR: ${{ runner.temp }}/digests
+        run: |
+          set -euo pipefail
+          cd "$DIGESTS_DIR"
+          # arm64 guard: require exactly the two expected per-arch digests before
+          # publishing, so a single-arch manifest list can never be tagged.
+          count="$(find . -type f | wc -l)"
+          [ "$count" -eq 2 ] || { echo "::error::expected 2 arch digests, found $count"; exit 1; }
+          # Always publish the immutable :<sha>; add moving tags only from main.
+          tags="-t ${IMAGE}:${SHA}"
+          if [ "$MOVING_TAGS" = "true" ]; then
+            tags="$tags -t ${IMAGE}:v${VERSION} -t ${IMAGE}:latest"
+          fi
+          # imagetools create references digests already in GHCR (no rebuild/re-push).
+          # shellcheck disable=SC2046,SC2086
+          docker buildx imagetools create $tags $(printf "${IMAGE}@sha256:%s " *)
+          docker buildx imagetools inspect "${IMAGE}:${SHA}"
+          echo "image=${IMAGE}:${SHA}" >> "$GITHUB_OUTPUT"

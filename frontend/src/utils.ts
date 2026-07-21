@@ -2,6 +2,7 @@
 import { Ref } from 'vue';
 import { Dayjs } from 'dayjs';
 import { i18nType } from '@/composables/i18n';
+import { config } from '@/config';
 import {
   EventPopup,
   HTMLElementEvent,
@@ -86,7 +87,7 @@ export const enumToObject = (e: object): { [key in string]: number } => {
 // This functions works independent from Pinia stores so that
 // it can be called even if stores are not initialized yet.
 export const timeFormat = (): string => {
-  const fallbackFormat = import.meta.env?.VITE_DEFAULT_HOUR_FORMAT ?? 12;
+  const fallbackFormat = config.defaultHourFormat ?? 12;
   const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}') as User;
 
   let use12HourTime = null;
