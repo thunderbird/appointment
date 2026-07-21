@@ -40,9 +40,6 @@ jobs:
           rm -rf frontend/dist  # Clean up from previous build
           cp frontend/.env.stage.example frontend/.env.stage
           cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
-          # Runtime config: emit config.js from the same .env values (backwards compatible;
-          # the bundle also keeps the --mode-baked values as a fallback). See src/config.ts.
-          node scripts/env-to-config-js.mjs .env.stage dist/config.js
 
       - name: Deploy frontend to S3
         run: |
@@ -180,9 +177,6 @@ jobs:
         run: |
           cp frontend/.env.prod.example frontend/.env.prod
           cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
-          # Runtime config: emit config.js from the same .env values (backwards compatible;
-          # the bundle also keeps the --mode-baked values as a fallback). See src/config.ts.
-          node scripts/env-to-config-js.mjs .env.prod dist/config.js
           zip -r ../frontend.zip dist
 
       - name: Download ECR tag
