@@ -1,16 +1,23 @@
 // Runtime application configuration.
 //
-// Config is read at runtime from `window.__APP_CONFIG__`, which is injected by
-// `/config.js` (loaded synchronously in index.html BEFORE the app bundle). This
-// lets a single built bundle run unchanged in every environment:
+// Config is read at runtime from `window.__APP_CONFIG__`, injected by `/config.js`
+// (loaded synchronously in index.html BEFORE the app bundle), with FALLBACK to
+// build-time `import.meta.env.VITE_*`.
 //
-//   - existing S3/CloudFront envs: the deploy uploads an env-specific config.js
-//   - EKS nginx container:         the entrypoint generates config.js from pod env
+//   - EKS / container path: the nginx entrypoint regenerates config.js from APP_*
+//     pod env, and the image is built env-agnostic (no baked values) -> config.js
+//     is the ONLY source and MUST be present (see assertConfigured, called at boot).
+//     Only this bundle is byte-identical across environments.
+//   - Existing S3/CloudFront path (workflows unchanged): the build still bakes
+//     VITE_* via `--mode`; the committed EMPTY public/config.js falls through to
+//     those baked values, so behavior is identical to before (backwards compatible).
+//   - Local dev / unit tests: fall back to `.env` via import.meta.env.
 //
-// For local dev and unit tests (no config.js present) we fall back to Vite's
-// build-time `import.meta.env.VITE_*`, so existing `.env` workflows keep working.
+// NOTE: pick()'s "empty string = unset" rule means the container build must stay
+// env-agnostic; a reintroduced baked `.env`/`--mode` there would let a
+// runtime-empty value silently fall back to the baked one.
 //
-// See docs: docs/superpowers/specs/2026-07-20-appointment-eks-kargo-promotion-pipeline-design.md (§C)
+// Design (in platform-infrastructure): docs/superpowers/specs/2026-07-20-appointment-eks-kargo-promotion-pipeline-design.md (§C)
 
 export type AppConfig = {
   apiUrl?: string;
@@ -96,6 +103,22 @@ export const config = {
   get defaultHourFormat() {
     return pick(runtime().defaultHourFormat, env.VITE_DEFAULT_HOUR_FORMAT);
   },
+};
+
+/**
+ * Fail loud if the app is unconfigured. On the container/EKS path there is no
+ * baked fallback, so a missing or empty `/config.js` (e.g. the entrypoint didn't
+ * run, or `APP_API_URL` was unset) would otherwise boot a silently-broken app.
+ * Call once at startup (main.ts). Dev/tests and the existing S3 build resolve
+ * `apiUrl` via `.env`/`--mode` fallback, so this only throws when truly unset.
+ */
+export const assertConfigured = (): void => {
+  if (!config.apiUrl) {
+    console.error(
+      '[config] window.__APP_CONFIG__ is missing/empty (no /config.js?). The SPA is unconfigured.'
+    );
+    throw new Error('Appointment SPA is unconfigured: config.apiUrl is empty (check /config.js).');
+  }
 };
 
 export default config;

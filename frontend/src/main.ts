@@ -3,7 +3,7 @@ import App from '@/App.vue';
 import { createApp } from 'vue';
 import { apiUrlKey, shortUrlKey } from '@/keys';
 import { defaultLocale } from '@/utils';
-import { config } from '@/config';
+import { config, assertConfigured } from '@/config';
 
 // pinia state management
 import { createPinia } from 'pinia';
@@ -21,6 +21,10 @@ import '@thunderbirdops/services-ui/style.css';
 
 // init sentry
 import * as Sentry from '@sentry/vue';
+
+// Fail loud if the SPA booted without runtime config (the container path has no
+// baked fallback -- a missing/empty /config.js would otherwise be silent). See config.ts.
+assertConfigured();
 
 const app = createApp(App);
 const useSentry = !!config.sentryDsn;

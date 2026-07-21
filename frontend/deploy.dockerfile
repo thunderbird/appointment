@@ -7,17 +7,19 @@ COPY . /build/frontend
 # (see public/config.js + docker-entrypoint.d/40-appointment-config.sh), so one
 # built bundle runs unchanged in every environment.
 
-# Add Node 18 support
+# Add Node 22 (Vite 8 requires Node >=20.19; matches the CI Node used by the S3 build)
+# and jq (used by the runtime-config entrypoint to emit JSON-safe config.js).
 RUN apt-get update
-RUN apt-get install -y ca-certificates curl gnupg
+RUN apt-get install -y ca-certificates curl gnupg jq
 RUN mkdir -p /etc/apt/keyrings
 RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_18.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
+RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_22.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
 RUN apt-get update
 RUN apt-get install -y nodejs
 
-# Build site (env-agnostic; runtime config supplies environment values)
-RUN cd /build/frontend && npm install
+# Build site (env-agnostic; runtime config supplies environment values). npm ci
+# for a reproducible, lockfile-pinned install across both arch builds.
+RUN cd /build/frontend && npm ci
 RUN cd /build/frontend && npm run build
 
 # Use our custom nginx config

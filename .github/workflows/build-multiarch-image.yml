@@ -39,6 +39,15 @@ on:
           their per-arch digest artifacts don't collide.
         required: true
         type: string
+      moving-tags:
+        description: >-
+          Publish the moving tags (:latest and :v<version>) in addition to the
+          immutable :<sha>. Pass true only from the default branch; false (default)
+          publishes only :<sha> so a workflow_dispatch from a feature branch cannot
+          re-point :latest at unreviewed content.
+        required: false
+        type: boolean
+        default: false
     outputs:
       image:
         description: The :<sha>-tagged multi-arch image reference that was pushed.
@@ -146,19 +155,26 @@ jobs:
 
       - name: Create manifest list and push
         id: merge
-        working-directory: ${{ runner.temp }}/digests
         env:
           IMAGE: ${{ inputs.image }}
           VERSION: ${{ inputs.version }}
           SHA: ${{ github.sha }}
+          MOVING_TAGS: ${{ inputs.moving-tags }}
+          DIGESTS_DIR: ${{ runner.temp }}/digests
         run: |
-          # imagetools create references digests already in GHCR, so nothing is
-          # rebuilt or re-pushed -- it only writes the manifest list under all
-          # three tags. The glob expands to one ${IMAGE}@sha256:<hex> per digest.
-          docker buildx imagetools create \
-            -t "${IMAGE}:${SHA}" \
-            -t "${IMAGE}:v${VERSION}" \
-            -t "${IMAGE}:latest" \
-            $(printf "${IMAGE}@sha256:%s " *)
+          set -euo pipefail
+          cd "$DIGESTS_DIR"
+          # arm64 guard: require exactly the two expected per-arch digests before
+          # publishing, so a single-arch manifest list can never be tagged.
+          count="$(find . -type f | wc -l)"
+          [ "$count" -eq 2 ] || { echo "::error::expected 2 arch digests, found $count"; exit 1; }
+          # Always publish the immutable :<sha>; add moving tags only from main.
+          tags="-t ${IMAGE}:${SHA}"
+          if [ "$MOVING_TAGS" = "true" ]; then
+            tags="$tags -t ${IMAGE}:v${VERSION} -t ${IMAGE}:latest"
+          fi
+          # imagetools create references digests already in GHCR (no rebuild/re-push).
+          # shellcheck disable=SC2046,SC2086
+          docker buildx imagetools create $tags $(printf "${IMAGE}@sha256:%s " *)
           docker buildx imagetools inspect "${IMAGE}:${SHA}"
           echo "image=${IMAGE}:${SHA}" >> "$GITHUB_OUTPUT"

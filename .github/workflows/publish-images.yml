@@ -28,52 +28,46 @@ permissions:
   packages: write
 
 jobs:
-  # Decide which image(s) changed and read the version once, so the build jobs
-  # below only run for images that actually changed.
-  detect-changes:
+  # Read the repo version once. NOTE: both images are versioned from
+  # frontend/package.json (single monorepo version); a backend-only change still
+  # publishes under that version.
+  version:
     runs-on: ubuntu-latest
     outputs:
-      backend-changed: ${{ steps.check.outputs.backend-changed }}
-      frontend-changed: ${{ steps.check.outputs.frontend-changed }}
-      version: ${{ steps.read-version.outputs.value }}
+      value: ${{ steps.read-version.outputs.value }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
-        id: check
-        with:
-          filters: |
-            backend-changed:
-              - 'backend/**'
-            frontend-changed:
-              - 'frontend/**'
-
       - name: Read version from frontend/package.json
         id: read-version
-        run: echo "value=$(jq -r .version frontend/package.json)" >> "$GITHUB_OUTPUT"
+        run: |
+          set -euo pipefail
+          v="$(jq -er .version frontend/package.json)"
+          [ -n "$v" ] && [ "$v" != "null" ] || { echo "::error::empty/invalid version in frontend/package.json"; exit 1; }
+          echo "value=$v" >> "$GITHUB_OUTPUT"
 
+  # Build BOTH images on every push/dispatch so both always carry the same :<sha>.
+  # The matched-set invariant (Kargo Freight = {backend@sha, frontend@sha} for the
+  # exact HEAD sha) requires both :<sha> refs to exist, so we do NOT path-filter.
+  # Moving tags (:latest, :v<version>) are published only from the main branch.
   backend:
-    needs: detect-changes
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      needs.detect-changes.outputs.backend-changed == 'true'
+    needs: version
     uses: ./.github/workflows/build-multiarch-image.yml
     with:
       image: ghcr.io/thunderbird/thunderbird-appointment
       dockerfile: backend/Dockerfile
       context: backend
-      version: ${{ needs.detect-changes.outputs.version }}
+      version: ${{ needs.version.outputs.value }}
       artifact-prefix: backend
+      moving-tags: ${{ github.ref == 'refs/heads/main' }}
 
   frontend:
-    needs: detect-changes
-    if: >-
-      github.event_name == 'workflow_dispatch' ||
-      needs.detect-changes.outputs.frontend-changed == 'true'
+    needs: version
     uses: ./.github/workflows/build-multiarch-image.yml
     with:
       image: ghcr.io/thunderbird/thunderbird-appointment-frontend
       dockerfile: frontend/deploy.dockerfile
       context: frontend
-      version: ${{ needs.detect-changes.outputs.version }}
+      version: ${{ needs.version.outputs.value }}
       artifact-prefix: frontend
+      moving-tags: ${{ github.ref == 'refs/heads/main' }}
