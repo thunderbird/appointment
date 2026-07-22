@@ -10,6 +10,7 @@ import zoneinfo
 import os
 from functools import cache
 from urllib.parse import urlparse, urljoin
+import recurring_ical_events
 
 import caldav.lib.error
 import lxml.etree
@@ -566,45 +567,55 @@ class CalDavConnector(BaseConnector):
 
         events = []
         calendar = self.client.calendar(url=self.url)
+        search_start = datetime.strptime(start, DATEFMT)
+        search_end = datetime.strptime(end, DATEFMT)
+
         result = calendar.search(
-            start=datetime.strptime(start, DATEFMT),
-            end=datetime.strptime(end, DATEFMT),
+            start=search_start,
+            end=search_end,
             event=True,
-            expand=True,
+            expand=False,
         )
-        for e in result:
-            transparency = e.icalendar_component['transp'].lower() if 'transp' in e.icalendar_component else 'opaque'
-            status = e.icalendar_component['status'].lower() if 'status' in e.icalendar_component else ''
+
+        all_instances = []
+
+        # First run to manually expand recurring events
+        for record in result:
+            component = record.icalendar_component
+
+            # Ignore events missing dtstart, or missing both dtend and duration:
+            # recurring_ical_events requires dtstart, and would otherwise synthesize
+            # a zero-duration dtend for events that don't have an end at all.
+            if 'DTSTART' not in component:
+                continue
+            if 'DTEND' not in component and 'DURATION' not in component:
+                continue
+
+            query = recurring_ical_events.of(component)
+            instances = query.between(search_start, search_end)
+            all_instances.extend(instances)
+
+        # Now that we have all event instances, do the actual vevent processing
+        # At this point it's guaranteed by recurring_ical_events that instances
+        # have both DTSTART and a synthesized DTEND.
+        for vevent in all_instances:
+            transparency = vevent['TRANSP'].lower() if 'TRANSP' in vevent else 'opaque'
+            status = vevent['STATUS'].lower() if 'STATUS' in vevent else ''
 
             # Ignore cancelled events
             if status == EventStatus.CANCELLED or transparency == 'transparent':
                 continue
 
-            vevent = e.vobject_instance.vevent
-            if not vevent:
-                continue
-
-            # Ignore events with missing dtstart
-            if not hasattr(vevent, 'dtstart') or not vevent.dtstart:
-                continue
-
-            # Check for either dtend or duration (need at least one to determine event end)
-            has_dtend = hasattr(vevent, 'dtend') and vevent.dtend
-            has_duration = hasattr(vevent, 'duration') and vevent.duration
-
-            if not has_dtend and not has_duration:
-                continue
-
             # Check for event summary or use default title
-            has_summary = hasattr(vevent, 'summary') and vevent.summary
-            title = vevent.summary.value if has_summary else l10n('event-summary-default')
+            has_summary = 'SUMMARY' in vevent and vevent['SUMMARY']
+            title = vevent['SUMMARY'] if has_summary else l10n('event-summary-default')
 
             # Mark tentative events
             tentative = status == EventStatus.TENTATIVE
 
-            start = vevent.dtstart.value
+            start = vevent['DTSTART'].dt
             # get_duration grabs either end or duration into a timedelta
-            end = start + e.get_duration()
+            end = (start + vevent['DURATION'].dt if 'DURATION' in vevent else vevent['DTEND'].dt)
             # if start doesn't hold time information (no datetime), it's a whole day
             all_day = not isinstance(start, datetime)
 
@@ -618,8 +629,8 @@ class CalDavConnector(BaseConnector):
                 """For a given vevent object, check if it is an event spanning from midnight
                    to midnight for exactly 24h.
                 """
-                dtstart = vevent.dtstart.value
-                dtend = vevent.dtend.value if hasattr(vevent, 'dtend') else None
+                dtstart = vevent['DTSTART'].dt
+                dtend = vevent['DTEND'].dt if 'DTEND' in vevent else None
 
                 # Must both be actual datetimes (not plain dates) and end must exist
                 if not dtend or not isinstance(dtstart, datetime) or not isinstance(dtend, datetime):
@@ -663,7 +674,7 @@ class CalDavConnector(BaseConnector):
                     end=end,
                     all_day=all_day,
                     tentative=tentative,
-                    description=e.icalendar_component['description'] if 'description' in e.icalendar_component else '',
+                    description=vevent['DESCRIPTION'] if 'DESCRIPTION' in vevent else '',
                 )
             )
 
