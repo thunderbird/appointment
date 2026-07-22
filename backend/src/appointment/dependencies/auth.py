@@ -213,8 +213,11 @@ def get_admin_subscriber(
     if not admin_emails or not user:
         raise InvalidPermissionLevelException()
 
-    admin_emails = admin_emails.split(',')
-    if not any([user.email.endswith(allowed_email) for allowed_email in admin_emails]):
+    allowed_emails = {email.strip().lower() for email in admin_emails.split(',') if email.strip()}
+
+    email = user.email.lower()
+    domain = email.rpartition('@')[2]
+    if email not in allowed_emails and f'@{domain}' not in allowed_emails:
         raise InvalidPermissionLevelException()
 
     return user

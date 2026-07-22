@@ -244,6 +244,28 @@ class TestAuthDependency:
             with pytest.raises(InvalidPermissionLevelException):
                 get_admin_subscriber(get_subscriber(request, access_token, db))
 
+    def test_get_admin_subscriber_rejects_domain_suffix_spoofing(self, with_db, with_l10n, make_pro_subscriber):
+        subscriber = make_pro_subscriber(email='attacker@evilexample.org')
+        access_token = create_access_token(data={'sub': f'uid-{subscriber.id}'})
+        request = mock.MagicMock()
+
+        os.environ['APP_ADMIN_ALLOW_LIST'] = 'example.org'
+
+        with with_db() as db:
+            with pytest.raises(InvalidPermissionLevelException):
+                get_admin_subscriber(get_subscriber(request, access_token, db))
+
+    def test_get_admin_subscriber_rejects_local_part_prefix_spoofing(self, with_db, with_l10n, make_pro_subscriber):
+        subscriber = make_pro_subscriber(email='evilceo@thundermail.com')
+        access_token = create_access_token(data={'sub': f'uid-{subscriber.id}'})
+        request = mock.MagicMock()
+
+        os.environ['APP_ADMIN_ALLOW_LIST'] = 'ceo@thundermail.com'
+
+        with with_db() as db:
+            with pytest.raises(InvalidPermissionLevelException):
+                get_admin_subscriber(get_subscriber(request, access_token, db))
+
     def test_get_subscriber_from_schedule_or_signed_url_with_signed_url(self, with_db, with_l10n, make_pro_subscriber):
         subscriber = make_pro_subscriber()
 
