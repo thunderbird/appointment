@@ -2,6 +2,8 @@ import json
 import os
 from unittest.mock import patch, MagicMock
 
+import pytest
+
 from appointment.controller.calendar import CalDavConnector, Tools
 from appointment.database import models
 from appointment.exceptions.calendar import TestConnectionFailed
@@ -13,6 +15,16 @@ from defines import auth_headers, TEST_USER_ID
 
 class TestOidcAutodiscoverAuth:
     """Tests for POST /caldav/oidc/auth"""
+
+    @pytest.fixture(autouse=True)
+    def mock_oidc_introspection(self, monkeypatch):
+        """The route introspects the token to recover the OIDC login (`preferred_username`) used
+        for CalDAV Basic Auth, since it can differ from subscriber.email. Default the mock to the
+        test subscriber's email so unrelated tests don't have to care about the distinction."""
+        monkeypatch.setattr(
+            'appointment.routes.caldav.OIDCClient.introspect_token',
+            lambda self, token: {'preferred_username': os.getenv('TEST_USER_EMAIL')},
+        )
 
     def _mock_tb_accounts_success(self, app_password='test-app-password'):
         mock_response = MagicMock()
@@ -300,6 +312,54 @@ class TestOidcAutodiscoverAuth:
         assert call_args[0][0] == 'https://accounts.test.example/appointment/caldav/setup/'
         assert call_args[1]['json']['appointment-secret'] == 'my-secret'
         assert call_args[1]['json']['oidc-access-token'] == 'testtokenplsignore'
+
+    def test_oidc_auth_uses_preferred_username_for_caldav_login(self, with_client, monkeypatch):
+        """CalDAV Basic Auth must use the OIDC login (`preferred_username`), not subscriber.email:
+        the CalDAV server may only recognize the login identity, treating the standard OIDC
+        `email` claim as a non-authenticating alias."""
+        monkeypatch.setenv('TB_ACCOUNTS_HOST', 'https://accounts.test.example')
+        monkeypatch.setenv('APPOINTMENT_CALDAV_SECRET', 'test-secret')
+        monkeypatch.setenv('TB_ACCOUNTS_CALDAV_URL', 'https://caldav.test.example')
+
+        monkeypatch.setattr(Tools, 'dns_caldav_lookup', lambda *a, **kw: (None, None))
+        monkeypatch.setattr(Tools, 'well_known_caldav_lookup', lambda *a, **kw: None)
+
+        login_username = 'login-handle@example.org'
+        assert login_username != os.getenv('TEST_USER_EMAIL')
+        monkeypatch.setattr(
+            'appointment.routes.caldav.OIDCClient.introspect_token',
+            lambda self, token: {'preferred_username': login_username},
+        )
+
+        captured_users = []
+
+        def capturing_init(self, db, redis_instance, url, user, password, subscriber_id, calendar_id):
+            captured_users.append(user)
+
+        monkeypatch.setattr(CalDavConnector, '__init__', capturing_init)
+        monkeypatch.setattr(CalDavConnector, 'test_connection', lambda self: True)
+        monkeypatch.setattr(CalDavConnector, 'sync_calendars', lambda self, **kw: None)
+
+        with patch('appointment.routes.caldav.requests.post', return_value=self._mock_tb_accounts_success()):
+            response = with_client.post('/caldav/oidc/auth', headers=auth_headers)
+
+        assert response.status_code == 200, response.text
+        assert captured_users == [login_username]
+
+    def test_oidc_auth_introspection_failure(self, with_client, monkeypatch):
+        """Should raise RemoteCalendarConnectionError when the token can't be introspected."""
+        monkeypatch.setenv('TB_ACCOUNTS_HOST', 'https://accounts.test.example')
+        monkeypatch.setenv('APPOINTMENT_CALDAV_SECRET', 'test-secret')
+        monkeypatch.setenv('TB_ACCOUNTS_CALDAV_URL', 'https://caldav.test.example')
+
+        monkeypatch.setattr('appointment.routes.caldav.OIDCClient.introspect_token', lambda self, token: None)
+
+        with patch('appointment.routes.caldav.requests.post') as mock_post:
+            response = with_client.post('/caldav/oidc/auth', headers=auth_headers)
+            mock_post.assert_not_called()
+
+        assert response.status_code == 400, response.text
+        assert response.json()['detail']['id'] == 'REMOTE_CALENDAR_CONNECTION_ERROR'
 
     def test_oidc_auth_requires_authentication(self, with_client, monkeypatch):
         """Request without auth headers should be rejected."""
