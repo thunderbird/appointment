@@ -1,7 +1,8 @@
+import icalendar
 import pytest
 import dateutil.parser
 from unittest.mock import patch, MagicMock
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from defines import DAY1, DAY3, auth_headers, TEST_USER_ID
 from appointment.database.repo import appointment as appointment_repo
@@ -59,35 +60,27 @@ class TestAppointment:
         from appointment.controller.calendar import CalDavConnector
 
         # Create mock events with various missing properties
-        class MockVEvent:
-            def __init__(self, has_summary=True, has_dtend=True, has_duration=False):
-                self.dtstart = MagicMock()
-                self.dtstart.value = datetime(2023, 12, 1, 10, 0, 0)
+        class MockEvent:
+            """A fake caldav event, as returned by calendar.search(), whose icalendar_component
+               is a real icalendar.Event so it can go through recurring_ical_events expansion.
+            """
+
+            def __init__(self, has_dtstart=True, has_summary=True, has_dtend=True, has_duration=False):
+                vevent = icalendar.Event()
+                vevent.add('status', 'confirmed')
+
+                if has_dtstart:
+                    vevent.add('dtstart', datetime(2023, 12, 1, 10, 0, 0))
 
                 if has_summary:
-                    self.summary = MagicMock()
-                    self.summary.value = 'Test Event'
+                    vevent.add('summary', 'Test Event')
 
                 if has_dtend:
-                    self.dtend = MagicMock()
-                    self.dtend.value = datetime(2023, 12, 1, 11, 0, 0)
+                    vevent.add('dtend', datetime(2023, 12, 1, 11, 0, 0))
                 elif has_duration:
-                    self.duration = MagicMock()
-                    self.duration.value = 'PT1H'  # 1 hour
+                    vevent.add('duration', timedelta(hours=1))
 
-        class MockVObjectInstance:
-            def __init__(self, has_summary=True, has_dtend=True, has_duration=False):
-                self.vevent = MockVEvent(has_summary, has_dtend, has_duration)
-
-        class MockEvent:
-            def __init__(self, has_summary=True, has_dtend=True, has_duration=False):
-                self.icalendar_component = {'status': 'confirmed'}
-                self.vobject_instance = MockVObjectInstance(has_summary, has_dtend, has_duration)
-
-            def get_duration(self):
-                from datetime import timedelta
-
-                return timedelta(hours=1)
+                self.icalendar_component = vevent
 
         # Create various test events
         mock_events = [
@@ -98,37 +91,10 @@ class TestAppointment:
         ]
 
         # Add events that should be filtered out by our guards
-        class MockBadVEvent:
-            """VEvent with missing critical properties"""
-
-            def __init__(self, missing_dtstart=False, missing_both_end_props=False):
-                if not missing_dtstart:
-                    self.dtstart = MagicMock()
-                    self.dtstart.value = datetime(2023, 12, 1, 10, 0, 0)
-
-                if not missing_both_end_props:
-                    self.dtend = MagicMock()
-                    self.dtend.value = datetime(2023, 12, 1, 11, 0, 0)
-
-        class MockBadVObjectInstance:
-            def __init__(self, missing_dtstart=False, missing_both_end_props=False):
-                self.vevent = MockBadVEvent(missing_dtstart, missing_both_end_props)
-
-        class MockBadEvent:
-            def __init__(self, missing_dtstart=False, missing_both_end_props=False):
-                self.icalendar_component = {'status': 'confirmed'}
-                self.vobject_instance = MockBadVObjectInstance(missing_dtstart, missing_both_end_props)
-
-            def get_duration(self):
-                from datetime import timedelta
-
-                return timedelta(hours=1)
-
-        # Add events that should be filtered out
         mock_events.extend(
             [
-                MockBadEvent(missing_dtstart=True),  # Missing dtstart - should be filtered
-                MockBadEvent(missing_both_end_props=True),  # Missing both dtend and duration - should be filtered
+                MockEvent(has_dtstart=False),  # Missing dtstart - should be filtered
+                MockEvent(has_dtend=False, has_duration=False),  # Missing both dtend and duration - should be filtered
             ]
         )
 

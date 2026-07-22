@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta
 from unittest.mock import MagicMock
 from zoneinfo import ZoneInfo
 
+import icalendar
 import pytest
 
 from appointment.database.models import CalendarProvider
@@ -516,49 +517,37 @@ class TestCaldav:
             assert 'Test Calendar 2' in calendar_titles
 
 
-class MockVEvent:
-    """A fake vobject vevent exposing only the attributes list_events() reads.
-    Attributes are only set if a value is passed in, so tests can exercise the
-    hasattr()-guarded "missing property" branches in list_events()."""
+def MockVEvent(dtstart=None, dtend=None, duration=None, summary=None):
+    """Build a fake VEVENT component exposing only the properties list_events() reads.
+    Properties are only set if a value is passed in, so tests can exercise the
+    "missing property" branches in list_events()."""
+    vevent = icalendar.Event()
+    if dtstart is not None:
+        vevent.add('dtstart', dtstart)
 
-    def __init__(self, dtstart=None, dtend=None, duration=None, summary=None):
-        if dtstart is not None:
-            self.dtstart = MagicMock()
-            self.dtstart.value = dtstart
+    if dtend is not None:
+        vevent.add('dtend', dtend)
 
-        if dtend is not None:
-            self.dtend = MagicMock()
-            self.dtend.value = dtend
+    if duration is not None:
+        vevent.add('duration', duration)
 
-        if duration is not None:
-            self.duration = MagicMock()
-            self.duration.value = duration
+    if summary is not None:
+        vevent.add('summary', summary)
 
-        if summary is not None:
-            self.summary = MagicMock()
-            self.summary.value = summary
-
-
-class MockVObjectInstance:
-    def __init__(self, vevent):
-        self.vevent = vevent
+    return vevent
 
 
 class MockCaldavEvent:
     """A fake caldav event, as returned by calendar.search()."""
 
-    def __init__(self, vevent, status='confirmed', transp=None, description=None, duration=timedelta(hours=1)):
-        self.icalendar_component = {'status': status}
+    def __init__(self, vevent, status='confirmed', transp=None, description=None):
+        vevent.add('status', status)
         if transp is not None:
-            self.icalendar_component['transp'] = transp
+            vevent.add('transp', transp)
         if description is not None:
-            self.icalendar_component['description'] = description
+            vevent.add('description', description)
 
-        self.vobject_instance = MockVObjectInstance(vevent)
-        self._duration = duration
-
-    def get_duration(self):
-        return self._duration
+        self.icalendar_component = vevent
 
 
 def make_caldav_connector(events, url='https://test.com/caldav'):
@@ -597,7 +586,7 @@ class TestCaldavListEvents:
         vevent = MockVEvent(
             dtstart=datetime(2024, 1, 1, 9, 0, 0), dtend=datetime(2024, 1, 1, 10, 0, 0), summary='Standup'
         )
-        event = MockCaldavEvent(vevent, description='Daily standup', duration=timedelta(hours=1))
+        event = MockCaldavEvent(vevent, description='Daily standup')
         connector = make_caldav_connector([event])
 
         events = connector.list_events('2024-01-01', '2024-01-02')
@@ -647,7 +636,7 @@ class TestCaldavListEvents:
         """A properly formed whole-day event uses date (not datetime) dtstart/dtend values
         and should be marked all_day on its own, without the thundermail workaround below."""
         vevent = MockVEvent(dtstart=date(2024, 1, 1), dtend=date(2024, 1, 2))
-        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        event = MockCaldavEvent(vevent)
         connector = make_caldav_connector([event])
 
         events = connector.list_events('2024-01-01', '2024-01-02')
@@ -672,7 +661,7 @@ class TestCaldavListEventsMidnightSpanWorkaround:
 
     def test_midnight_span_event_on_thundermail_is_treated_as_all_day(self):
         vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 0, 0, 0), dtend=datetime(2024, 1, 2, 0, 0, 0))
-        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        event = MockCaldavEvent(vevent)
         connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
 
         events = connector.list_events('2024-01-01', '2024-01-02')
@@ -683,7 +672,7 @@ class TestCaldavListEventsMidnightSpanWorkaround:
     def test_midnight_span_event_on_thundermail_subdomain_is_treated_as_all_day(self):
         """has_domain() matches subdomains of thundermail.com too."""
         vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 0, 0, 0), dtend=datetime(2024, 1, 2, 0, 0, 0))
-        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        event = MockCaldavEvent(vevent)
         connector = make_caldav_connector([event], url='https://eu.thundermail.com/dav/john/')
 
         events = connector.list_events('2024-01-01', '2024-01-02')
@@ -695,7 +684,7 @@ class TestCaldavListEventsMidnightSpanWorkaround:
         """has_domain() must match against every entry of the whitelist, not just the first."""
         for url in ('https://caldav.thundermail.com/dav/john/', 'https://caldav.stage-thundermail.com/dav/john/'):
             vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 0, 0, 0), dtend=datetime(2024, 1, 2, 0, 0, 0))
-            event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+            event = MockCaldavEvent(vevent)
             connector = make_caldav_connector([event], url=url)
 
             events = connector.list_events('2024-01-01', '2024-01-02')
@@ -707,7 +696,7 @@ class TestCaldavListEventsMidnightSpanWorkaround:
         """The workaround is scoped to thundermail.com; other CalDAV servers keep the
         (technically correct, per RFC) datetime-based event untouched."""
         vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 0, 0, 0), dtend=datetime(2024, 1, 2, 0, 0, 0))
-        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        event = MockCaldavEvent(vevent)
         connector = make_caldav_connector([event], url='https://caldav.example.com/dav/john/')
 
         events = connector.list_events('2024-01-01', '2024-01-02')
@@ -718,7 +707,7 @@ class TestCaldavListEventsMidnightSpanWorkaround:
     def test_non_midnight_event_on_thundermail_is_not_treated_as_all_day(self):
         """Only events that start and end exactly at midnight are affected."""
         vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 9, 0, 0), dtend=datetime(2024, 1, 1, 17, 0, 0))
-        event = MockCaldavEvent(vevent, duration=timedelta(hours=8))
+        event = MockCaldavEvent(vevent)
         connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
 
         events = connector.list_events('2024-01-01', '2024-01-02')
@@ -730,7 +719,7 @@ class TestCaldavListEventsMidnightSpanWorkaround:
         """The workaround only applies to an exact one-day span; a DST-safe guard against
         misclassifying genuinely multi-day timed events."""
         vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 0, 0, 0), dtend=datetime(2024, 1, 3, 0, 0, 0))
-        event = MockCaldavEvent(vevent, duration=timedelta(days=2))
+        event = MockCaldavEvent(vevent)
         connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
 
         events = connector.list_events('2024-01-01', '2024-01-03')
@@ -746,7 +735,7 @@ class TestCaldavListEventsMidnightSpanWorkaround:
         vevent = MockVEvent(
             dtstart=datetime(2024, 6, 1, 0, 0, 0, tzinfo=tz), dtend=datetime(2024, 6, 2, 0, 0, 0, tzinfo=tz)
         )
-        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        event = MockCaldavEvent(vevent)
         connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
 
         events = connector.list_events('2024-06-01', '2024-06-02')
@@ -766,7 +755,7 @@ class TestCaldavListEventsMidnightSpanWorkaround:
         vevent = MockVEvent(
             dtstart=datetime(2024, 6, 1, 0, 0, 0, tzinfo=tz), dtend=datetime(2024, 6, 2, 0, 0, 0, tzinfo=tz)
         )
-        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        event = MockCaldavEvent(vevent)
         connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
 
         events = connector.list_events('2024-06-01', '2024-06-02')
@@ -780,7 +769,7 @@ class TestCaldavListEventsMidnightSpanWorkaround:
         dtstart = datetime(2024, 6, 1, 9, 0, 0, tzinfo=tz)
         dtend = datetime(2024, 6, 1, 17, 0, 0, tzinfo=tz)
         vevent = MockVEvent(dtstart=dtstart, dtend=dtend)
-        event = MockCaldavEvent(vevent, duration=timedelta(hours=8))
+        event = MockCaldavEvent(vevent)
         connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
 
         events = connector.list_events('2024-06-01', '2024-06-02')
@@ -792,16 +781,18 @@ class TestCaldavListEventsMidnightSpanWorkaround:
         assert events[0].start.tzinfo is not None
 
     def test_midnight_span_check_handles_event_without_dtend(self):
-        """Events that only expose a duration (no dtend attribute at all) must not crash
-        is_midnight_one_day_span() - it should treat them as not matching the workaround."""
-        vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 0, 0, 0), duration='P1D')
-        event = MockCaldavEvent(vevent, duration=timedelta(days=1))
+        """Events that only expose a duration (no dtend property at all) must not crash
+        is_midnight_one_day_span(). The recurring_ical_events expansion always resolves
+        duration into a concrete dtend, so a midnight-to-midnight duration-only event is
+        still picked up by the workaround, same as if dtend had been given explicitly."""
+        vevent = MockVEvent(dtstart=datetime(2024, 1, 1, 0, 0, 0), duration=timedelta(days=1))
+        event = MockCaldavEvent(vevent)
         connector = make_caldav_connector([event], url='https://caldav.thundermail.com/dav/john/')
 
         events = connector.list_events('2024-01-01', '2024-01-02')
 
         assert len(events) == 1
-        assert not events[0].all_day
+        assert events[0].all_day
 
 
 class TestCalendarUpdateOrCreate:
