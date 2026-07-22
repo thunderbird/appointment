@@ -614,8 +614,7 @@ class CalDavConnector(BaseConnector):
             tentative = status == EventStatus.TENTATIVE
 
             start = vevent['DTSTART'].dt
-            # get_duration grabs either end or duration into a timedelta
-            end = (start + vevent['DURATION'].dt if 'DURATION' in vevent else vevent['DTEND'].dt)
+            end = vevent['DTEND'].dt
             # if start doesn't hold time information (no datetime), it's a whole day
             all_day = not isinstance(start, datetime)
 
@@ -630,10 +629,10 @@ class CalDavConnector(BaseConnector):
                    to midnight for exactly 24h.
                 """
                 dtstart = vevent['DTSTART'].dt
-                dtend = vevent['DTEND'].dt if 'DTEND' in vevent else None
+                dtend = vevent['DTEND'].dt
 
-                # Must both be actual datetimes (not plain dates) and end must exist
-                if not dtend or not isinstance(dtstart, datetime) or not isinstance(dtend, datetime):
+                # Must both be actual datetimes, not plain dates
+                if not isinstance(dtstart, datetime) or not isinstance(dtend, datetime):
                     return False
 
                 starts_at_midnight = (
