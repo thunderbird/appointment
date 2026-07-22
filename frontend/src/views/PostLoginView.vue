@@ -55,11 +55,14 @@ onMounted(async () => {
   // Run health checks on external connections in the background
   externalConnectionsStore.checkStatus();
 
+  // TODO: Commenting this out for now as there are some intermittent issues in Sentry
+  // https://thunderbird.sentry.io/issues/7463150573/events/27fa49bce44244efb470683d241a35df/?project=4508965616680960&referrer=event-or-group-header
+
   // Fetch waffle feature flags and store them on the user
-  const { error: featureFlagsError } = await user.updateFeatureFlags();
-  if (featureFlagsError) {
-    console.error('Could not retrieve waffle flags', featureFlagsError);
-  }
+  // const { error: featureFlagsError } = await user.updateFeatureFlags();
+  // if (featureFlagsError) {
+  //   console.error('Could not retrieve waffle flags', featureFlagsError);
+  // }
 
   // If we don't have a redirectTo or it's to logout then push to dashboard!
   if (!redirectTo || redirectTo === '/logout') {
