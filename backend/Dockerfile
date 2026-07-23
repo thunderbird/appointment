@@ -14,6 +14,7 @@ COPY requirements.txt .
 COPY pyproject.toml .
 COPY alembic.ini.example alembic.ini
 COPY scripts/entry.sh scripts/entry.sh
+COPY scripts/uvicorn_log_config.json scripts/uvicorn_log_config.json
 COPY scripts/cron /etc/cron.d/appointment-cron
 
 # Setup cron permissions

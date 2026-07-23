@@ -26,10 +26,10 @@ elif [[ "$CONTAINER_ROLE" == "api" ]]; then
         service cron start
     fi
 
-    ARGS="--factory appointment.main:server --host 0.0.0.0 --port 5000"
+    ARGS="--factory appointment.main:server --host 0.0.0.0 --port 5000 --log-config scripts/uvicorn_log_config.json"
 
     if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
-        ARGS="$ARGS --reload --log-level trace"
+        ARGS="$ARGS --reload --log-level info"
     fi
 
     echo "Running uvicorn with these arguments: '$ARGS'"
