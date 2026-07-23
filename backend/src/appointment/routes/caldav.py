@@ -11,6 +11,7 @@ from redis import Redis
 from sqlalchemy.orm import Session
 
 from appointment import utils
+from appointment.controller.apis.oidc_client import OIDCClient
 from appointment.controller.calendar import CalDavConnector, Tools
 from appointment.database import models, schemas, repo
 from appointment.dependencies.auth import get_subscriber, get_bearer_token
@@ -169,6 +170,14 @@ def oidc_autodiscover_auth(
     if not tb_accounts_host or not appointment_caldav_secret:
         raise RemoteCalendarConnectionError()
 
+    # The CalDAV server authenticates against the account's OIDC login (`preferred_username`),
+    # which can differ from `subscriber.email` (the standard OIDC `email` claim, used for
+    # notifications). Introspect the token to recover the login identity for CalDAV auth.
+    token_data = OIDCClient().introspect_token(token)
+    if not token_data:
+        raise RemoteCalendarConnectionError()
+    caldav_user = token_data.get('preferred_username') or token_data.get('username') or subscriber.email
+
     try:
         response = requests.post(
             f'{tb_accounts_host}/appointment/caldav/setup/',
@@ -199,7 +208,7 @@ def oidc_autodiscover_auth(
         url=connection_url,
         subscriber_id=subscriber.id,
         calendar_id=None,
-        user=subscriber.email,
+        user=caldav_user,
         password=app_password,
     )
 
