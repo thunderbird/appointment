@@ -9,19 +9,20 @@ Copy the [.env.example](.env.example) as `.env`.
 Then simply run:
 
 ```bash
-npm install
+corepack enable
+pnpm install
 ```
 
 ### Compiles and hot-reloads for development
 
 ```bash
-npm run serve
+pnpm run serve
 ```
 
 ### Compiles and minifies for production
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 ### Post-CSS
@@ -47,14 +48,14 @@ We use slowapi for rate limiting. In order for rate limiting to function an api 
 Frontend is formatted using ESlint with airbnb rules.
 
 ```bash
-npm run lint
-npm run lint -- --fix
+pnpm run lint
+pnpm run lint -- --fix
 ```
 
 ### Run tests
 
 ```bash
-npm run test
+pnpm run test
 ```
 
 Note: Tests are setup to run in America/Vancouver timezone.
