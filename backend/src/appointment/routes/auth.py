@@ -1,7 +1,6 @@
 import base64
 import json
 import os
-import secrets
 from datetime import timedelta, datetime, UTC
 from secrets import token_urlsafe
 from typing import Annotated
@@ -30,7 +29,6 @@ from ..dependencies.database import get_db, get_shared_redis
 from ..dependencies.auth import (
     get_subscriber,
     get_admin_subscriber,
-    get_subscriber_from_onetime_token,
     get_accounts_client,
     get_bearer_token,
 )

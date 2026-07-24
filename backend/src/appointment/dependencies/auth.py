@@ -170,16 +170,6 @@ def get_subscriber(
     return user
 
 
-async def get_subscriber_from_onetime_token(
-    request: Request,
-    db: Session = Depends(get_db),
-    redis_instance=Depends(get_redis),
-):
-    """Retrieve the subscriber via a one-time token only!"""
-    token: str = await get_bearer_token(request)
-    return get_subscriber(request, token, db, redis_instance, require_jti=True)
-
-
 async def get_subscriber_or_none(
     request: Request,
     db: Session = Depends(get_db),
