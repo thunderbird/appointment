@@ -8,6 +8,6 @@ ENV PATH="/app/node_modules/.bin:${PATH}"
 RUN apk add --no-cache git
 
 COPY . .
-RUN npm install
+RUN corepack enable && pnpm install --frozen-lockfile
 
 CMD ["vite", "dev", "--port", "8080"]
