@@ -38,8 +38,6 @@
     "@babel/eslint-parser": "7.12.16",
     "@eslint/js": "9.39.5",
     "@pinia/testing": "1.0.2",
-    "@typescript-eslint/eslint-plugin": "8.65.0",
-    "@typescript-eslint/parser": "8.65.0",
     "@vue/eslint-config-typescript": "14.9.0",
     "@vue/test-utils": "2.4.11",
     "autoprefixer": "10.4.12",
@@ -71,7 +69,7 @@
     }
   },
   "engines": {
-    "node": ">=20.15.0"
+    "node": ">=22.13.0"
   },
   "type": "module",
   "packageManager": "pnpm@11.15.1"
