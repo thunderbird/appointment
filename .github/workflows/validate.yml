@@ -97,28 +97,32 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.15.1
+
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-          cache: 'npm'
-          cache-dependency-path: 'frontend/package-lock.json'
+          cache: 'pnpm'
+          cache-dependency-path: 'frontend/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: |
           cd ./frontend
-          npm ci
+          pnpm install --frozen-lockfile
 
       - name: Frontend lint check
         run: |
-          cd ./frontend && npm run lint
+          cd ./frontend && pnpm run lint
 
       - name: Build frontend
         run: |
-          cd ./frontend && npm run build
+          cd ./frontend && pnpm run build
 
       - name: Test with vitest
         run: |
-          cd ./frontend && npm run test -- --run
+          cd ./frontend && pnpm run test -- --run
 
   validate-pulumi:
     needs: detect-changes
