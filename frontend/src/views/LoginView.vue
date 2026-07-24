@@ -3,8 +3,8 @@ import { inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { createUserStore } from '@/stores/user-store';
-import { dayjsKey, callKey } from '@/keys';
-import { BooleanResponse, AuthUrlResponse, AuthUrl, Error, PydanticException, Alert } from '@/models';
+import { callKey } from '@/keys';
+import { BooleanResponse, Error, PydanticException, Alert } from '@/models';
 import { PrimaryButton, TextInput, NoticeBar, NoticeBarTypes, IconButton } from '@thunderbirdops/services-ui';
 import { handleFormError } from '@/utils';
 import { userManager } from '@/composables/oidcUserManager';
@@ -14,7 +14,6 @@ import { PhX } from '@phosphor-icons/vue';
 // component constants
 const { t } = useI18n();
 const call = inject(callKey);
-const dj = inject(dayjsKey);
 const route = useRoute();
 const router = useRouter();
 const user = createUserStore(call);
