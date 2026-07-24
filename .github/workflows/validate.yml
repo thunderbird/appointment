@@ -28,7 +28,7 @@ jobs:
       validate-frontend: ${{ steps.check.outputs.validate-frontend }}
       validate-pulumi: ${{ steps.check.outputs.validate-pulumi }}
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - uses: dorny/paths-filter@v3
       id: check
@@ -53,7 +53,7 @@ jobs:
     if: needs.detect-changes.outputs.validate-backend == 'true'
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -95,13 +95,13 @@ jobs:
       deployment: false
     if: needs.detect-changes.outputs.validate-frontend == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: pnpm/action-setup@v6
         with:
           version: 11.15.1
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: 'pnpm'
@@ -132,7 +132,7 @@ jobs:
       deployment: false
     if: needs.detect-changes.outputs.validate-pulumi == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Set up Python
         uses: actions/setup-python@v5
