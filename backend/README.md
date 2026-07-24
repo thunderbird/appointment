@@ -36,7 +36,7 @@ ruff check
 
 ### Authentication
 
-This project is deployed with Mozilla Accounts (known as fxa in the code.) Since Mozilla Accounts is for internal use you will need to use password authentication. Note: password authentication does not currently have a registration flow.
+This project uses our own OIDC provider [Thunderbird Accounts](https://github.com/thunderbird/thunderbird-accounts). You can use password authentication for local development and testing. Note: password authentication does not currently have a registration flow. When you access the frontend the first time, you will see a first-time-user login form. Enter the email address you configured in your allow list (see above) and a password. This login will create the first user (also called 'subscriber' in Appointment) granting you access to the application. Any login attempts with other email addresses after that will check against existing credentials.
 
 ### Testing
 
@@ -137,6 +137,6 @@ run-command main --help
 ╰────────────────────────────────────────────────────────────────╯
 ```
 
-* `download-legal` is an internal command to process privacy policy and terms of service files that will be served by the frontend.
-* `update-db` runs on docker container entry, and ensures the latest db migration has run, or if it's a new db then to kickstart that.
-* `setup` a first run setup that fills in some missing environment variables.
+- `download-legal` is an internal command to process privacy policy and terms of service files that will be served by the frontend.
+- `update-db` runs on docker container entry, and ensures the latest db migration has run, or if it's a new db then to kickstart that.
+- `setup` a first run setup that fills in some missing environment variables.

@@ -140,7 +140,6 @@
       "connectedApplications": {
         "accounts": "Mozilla Konten",
         "caldav": "CalDAV Verbindungen",
-        "fxa": "Mozilla Konten",
         "google": "Google Kalender",
         "zoom": "Zoom"
       }
@@ -549,9 +548,6 @@
     "hostHasBeenNotified": "Der Gastgeber wurde benachrichtigt. Thunderbird Appointment wird dir eine E-Mail senden, sobald er antwortet.",
     "invalidOrAlreadyBooked": "Der Buchungsplatz ist möglicherweise nicht mehr verfügbar oder der Link ist defekt.",
     "invitationSentToAddress": "Eine Einladung für dieses Event wurde an {address} geschickt.",
-    "login": {
-      "continueToFxa": "Bitte die E-Mail-Adresse des Mozilla-Kontos eingeben."
-    },
     "ownerNeedsToConfirmBooking": "Wenn diese Option aktiviert ist, müssen Buchungen dieses Zeitplans bestätigt oder ablehnt werden. Wenn diese Option deaktiviert ist, werden alle Zeiten automatisch bestätigt.",
     "preferredEmailHelp": "Die E-Mail-Adresse festlegen, die für ausgehende Kommunikation in Kalenderereignissen verwendet werden soll.",
     "recipientsCanScheduleBetween": "Empfänger können einen Termin zwischen {earliest} und {farthest} ab dem aktuellen Zeitpunkt wählen. ",
@@ -581,7 +577,6 @@
         "connect": {
           "accounts": "Dies ist das Benutzerkonto, das mit dem Login verbunden ist. Wenn das Mozilla-Konto gelöscht wird, werden auch alle Daten bei Thunderbird Appointment entfernt.",
           "caldav": "Eine Verbindung zu einem CalDav-Server herstellen und die zugehörigen Kalender abrufen.",
-          "fxa": "Dies ist das Benutzerkonto, das mit dem Login verbunden ist. Wenn das Mozilla-Konto gelöscht wird, werden auch alle Daten bei Thunderbird Appointment entfernt.",
           "google": "Ein Google-Konto kann verbunden werden, um auf die Kalender zuzugreifen. Wenn die Verbindung zum Google-Konto getrennt wird, werden die entsprechenden Kalender und die damit verbundenen Daten bei Thunderbird Appointment entfernt.",
           "googleLegal": {
             "link": "Google API Services User Data Policy",

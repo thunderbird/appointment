@@ -12,14 +12,6 @@ const API_URL = 'http://localhost';
 const restHandlers = [
   http.get(`${API_URL}/account/external-connections`, async () =>
     HttpResponse.json({
-      fxa: [
-        {
-          owner_id: 1,
-          name: 'MozillaAccount1',
-          type: 'fxa',
-          type_id: 'f',
-        },
-      ],
       google: [
         {
           owner_id: 1,
@@ -87,7 +79,6 @@ describe('External Connections Store', () => {
   test('init', () => {
     const ec = useExternalConnectionsStore();
     expect(ec.isLoaded).toBe(false);
-    expect(ec.connections.fxa.length).toBe(0);
     expect(ec.connections.google.length).toBe(0);
     expect(ec.connections.zoom.length).toBe(0);
     expect(ec.connections.caldav.length).toBe(0);
@@ -97,11 +88,6 @@ describe('External Connections Store', () => {
     const ec = createExternalConnectionsStore(createFetch({ baseUrl: API_URL }));
     await ec.fetch();
     expect(ec.isLoaded).toBe(true);
-    expect(ec.connections.fxa.length).toBe(1);
-    expect(ec.connections.fxa[0].owner_id).toBe(1);
-    expect(ec.connections.fxa[0].name).toBe('MozillaAccount1');
-    expect(ec.connections.fxa[0].type).toBe('fxa');
-    expect(ec.connections.fxa[0].type_id).toBe('f');
     expect(ec.connections.google.length).toBe(1);
     expect(ec.connections.zoom.length).toBe(1);
     expect(ec.connections.caldav.length).toBe(1);
@@ -119,7 +105,6 @@ describe('External Connections Store', () => {
 
     // Check if appointments exist
     expect(ec.isLoaded).toBe(true);
-    expect(ec.connections.fxa.length).toBe(1);
     expect(ec.connections.google.length).toBe(1);
     expect(ec.connections.zoom.length).toBe(1);
     expect(ec.connections.caldav.length).toBe(1);
@@ -129,7 +114,6 @@ describe('External Connections Store', () => {
 
     // Ensure our data is null/don't exist
     expect(ec.isLoaded).toBe(false);
-    expect(ec.connections.fxa.length).toBe(0);
     expect(ec.connections.google.length).toBe(0);
     expect(ec.connections.zoom.length).toBe(0);
     expect(ec.connections.caldav.length).toBe(0);

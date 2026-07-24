@@ -1,15 +1,11 @@
 import os
 import json
-import secrets
 import pytest
-from datetime import timedelta
 from uuid import uuid4
 from unittest.mock import patch
 
-from appointment.dependencies import auth
 from appointment.dependencies.auth import get_accounts_client
-from appointment.routes.auth import create_access_token
-from defines import FXA_CLIENT_PATCH, auth_headers, TEST_USER_ID
+from defines import auth_headers, TEST_USER_ID
 from appointment.database import repo, models
 
 
@@ -155,9 +151,9 @@ class TestPassword:
         assert response.status_code == 403, response.text
 
     def test_token_fails_due_to_invalid_auth_scheme(self, with_db, with_client, make_pro_subscriber):
-        """Test that our username/password authentication fails when auth scheme is fxa"""
+        """Test that our username/password authentication fails when auth scheme is accounts"""
         saved_scheme = os.environ['AUTH_SCHEME']
-        os.environ['AUTH_SCHEME'] = 'fxa'
+        os.environ['AUTH_SCHEME'] = 'accounts'
         password = 'test'
 
         subscriber = make_pro_subscriber(password=password)
@@ -167,236 +163,6 @@ class TestPassword:
             '/token',
             data={'username': subscriber.email, 'password': password},
         )
-        os.environ['AUTH_SCHEME'] = saved_scheme
-        assert response.status_code == 405, response.text
-
-
-class TestFXA:
-    def test_fxa_login(self, with_client):
-        os.environ['AUTH_SCHEME'] = 'fxa'
-        response = with_client.get(
-            '/fxa_login',
-            params={
-                'email': FXA_CLIENT_PATCH.get('subscriber_email'),
-            },
-        )
-        assert response.status_code == 200, response.text
-        data = response.json()
-        assert 'url' in data
-        assert data.get('url') == FXA_CLIENT_PATCH.get('authorization_url')
-
-    def test_fxa_login_with_uppercase_email(self, with_client):
-        os.environ['AUTH_SCHEME'] = 'fxa'
-        response = with_client.get(
-            '/fxa_login',
-            params={
-                'email': FXA_CLIENT_PATCH.get('subscriber_email').upper(),
-            },
-        )
-        assert response.status_code == 200, response.text
-        data = response.json()
-        assert 'url' in data
-        assert data.get('url') == FXA_CLIENT_PATCH.get('authorization_url')
-
-
-    def test_fxa_login_fail_with_invalid_auth_scheme(self, with_client):
-        saved_scheme = os.environ['AUTH_SCHEME']
-        os.environ['AUTH_SCHEME'] = 'NOT-fxa'
-        response = with_client.get(
-            '/fxa_login',
-            params={
-                'email': FXA_CLIENT_PATCH.get('subscriber_email'),
-            },
-        )
-        os.environ['AUTH_SCHEME'] = saved_scheme
-        assert response.status_code == 405, response.text
-
-    def test_fxa_callback_with_allowlist(self, with_db, with_client, monkeypatch):
-        """Test that our callback function correctly handles the session states, and creates a new subscriber"""
-        os.environ['AUTH_SCHEME'] = 'fxa'
-        os.environ['FXA_ALLOW_LIST'] = '@example.org'
-
-        with with_db() as db:
-            assert not repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
-
-        state = 'a1234'
-
-        monkeypatch.setattr(
-            'starlette.requests.HTTPConnection.session',
-            {
-                'fxa_state': state,
-                'fxa_user_email': FXA_CLIENT_PATCH.get('subscriber_email'),
-                'fxa_user_timezone': 'America/Vancouver',
-            },
-        )
-
-        response = with_client.get(
-            '/fxa', params={'code': FXA_CLIENT_PATCH.get('credentials_code'), 'state': state}, follow_redirects=False
-        )
-        # This is a redirect request
-        assert response.status_code == 307, response.text
-
-        with with_db() as db:
-            subscriber = repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
-            assert subscriber
-            assert subscriber.avatar_url == FXA_CLIENT_PATCH.get('subscriber_avatar_url')
-            assert subscriber.name == FXA_CLIENT_PATCH.get('subscriber_display_name')
-            fxa = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
-            assert fxa
-            assert fxa.type_id == FXA_CLIENT_PATCH.get('external_connection_type_id')
-
-    def test_fxa_callback_with_allowlist_again(self, with_db, with_client, monkeypatch):
-        """Test that our callback function correctly handles the session states, and creates a new subscriber"""
-        os.environ['AUTH_SCHEME'] = 'fxa'
-        os.environ['FXA_ALLOW_LIST'] = '@example.org'
-
-        state = 'a1234'
-
-        monkeypatch.setattr(
-            'starlette.requests.HTTPConnection.session',
-            {
-                'fxa_state': state,
-                'fxa_user_email': FXA_CLIENT_PATCH.get('subscriber_email'),
-                'fxa_user_timezone': 'America/Vancouver',
-            },
-        )
-
-        response = with_client.get(
-            '/fxa', params={'code': FXA_CLIENT_PATCH.get('credentials_code'), 'state': state}, follow_redirects=False
-        )
-        # This is a redirect request
-        assert response.status_code == 307, response.text
-
-        with with_db() as db:
-            subscriber = repo.subscriber.get_by_email(db, FXA_CLIENT_PATCH.get('subscriber_email'))
-            assert subscriber
-            assert subscriber.avatar_url == FXA_CLIENT_PATCH.get('subscriber_avatar_url')
-            assert subscriber.name == FXA_CLIENT_PATCH.get('subscriber_display_name')
-            fxa = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
-            assert fxa
-            assert fxa.type_id == FXA_CLIENT_PATCH.get('external_connection_type_id')
-
-    def test_fxa_callback_with_mismatch_uid(
-        self, with_db, with_client, monkeypatch, make_external_connections, make_basic_subscriber, with_l10n
-    ):
-        """Test that our fxa callback will throw an invalid-credentials error
-        if the incoming fxa uid doesn't match any existing ones.
-        """
-        os.environ['AUTH_SCHEME'] = 'fxa'
-
-        state = 'a1234'
-
-        subscriber = make_basic_subscriber(email=FXA_CLIENT_PATCH.get('subscriber_email'))
-
-        mismatch_uid = f'{FXA_CLIENT_PATCH.get("external_connection_type_id")}-not-actually'
-        make_external_connections(subscriber.id, type=models.ExternalConnectionType.fxa, type_id=mismatch_uid)
-
-        monkeypatch.setattr(
-            'starlette.requests.HTTPConnection.session',
-            {
-                'fxa_state': state,
-                'fxa_user_email': FXA_CLIENT_PATCH.get('subscriber_email'),
-                'fxa_user_timezone': 'America/Vancouver',
-            },
-        )
-
-        response = with_client.get(
-            '/fxa', params={'code': FXA_CLIENT_PATCH.get('credentials_code'), 'state': state}, follow_redirects=False
-        )
-
-        # This should contain the invalid-credentials error
-        assert response.status_code == 307, response.text
-        assert '?error=invalid-credentials' in response.headers.get('location')
-
-    def test_fxa_token_success(self, make_basic_subscriber, with_client):
-        os.environ['AUTH_SCHEME'] = 'fxa'
-
-        # Clear get_subscriber dep, so we can retrieve the real subscriber info later
-        del with_client.app.dependency_overrides[auth.get_subscriber]
-
-        subscriber = make_basic_subscriber(email='apple@example.org')
-        access_token_expires = timedelta(minutes=float(10))
-        one_time_access_token = create_access_token(
-            data={'sub': f'uid-{subscriber.id}', 'jti': secrets.token_urlsafe(16)}, expires_delta=access_token_expires
-        )
-
-        # Exchange the one-time token with a long-living token
-        response = with_client.post('/fxa-token', headers={'Authorization': f'Bearer {one_time_access_token}'})
-
-        assert response.status_code == 200, response.text
-
-        data = response.json()
-        access_token = data.get('access_token')
-
-        assert access_token
-        assert data.get('token_type') == 'bearer'
-
-        # Test it out!
-        response = with_client.get('/me', headers={'Authorization': f'Bearer {access_token}'})
-
-        assert response.status_code == 200, response.text
-        assert response.json().get('email') == subscriber.email
-
-    def test_fxa_token_failed_due_to_non_one_time_token(self, make_basic_subscriber, with_client):
-        """Ensure fxa-token only works with access tokens that have a jti claim"""
-        os.environ['AUTH_SCHEME'] = 'fxa'
-
-        del with_client.app.dependency_overrides[auth.get_subscriber]
-
-        subscriber = make_basic_subscriber(email='apple@example.org')
-        access_token_expires = timedelta(minutes=float(10))
-        regular_access_token = create_access_token(
-            data={
-                'sub': f'uid-{subscriber.id}',
-            },
-            expires_delta=access_token_expires,
-        )
-
-        response = with_client.post('/fxa-token', headers={'Authorization': f'Bearer {regular_access_token}'})
-
-        assert response.status_code == 401, response.text
-
-    def test_non_one_time_token_authed_route_failed_due_to_one_time_token(self, make_basic_subscriber, with_client):
-        """Ensure a one time token (jti claim) does not work on any other route"""
-        os.environ['AUTH_SCHEME'] = 'fxa'
-
-        del with_client.app.dependency_overrides[auth.get_subscriber]
-
-        subscriber = make_basic_subscriber(email='apple@example.org')
-        access_token_expires = timedelta(minutes=float(10))
-        one_time_access_token = create_access_token(
-            data={'sub': f'uid-{subscriber.id}', 'jti': secrets.token_urlsafe(16)}, expires_delta=access_token_expires
-        )
-
-        response = with_client.get('/me', headers={'Authorization': f'Bearer {one_time_access_token}'})
-
-        assert response.status_code == 401, response.text
-
-    def test_fxa_token_failed_due_to_empty_auth(self, make_basic_subscriber, with_client):
-        """Ensure fxa-token only works with access tokens that have a jti claim"""
-        os.environ['AUTH_SCHEME'] = 'fxa'
-
-        del with_client.app.dependency_overrides[auth.get_subscriber]
-
-        response = with_client.post('/fxa-token')
-
-        assert response.status_code == 401, response.text
-
-    def test_fxa_token_failed_due_to_invalid_auth_scheme(self, with_client, make_basic_subscriber):
-        saved_scheme = os.environ['AUTH_SCHEME']
-        os.environ['AUTH_SCHEME'] = 'NOT-fxa'
-
-        # Clear get_subscriber dep, so we can retrieve the real subscriber info later
-        del with_client.app.dependency_overrides[auth.get_subscriber]
-
-        subscriber = make_basic_subscriber(email='apple@example.org')
-        access_token_expires = timedelta(minutes=float(10))
-        one_time_access_token = create_access_token(
-            data={'sub': f'uid-{subscriber.id}', 'jti': secrets.token_urlsafe(16)}, expires_delta=access_token_expires
-        )
-
-        # Exchange the one-time token with a long-living token
-        response = with_client.post('/fxa-token', headers={'Authorization': f'Bearer {one_time_access_token}'})
         os.environ['AUTH_SCHEME'] = saved_scheme
         assert response.status_code == 405, response.text
 

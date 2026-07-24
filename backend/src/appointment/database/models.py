@@ -75,7 +75,6 @@ class CalendarProvider(enum.Enum):
 class ExternalConnectionType(enum.Enum):
     zoom = 1
     google = 2
-    fxa = 3
     caldav = 4
     accounts = 5
     oidc = 6
@@ -213,12 +212,7 @@ class Subscriber(HasSoftDelete, Base):
     @cached_property
     def unique_hash(self):
         """Retrieve the unique hash for the subscriber"""
-        fxa = self.get_external_connection(type=ExternalConnectionType.fxa)
-        # If we somehow don't have a fxa connection, use id.
-        if fxa is None:
-            id = self.id
-        else:
-            id = fxa.type_id
+        id = self.id
         hash_instance = hashlib.sha256()
         hash_instance.update(str(id).encode('utf-8'))
         return hash_instance.hexdigest()

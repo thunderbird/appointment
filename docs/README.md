@@ -4,7 +4,7 @@ This place holds all additional technical documentation for Thunderbird Appointm
 
 ## Documents
 
-* [Updating Legal](./updating-legal.rst)
+- [Updating Legal](./updating-legal.rst)
 
 ## API endpoints
 
@@ -24,12 +24,12 @@ C4Component
   Container(c1, "Frontend", "Vue3", "Provides all Appointment<br>functionality to customers<br>via their web browser")
   Container_Boundary(b1, "Backend") {
     Component(c3, "Subscriber Area", "FastAPI, JWT auth", "Provides functionality related<br>to calendar connections,<br>appointments, general availability")
-    Component(c2, "Auth Controller", "FastAPI", "Redirects to FxA service,<br>authenticates subscriber,<br>gets subscription level")
+    Component(c2, "Auth Controller", "FastAPI", "Handles authentication via OIDC provider")
     Component(c5, "Public Link Area", "FastAPI", "Allows visitors to choose<br>slots in given<br>availability timeline.")
     Boundary(e1, "External Connections") {
       System_Ext(e3, "Google", "Allows to query and write<br>event data into calendars<br>using Google API")
       System_Ext(e2, "CalDAV", "Allows to query and write<br>event data into calendars<br>using CalDAV format")
-      System_Ext(e1, "FxA", "Allows users to register,<br>sign in and subscribe<br>to an Appointment tier")
+      System_Ext(e1, "OIDC", "Allows users to register,<br>sign in and subscribe<br>to an Appointment tier")
       System_Ext(e4, "Zoom", "Allows to create meeting links<br>and attach them to events<br>using Zoom integration")
     }
   }
@@ -69,7 +69,7 @@ erDiagram
   SUBSCRIBERS {
     int id PK "Unique user key"
     string username "URL-friendly username, format is restricted"
-    string email "FxA account email and email used for password auth"
+    string email "OIDC provider account email or email used for password auth"
     string name "Preferred display name"
     enum level "Subscription level [basic, plus, pro, admin]"
     string avatar_url "Public link to an avatar image"
@@ -107,8 +107,8 @@ erDiagram
     int id PK "Unique connection key"
     int owner_id FK "Person who creates and owns this connection"
     string name "Custom connection title"
-    enum type "Connection type [zoom, google, fxa, caldav]"
-    string type_id "Type specific user or unique identifier (e.g. FXA/Zoom/etc. user id)"
+    enum type "Connection type [zoom, google, accounts, caldav]"
+    string type_id "Type specific user or unique identifier (e.g. OIDC/Google/Zoom/etc. user id)"
     string token "Passphrase or passtoken for connecting"
     date time_created "UTC timestamp of connection creation"
     date time_updated "UTC timestamp of last connection modification"

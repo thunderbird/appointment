@@ -65,24 +65,15 @@ class TestSubscriber:
 
             # Create multiple external connections of the same type
             make_external_connections(
-                subscriber_id=subscriber.id, type=models.ExternalConnectionType.fxa, type_id='fxa_id_1'
-            )
-            make_external_connections(
-                subscriber_id=subscriber.id, type=models.ExternalConnectionType.fxa, type_id='fxa_id_2'
-            )
-            make_external_connections(
                 subscriber_id=subscriber.id, type=models.ExternalConnectionType.google, type_id='google_id_1'
+            )
+            make_external_connections(
+                subscriber_id=subscriber.id, type=models.ExternalConnectionType.google, type_id='google_id_2'
             )
 
             db.refresh(subscriber)
 
-            # Should return the first FXA connection found
-            result = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
-            assert result is not None
-            assert result.type == models.ExternalConnectionType.fxa
-            assert result.type_id == 'fxa_id_1'
-
-            # Should return the Google connection
+            # Should return the first Google connection
             result = subscriber.get_external_connection(models.ExternalConnectionType.google)
             assert result is not None
             assert result.type == models.ExternalConnectionType.google
@@ -102,27 +93,27 @@ class TestSubscriber:
 
             # Create multiple external connections of the same type with different type_ids
             make_external_connections(
-                subscriber_id=subscriber.id, type=models.ExternalConnectionType.fxa, type_id='fxa_id_1'
+                subscriber_id=subscriber.id, type=models.ExternalConnectionType.google, type_id='google_id_1'
             )
             make_external_connections(
-                subscriber_id=subscriber.id, type=models.ExternalConnectionType.fxa, type_id='fxa_id_2'
+                subscriber_id=subscriber.id, type=models.ExternalConnectionType.google, type_id='google_id_2'
             )
 
             db.refresh(subscriber)
 
             # Should return the specific connection with matching type_id
-            result = subscriber.get_external_connection(models.ExternalConnectionType.fxa, type_id='fxa_id_1')
+            result = subscriber.get_external_connection(models.ExternalConnectionType.google, type_id='google_id_1')
             assert result is not None
-            assert result.type == models.ExternalConnectionType.fxa
-            assert result.type_id == 'fxa_id_1'
+            assert result.type == models.ExternalConnectionType.google
+            assert result.type_id == 'google_id_1'
 
-            result = subscriber.get_external_connection(models.ExternalConnectionType.fxa, type_id='fxa_id_2')
+            result = subscriber.get_external_connection(models.ExternalConnectionType.google, type_id='google_id_2')
             assert result is not None
-            assert result.type == models.ExternalConnectionType.fxa
-            assert result.type_id == 'fxa_id_2'
+            assert result.type == models.ExternalConnectionType.google
+            assert result.type_id == 'google_id_2'
 
             # Should return None for non-existent type_id
-            result = subscriber.get_external_connection(models.ExternalConnectionType.fxa, type_id='non_existent_id')
+            result = subscriber.get_external_connection(models.ExternalConnectionType.google, type_id='non_existent_id')
             assert result is None
 
     def test_get_external_connection_no_connections(self, with_db, make_basic_subscriber):
@@ -133,10 +124,10 @@ class TestSubscriber:
             db.refresh(subscriber)
 
             # Should return None when no connections exist
-            result = subscriber.get_external_connection(models.ExternalConnectionType.fxa)
+            result = subscriber.get_external_connection(models.ExternalConnectionType.google)
             assert result is None
 
-            result = subscriber.get_external_connection(models.ExternalConnectionType.fxa, type_id='any_id')
+            result = subscriber.get_external_connection(models.ExternalConnectionType.google, type_id='any_id')
             assert result is None
 
 

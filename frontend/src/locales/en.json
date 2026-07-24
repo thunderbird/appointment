@@ -142,7 +142,6 @@
     "settings": {
       "connectedApplications": {
         "caldav": "CalDAV Connection",
-        "fxa": "Mozilla Accounts",
         "google": "Google Calendar",
         "oidc": "Thunderbird Pro",
         "zoom": "Zoom"
@@ -550,9 +549,6 @@
     "hostHasBeenNotified": "Your host has been notified. Thunderbird Appointment will email you once they respond.",
     "invalidOrAlreadyBooked": "The booking slot might not be available anymore or the link is broken.",
     "invitationSentToAddress": "An invitation for this event has been emailed to {address}.",
-    "login": {
-      "continueToFxa": "Enter your email above to continue to Mozilla Accounts"
-    },
     "ownerNeedsToConfirmBooking": "When this option is active, you will be required to confirm or decline times booked on your schedule. When this option is deactivated, all times will automatically be confirmed.",
     "preferredEmailHelp": "Set the email you'll use for out-going communication. This will be used in calendar events and emails.",
     "recipientsCanScheduleBetween": "Recipients can schedule a {duration} appointment between {earliest} and {farthest} ahead of time.",
@@ -581,7 +577,6 @@
       "connectedApplications": {
         "connect": {
           "caldav": "You can connect to a CalDav server and pull its associated calendars.",
-          "fxa": "This is the account associated with your login. If you delete your Mozilla Account your data with Thunderbird Appointment will also be removed.",
           "google": "You can connect your Google account to access your calendars. Disconnecting your account will remove your calendars, and associated data.",
           "googleLegal": {
             "link": "Google API Services User Data Policy",

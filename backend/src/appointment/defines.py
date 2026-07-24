@@ -48,13 +48,8 @@ class AuthScheme(StrEnum):
     """Enum for authentication scheme"""
 
     PASSWORD = 'password'
-    FXA = 'fxa'
     ACCOUNTS = 'accounts'
     OIDC = 'oidc'
-
-    @staticmethod
-    def is_fxa():
-        return os.getenv('AUTH_SCHEME') == AuthScheme.FXA
 
     @staticmethod
     def is_password():
