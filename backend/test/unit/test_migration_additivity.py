@@ -37,6 +37,7 @@ def wrap(upgrade_body: str, downgrade_body: str = 'pass') -> str:
 
 # --- additive: must NOT be flagged -------------------------------------------------
 
+
 def test_add_nullable_column_is_additive():
     assert rules(wrap("op.add_column('t', sa.Column('c', sa.String, nullable=True))")) == []
 
@@ -52,8 +53,7 @@ def test_create_table_with_not_null_columns_is_additive():
 
 
 def test_unique_index_on_a_table_created_here_is_additive():
-    src = wrap("op.create_table('t', sa.Column('c', sa.String))\n    "
-               "op.create_index('i', 't', ['c'], unique=True)")
+    src = wrap("op.create_table('t', sa.Column('c', sa.String))\n    op.create_index('i', 't', ['c'], unique=True)")
     assert rules(src) == []
 
 
@@ -78,9 +78,11 @@ def test_destructive_ddl_in_downgrade_is_ignored():
 
 
 def test_helper_called_only_from_downgrade_is_ignored():
-    src = ('def _cleanup():\n    op.drop_table("t")\n\n\n'
-           'def upgrade():\n    op.add_column("t", sa.Column("c", sa.String))\n\n\n'
-           'def downgrade():\n    _cleanup()\n')
+    src = (
+        'def _cleanup():\n    op.drop_table("t")\n\n\n'
+        'def upgrade():\n    op.add_column("t", sa.Column("c", sa.String))\n\n\n'
+        'def downgrade():\n    _cleanup()\n'
+    )
     assert rules(src) == []
 
 
@@ -91,7 +93,7 @@ def test_index_swap_is_not_flagged():
 
 
 def test_non_destructive_execute_is_additive():
-    assert rules(wrap("op.execute(\"UPDATE t SET c = 'x' WHERE c IS NULL\")")) == []
+    assert rules(wrap('op.execute("UPDATE t SET c = \'x\' WHERE c IS NULL")')) == []
 
 
 def test_add_column_raw_sql_is_additive():
@@ -100,6 +102,7 @@ def test_add_column_raw_sql_is_additive():
 
 
 # --- non-additive: must be flagged -------------------------------------------------
+
 
 @pytest.mark.parametrize(
     'body,expected',
@@ -156,8 +159,7 @@ def test_destructive_batch_alter_is_flagged():
 
 
 def test_additive_batch_alter_is_not_flagged():
-    src = ('def upgrade():\n    with op.batch_alter_table("t") as b:\n'
-           '        b.add_column(sa.Column("c", sa.String))\n')
+    src = 'def upgrade():\n    with op.batch_alter_table("t") as b:\n        b.add_column(sa.Column("c", sa.String))\n'
     assert rules(src) == []
 
 
@@ -190,8 +192,10 @@ def test_raw_sql_on_any_receiver_is_flagged(stmt):
 
 def test_destructive_op_in_a_helper_is_flagged():
     """Factoring a drop into a helper is house style here; it must not hide it."""
-    src = ('def _cleanup(conn):\n    op.drop_index("i", "t")\n\n\n'
-           'def upgrade():\n    _cleanup(op.get_bind())\n\n\ndef downgrade():\n    pass\n')
+    src = (
+        'def _cleanup(conn):\n    op.drop_index("i", "t")\n\n\n'
+        'def upgrade():\n    _cleanup(op.get_bind())\n\n\ndef downgrade():\n    pass\n'
+    )
     assert 'op.drop_index' in rules(src)
 
 
@@ -202,6 +206,7 @@ def test_missing_upgrade_is_flagged_not_ignored():
 
 # --- non-blocking notes ------------------------------------------------------------
 
+
 def test_enum_change_is_a_note_not_a_block():
     """Appending an enum value is additive; removing one is not, and the member
     list is usually interpolated, so it cannot be decided statically."""
@@ -211,11 +216,12 @@ def test_enum_change_is_a_note_not_a_block():
 
 
 def test_dynamic_sql_is_a_note_not_a_block():
-    src = wrap("op.execute(some_statement)")
+    src = wrap('op.execute(some_statement)')
     assert rules(src) == []
 
 
 # --- exemption ---------------------------------------------------------------------
+
 
 def test_exemption_with_valid_url_and_reason_waives(tmp_path):
     p = tmp_path / 'm.py'
@@ -234,8 +240,8 @@ def test_exemption_with_valid_url_and_reason_waives(tmp_path):
 @pytest.mark.parametrize(
     'marker',
     [
-        '# additivity-exempt: trust-me a good reason here',           # not a URL
-        '# additivity-exempt: https:// a good reason here',           # bare scheme
+        '# additivity-exempt: trust-me a good reason here',  # not a URL
+        '# additivity-exempt: https:// a good reason here',  # bare scheme
         '# additivity-exempt: https://evil.example/1 a good reason',  # wrong host
         '# additivity-exempt: https://github.com/thunderbird/appointment/issues/1',  # no reason
     ],
@@ -266,27 +272,28 @@ def test_exemption_inside_a_docstring_does_not_count(tmp_path):
 # migrations must be additive or carry an exemption. Both directions are asserted
 # so that a checker which stops flagging anything FAILS rather than passing.
 
-GRANDFATHERED = frozenset({
-    '2023_07_27_1102-f9c5471478d0_modify_schedules_table.py',
-    '2024_03_13_1621-f92bae6c27da_update_subscribers_table_to_.py',
-    '2024_06_13_1525-f732d6e597fe_update_appointments_make_uuid_.py',
-    '2024_06_25_2133-156b3b0d77b9_add_ftue_level_to_subscribers.py',
-    '2024_12_20_1733-0c99f6a02f3b_make_subscribers_language_not_.py',
-    '2025_01_15_1340-4a15d01919b8_add_config_fields_to_subscribers_table.py',
-    '2025_04_04_1536-666158eab217_add_start_of_week_user_setting.py',
-    '2025_05_13_0837-ceecffbb5eb5_update_availabilities_table.py',
-    '2025_06_26_1629-88dbe32dc40d_switch_appointment_uuid_type.py',
-    '2026_02_19_0842-17792ef315c1_remove_invites_and_waiting_list_.py',
-    '2026_06_15_1200-d4e5f6a7b8c9_add_owner_id_scoped_schedule_slug.py',
-})
+GRANDFATHERED = frozenset(
+    {
+        '2023_07_27_1102-f9c5471478d0_modify_schedules_table.py',
+        '2024_03_13_1621-f92bae6c27da_update_subscribers_table_to_.py',
+        '2024_06_13_1525-f732d6e597fe_update_appointments_make_uuid_.py',
+        '2024_06_25_2133-156b3b0d77b9_add_ftue_level_to_subscribers.py',
+        '2024_12_20_1733-0c99f6a02f3b_make_subscribers_language_not_.py',
+        '2025_01_15_1340-4a15d01919b8_add_config_fields_to_subscribers_table.py',
+        '2025_04_04_1536-666158eab217_add_start_of_week_user_setting.py',
+        '2025_05_13_0837-ceecffbb5eb5_update_availabilities_table.py',
+        '2025_06_26_1629-88dbe32dc40d_switch_appointment_uuid_type.py',
+        '2026_02_19_0842-17792ef315c1_remove_invites_and_waiting_list_.py',
+        '2026_06_15_1200-d4e5f6a7b8c9_add_owner_id_scoped_schedule_slug.py',
+    }
+)
 
 
 def _blocking_flagged() -> set[str]:
     return {
         p.name
         for p in checker.VERSIONS_DIR.glob('*.py')
-        if p.name != '__init__.py'
-        and any(f.blocking for f in checker.check_file(p)[0])
+        if p.name != '__init__.py' and any(f.blocking for f in checker.check_file(p)[0])
     }
 
 

@@ -88,11 +88,14 @@ jobs:
           cd ./backend && ruff format
 
   migration-additivity:
-    # Appointment deploys blue-green: for a window the OLD and NEW replicas run
-    # against the SAME database, and a schema change cannot be undone by aborting
-    # the deploy. So a migration must only ADD ("expand"); removals ship a release
-    # later ("contract"). Checked pre-merge -- the last point at which the migration
-    # has not yet run anywhere.
+    # For a window during every deploy the OLD and NEW replicas run against the SAME
+    # database, and a schema change cannot be undone by aborting the deploy. So a
+    # migration must only ADD ("expand"); removals ship a release later ("contract").
+    # That window is short and incidental on the current ECS rolling deploy; it is
+    # long and deliberate on the Argo Rollouts blue-green deploy being stood up on
+    # EKS tb-dev / tb-prod (thunderbird/platform-infrastructure#781), which this
+    # check is groundwork for. Checked pre-merge -- the last point at which the
+    # migration has not yet run anywhere.
     #
     # Its own job on purpose: the check is stdlib-only and takes ~100ms, so it should
     # not sit behind pip install + the full pytest suite. A migration author should
@@ -109,9 +112,13 @@ jobs:
 
       - name: Check new migrations are additive
         working-directory: ./backend
+        # Interpolate the branch name through env rather than into the script body,
+        # so a ref name can never be spliced into the shell command.
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           set -euo pipefail
-          BASE="origin/${{ github.event.repository.default_branch }}"
+          BASE="origin/${DEFAULT_BRANCH}"
           # AMR + --no-renames: a migration can be made destructive by EDITING or
           # RENAMING one, not only by adding one.
           CHANGED=$(git diff --name-only --diff-filter=AMR --no-renames --relative \

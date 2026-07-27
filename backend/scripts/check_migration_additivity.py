@@ -119,6 +119,7 @@ class Finding:
 
 # --- small AST helpers -------------------------------------------------------------
 
+
 def _attr_name(call: ast.Call) -> str | None:
     """`x.foo(...)` -> 'foo'."""
     return call.func.attr if isinstance(call.func, ast.Attribute) else None
@@ -194,11 +195,10 @@ def _literal_sql(call: ast.Call) -> tuple[str, bool]:
 
 # --- scan scope: upgrade() plus the helpers it calls --------------------------------
 
+
 def _scanned_functions(tree: ast.Module) -> tuple[list[ast.AST], list[str]]:
     """Return (functions to scan, names of upgrade entrypoints found)."""
-    funcs: dict[str, ast.AST] = {
-        n.name: n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))
-    }
+    funcs: dict[str, ast.AST] = {n.name: n for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef))}
     entry = [name for name in funcs if UPGRADE_RE.match(name)]
     if not entry:
         return [], []
@@ -222,12 +222,18 @@ def _scanned_functions(tree: ast.Module) -> tuple[list[ast.AST], list[str]]:
 
 # --- the rules ---------------------------------------------------------------------
 
+
 def check_upgrade(tree: ast.Module) -> list[Finding]:
     scoped, entry = _scanned_functions(tree)
     if not entry:
-        return [Finding(0, 'no upgrade() found',
-                        'the file defines no top-level upgrade()/upgrade_<engine>()',
-                        'A migration must define upgrade(); the check cannot verify this file.')]
+        return [
+            Finding(
+                0,
+                'no upgrade() found',
+                'the file defines no top-level upgrade()/upgrade_<engine>()',
+                'A migration must define upgrade(); the check cannot verify this file.',
+            )
+        ]
 
     calls = [n for f in scoped for n in ast.walk(f) if isinstance(n, ast.Call)]
 
@@ -238,7 +244,9 @@ def check_upgrade(tree: ast.Module) -> list[Finding]:
     # `with op.batch_alter_table(...) as batch_op:` binds an alias we must trust.
     batch_aliases = {
         item.optional_vars.id
-        for f in scoped for n in ast.walk(f) if isinstance(n, ast.With)
+        for f in scoped
+        for n in ast.walk(f)
+        if isinstance(n, ast.With)
         for item in n.items
         if isinstance(item.context_expr, ast.Call)
         and _attr_name(item.context_expr) == 'batch_alter_table'
@@ -262,17 +270,34 @@ def check_upgrade(tree: ast.Module) -> list[Finding]:
                 # An enum MODIFY is ambiguous: appending a value is additive, removing
                 # one is not, and the member list is usually interpolated so it cannot
                 # be compared statically. Surface it; do not block on it.
-                findings.append(Finding(node.lineno, 'execute(<enum change>)',
-                                        'alters an enum; additive only if values are ADDED, never removed',
-                                        'Reviewer must confirm no enum value was removed.', blocking=False))
+                findings.append(
+                    Finding(
+                        node.lineno,
+                        'execute(<enum change>)',
+                        'alters an enum; additive only if values are ADDED, never removed',
+                        'Reviewer must confirm no enum value was removed.',
+                        blocking=False,
+                    )
+                )
             elif hit:
-                findings.append(Finding(node.lineno, 'execute(<destructive SQL>)',
-                                        f'raw SQL contains {hit.group(0).strip()!r}',
-                                        'Defer the destructive statement to a later release.'))
+                findings.append(
+                    Finding(
+                        node.lineno,
+                        'execute(<destructive SQL>)',
+                        f'raw SQL contains {hit.group(0).strip()!r}',
+                        'Defer the destructive statement to a later release.',
+                    )
+                )
             elif not static and sql.strip():
-                findings.append(Finding(node.lineno, 'execute(<dynamic SQL>)',
-                                        'SQL is built at runtime, so it cannot be verified statically',
-                                        'Reviewer must confirm this is additive.', blocking=False))
+                findings.append(
+                    Finding(
+                        node.lineno,
+                        'execute(<dynamic SQL>)',
+                        'SQL is built at runtime, so it cannot be verified statically',
+                        'Reviewer must confirm this is additive.',
+                        blocking=False,
+                    )
+                )
             continue
 
         # Everything below is a DDL op and must actually be on op/batch_op.
@@ -280,8 +305,14 @@ def check_upgrade(tree: ast.Module) -> list[Finding]:
             continue
 
         if name in DESTRUCTIVE_OPS:
-            findings.append(Finding(node.lineno, f'op.{name}', DESTRUCTIVE_OPS[name],
-                                    'Ship the removal in a LATER release (contract phase).'))
+            findings.append(
+                Finding(
+                    node.lineno,
+                    f'op.{name}',
+                    DESTRUCTIVE_OPS[name],
+                    'Ship the removal in a LATER release (contract phase).',
+                )
+            )
             continue
 
         if name == 'drop_index':
@@ -290,46 +321,86 @@ def check_upgrade(tree: ast.Module) -> list[Finding]:
             )
             if table in reindexed:
                 continue  # index swap: dropped and recreated in the same migration
-            findings.append(Finding(node.lineno, 'op.drop_index',
-                                    'removes an index the old replicas depend on for query plans',
-                                    'Recreate it here, or drop it in a later release.'))
+            findings.append(
+                Finding(
+                    node.lineno,
+                    'op.drop_index',
+                    'removes an index the old replicas depend on for query plans',
+                    'Recreate it here, or drop it in a later release.',
+                )
+            )
             continue
 
         if name == 'batch_alter_table':
             table = _str_arg(node, 0)
-            parent = next((w for f in scoped for w in ast.walk(f)
-                           if isinstance(w, ast.With)
-                           and any(i.context_expr is node for i in w.items)), None)
+            parent = next(
+                (
+                    w
+                    for f in scoped
+                    for w in ast.walk(f)
+                    if isinstance(w, ast.With) and any(i.context_expr is node for i in w.items)
+                ),
+                None,
+            )
             destructive = parent is not None and any(
-                _attr_name(c) in (DESTRUCTIVE_OPS | {'drop_index': ''}) for c in ast.walk(parent)
+                _attr_name(c) in (DESTRUCTIVE_OPS | {'drop_index': ''})
+                for c in ast.walk(parent)
                 if isinstance(c, ast.Call)
             )
             if destructive and table not in new_tables:
-                findings.append(Finding(node.lineno, 'op.batch_alter_table(<destructive>)',
-                                        'batch mode recreates the table, and the body removes something',
-                                        'Defer the removal to a later release.'))
+                findings.append(
+                    Finding(
+                        node.lineno,
+                        'op.batch_alter_table(<destructive>)',
+                        'batch mode recreates the table, and the body removes something',
+                        'Defer the removal to a later release.',
+                    )
+                )
             continue
 
         if name == 'alter_column':
             table = _str_arg(node, 0)
             if _kwarg(node, 'new_column_name') is not None:
-                findings.append(Finding(node.lineno, 'op.alter_column(new_column_name=...)',
-                                        'renames a column; old replicas still SELECT the old name',
-                                        'Add the new column, dual-write, backfill, drop the old one later.'))
+                findings.append(
+                    Finding(
+                        node.lineno,
+                        'op.alter_column(new_column_name=...)',
+                        'renames a column; old replicas still SELECT the old name',
+                        'Add the new column, dual-write, backfill, drop the old one later.',
+                    )
+                )
             if _is(_kwarg(node, 'nullable'), False) and table not in new_tables:
-                findings.append(Finding(node.lineno, 'op.alter_column(nullable=False)',
-                                        "narrows a column; old replicas' NULL-omitting INSERTs start failing",
-                                        'Backfill first, then enforce NOT NULL in a later release.'))
-            if _has_kwarg(node, 'server_default') and _is(_kwarg(node, 'server_default'), None) \
-                    and _has_kwarg(node, 'existing_server_default'):
-                findings.append(Finding(node.lineno, 'op.alter_column(server_default=None)',
-                                        "removes a default the old replicas' INSERTs rely on",
-                                        'Remove the default in a later release.'))
+                findings.append(
+                    Finding(
+                        node.lineno,
+                        'op.alter_column(nullable=False)',
+                        "narrows a column; old replicas' NULL-omitting INSERTs start failing",
+                        'Backfill first, then enforce NOT NULL in a later release.',
+                    )
+                )
+            if (
+                _has_kwarg(node, 'server_default')
+                and _is(_kwarg(node, 'server_default'), None)
+                and _has_kwarg(node, 'existing_server_default')
+            ):
+                findings.append(
+                    Finding(
+                        node.lineno,
+                        'op.alter_column(server_default=None)',
+                        "removes a default the old replicas' INSERTs rely on",
+                        'Remove the default in a later release.',
+                    )
+                )
             new_t, old_t = _type_length(_kwarg(node, 'type_')), _type_length(_kwarg(node, 'existing_type'))
             if new_t and old_t and new_t[0] == old_t[0] and new_t[1] < old_t[1]:
-                findings.append(Finding(node.lineno, 'op.alter_column(<narrowing type>)',
-                                        f'{old_t[0]}({old_t[1]}) -> {new_t[0]}({new_t[1]}) truncates existing data',
-                                        'Widen instead, or narrow in a later release after backfilling.'))
+                findings.append(
+                    Finding(
+                        node.lineno,
+                        'op.alter_column(<narrowing type>)',
+                        f'{old_t[0]}({old_t[1]}) -> {new_t[0]}({new_t[1]}) truncates existing data',
+                        'Widen instead, or narrow in a later release after backfilling.',
+                    )
+                )
             continue
 
         if name == 'add_column':
@@ -341,24 +412,34 @@ def check_upgrade(tree: ast.Module) -> list[Finding]:
             for col in _sa_columns(node):
                 default = _kwarg(col, 'server_default')
                 if _is(_kwarg(col, 'nullable'), False) and (default is None or _is(default, None)):
-                    findings.append(Finding(
-                        col.lineno, 'op.add_column(nullable=False) without server_default',
-                        "old replicas' INSERTs omit the column, so they fail",
-                        "Add server_default=... (SQLAlchemy's default= is client-side and emits no DDL default)."))
+                    findings.append(
+                        Finding(
+                            col.lineno,
+                            'op.add_column(nullable=False) without server_default',
+                            "old replicas' INSERTs omit the column, so they fail",
+                            "Add server_default=... (SQLAlchemy's default= is client-side and emits no DDL default).",
+                        )
+                    )
             continue
 
         if (name == 'create_index' and _is(_kwarg(node, 'unique'), True)) or name == 'create_unique_constraint':
             table = _str_arg(node, 1)
             if table in new_tables:
                 continue
-            findings.append(Finding(node.lineno, f'op.{name} (unique)',
-                                    'aborts the migration if existing rows collide',
-                                    'De-duplicate in a prior release, then add the constraint.'))
+            findings.append(
+                Finding(
+                    node.lineno,
+                    f'op.{name} (unique)',
+                    'aborts the migration if existing rows collide',
+                    'De-duplicate in a prior release, then add the constraint.',
+                )
+            )
 
     return findings
 
 
 # --- exemptions (real comments only) -----------------------------------------------
+
 
 def _exemptions(src: str) -> list[tuple[int, str, str]]:
     """Markers found in genuine COMMENT tokens -- not docstrings or SQL strings."""
@@ -393,16 +474,20 @@ def check_file(path: pathlib.Path) -> tuple[list[Finding], str | None]:
     bad = [(ln, url) for ln, url, reason in markers if not EXEMPT_URL_RE.match(url) or len(reason) < 10]
     if bad:
         ln, url = bad[0]
-        return findings + [Finding(
-            ln, 'invalid additivity-exempt marker',
-            f'{url!r} is not a Thunderbird issue/PR URL followed by a reason',
-            'Use: # additivity-exempt: https://github.com/thunderbird/<repo>/issues/<n> <why it is safe>',
-        )], None
+        return findings + [
+            Finding(
+                ln,
+                'invalid additivity-exempt marker',
+                f'{url!r} is not a Thunderbird issue/PR URL followed by a reason',
+                'Use: # additivity-exempt: https://github.com/thunderbird/<repo>/issues/<n> <why it is safe>',
+            )
+        ], None
 
     return findings, '; '.join(f'{url} {reason}' for _, url, reason in markers)
 
 
 # --- output ------------------------------------------------------------------------
+
 
 def _annotate(path: pathlib.Path, f: Finding) -> None:
     if os.environ.get('GITHUB_ACTIONS') and f.line:
