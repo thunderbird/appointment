@@ -54,10 +54,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          # Full history so the migration-additivity check can diff against main
-          # to find the migrations this branch ADDS.
-          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -91,25 +87,42 @@ jobs:
         run: |
           cd ./backend && ruff format
 
-      # Appointment deploys blue-green: for a window, the OLD and NEW replicas run
-      # against the SAME database, and a schema change cannot be undone by aborting
-      # the deploy. So a migration must only ADD ("expand"); removals ship a release
-      # later ("contract"). Checked here, pre-merge, because that is the last point
-      # at which the migration has not yet run anywhere.
-      # Scoped to migrations this branch ADDS -- historical ones predate the gate.
-      - name: Migration additivity check (expand/contract)
+  migration-additivity:
+    # Appointment deploys blue-green: for a window the OLD and NEW replicas run
+    # against the SAME database, and a schema change cannot be undone by aborting
+    # the deploy. So a migration must only ADD ("expand"); removals ship a release
+    # later ("contract"). Checked pre-merge -- the last point at which the migration
+    # has not yet run anywhere.
+    #
+    # Its own job on purpose: the check is stdlib-only and takes ~100ms, so it should
+    # not sit behind pip install + the full pytest suite. A migration author should
+    # not have to fix unrelated test failures to learn their schema change is unsafe.
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-changes.outputs.validate-backend == 'true'
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Needed to diff against the default branch.
+          fetch-depth: 0
+
+      - name: Check new migrations are additive
         working-directory: ./backend
         run: |
-          git fetch --no-tags origin main
-          ADDED=$(git diff --name-only --diff-filter=A --relative \
-                    origin/main...HEAD -- src/appointment/migrations/versions/)
-          if [ -z "$ADDED" ]; then
-            echo "No new migrations in this branch - nothing to check."
+          set -euo pipefail
+          BASE="origin/${{ github.event.repository.default_branch }}"
+          # AMR + --no-renames: a migration can be made destructive by EDITING or
+          # RENAMING one, not only by adding one.
+          CHANGED=$(git diff --name-only --diff-filter=AMR --no-renames --relative \
+                      "$BASE"...HEAD -- src/appointment/migrations/versions/)
+          if [ -z "$CHANGED" ]; then
+            echo "No added/changed migrations in this branch - nothing to check."
             exit 0
           fi
-          echo "New migrations:"; echo "$ADDED" | sed 's/^/  /'
+          echo "Migrations to check:"; echo "$CHANGED" | sed 's/^/  /'
           # shellcheck disable=SC2086
-          python scripts/check_migration_additivity.py $ADDED
+          python3 scripts/check_migration_additivity.py $CHANGED
 
   validate-frontend:
     needs: detect-changes
