@@ -3,12 +3,20 @@
 
 WHY
 ---
-Appointment is deployed with a blue-green rollout: for a window during every
-deploy, the OLD and NEW replicas run against the SAME database. A migration that
-removes or narrows something the old replicas still use breaks them the moment it
-lands -- and a schema change cannot be rolled back by aborting the deploy. So a
-migration must only ever ADD things ("expand"); removals ("contract") ship in a
-LATER release, once no running replica references them.
+For a window during every deploy, the OLD and NEW replicas run against the SAME
+database. A migration that removes or narrows something the old replicas still
+use breaks them the moment it lands -- and a schema change cannot be rolled back
+by aborting the deploy. So a migration must only ever ADD things ("expand");
+removals ("contract") ship in a LATER release, once no running replica
+references them.
+
+That window already exists in the current ECS Fargate rolling deploy (AWS
+default min 100% / max 200%), where it is short and incidental. This check is
+groundwork for the Argo Rollouts BLUE-GREEN deploy on the new EKS tb-dev /
+tb-prod clusters (thunderbird/platform-infrastructure#781), which holds both
+versions up on purpose -- for the length of prePromotionAnalysis plus
+scaleDownDelaySeconds -- and offers an abort path that looks like a rollback but
+cannot undo DDL.
 
 This runs in CI on the migrations a PR adds or edits, so the author finds out
 while it is still cheap to fix, and before the migration can execute anywhere.
@@ -458,8 +466,9 @@ def main() -> int:
 
     if failed:
         print(
-            '\nA blue-green deploy runs the OLD and NEW replicas against the same database,\n'
-            'and a schema change cannot be undone by aborting the deploy. Split the change:\n'
+            '\nA deploy runs the OLD and NEW replicas against the same database (briefly on\n'
+            'ECS rolling; deliberately, for longer, on the EKS blue-green rollout), and a\n'
+            'schema change cannot be undone by aborting the deploy. Split the change:\n'
             '  release N   : add the new thing, and dual-write/backfill it in the app\n'
             '  release N+1 : remove the old thing, once no running replica references it\n'
             '\nA rename is add -> dual-write -> backfill -> drop, i.e. more than two releases.\n'
