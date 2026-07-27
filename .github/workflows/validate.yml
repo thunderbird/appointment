@@ -54,6 +54,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          # Full history so the migration-additivity check can diff against main
+          # to find the migrations this branch ADDS.
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -86,6 +90,26 @@ jobs:
       - name: Backend formatting check
         run: |
           cd ./backend && ruff format
+
+      # Appointment deploys blue-green: for a window, the OLD and NEW replicas run
+      # against the SAME database, and a schema change cannot be undone by aborting
+      # the deploy. So a migration must only ADD ("expand"); removals ship a release
+      # later ("contract"). Checked here, pre-merge, because that is the last point
+      # at which the migration has not yet run anywhere.
+      # Scoped to migrations this branch ADDS -- historical ones predate the gate.
+      - name: Migration additivity check (expand/contract)
+        working-directory: ./backend
+        run: |
+          git fetch --no-tags origin main
+          ADDED=$(git diff --name-only --diff-filter=A --relative \
+                    origin/main...HEAD -- src/appointment/migrations/versions/)
+          if [ -z "$ADDED" ]; then
+            echo "No new migrations in this branch - nothing to check."
+            exit 0
+          fi
+          echo "New migrations:"; echo "$ADDED" | sed 's/^/  /'
+          # shellcheck disable=SC2086
+          python scripts/check_migration_additivity.py $ADDED
 
   validate-frontend:
     needs: detect-changes
