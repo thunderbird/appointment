@@ -120,6 +120,25 @@ jobs:
         run: |
           cd ./frontend && npm run test -- --run
 
+  # `nginx -t` is necessary but NOT sufficient: mis-scoping an add_header or
+  # breaking the /assets/ match is syntactically valid and only fails at request
+  # time. A *total* root mis-scope is not the gap -- that one fails closed, since
+  # / itself 404s and the rollout's readiness probe never goes green. The gap is
+  # breakage confined to /assets/, or a wrong or leaked Cache-Control value on a
+  # path that still returns 200: neither the readiness probe nor the synthetic
+  # analysis can see those, so they promote green. Runs the shipped conf in a stock
+  # nginx image over a synthetic dist tree: no npm build, no registry auth, no
+  # AWS creds.
+  validate-frontend-nginx:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-changes.outputs.validate-frontend == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Test nginx config behaviour
+        run: ./frontend/docker/test-nginx-config.sh
+
   validate-pulumi:
     needs: detect-changes
     runs-on: ubuntu-latest
