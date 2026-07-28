@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a  # v4
         with:
           aws-region: eu-central-1
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
@@ -64,19 +64,19 @@ jobs:
           echo "pulumi_tag=$(cat new_ecr_tag.txt)" >> $GITHUB_OUTPUT
 
       - name: Configure AWS credentials (Pulumi)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a  # v4
         with:
           aws-region: eu-central-1
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64  # v2
         with:
           mask-password: "true"
 
       - name: Set up Python 3.13
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5
         with:
           python-version: 3.13
 
