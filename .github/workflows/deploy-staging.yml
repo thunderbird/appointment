@@ -45,7 +45,7 @@ jobs:
         run: |
           rm -rf frontend/dist  # Clean up from previous build
           cp frontend/.env.stage.example frontend/.env.stage
-          cd frontend && pnpm run build -- --mode ${{ vars.APP_ENV }}
+          cd frontend && pnpm run build --mode ${{ vars.APP_ENV }}
 
       - name: Deploy frontend to S3
         run: |
@@ -188,7 +188,7 @@ jobs:
       - name: Build prod frontend
         run: |
           cp frontend/.env.prod.example frontend/.env.prod
-          cd frontend && pnpm run build -- --mode ${{ vars.APP_ENV }}
+          cd frontend && pnpm run build --mode ${{ vars.APP_ENV }}
           zip -r ../frontend.zip dist
 
       - name: Download ECR tag

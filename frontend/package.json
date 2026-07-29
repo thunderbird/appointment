@@ -10,7 +10,7 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "test": "vitest",
-    "format": "npx prettier . --write"
+    "format": "prettier . --write"
   },
   "dependencies": {
     "@phosphor-icons/vue": "2.2.1",

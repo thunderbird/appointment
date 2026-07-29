@@ -122,7 +122,7 @@ jobs:
 
       - name: Test with vitest
         run: |
-          cd ./frontend && pnpm run test -- --run
+          cd ./frontend && pnpm run test --run
 
   validate-pulumi:
     needs: detect-changes

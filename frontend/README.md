@@ -16,7 +16,7 @@ pnpm install
 ### Compiles and hot-reloads for development
 
 ```bash
-pnpm run serve
+pnpm run dev
 ```
 
 ### Compiles and minifies for production
@@ -49,7 +49,7 @@ Frontend is formatted using ESlint with airbnb rules.
 
 ```bash
 pnpm run lint
-pnpm run lint -- --fix
+pnpm run lint:fix
 ```
 
 ### Run tests
