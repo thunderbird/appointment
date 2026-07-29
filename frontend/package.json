@@ -36,6 +36,7 @@
   "devDependencies": {
     "@babel/core": "7.29.6",
     "@babel/eslint-parser": "7.12.16",
+    "@eslint/js": "9.39.5",
     "@pinia/testing": "1.0.2",
     "@typescript-eslint/eslint-plugin": "8.65.0",
     "@typescript-eslint/parser": "8.65.0",
@@ -57,6 +58,7 @@
     "prettier": "3.8.3",
     "prettier-plugin-sort-json": "4.2.0",
     "typescript": "5.5.3",
+    "typescript-eslint": "8.65.0",
     "vite-plugin-eslint": "1.8.1",
     "vitest": "4.1.8"
   },
