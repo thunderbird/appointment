@@ -1,7 +1,7 @@
 # Keep the build context clean and reproducible: the image installs deps from
-# package-lock.json via `npm ci`, so host-installed node_modules/dist must NOT be
-# copied in (they bloat the image, can carry cross-arch native binaries, and can
-# desync npm ci). See frontend/deploy.dockerfile.
+# pnpm-lock.yaml via `pnpm install --frozen-lockfile`, so host-installed node_modules/dist
+# must NOT be copied in (they bloat the image, can carry cross-arch native binaries, and can
+# desync the frozen lockfile install). See frontend/deploy.dockerfile.
 node_modules
 dist
 .git

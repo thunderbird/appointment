@@ -19,7 +19,7 @@ jobs:
     environment: staging
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -27,19 +27,25 @@ jobs:
           aws-region: eu-central-1
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
 
-      - name: Setup NPM
-        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.15.1
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
         with:
           node-version: 24
+          cache: 'pnpm'
+          cache-dependency-path: 'frontend/pnpm-lock.yaml'
 
       - name: Install dependencies
-        run: cd frontend && npm ci
+        run: cd frontend && pnpm install --frozen-lockfile
 
       - name: Build stage frontend
         run: |
           rm -rf frontend/dist  # Clean up from previous build
           cp frontend/.env.stage.example frontend/.env.stage
-          cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
+          cd frontend && pnpm run build --mode ${{ vars.APP_ENV }}
 
       - name: Deploy frontend to S3
         run: |
@@ -50,7 +56,7 @@ jobs:
     environment: staging
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Configure AWS credentials (Pulumi)
         uses: aws-actions/configure-aws-credentials@v4
@@ -91,7 +97,7 @@ jobs:
     environment: staging
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Download ecr tag
         uses: actions/download-artifact@v4
@@ -163,20 +169,26 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - name: Setup NPM
-        uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 11.15.1
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
         with:
           node-version: 24
+          cache: 'pnpm'
+          cache-dependency-path: 'frontend/pnpm-lock.yaml'
 
       - name: Install dependencies
-        run: cd frontend && npm ci
+        run: cd frontend && pnpm install --frozen-lockfile
 
       - name: Build prod frontend
         run: |
           cp frontend/.env.prod.example frontend/.env.prod
-          cd frontend && npm run build -- --mode ${{ vars.APP_ENV }}
+          cd frontend && pnpm run build --mode ${{ vars.APP_ENV }}
           zip -r ../frontend.zip dist
 
       - name: Download ECR tag
@@ -231,18 +243,22 @@ jobs:
       APPT_MY_SHARE_LINK: ${{ secrets.E2E_APPT_STAGE_MY_SHARE_LINK }}
       APPT_BOOKEE_EMAIL: ${{ secrets.E2E_APPT_STAGE_BOOKEE_EMAIL }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: pnpm/action-setup@v6
         with:
-          node-version: 20
-          cache: 'npm'
-          cache-dependency-path: 'test/e2e/package-lock.json'
+          version: 11.15.1
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'pnpm'
+          cache-dependency-path: 'test/e2e/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: |
           cd ./test/e2e
-          npm ci
+          pnpm install --frozen-lockfile
 
       - name: BrowserStack Env Setup
         uses: browserstack/github-actions/setup-env@master
@@ -256,4 +272,4 @@ jobs:
         run: |
           cd ./test/e2e
           cp .env.stage.example .env
-          npm run stage-sanity-test-browserstack-firefox
+          pnpm run stage-sanity-test-browserstack-firefox

@@ -8,13 +8,14 @@ First install the E2E suite (includes Playwright):
 
 ```bash
 cd test/e2e
-npm install
+corepack enable
+pnpm install
 ```
 
 Next install the Playwright browsers (Playwright uses it's own bundled browers) still in `test/e2e`:
 
 ```bash
-npx playwright install
+pnpm exec playwright install
 ```
 
 ## E2E Test Prerequisites
@@ -58,25 +59,25 @@ APPT_BOOKEE_EMAIL=<booking-requesters-email>
 To run the E2E tests on Firefox headless (still in `test/e2e`):
 
 ```bash
-npm run e2e-test
+pnpm run e2e-test
 ```
 
 To run the E2E tests on Firefox with a UI so you can watch the tests run (still in `test/e2e`):
 
 ```bash
-npm run e2e-test-headed
+pnpm run e2e-test-headed
 ```
 
 To run the E2E tests against google chromium with a UI so you can watch the tests run (still in `test/e2e`):
 
 ```bash
-npx playwright test --grep e2e-suite --project=chromium --headed
+pnpm exec playwright test --grep e2e-suite --project=chromium --headed
 ```
 
 To run the E2E tests against safari with a UI so you can watch the tests run (still in `test/e2e`):
 
 ```bash
-npx playwright test --grep e2e-suite --project=safari --headed
+pnpm exec playwright test --grep e2e-suite --project=safari --headed
 ```
 
 Note that for project you can use any of the project/browser names as listed in the [playwright.config.ts](./playwright.config.ts) file (but the browser must be installed on your local machine).
@@ -88,7 +89,7 @@ You can run the E2E tests on your local machine on emulated mobile browser views
 To run the E2E tests on an emulated Google Pixel 7 mobile browser view (still in `test/e2e`):
 
 ```bash
-npx playwright test --grep e2e-mobile-suite --project=Google-Pixel-7-View --headed
+pnpm exec playwright test --grep e2e-mobile-suite --project=Google-Pixel-7-View --headed
 ```
 
 Note that for project you can use any of the project/browser names as listed in the [playwright.config.ts](./playwright.config.ts) file (but the browser must be installed on your local machine).
@@ -116,13 +117,13 @@ APPT_BOOKEE_EMAIL=<booking-requesters-email>
 To run the E2E tests on Firefox headless (still in `test/e2e`):
 
 ```bash
-npm run e2e-test
+pnpm run e2e-test
 ```
 
 To run the E2E tests on Firefox with a UI so you can watch the tests run (still in `test/e2e`):
 
 ```bash
-npm run e2e-test-headed
+pnpm run e2e-test-headed
 ```
 
 ## Running the production sanity test
@@ -148,13 +149,13 @@ APPT_BOOKEE_EMAIL=<booking-requesters-email>
 To run the production sanity test on Firefox headless (still in `test/e2e`):
 
 ```bash
-npm run prod-sanity-test
+pnpm run prod-sanity-test
 ```
 
 To run the production sanity test on Firefox with a UI so you can watch the tests run (still in `test/e2e`):
 
 ```bash
-npm run prod-sanity-test-headed
+pnpm run prod-sanity-test-headed
 ```
 
 ## Running on BrowserStack
@@ -187,25 +188,25 @@ export BROWSERSTACK_ACCESS_KEY=<your-browserstack-access-key>
 To run the E2E tests on Firefox Desktop on BrowserStack (still in `test/e2e`):
 
 ```bash
-npm run e2e-test-browserstack-firefox
+pnpm run e2e-test-browserstack-firefox
 ```
 
 To run the production sanity test on Firefox Desktop on BrowserStack (still in `test/e2e`):
 
 ```bash
-npm run prod-sanity-test-browserstack-firefox
+pnpm run prod-sanity-test-browserstack-firefox
 ```
 
 To run the E2E tests on Android Chrome on a real Google Pixel device on BrowserStack (still in `test/e2e`):
 
 ```bash
-npm run e2e-tests-mobile-browserstack-android-chrome
+pnpm run e2e-tests-mobile-browserstack-android-chrome
 ```
 
 To run the E2E tests on iOS Safari on a real iPhone device on BrowserStack (still in `test/e2e`):
 
 ```bash
-npm run e2e-tests-mobile-browserstack-ios-safari
+pnpm run e2e-tests-mobile-browserstack-ios-safari
 ```
 
 After the tests finish in your local console you'll see a link to the BrowserStack test session; when signed into your BrowserStack account you'll be able to use that link to see the test session results including video playback.

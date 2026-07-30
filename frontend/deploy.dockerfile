@@ -7,8 +7,7 @@ COPY . /build/frontend
 # (see public/config.js + docker-entrypoint.d/40-appointment-config.sh), so one
 # built bundle runs unchanged in every environment.
 
-# Add Node 24 (matches the CI Node; npm 11 is required -- npm 10 shipped with
-# Node 22 fails `npm ci` on this lockfileVersion 3 lock. Vite 8 needs Node >=20.19)
+# Add Node 24 (matches the CI Node; pnpm 11 and vite 8 both require Node >=22.13)
 # and jq (used by the runtime-config entrypoint to emit JSON-safe config.js).
 RUN apt-get update
 RUN apt-get install -y ca-certificates curl gnupg jq
@@ -18,10 +17,12 @@ RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesourc
 RUN apt-get update
 RUN apt-get install -y nodejs
 
-# Build site (env-agnostic; runtime config supplies environment values). npm ci
-# for a reproducible, lockfile-pinned install across both arch builds.
-RUN cd /build/frontend && npm ci
-RUN cd /build/frontend && npm run build
+# Build site (env-agnostic; runtime config supplies environment values). pnpm
+# install --frozen-lockfile for a reproducible, lockfile-pinned install across
+# both arch builds.
+RUN corepack enable
+RUN cd /build/frontend && pnpm install --frozen-lockfile
+RUN cd /build/frontend && pnpm run build
 
 # Use our custom nginx config
 RUN rm /etc/nginx/conf.d/default.conf
