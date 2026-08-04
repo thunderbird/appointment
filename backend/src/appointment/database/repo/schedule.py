@@ -30,6 +30,7 @@ def get_by_subscriber(db: Session, subscriber_id: int) -> list[models.Schedule]:
         db.query(models.Schedule)
         .join(models.Calendar, models.Schedule.calendar_id == models.Calendar.id)
         .filter(models.Calendar.owner_id == subscriber_id)
+        .order_by(models.Schedule.id)
         .all()
     )
 
