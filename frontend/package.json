@@ -42,23 +42,23 @@
     "@vue/test-utils": "2.4.11",
     "autoprefixer": "10.4.12",
     "eslint": "9.39.5",
-    "eslint-import-resolver-typescript": "4.3.1",
+    "eslint-import-resolver-typescript": "4.4.5",
     "eslint-plugin-import": "2.32.0",
     "eslint-plugin-vue": "10.0.0",
     "globals": "17.3.0",
-    "jsdom": "28.0.0",
+    "jsdom": "30.0.1",
     "msw": "2.2.14",
     "node-fetch": "3.3.2",
-    "postcss": "8.5.10",
+    "postcss": "8.5.23",
     "postcss-custom-media": "12.0.0",
     "postcss-mixins": "12.1.2",
     "postcss-nesting": "14.0.0",
     "prettier": "3.8.3",
     "prettier-plugin-sort-json": "4.2.0",
     "typescript": "5.5.3",
-    "typescript-eslint": "8.65.0",
+    "typescript-eslint": "8.66.0",
     "vite-plugin-eslint": "1.8.1",
-    "vitest": "4.1.8"
+    "vitest": "4.1.10"
   },
   "postcss": {
     "plugins": {
