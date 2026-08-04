@@ -55,13 +55,13 @@ def slug_taken(db: Session, slug: str, owner_id: int) -> bool:
     )
 
 
-def slug_available_for_schedule(db: Session, slug: str, schedule_id: int) -> bool:
-    """True if this slug is unused or already belongs to the given schedule for the same owner."""
+def find_conflicting_schedule_id(db: Session, slug: str, schedule_id: int) -> int | None:
+    """Id of another schedule for the same owner that already uses this slug, if any."""
     schedule = get(db, schedule_id)
     if not schedule:
-        return False
+        return None
 
-    return (
+    conflicting = (
         db.query(models.Schedule)
         .filter(
             models.Schedule.slug == slug,
@@ -69,8 +69,16 @@ def slug_available_for_schedule(db: Session, slug: str, schedule_id: int) -> boo
             models.Schedule.owner_id == schedule.owner_id,
         )
         .first()
-        is None
     )
+    return conflicting.id if conflicting else None
+
+
+def slug_available_for_schedule(db: Session, slug: str, schedule_id: int) -> bool:
+    """True if this slug is unused or already belongs to the given schedule for the same owner."""
+    if not exists(db, schedule_id):
+        return False
+
+    return find_conflicting_schedule_id(db, slug, schedule_id) is None
 
 
 def get(db: Session, schedule_id: int):

@@ -212,6 +212,7 @@ def update_schedule(
         raise validation.InvalidAvailabilityException()
 
     if schedule.slug and not repo.schedule.slug_available_for_schedule(db, schedule.slug, id):
+        _log_slug_conflict(db, subscriber.id, id, schedule.slug)
         raise validation.ScheduleSlugTakenException()
 
     result = repo.schedule.update(db=db, schedule=schedule, schedule_id=id)
@@ -220,6 +221,27 @@ def update_schedule(
         _sync_watch_channels(db, google_client, subscriber, schedule.calendar_id)
 
     return result
+
+
+def _log_slug_conflict(db: Session, owner_id: int, schedule_id: int, slug: str) -> None:
+    """Helped to log slug conflict to Sentry"""
+    if not os.getenv('SENTRY_DSN'):
+        return
+
+    schedules_for_owner = repo.schedule.get_by_subscriber(db, owner_id)
+
+    sentry_sdk.set_context(
+        'schedule_slug_conflict',
+        {
+            'schedule_id': schedule_id,
+            'owner_id': owner_id,
+            'conflicting_schedule_id': repo.schedule.find_conflicting_schedule_id(db, slug, schedule_id),
+            'schedule_count_for_owner': len(schedules_for_owner),
+            'schedule_ids_for_owner': [s.id for s in schedules_for_owner],
+            'slug_length': len(slug),
+        },
+    )
+    sentry_sdk.capture_message('Schedule update rejected: slug already taken', level='warning')
 
 
 def _sync_watch_channels(db: Session, google_client: GoogleClient, subscriber: Subscriber, default_calendar_id: int):
