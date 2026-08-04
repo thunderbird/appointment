@@ -86,12 +86,9 @@ export const useUserStore = defineStore('user', () => {
    */
   const mySlug = computed((): string | null => {
     const slugs = data?.value?.scheduleSlugs ?? {};
-    const slugKeys = Object.keys(slugs);
-    if (slugKeys.length == 0) {
-      return null;
-    }
+    const slugValues = Object.values(slugs);
 
-    return slugs[slugKeys[0]];
+    return slugValues.length > 0 ? (slugValues[0] as string) : null;
   });
 
   /**

@@ -179,4 +179,18 @@ describe('User Store', () => {
     expect(user.data.settings.startOfWeek).toBeTruthy();
     expect(user.data.signedUrl).toBeTruthy();
   });
+
+  test('mySlug picks the first schedule slug', () => {
+    const user = useUserStore();
+    user.data.scheduleSlugs = { 12: 'second-schedule-slug', 3: 'first-schedule-slug' };
+
+    expect(user.mySlug).toBe('first-schedule-slug');
+  });
+
+  test('mySlug is null when there are no schedules', () => {
+    const user = useUserStore();
+    user.data.scheduleSlugs = {};
+
+    expect(user.mySlug).toBeNull();
+  });
 });
