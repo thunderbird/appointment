@@ -1,6 +1,6 @@
 """Module: auth
 
-Handle authentication with Thunderbird Accounts or FxA and get subscription data.
+Handle authentication with Thunderbird Accounts and get subscription data.
 """
 
 import os
@@ -12,7 +12,6 @@ import urllib.parse
 from sqlalchemy.orm import Session
 
 from .apis.accounts_client import AccountsClient
-from .apis.fxa_client import FxaClient
 from ..database import schemas, models, repo
 from ..defines import get_long_base_sign_url
 
@@ -20,7 +19,7 @@ from ..defines import get_long_base_sign_url
 def logout(
     db: Session,
     subscriber: models.Subscriber,
-    auth_client: FxaClient | AccountsClient | None,
+    auth_client: AccountsClient | None,
     deny_previous_tokens=True,
 ):
     """Sets a minimum valid issued at time (time). This prevents access tokens issued earlier from working."""

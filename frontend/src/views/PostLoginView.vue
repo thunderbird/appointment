@@ -7,7 +7,7 @@ import { LOGIN_REDIRECT_KEY } from '@/definitions';
 import { callKey, dayjsKey } from '@/keys';
 import { userManager } from '@/composables/oidcUserManager';
 import { BooleanResponse } from '@/models';
-import { isFxaAuth, isOidcAuth } from '@/composables/authSchemes';
+import { isOidcAuth } from '@/composables/authSchemes';
 
 const route = useRoute();
 const router = useRouter();
@@ -41,9 +41,6 @@ onMounted(async () => {
       console.error('Err', data.value);
       return;
     }
-  } else if (!isFxaAuth) {
-    await router.push(redirectTo ?? '/');
-    return;
   }
 
   if (isOidcAuth) {

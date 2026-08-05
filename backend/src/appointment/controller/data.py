@@ -97,7 +97,6 @@ def delete_account(db, subscriber: Subscriber):
         len(repo.appointment.get_by_subscriber(db, subscriber.id, all=True)),
         len(repo.calendar.get_by_subscriber(db, subscriber.id)),
         len(repo.schedule.get_by_subscriber(db, subscriber.id)),
-        len(repo.external_connection.get_by_type(db, subscriber.id, models.ExternalConnectionType.fxa)),
         len(repo.external_connection.get_by_type(db, subscriber.id, models.ExternalConnectionType.google)),
         len(repo.external_connection.get_by_type(db, subscriber.id, models.ExternalConnectionType.zoom)),
     ]

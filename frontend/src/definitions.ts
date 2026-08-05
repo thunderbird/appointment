@@ -3,7 +3,6 @@
  */
 export enum AuthSchemes {
   Password = 'password',
-  Fxa = 'fxa',
   Oidc = 'oidc',
 }
 
@@ -107,7 +106,6 @@ export enum CalendarProviders {
  * Supported external connection providers
  */
 export enum ExternalConnectionProviders {
-  Fxa = 1,
   Google = 2,
   Zoom = 3,
   Caldav = 4,

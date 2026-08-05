@@ -88,22 +88,6 @@ def get_subscriber_by_accounts_uuid(db: Session, uuid: str):
     return None
 
 
-def get_subscriber_by_fxa_uid(db: Session, type_id: str):
-    """Return a subscriber from a fxa profile uid"""
-    query = (
-        db.query(models.ExternalConnections)
-        .filter(models.ExternalConnections.type == models.ExternalConnectionType.fxa)
-        .filter(models.ExternalConnections.type_id == type_id)
-    )
-
-    result = query.first()
-
-    if result is not None:
-        return result.owner
-
-    return None
-
-
 def get_subscriber_by_zoom_user_id(db: Session, type_id: str):
     """Return a subscriber from a zoom user id"""
     query = (

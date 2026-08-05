@@ -28,7 +28,6 @@ def make_external_connections(with_db):
                             (
                                 models.ExternalConnectionType.zoom.value,
                                 models.ExternalConnectionType.google.value,
-                                models.ExternalConnectionType.fxa.value,
                             )
                         )
                     ),

@@ -154,7 +154,6 @@ export type ExternalConnection = {
 export type ExternalConnectionCollection = {
   oidc?: ExternalConnection[];
   accounts?: ExternalConnection[];
-  fxa?: ExternalConnection[];
   google?: ExternalConnection[];
   zoom?: ExternalConnection[];
   caldav?: ExternalConnection[];

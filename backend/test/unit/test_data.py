@@ -39,7 +39,6 @@ class TestData:
         appointment = make_appointment(calendar_id=calendar.id)
         schedule = make_schedule(calendar_id=calendar.id)
         external_connections = [
-            make_external_connections(subscriber_id=subscriber.id, type=models.ExternalConnectionType.fxa),
             make_external_connections(subscriber_id=subscriber.id, type=models.ExternalConnectionType.google),
             make_external_connections(subscriber_id=subscriber.id, type=models.ExternalConnectionType.zoom),
         ]

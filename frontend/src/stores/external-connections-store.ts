@@ -15,14 +15,12 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
   // Data
   const oidc = ref<ExternalConnection[]>([]);
   const zoom = ref<ExternalConnection[]>([]);
-  const fxa = ref<ExternalConnection[]>([]);
   const google = ref<ExternalConnection[]>([]);
   const caldav = ref<ExternalConnection[]>([]);
   const connections = computed(
     (): ExternalConnectionCollection => ({
-      // FXA should be at the top since it represents the Appointment subscriber.
+      // OIDC should be at the top since it represents the Appointment subscriber.
       oidc: oidc.value,
-      fxa: fxa.value,
       google: google.value,
       zoom: zoom.value,
       caldav: caldav.value,
@@ -64,7 +62,6 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
 
     oidc.value = data.value?.oidc ?? [];
     zoom.value = data.value?.zoom ?? [];
-    fxa.value = data.value?.fxa ?? [];
     google.value = data.value?.google ?? [];
     caldav.value = data.value?.caldav ?? [];
     isLoaded.value = true;
@@ -76,7 +73,6 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
   const $reset = () => {
     oidc.value = [];
     zoom.value = [];
-    fxa.value = [];
     google.value = [];
     caldav.value = [];
     isLoaded.value = false;
@@ -115,7 +111,6 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     if (data.value) {
       oidc.value = data.value?.oidc ?? oidc.value;
       zoom.value = data.value?.zoom ?? zoom.value;
-      fxa.value = data.value?.fxa ?? fxa.value;
       google.value = data.value?.google ?? google.value;
       caldav.value = data.value?.caldav ?? caldav.value;
       isLoaded.value = true;
@@ -146,7 +141,6 @@ export const useExternalConnectionsStore = defineStore('externalConnections', ()
     isLoaded,
     hasUnhealthyConnections,
     oidc,
-    fxa,
     zoom,
     google,
     init,

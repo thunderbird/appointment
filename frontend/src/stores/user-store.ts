@@ -18,7 +18,7 @@ import { usePosthog, posthog } from '@/composables/posthog';
 import { dayjsKey } from '@/keys';
 import { ColourSchemes } from '@/definitions';
 import { userManager } from '@/composables/oidcUserManager';
-import { isFxaAuth, isOidcAuth, isPasswordAuth } from '@/composables/authSchemes';
+import { isOidcAuth, isPasswordAuth } from '@/composables/authSchemes';
 
 const initialUserConfigObject = {
   language: null,
@@ -263,7 +263,7 @@ export const useUserStore = defineStore('user', () => {
   /**
    * Request subscriber login
    * @param username an auth string, could be username, one time token, or session id
-   * @param password or null if fxa authentication
+   * @param password or null if oidc authentication
    */
   const login = async (username: string, password: string | null): Promise<Error> => {
     $reset();
@@ -277,22 +277,6 @@ export const useUserStore = defineStore('user', () => {
       formData.set('username', username);
       formData.set('password', password);
       const { error, data: tokenData }: TokenResponse = await call.value('token').post(formData).json();
-
-      if (error.value || !tokenData.value.access_token) {
-        return { error: tokenData.value ?? error.value };
-      }
-
-      data.value.accessToken = tokenData.value.access_token;
-    } else if (isFxaAuth) {
-      // We get a one-time token back from the api, use it to fetch the real access token
-      const { error, data: tokenData }: TokenResponse = await call
-        .value('fxa-token', {
-          headers: {
-            Authorization: `Bearer ${username}`,
-          },
-        })
-        .post()
-        .json();
 
       if (error.value || !tokenData.value.access_token) {
         return { error: tokenData.value ?? error.value };

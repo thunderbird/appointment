@@ -10,7 +10,7 @@ from fastapi import Request
 from starlette_context import request_cycle_context
 
 from appointment.exceptions.validation import InvalidTokenException
-from defines import TEST_USER_ID, TEST_CALDAV_URL, TEST_CALDAV_USER, FXA_CLIENT_PATCH
+from defines import TEST_USER_ID, TEST_CALDAV_URL, TEST_CALDAV_USER
 
 # Factory functions
 from factory.attendee_factory import make_attendee  # noqa: F401
@@ -97,47 +97,6 @@ def _patch_mailer(monkeypatch):
     monkeypatch.setattr(Mailer, 'send', MockMailer.send)
 
 
-def _patch_fxa_client(monkeypatch):
-    class MockFxaClient:
-        @staticmethod
-        def setup(self, subscriber_id=None, token=None):
-            pass
-
-        @staticmethod
-        def get_redirect_url(self, db, state, email):
-            return FXA_CLIENT_PATCH.get('authorization_url'), state
-
-        @staticmethod
-        def get_credentials(self, code: str):
-            return FXA_CLIENT_PATCH.get('credentials_code')
-
-        @staticmethod
-        def get_profile(self):
-            return {
-                'email': FXA_CLIENT_PATCH.get('subscriber_email'),
-                'uid': FXA_CLIENT_PATCH.get('external_connection_type_id'),
-                'avatar': FXA_CLIENT_PATCH.get('subscriber_avatar_url'),
-                'displayName': FXA_CLIENT_PATCH.get('subscriber_display_name'),
-            }
-
-        @staticmethod
-        def logout(self):
-            return
-
-        @staticmethod
-        def get_jwk(self):
-            return {}
-
-    from appointment.controller.apis.fxa_client import FxaClient
-
-    monkeypatch.setattr(FxaClient, 'setup', MockFxaClient.setup)
-    monkeypatch.setattr(FxaClient, 'get_redirect_url', MockFxaClient.get_redirect_url)
-    monkeypatch.setattr(FxaClient, 'get_credentials', MockFxaClient.get_credentials)
-    monkeypatch.setattr(FxaClient, 'get_profile', MockFxaClient.get_profile)
-    monkeypatch.setattr(FxaClient, 'logout', MockFxaClient.logout)
-    monkeypatch.setattr(FxaClient, 'get_jwk', MockFxaClient.get_jwk)
-
-
 @pytest.fixture()
 def with_db():
     database_url = database.get_database_url()
@@ -189,7 +148,6 @@ def with_client(with_db, monkeypatch):
     # Patch various classes
     _patch_caldav_connector(monkeypatch)
     _patch_mailer(monkeypatch)
-    _patch_fxa_client(monkeypatch)
 
     app = server()
 

@@ -3,18 +3,17 @@ import { inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 import { createUserStore } from '@/stores/user-store';
-import { dayjsKey, callKey } from '@/keys';
-import { BooleanResponse, AuthUrlResponse, AuthUrl, Error, PydanticException, Alert } from '@/models';
+import { callKey } from '@/keys';
+import { BooleanResponse, Error, PydanticException, Alert } from '@/models';
 import { PrimaryButton, TextInput, NoticeBar, NoticeBarTypes, IconButton } from '@thunderbirdops/services-ui';
 import { handleFormError } from '@/utils';
 import { userManager } from '@/composables/oidcUserManager';
-import { isFxaAuth, isOidcAuth, isPasswordAuth } from '@/composables/authSchemes';
+import { isOidcAuth, isPasswordAuth } from '@/composables/authSchemes';
 import { PhX } from '@phosphor-icons/vue';
 
 // component constants
 const { t } = useI18n();
 const call = inject(callKey);
-const dj = inject(dayjsKey);
 const route = useRoute();
 const router = useRouter();
 const user = createUserStore(call);
@@ -77,25 +76,6 @@ const login = async () => {
     await userManager.signinRedirect({
       login_hint: email.value,
     });
-  } else if (isFxaAuth) {
-    const apiUrl = 'fxa_login';
-    const params = new URLSearchParams({
-      email: email.value,
-      timezone: dj.tz.guess(),
-    });
-
-    const { error, data }: AuthUrlResponse = await call(`${apiUrl}?${params}`).get().json();
-
-    if (error.value) {
-      loginError.value = handleFormError(t, formRef, data.value as PydanticException);
-      isLoading.value = false;
-      return;
-    }
-
-    const { url } = data.value as AuthUrl;
-
-    window.location.href = url;
-    return;
   }
 
   const { error }: Error = await user.login(email.value, password.value);
