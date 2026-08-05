@@ -58,6 +58,16 @@ class TestScheduleSlug:
         with with_db() as db:
             assert repo.schedule.slug_available_for_schedule(db, slug, other_schedule.id) is True
 
+    def test_get_by_subscriber_orders_schedules_by_id(self, with_db, make_schedule):
+        first = make_schedule()
+        second = make_schedule(calendar_id=first.calendar_id)
+        third = make_schedule(calendar_id=first.calendar_id)
+
+        with with_db() as db:
+            schedules = repo.schedule.get_by_subscriber(db, TEST_USER_ID)
+
+        assert [s.id for s in schedules] == sorted([first.id, second.id, third.id])
+
     def test_get_by_slug_is_scoped_to_owner(
         self, with_db, make_schedule, make_pro_subscriber, make_caldav_calendar
     ):
