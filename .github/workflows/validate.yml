@@ -1,10 +1,20 @@
 name: validate
 
 concurrency:
-  group: validate
+  # Keyed per PR / per branch. A bare `validate` group is global, so a new run on
+  # one branch cancels the run in flight on every other branch.
+  group: validate-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 on:
+  # Fork PRs push to the fork, never here, so `push` alone means external
+  # contributions are never validated before merge. On `pull_request` from a fork
+  # GitHub withholds every secret and forces GITHUB_TOKEN to read-only, and this
+  # repo already requires approval for outside collaborators' runs, so each one
+  # waits for a maintainer to click "Approve and run workflows".
+  pull_request:
+    branches:
+      - main
   push:
     branches:
       - '**'
