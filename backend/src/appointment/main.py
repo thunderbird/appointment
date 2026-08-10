@@ -35,6 +35,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exception_handlers import (
     http_exception_handler,
 )
+from uvicorn.logging import DefaultFormatter
 
 from slowapi.errors import RateLimitExceeded
 
@@ -51,17 +52,14 @@ def _common_setup():
     level = os.getenv('LOG_LEVEL', 'ERROR')
     use_log_stream = os.getenv('LOG_USE_STREAM', False)
 
-    log_config = {
-        'format': '%(asctime)s %(levelname)-8s %(message)s',
-        'level': getattr(logging, level),
-        'datefmt': '%Y-%m-%d %H:%M:%S',
-    }
-    if use_log_stream:
-        log_config['stream'] = sys.stdout
-    else:
-        log_config['filename'] = 'appointment.log'
+    log_handler = logging.StreamHandler(sys.stdout) if use_log_stream else logging.FileHandler('appointment.log')
+    log_handler.setFormatter(DefaultFormatter(
+        fmt='%(asctime)s %(levelprefix)s %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        use_colors=True,
+    ))
 
-    logging.basicConfig(**log_config)
+    logging.basicConfig(level=getattr(logging, level), handlers=[log_handler])
 
     # Adjust caldav
     caldav_logger = logging.getLogger('caldav')
