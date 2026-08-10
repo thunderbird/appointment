@@ -31,6 +31,13 @@ DEFAULT_CALENDAR_COLOUR = '#c276c5'
 # List of Google CalDAV domains
 GOOGLE_CALDAV_DOMAINS = ['googleusercontent.com', 'google.com', 'gmail.com']
 
+# Code Accounts returns when a subscriber's Thundermail mailbox hasn't finished provisioning yet
+# (see thunderbird-accounts mail/views.py `appointment_caldav_setup`). It's a transient race, not
+# a permanent failure, so Appointment retries a few times with backoff before giving up.
+ACCOUNTS_MAIL_NOT_READY_CODE = 'mail_account_not_ready'
+ACCOUNTS_CALDAV_SETUP_MAX_ATTEMPTS = 3
+ACCOUNTS_CALDAV_SETUP_RETRY_DELAY_SECONDS = 2
+
 # Resolves to absolute appointment package path
 BASE_PATH = f'{sys.modules["appointment"].__path__[0]}'
 

@@ -1,5 +1,6 @@
 import os
 import json
+import time
 import urllib
 from typing import Optional
 from urllib.parse import urlparse
@@ -25,9 +26,70 @@ from appointment.exceptions.validation import (
     RemoteCalendarAuthenticationException,
 )
 from appointment.l10n import l10n
-from appointment.defines import GOOGLE_CALDAV_DOMAINS
+from appointment.defines import (
+    GOOGLE_CALDAV_DOMAINS,
+    ACCOUNTS_MAIL_NOT_READY_CODE,
+    ACCOUNTS_CALDAV_SETUP_MAX_ATTEMPTS,
+    ACCOUNTS_CALDAV_SETUP_RETRY_DELAY_SECONDS,
+)
 
 router = APIRouter()
+
+
+def _request_appointment_app_password(token: str) -> str:
+    """Requests (or retrieves) the Appointment CalDAV app password from Thunderbird Accounts.
+
+    Retries with backoff when Accounts reports the mailbox is still being provisioned, and raises
+    a `RemoteCalendarConnectionError` carrying Accounts' own error message as `reason` for every
+    other failure.
+    """
+    tb_accounts_host = os.getenv('TB_ACCOUNTS_HOST')
+    appointment_caldav_secret = os.getenv('APPOINTMENT_CALDAV_SECRET')
+
+    if not tb_accounts_host or not appointment_caldav_secret:
+        raise RemoteCalendarConnectionError()
+
+    reason = None
+
+    for attempt in range(1, ACCOUNTS_CALDAV_SETUP_MAX_ATTEMPTS + 1):
+        try:
+            response = requests.post(
+                f'{tb_accounts_host}/appointment/caldav/setup/',
+                json={
+                    'appointment-secret': appointment_caldav_secret,
+                    'oidc-access-token': token,
+                },
+                timeout=10,
+            )
+        except requests.RequestException as ex:
+            sentry_sdk.capture_exception(ex)
+            raise RemoteCalendarConnectionError()
+
+        try:
+            result = response.json()
+        except ValueError:
+            result = {}
+
+        if response.ok and result.get('success'):
+            app_password = result.get('app_password')
+            if app_password:
+                return app_password
+            reason = None
+            break
+
+        reason = result.get('error')
+
+        if result.get('code') == ACCOUNTS_MAIL_NOT_READY_CODE and attempt < ACCOUNTS_CALDAV_SETUP_MAX_ATTEMPTS:
+            time.sleep(ACCOUNTS_CALDAV_SETUP_RETRY_DELAY_SECONDS * attempt)
+            continue
+
+        break
+
+    sentry_sdk.capture_message(
+        f'Appointment CalDAV auto-setup failed: {reason or "unknown error"}',
+        level='warning',
+    )
+    raise RemoteCalendarConnectionError(reason=reason)
 
 
 def _resolve_caldav_url(connection_url: str, redis_client: Redis) -> str:
@@ -163,13 +225,6 @@ def oidc_autodiscover_auth(
 
     connection_url = _resolve_caldav_url(os.getenv('TB_ACCOUNTS_CALDAV_URL'), redis_client)
 
-    # Request or retrieve an app password from Thunderbird Accounts for CalDAV authentication
-    tb_accounts_host = os.getenv('TB_ACCOUNTS_HOST')
-    appointment_caldav_secret = os.getenv('APPOINTMENT_CALDAV_SECRET')
-
-    if not tb_accounts_host or not appointment_caldav_secret:
-        raise RemoteCalendarConnectionError()
-
     # The CalDAV server authenticates against the account's OIDC login (`preferred_username`),
     # which can differ from `subscriber.email` (the standard OIDC `email` claim, used for
     # notifications). Introspect the token to recover the login identity for CalDAV auth.
@@ -178,29 +233,7 @@ def oidc_autodiscover_auth(
         raise RemoteCalendarConnectionError()
     caldav_user = token_data.get('preferred_username') or token_data.get('username') or subscriber.email
 
-    try:
-        response = requests.post(
-            f'{tb_accounts_host}/appointment/caldav/setup/',
-            json={
-                'appointment-secret': appointment_caldav_secret,
-                'oidc-access-token': token,
-            },
-            timeout=10,
-        )
-
-        response.raise_for_status()
-        result = response.json()
-
-        if not result.get('success'):
-            raise RemoteCalendarConnectionError()
-
-        app_password = result.get('app_password')
-
-        if not app_password:
-            raise RemoteCalendarConnectionError()
-    except requests.RequestException as ex:
-        sentry_sdk.capture_exception(ex)
-        raise RemoteCalendarConnectionError()
+    app_password = _request_appointment_app_password(token)
 
     con = CalDavConnector(
         db=db,
