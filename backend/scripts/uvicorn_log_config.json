@@ -1,6 +1,11 @@
 {
   "version": 1,
   "disable_existing_loggers": false,
+  "filters": {
+    "access_log_level": {
+      "()": "appointment.logs.AccessLogLevelFilter"
+    }
+  },
   "formatters": {
     "default": {
       "()": "uvicorn.logging.DefaultFormatter",
@@ -11,7 +16,8 @@
     "access": {
       "()": "uvicorn.logging.AccessFormatter",
       "fmt": "%(asctime)s %(levelprefix)s %(client_addr)s - \"%(request_line)s\" %(status_code)s",
-      "datefmt": "%Y-%m-%d %H:%M:%S"
+      "datefmt": "%Y-%m-%d %H:%M:%S",
+      "use_colors": true
     }
   },
   "handlers": {
@@ -22,6 +28,7 @@
     },
     "access": {
       "formatter": "access",
+      "filters": ["access_log_level"],
       "class": "logging.StreamHandler",
       "stream": "ext://sys.stdout"
     }
