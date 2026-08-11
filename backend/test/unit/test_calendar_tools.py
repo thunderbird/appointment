@@ -1,5 +1,6 @@
-from appointment.controller.calendar import Tools, GoogleConnector
+from appointment.controller.calendar import Tools, GoogleConnector, CalDavConnector
 from appointment.database import schemas, models
+from appointment.exceptions.calendar import RemoteCalendarAuthenticationError
 from datetime import datetime, timedelta, time, date, timezone
 from unittest.mock import Mock, MagicMock, PropertyMock
 from starlette_context import request_cycle_context
@@ -180,6 +181,43 @@ class TestTools:
             now + timedelta(minutes=60),  # requested slot
             now + timedelta(minutes=90),  # booked slot
         ]
+
+    def test_existing_events_for_schedule_skips_caldav_calendar_on_auth_failure(
+        self, monkeypatch, with_db, make_pro_subscriber, make_caldav_calendar, make_schedule
+    ):
+        """One CalDAV calendar with bad/expired credentials shouldn't prevent availability
+        from being computed for the subscriber's other calendars."""
+        subscriber = make_pro_subscriber()
+        bad_calendar = make_caldav_calendar(
+            subscriber_id=subscriber.id, connected=True, url='https://bad.example.com/caldav'
+        )
+        good_calendar = make_caldav_calendar(
+            subscriber_id=subscriber.id, connected=True, url='https://good.example.com/caldav'
+        )
+        schedule = make_schedule(calendar_id=good_calendar.id)
+
+        with with_db() as db:
+            db.add(schedule)
+            db.refresh(schedule)
+
+            def mock_get_busy_time(self, calendar_ids, start, end):
+                if self.url == bad_calendar.url:
+                    raise RemoteCalendarAuthenticationError(reason='Unauthorized')
+                return [{'start': datetime.now(), 'end': datetime.now() + timedelta(hours=1)}]
+
+            monkeypatch.setattr(CalDavConnector, 'get_busy_time', mock_get_busy_time)
+
+            events = Tools.existing_events_for_schedule(
+                schedule=schedule,
+                calendars=[bad_calendar, good_calendar],
+                subscriber=subscriber,
+                google_client=Mock(),
+                db=db,
+                redis=None,
+            )
+
+        # Only the healthy calendar's busy time should come through
+        assert len(events) == 1
 
 
 class TestVCreate:
