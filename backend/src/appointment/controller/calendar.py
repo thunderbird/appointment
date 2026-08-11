@@ -425,8 +425,19 @@ class CalDavConnector(BaseConnector):
 
         perf_start = time.perf_counter_ns()
 
-        calendar = self.client.calendar(url=calendar_ids[0])
-        response = calendar.freebusy_request(time_min, time_max)
+        try:
+            calendar = self.client.calendar(url=calendar_ids[0])
+            response = calendar.freebusy_request(time_min, time_max)
+        except lxml.etree.XMLSyntaxError as ex:
+            # Server returned invalid XML (e.g. a JSON auth error body instead of a CalDAV response)
+            logging.warning(f'FreeBusy XML Error: {ex}')
+            raise TestConnectionFailed(reason=l10n('remote-calendar-reason-invalid-response'))
+        except caldav.lib.error.AuthorizationError as ex:
+            logging.warning(f'FreeBusy AuthorizationError: {ex}')
+            reason = ex.reason
+            if reason == 'Unauthorized' or reason == caldav.lib.error.DAVError.reason:
+                raise RemoteCalendarAuthenticationError(reason=l10n('remote-calendar-reason-unauthorized'))
+            raise TestConnectionFailed(reason=reason)
 
         perf_end = time.perf_counter_ns()
         print(f'CALDAV FreeBusy response: {(perf_end - perf_start) / 1000000000} seconds')
@@ -570,12 +581,23 @@ class CalDavConnector(BaseConnector):
         search_start = datetime.strptime(start, DATEFMT)
         search_end = datetime.strptime(end, DATEFMT)
 
-        result = calendar.search(
-            start=search_start,
-            end=search_end,
-            event=True,
-            expand=False,
-        )
+        try:
+            result = calendar.search(
+                start=search_start,
+                end=search_end,
+                event=True,
+                expand=False,
+            )
+        except lxml.etree.XMLSyntaxError as ex:
+            # Server returned invalid XML (e.g. a JSON auth error body instead of a CalDAV response)
+            logging.warning(f'List Events XML Error: {ex}')
+            raise TestConnectionFailed(reason=l10n('remote-calendar-reason-invalid-response'))
+        except caldav.lib.error.AuthorizationError as ex:
+            logging.warning(f'List Events AuthorizationError: {ex}')
+            reason = ex.reason
+            if reason == 'Unauthorized' or reason == caldav.lib.error.DAVError.reason:
+                raise RemoteCalendarAuthenticationError(reason=l10n('remote-calendar-reason-unauthorized'))
+            raise TestConnectionFailed(reason=reason)
 
         all_instances = []
 
