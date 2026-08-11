@@ -806,6 +806,7 @@ class Tools:
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
         attendee: schemas.AttendeeBase,
+        schedule_name: str,
     ):
         """send a booking confirmation email to attendee with .ics file attached"""
         ics_file = Attachment(
@@ -833,6 +834,8 @@ class Tools:
             send_invite_email,
             organizer.name,
             organizer.email,
+            schedule_name=schedule_name,
+            attendee_email=attendee.email,
             date=date,
             duration=slot.duration,
             to=attendee.email,
@@ -848,6 +851,7 @@ class Tools:
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
         attendee: schemas.AttendeeBase,
+        schedule_name: str,
     ):
         """send a hold booking email to attendee with .ics file attached"""
         ics_file = Attachment(
@@ -874,7 +878,7 @@ class Tools:
             organizer.name,
             owner_email=organizer.email,
             attendee_email=attendee.email,
-            schedule_name=slot.schedule.name,
+            schedule_name=schedule_name,
             date=date,
             duration=slot.duration,
             to=attendee.email,

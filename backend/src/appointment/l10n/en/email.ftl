@@ -26,16 +26,19 @@ mail-brand-footer-support = Need help? Visit Support
 invite-mail-subject = Booking confirmed from {-brand-name}
 invite-mail-plain = {-brand-footer}
 
-invite-mail-html-heading-name = { $name }
-invite-mail-html-heading-email = ({ $email })
-invite-mail-html-heading-text = has accepted your booking:
-invite-mail-html-time = { $duration } mins
+# Variables:
+# $name_and_email (String) - Pre-formatted HTML: owner's name followed by their email in parentheses
+invite-mail-html-heading = Your booking with { $name_and_email } has been CONFIRMED. Please find your meeting request details below.
+# Variables:
+# $duration (String) - Length of minutes the appointment will be
+invite-mail-html-time = { $duration } minutes
+invite-mail-html-badge = Confirmed
+invite-mail-html-meeting-with = Meeting with:
 # Variables:
 # $meeting_link_url (String) - URL for the meeting link
 invite-mail-plain-meeting-link = Join Meeting: { $meeting_link_url }
-invite-mail-html-meeting-link = Join Meeting
-invite-mail-html-invite-is-attached = Your calendar invite is attached.
-invite-mail-html-download = Download
+invite-mail-html-meeting-link = Meeting link
+invite-mail-html-invite-is-attached = An invite is attached to this email.
 
 ## New Booking
 

@@ -26,16 +26,19 @@ mail-brand-footer-support = Hilfe benötigt? Support besuchen
 invite-mail-subject = Buchung bestätigt von {-brand-name}
 invite-mail-plain = {-brand-footer}
 
-invite-mail-html-heading-name = { $name }
-invite-mail-html-heading-email = ({ $email })
-invite-mail-html-heading-text = hat deine Buchung bestätigt:
-invite-mail-html-time = { $duration } min
+# Variables:
+# $name_and_email (String) - Vorformatiertes HTML: Name der/des Eigentümer:in gefolgt von der E-Mail-Adresse in Klammern
+invite-mail-html-heading = Deine Buchung mit { $name_and_email } wurde BESTÄTIGT. Deine Termindetails findest du unten.
+# Variables:
+# $duration (String) - Length of minutes the appointment will be
+invite-mail-html-time = { $duration } Minuten
+invite-mail-html-badge = Bestätigt
+invite-mail-html-meeting-with = Termin mit:
 # Variables:
 # $meeting_link_url (String) - URL for the meeting link
 invite-mail-plain-meeting-link = Meeting beitreten: { $meeting_link_url }
-invite-mail-html-meeting-link = Meeting beitreten
-invite-mail-html-invite-is-attached = Deine Kalendereinladung ist angehängt.
-invite-mail-html-download = Download
+invite-mail-html-meeting-link = Meeting-Link
+invite-mail-html-invite-is-attached = Eine Einladung ist dieser E-Mail angehängt.
 
 ## New Booking
 

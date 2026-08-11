@@ -16,11 +16,15 @@ from appointment.controller.mailer import (
 from appointment.defines import APP_ENV_DEV
 
 
-def send_invite_email(owner_name, owner_email, date, duration, to, attachment, lang, meeting_link_url=None):
+def send_invite_email(
+    owner_name, owner_email, schedule_name, attendee_email, date, duration, to, attachment, lang,
+    meeting_link_url=None,
+):
     try:
         mail = InvitationMail(
-            name=owner_name, email=owner_email, date=date, duration=duration,
-            to=to, attachments=[attachment], lang=lang, meeting_link_url=meeting_link_url,
+            schedule_name=schedule_name, attendee_email=attendee_email, name=owner_name, email=owner_email,
+            date=date, duration=duration, to=to, attachments=[attachment], lang=lang,
+            meeting_link_url=meeting_link_url,
         )
         mail.send()
     except Exception as e:

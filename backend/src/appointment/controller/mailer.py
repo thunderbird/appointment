@@ -228,16 +228,41 @@ class BaseBookingMail(Mailer):
 
 
 class InvitationMail(BaseBookingMail):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, schedule_name, attendee_email, *args, **kwargs):
         """Init Mailer with invitation/booking-accepted specific defaults
         To: Bookee
         """
+        self.schedule_name = schedule_name
+        self.attendee_email = attendee_email
         lang = kwargs.get('lang')
         default_kwargs = {
             'subject': l10n('invite-mail-subject', lang=lang),
             'plain': l10n('invite-mail-plain', lang=lang),
         }
         super().__init__(*args, **default_kwargs, **kwargs)
+
+    def _attachments(self):
+        """This message body only uses the clock and check icons, not the calendar one"""
+        path = os.path.join(BASE_PATH, 'templates/assets/img/icons')
+
+        with open(f'{path}/clock.png', 'rb') as fh:
+            clock_icon = fh.read()
+        with open(f'{path}/circle-check.png', 'rb') as fh:
+            check_icon = fh.read()
+
+        return [
+            *Mailer._attachments(self),
+            Attachment(
+                mime=('image', 'png'),
+                filename='clock.png',
+                data=clock_icon,
+            ),
+            Attachment(
+                mime=('image', 'png'),
+                filename='circle-check.png',
+                data=check_icon,
+            ),
+        ]
 
     def text(self):
         plain = super().text()
@@ -252,7 +277,9 @@ class InvitationMail(BaseBookingMail):
         return get_template('invite.jinja2').render(
             name=self.name,
             email=self.email,
-            time_range=self.time_range,
+            attendee_email=self.attendee_email,
+            schedule_name=self.schedule_name,
+            start_time=self.date.strftime(self.time_format),
             timezone=self.timezone,
             day=self.day,
             duration=self.duration,
@@ -260,8 +287,8 @@ class InvitationMail(BaseBookingMail):
             lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
-            calendar_icon_cid=self._attachments()[2].filename,
-            clock_icon_cid=self._attachments()[3].filename,
+            clock_icon_cid=self._attachments()[2].filename,
+            check_icon_cid=self._attachments()[3].filename,
         )
 
 
