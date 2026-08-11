@@ -21,6 +21,11 @@ mail-brand-footer-legal = Legal
 mail-brand-footer-participation = Participation
 mail-brand-footer-support = Need help? Visit Support
 
+# Variables:
+# $duration (String) - Length of minutes the appointment will be
+mail-html-time = { $duration } minutes
+mail-html-meeting-with = Meeting with:
+
 ## Invitation
 
 invite-mail-subject = Booking confirmed from {-brand-name}
@@ -29,11 +34,7 @@ invite-mail-plain = {-brand-footer}
 # Variables:
 # $name_and_email (String) - Pre-formatted HTML: owner's name followed by their email in parentheses
 invite-mail-html-heading = Your booking with { $name_and_email } has been CONFIRMED. Please find your meeting request details below.
-# Variables:
-# $duration (String) - Length of minutes the appointment will be
-invite-mail-html-time = { $duration } minutes
 invite-mail-html-badge = Confirmed
-invite-mail-html-meeting-with = Meeting with:
 # Variables:
 # $meeting_link_url (String) - URL for the meeting link
 invite-mail-plain-meeting-link = Join Meeting: { $meeting_link_url }
@@ -96,10 +97,6 @@ confirm-mail-plain = { $name } ({ $email }) is requesting to book a time slot in
 # $name_and_email (String) - Pre-formatted HTML: name followed by the email in parentheses
 # $schedule_name (String) - The name of the schedule used to book the appointment
 confirm-mail-html-heading = { $name_and_email } is requesting to book a time slot in { $schedule_name }.
-# Variables:
-# $duration (String) - Length of minutes the appointment will be
-confirm-mail-html-time = { $duration } minutes
-confirm-mail-html-meeting-with = Meeting with:
 confirm-mail-html-open-link = Open on Thunderbird Appointment
 
 confirm-mail-html-confirm-action = Confirm
@@ -111,11 +108,7 @@ cancel-mail-subject = Booking request cancelled
 # Variables:
 # $name_and_email (String) - Pre-formatted HTML: owner's name followed by their email in parentheses
 cancel-mail-html-heading = The following booking was CANCELLED by { $name_and_email }.
-# Variables:
-# $duration (String) - Length of minutes the appointment will be
-cancel-mail-html-time = { $duration } minutes
 cancel-mail-html-badge = Cancelled
-cancel-mail-html-meeting-with = Meeting with:
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $day (String) - Localized date of the requested appointment
@@ -130,11 +123,7 @@ reject-mail-subject = Booking request declined
 # Variables:
 # $name_and_email (String) - Pre-formatted HTML: owner's name followed by their email in parentheses
 reject-mail-html-heading = The following booking request was DECLINED by { $name_and_email }.
-# Variables:
-# $duration (String) - Length of minutes the appointment will be
-reject-mail-html-time = { $duration } minutes
 reject-mail-html-badge = Declined
-reject-mail-html-meeting-with = Meeting with:
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $day (String) - Localized date of the requested appointment
@@ -149,10 +138,6 @@ pending-mail-subject = Your booking request is pending approval
 # Variables:
 # $name_and_email (String) - Pre-formatted HTML: owner's name followed by their email in parentheses
 pending-mail-html-heading = Your booking with { $name_and_email } has been requested and PENDING confirmation. Please find your meeting details below. You will receive another email once that request has been approved or declined.
-# Variables:
-# $duration (String) - Length of minutes the appointment will be
-pending-mail-html-time = { $duration } minutes
-pending-mail-html-meeting-with = Meeting with:
 pending-mail-html-badge = Pending
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule

@@ -33,11 +33,11 @@
     {{ day }} {{ start_time }} {{ timezone }}
   </div>
   <div style="color: {{ colour_icon_secondary }}; display: flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; margin-bottom: 16px;">
-    {{ clock_image_small|safe }} {{ l10n('reject-mail-html-time', {'duration': duration}, lang) }}
+    {{ clock_image_small|safe }} {{ l10n('mail-html-time', {'duration': duration}, lang) }}
   </div>
   <hr style="border: none; border-top: 1px solid {{ colour_border }}; margin: 0 0 16px 0;" />
   <div style="color: {{ colour_text_base }}; font-size: 11px; margin-bottom: 2px;">
-    {{ l10n('reject-mail-html-meeting-with', lang=lang) }}
+    {{ l10n('mail-html-meeting-with', lang=lang) }}
   </div>
   <div>
     {{ attendee_email }}
