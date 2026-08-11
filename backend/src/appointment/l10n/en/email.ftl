@@ -18,7 +18,7 @@ mail-brand-reply-hint = Have questions? Thunderbird is here to help. Get in touc
 mail-brand-footer = Thunderbird is part of MZLA Technologies Corporation, a wholly owned subsidiary of the not-for-profit Mozilla.org.
 mail-brand-footer-privacy = Privacy Policy
 mail-brand-footer-legal = Legal
-mail-brand-footer-participation = Participation
+mail-brand-footer-participation = Participation Guidelines
 mail-brand-footer-support = Need help? Visit Support
 
 # Variables:

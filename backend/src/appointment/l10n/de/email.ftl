@@ -18,7 +18,7 @@ mail-brand-reply-hint = Du hast Fragen? Wir helfen gern! Du erreichst uns über 
 mail-brand-footer = Thunderbird ist Teil der MZLA Technologies Corporation, einer hundertprozentigen Tochtergesellschaft der gemeinnützigen Organisation Mozilla.org.
 mail-brand-footer-privacy = Datenschutzrichtlinie
 mail-brand-footer-legal = Impressum
-mail-brand-footer-participation = Mitmachen
+mail-brand-footer-participation = Teilnahmerichtlinien
 mail-brand-footer-support = Hilfe benötigt? Support besuchen
 
 # Variables:
