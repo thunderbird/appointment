@@ -477,10 +477,10 @@ class CalDavConnector(BaseConnector):
                     break
         except IndexError as ex:
             # Library has an issue with top level urls, probably due to caldav spec?
-            logging.error(f'IE: Error testing connection {ex}')
+            logging.warning(f'IE: Error testing connection {ex}')
             raise TestConnectionFailed(reason=None)
         except KeyError as ex:
-            logging.error(f'KE: Error testing connection {ex}')
+            logging.warning(f'KE: Error testing connection {ex}')
             raise TestConnectionFailed(reason=None)
         except requests.exceptions.RequestException:
             raise TestConnectionFailed(reason=None)
@@ -489,11 +489,11 @@ class CalDavConnector(BaseConnector):
             raise TestConnectionFailed(reason=l10n('remote-calendar-reason-doesnt-support-auth'))
         except lxml.etree.XMLSyntaxError as ex:
             # Server returned invalid XML (e.g., an HTML error page like nginx 404)
-            logging.error(f'Test Connection XML Error: {ex}')
+            logging.warning(f'Test Connection XML Error: {ex}')
             raise TestConnectionFailed(reason=l10n('remote-calendar-reason-invalid-response'))
         except caldav.lib.error.NotFoundError as ex:
             # Good server, bad URL - 404 response
-            logging.error(f'Test Connection NotFoundError: {ex}')
+            logging.warning(f'Test Connection NotFoundError: {ex}')
             raise TestConnectionFailed(reason=l10n('remote-calendar-reason-not-found'))
         except (
             caldav.lib.error.PropfindError,
@@ -503,7 +503,7 @@ class CalDavConnector(BaseConnector):
             PropfindError: Some properties could not be retrieved.
             AuthorizationError: Credentials are not accepted.
             """
-            logging.error(f'Test Connection Error: {ex}')
+            logging.warning(f'Test Connection Error: {ex}')
 
             reason = ex.reason
             # Don't use the default "no reason" error message if we encounter it.
