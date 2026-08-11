@@ -648,9 +648,6 @@ class TestVEventTimezoneFallback:
             booking_status=models.BookingStatus.requested,
         )
 
-    # Methods that require an explicit schedule_name argument
-    SCHEDULE_NAME_METHODS = {'send_invitation_vevent', 'send_hold_vevent', 'send_reject_vevent'}
-
     def _make_organizer(self):
         organizer = Mock()
         organizer.name = 'Test Organizer'
@@ -678,9 +675,8 @@ class TestVEventTimezoneFallback:
         slot = self._make_slot()
         attendee = self._make_attendee('America/New_York')
 
-        extra_kwargs = {'schedule_name': 'Test Schedule'} if method_name in self.SCHEDULE_NAME_METHODS else {}
         method = getattr(tools, method_name)
-        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee, **extra_kwargs)
+        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee, schedule_name='Test Schedule')
 
         bg.add_task.assert_called_once()
         call_kwargs = bg.add_task.call_args
@@ -702,9 +698,8 @@ class TestVEventTimezoneFallback:
         slot = self._make_slot()
         attendee = self._make_attendee(bad_tz)
 
-        extra_kwargs = {'schedule_name': 'Test Schedule'} if method_name in self.SCHEDULE_NAME_METHODS else {}
         method = getattr(tools, method_name)
-        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee, **extra_kwargs)
+        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee, schedule_name='Test Schedule')
 
         bg.add_task.assert_called_once()
         call_kwargs = bg.add_task.call_args
@@ -726,9 +721,8 @@ class TestVEventTimezoneFallback:
         slot = self._make_slot()
         attendee = self._make_attendee(tz=None)
 
-        extra_kwargs = {'schedule_name': 'Test Schedule'} if method_name in self.SCHEDULE_NAME_METHODS else {}
         method = getattr(tools, method_name)
-        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee, **extra_kwargs)
+        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee, schedule_name='Test Schedule')
 
         bg.add_task.assert_called_once()
         call_kwargs = bg.add_task.call_args
