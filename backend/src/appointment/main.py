@@ -43,6 +43,17 @@ from slowapi.errors import RateLimitExceeded
 import sentry_sdk
 
 
+class _SuppressCaldavXmlParseCritical(logging.Filter):
+    """The caldav library logs a full traceback at CRITICAL via the *root* logger
+    (bypassing its own 'caldav' logger) whenever a server response isn't valid XML,
+    e.g. a JSON auth-error body returned for an expired/invalid CalDAV credential.
+    See https://github.com/python-caldav/caldav/blob/master/caldav/davclient.py
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        return 'Expected some valid XML from the server' not in record.getMessage()
+
+
 def _common_setup():
     # load any available .env into env
     if os.getenv('APP_ENV') != APP_ENV_TEST:
@@ -64,6 +75,10 @@ def _common_setup():
     # Adjust caldav
     caldav_logger = logging.getLogger('caldav')
     caldav_logger.setLevel(logging.CRITICAL)
+
+    # caldav's XML-parse-failure log bypasses the 'caldav' logger above (it calls the
+    # root logger directly), so it needs its own filter to keep it out of Sentry
+    logging.getLogger().addFilter(_SuppressCaldavXmlParseCritical())
 
     logging.debug('Logger started!')
 
