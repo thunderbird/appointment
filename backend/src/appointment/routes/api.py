@@ -572,7 +572,11 @@ def cancel_my_appointment(
 
     # Send cancel information to all slots' bookees
     for slot in appointment.slots:
-        Tools().send_cancel_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
+        schedule = repo.schedule.get(db, schedule_id=slot.schedule_id)
+        schedule_name = schedule.name if schedule else appointment.title
+        Tools().send_cancel_vevent(
+            background_tasks, appointment, slot, subscriber, slot.attendee, schedule_name=schedule_name,
+        )
 
         # If needed, delete appointment's Zoom meeting through Zoom client
         if zoom_client:
