@@ -193,7 +193,7 @@ class BaseBookingMail(Mailer):
 
         # If value is key then there's no localization available, set a default.
         if self.time_format == 'time-format':
-            self.time_format = '%I:%M%p'
+            self.time_format = '%I:%M %p'
 
         date_end = self.date + datetime.timedelta(minutes=self.duration)
 
@@ -394,7 +394,7 @@ class CancelMail(Mailer):
         # Localize date and time
         time_format = l10n('time-format', lang=self.lang)
         if time_format == 'time-format':
-            time_format = '%I:%M%p'
+            time_format = '%I:%M %p'
 
         date_end = self.date + datetime.timedelta(minutes=self.duration)
         self.time_range = ' - '.join([date.strftime(time_format), date_end.strftime(time_format)])
@@ -427,12 +427,15 @@ class CancelMail(Mailer):
 
 
 class RejectionMail(Mailer):
-    def __init__(self, owner_name, date, duration, *args, **kwargs):
+    def __init__(self, owner_name, owner_email, attendee_email, schedule_name, date, duration, *args, **kwargs):
         """Init Mailer with rejection specific defaults
         To: Bookee
         Reply-To: Event owner
         """
         self.owner_name = owner_name
+        self.owner_email = owner_email
+        self.attendee_email = attendee_email
+        self.schedule_name = schedule_name
         self.date = date
         self.duration = duration
         default_kwargs = {'subject': l10n('reject-mail-subject', lang=kwargs.get('lang'))}
@@ -440,16 +443,39 @@ class RejectionMail(Mailer):
         self.method = 'CANCEL'
 
         # Localize date and time
-        time_format = l10n('time-format', lang=self.lang)
-        if time_format == 'time-format':
-            time_format = '%I:%M%p'
+        self.time_format = l10n('time-format', lang=self.lang)
+        if self.time_format == 'time-format':
+            self.time_format = '%I:%M %p'
 
         date_end = self.date + datetime.timedelta(minutes=self.duration)
-        self.time_range = ' - '.join([date.strftime(time_format), date_end.strftime(time_format)])
+        self.time_range = ' - '.join([date.strftime(self.time_format), date_end.strftime(self.time_format)])
         self.timezone = ''
         if self.date.tzinfo:
             self.timezone = f'({date.strftime("%Z")})'
         self.day = format_date(date, format='full', locale=self.lang or FALLBACK_LOCALE)
+
+    def _attachments(self):
+        """Icons for the message body"""
+        path = os.path.join(BASE_PATH, 'templates/assets/img/icons')
+
+        with open(f'{path}/clock.png', 'rb') as fh:
+            clock_icon = fh.read()
+        with open(f'{path}/triangle-error.png', 'rb') as fh:
+            error_icon = fh.read()
+
+        return [
+            *super()._attachments(),
+            Attachment(
+                mime=('image', 'png'),
+                filename='clock.png',
+                data=clock_icon,
+            ),
+            Attachment(
+                mime=('image', 'png'),
+                filename='triangle-error.png',
+                data=error_icon,
+            ),
+        ]
 
     def text(self):
         return l10n(
@@ -461,11 +487,18 @@ class RejectionMail(Mailer):
     def html(self):
         return get_template('rejected.jinja2').render(
             owner_name=self.owner_name,
+            owner_email=self.owner_email,
+            attendee_email=self.attendee_email,
+            schedule_name=self.schedule_name,
             day=self.day,
-            time_range=self.time_range,
+            start_time=self.date.strftime(self.time_format),
             timezone=self.timezone,
-            tbpro_logo_cid=self._attachments()[0].filename,
+            duration=self.duration,
             lang=self.lang,
+            # Image cids
+            tbpro_logo_cid=self._attachments()[0].filename,
+            clock_icon_cid=self._attachments()[2].filename,
+            triangle_icon_cid=self._attachments()[3].filename,
         )
 
 

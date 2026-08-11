@@ -893,6 +893,7 @@ class Tools:
         slot: schemas.Slot,
         organizer: schemas.Subscriber,
         attendee: schemas.AttendeeBase,
+        schedule_name: str,
     ):
         """send a booking rejection email to attendee with .ics file attached"""
         ics_file = Attachment(
@@ -917,6 +918,9 @@ class Tools:
         background_tasks.add_task(
             send_rejection_email,
             organizer.name,
+            owner_email=organizer.email,
+            attendee_email=attendee.email,
+            schedule_name=schedule_name,
             date=date,
             duration=slot.duration,
             to=attendee.email,

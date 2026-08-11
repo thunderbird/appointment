@@ -643,7 +643,9 @@ def handle_schedule_availability_decision(
         # For non-Google calendars, send branded rejection email to the bookee.
         # For Google, the delete with sendUpdates handles the cancellation notification.
         if not use_google_invite:
-            Tools().send_reject_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
+            Tools().send_reject_vevent(
+                background_tasks, appointment, slot, subscriber, slot.attendee, schedule_name=schedule.name,
+            )
 
         # mark the slot as BookingStatus.declined
         slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.declined)

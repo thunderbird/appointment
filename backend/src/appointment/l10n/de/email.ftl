@@ -127,11 +127,13 @@ cancel-mail-plain = { $owner_name } hat deine Buchungsanfrage für { $day } um {
 
 reject-mail-subject = Buchungsanfrage abgelehnt
 # Variables:
-# $owner_name (String) - Name of the person who owns the schedule
-# $day (String) - Localized date of the requested appointment
-# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
-# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
-reject-mail-html-heading = { $owner_name } hat deine Buchungsanfrage für { $day } um { $time_range } { $timezone } abgelehnt.
+# $name_and_email (String) - Vorformatiertes HTML: Name der/des Eigentümer:in gefolgt von der E-Mail-Adresse in Klammern
+reject-mail-html-heading = Die folgende Buchungsanfrage wurde von { $name_and_email } ABGELEHNT.
+# Variables:
+# $duration (String) - Length of minutes the appointment will be
+reject-mail-html-time = { $duration } Minuten
+reject-mail-html-badge = Abgelehnt
+reject-mail-html-meeting-with = Termin mit:
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $day (String) - Localized date of the requested appointment

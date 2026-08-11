@@ -126,11 +126,13 @@ cancel-mail-plain = { $owner_name } cancelled your booking request for { $day } 
 
 reject-mail-subject = Booking request declined
 # Variables:
-# $owner_name (String) - Name of the person who owns the schedule
-# $day (String) - Localized date of the requested appointment
-# $time_range (String) - Time range of the requested appointment (e.g. "2:00PM - 2:30PM")
-# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
-reject-mail-html-heading = { $owner_name } denied your booking request for { $day } at { $time_range } { $timezone }.
+# $name_and_email (String) - Pre-formatted HTML: owner's name followed by their email in parentheses
+reject-mail-html-heading = The following booking request was DECLINED by { $name_and_email }.
+# Variables:
+# $duration (String) - Length of minutes the appointment will be
+reject-mail-html-time = { $duration } minutes
+reject-mail-html-badge = Declined
+reject-mail-html-meeting-with = Meeting with:
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $day (String) - Localized date of the requested appointment
