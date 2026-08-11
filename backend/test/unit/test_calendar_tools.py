@@ -642,11 +642,13 @@ class TestVEventTimezoneFallback:
         return tools
 
     def _make_slot(self):
-        return schemas.SlotBase(
-            start=datetime(2026, 3, 15, 14, 0, 0),
-            duration=30,
-            booking_status=models.BookingStatus.requested,
-        )
+        slot = Mock()
+        slot.start = datetime(2026, 3, 15, 14, 0, 0)
+        slot.duration = 30
+        slot.booking_status = models.BookingStatus.requested
+        slot.schedule = Mock()
+        slot.schedule.name = 'Test Schedule'
+        return slot
 
     def _make_organizer(self):
         organizer = Mock()
