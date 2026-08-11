@@ -3,6 +3,10 @@ allowBuilds:
   core-js: true
   msw: true
   unrs-resolver: true
+minimumReleaseAgeExclude:
+  - '@posthog/browser-common@0.5.0'
+  - '@posthog/types@1.402.3'
+  - posthog-js@1.415.5
 overrides:
   brace-expansion@<1.1.17: ^1.1.17
   brace-expansion@<1.1.18: ^1.1.18
