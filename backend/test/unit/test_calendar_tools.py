@@ -642,13 +642,14 @@ class TestVEventTimezoneFallback:
         return tools
 
     def _make_slot(self):
-        slot = Mock()
-        slot.start = datetime(2026, 3, 15, 14, 0, 0)
-        slot.duration = 30
-        slot.booking_status = models.BookingStatus.requested
-        slot.schedule = Mock()
-        slot.schedule.name = 'Test Schedule'
-        return slot
+        return schemas.SlotBase(
+            start=datetime(2026, 3, 15, 14, 0, 0),
+            duration=30,
+            booking_status=models.BookingStatus.requested,
+        )
+
+    # Methods that require an explicit schedule_name argument
+    SCHEDULE_NAME_METHODS = {'send_invitation_vevent', 'send_hold_vevent'}
 
     def _make_organizer(self):
         organizer = Mock()
@@ -677,8 +678,9 @@ class TestVEventTimezoneFallback:
         slot = self._make_slot()
         attendee = self._make_attendee('America/New_York')
 
+        extra_kwargs = {'schedule_name': 'Test Schedule'} if method_name in self.SCHEDULE_NAME_METHODS else {}
         method = getattr(tools, method_name)
-        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee)
+        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee, **extra_kwargs)
 
         bg.add_task.assert_called_once()
         call_kwargs = bg.add_task.call_args
@@ -700,8 +702,9 @@ class TestVEventTimezoneFallback:
         slot = self._make_slot()
         attendee = self._make_attendee(bad_tz)
 
+        extra_kwargs = {'schedule_name': 'Test Schedule'} if method_name in self.SCHEDULE_NAME_METHODS else {}
         method = getattr(tools, method_name)
-        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee)
+        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee, **extra_kwargs)
 
         bg.add_task.assert_called_once()
         call_kwargs = bg.add_task.call_args
@@ -723,8 +726,9 @@ class TestVEventTimezoneFallback:
         slot = self._make_slot()
         attendee = self._make_attendee(tz=None)
 
+        extra_kwargs = {'schedule_name': 'Test Schedule'} if method_name in self.SCHEDULE_NAME_METHODS else {}
         method = getattr(tools, method_name)
-        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee)
+        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee, **extra_kwargs)
 
         bg.add_task.assert_called_once()
         call_kwargs = bg.add_task.call_args
@@ -739,7 +743,9 @@ class TestVEventTimezoneFallback:
         slot.meeting_link_url = 'https://zoom.us/j/12345'
         appointment = self._make_appointment(location_url='https://fallback.example.com')
 
-        tools.send_invitation_vevent(bg, appointment, slot, self._make_organizer(), self._make_attendee())
+        tools.send_invitation_vevent(
+            bg, appointment, slot, self._make_organizer(), self._make_attendee(), schedule_name='Test Schedule',
+        )
 
         call_kwargs = bg.add_task.call_args
         assert call_kwargs.kwargs['meeting_link_url'] == 'https://zoom.us/j/12345'
@@ -752,7 +758,9 @@ class TestVEventTimezoneFallback:
         slot.meeting_link_url = None
         appointment = self._make_appointment(location_url='https://fallback.example.com')
 
-        tools.send_invitation_vevent(bg, appointment, slot, self._make_organizer(), self._make_attendee())
+        tools.send_invitation_vevent(
+            bg, appointment, slot, self._make_organizer(), self._make_attendee(), schedule_name='Test Schedule',
+        )
 
         call_kwargs = bg.add_task.call_args
         assert call_kwargs.kwargs['meeting_link_url'] == 'https://fallback.example.com'
@@ -765,7 +773,9 @@ class TestVEventTimezoneFallback:
         slot.meeting_link_url = None
         appointment = self._make_appointment(location_url=None)
 
-        tools.send_invitation_vevent(bg, appointment, slot, self._make_organizer(), self._make_attendee())
+        tools.send_invitation_vevent(
+            bg, appointment, slot, self._make_organizer(), self._make_attendee(), schedule_name='Test Schedule',
+        )
 
         call_kwargs = bg.add_task.call_args
         assert call_kwargs.kwargs['meeting_link_url'] is None
