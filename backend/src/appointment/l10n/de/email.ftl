@@ -15,12 +15,11 @@ mail-brand-contact-form = Kontaktformular
 mail-brand-support-hint = Du hast Fragen? Wir helfen gern! Antworte einfach auf diese E-Mail für Support.
 mail-brand-reply-hint = Du hast Fragen? Wir helfen gern! Du erreichst uns über unser { $contact_form_link }.
 
-mail-brand-footer = Du erhälst diese E-Mail, weil Du dich auf unserer Website für Thunderbird Appointment Beta angemeldet hast.
-
-                    Copyright © 2025 MZLA Technologies. All rights reserved.
-                    MZLA Technologies 149 New Montgomery St., 4th Floor San Francisco, CA 94501 USA
-mail-brand-footer-privacy = Datenschutz
+mail-brand-footer = Thunderbird ist Teil der MZLA Technologies Corporation, einer hundertprozentigen Tochtergesellschaft der Mozilla Foundation.
+mail-brand-footer-privacy = Datenschutzrichtlinie
 mail-brand-footer-legal = Impressum
+mail-brand-footer-participation = Mitmachen
+mail-brand-footer-support = Hilfe benötigt? Support besuchen
 
 ## Invitation
 
@@ -96,14 +95,12 @@ confirm-mail-plain = { $name } ({ $email }) hat soeben dieses Zeitfenster aus de
 # $date (String) - Date of the requested appointment
 # $schedule_name (String) - The name of the schedule used to book the appointment
 # $duration (String) - Length of minutes the appointment will be
-confirm-mail-html-heading-name = { $name }
-confirm-mail-html-heading-email = ({ $email })
-confirm-mail-html-heading-text = fordert die Buchung eines Zeitfensters in { $schedule_name } an
+confirm-mail-html-heading = { $name_and_email } fordert die Buchung eines Zeitfensters in { $schedule_name } an.
 confirm-mail-html-time = { $duration } Minuten
+confirm-mail-html-meeting-with = Termin mit:
+confirm-mail-html-open-link = In Thunderbird Appointment öffnen
 
-confirm-mail-html-confirm-text = Dieser Link führt zur Bestätigung der Buchungsanfrage:
 confirm-mail-html-confirm-action = Buchung bestätigen
-confirm-mail-html-deny-text = Dieser Link führt zur Ablehnung der Buchungsanfrage:
 confirm-mail-html-deny-action = Buchung ablehnen
 
 ## Cancelled Appointment

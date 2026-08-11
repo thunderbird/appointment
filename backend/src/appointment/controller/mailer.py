@@ -287,13 +287,17 @@ class ZoomMeetingFailedMail(Mailer):
 
 
 class ConfirmationMail(BaseBookingMail):
-    def __init__(self, confirm_url, deny_url, name, email, date, duration, schedule_name, *args, **kwargs):
+    def __init__(
+        self, confirm_url, deny_url, name, email, date, duration, schedule_name, appointment_slug,
+        *args, **kwargs,
+    ):
         """Init Mailer with action-required:confirm/deny specific defaults
         To: Event owner
         """
         self.confirmUrl = confirm_url
         self.denyUrl = deny_url
         self.schedule_name = schedule_name
+        self.appointment_slug = appointment_slug
         default_kwargs = {'subject': l10n('confirm-mail-subject', {'name': name}, kwargs['lang'])}
         super().__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
 
@@ -317,17 +321,17 @@ class ConfirmationMail(BaseBookingMail):
         return get_template('confirm.jinja2').render(
             name=self.name,
             email=self.email,
-            time_range=self.time_range,
+            start_time=self.date.strftime(self.time_format),
             timezone=self.timezone,
             day=self.day,
             duration=self.duration,
             confirm=self.confirmUrl,
             deny=self.denyUrl,
             schedule_name=self.schedule_name,
+            appointment_slug=self.appointment_slug,
             lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
-            calendar_icon_cid=self._attachments()[1].filename,
             clock_icon_cid=self._attachments()[2].filename,
         )
 

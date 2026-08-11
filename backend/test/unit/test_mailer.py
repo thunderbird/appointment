@@ -75,6 +75,7 @@ class TestMailer:
             to=fake_email,
             duration=30,
             schedule_name='test',
+            appointment_slug='test-slug',
             lang='en',
         )
         assert mailer.html()

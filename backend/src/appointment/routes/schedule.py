@@ -489,6 +489,7 @@ def request_schedule_availability_slot(
                 date=date,
                 duration=slot.duration,
                 schedule_name=schedule.name,
+                appointment_slug=appointment.slug,
                 to=subscriber.preferred_email,
                 lang=subscriber.language,
             )

@@ -12,15 +12,14 @@
                 MZLA Technologies 149 New Montgomery St., 4th Floor San Francisco, CA 94501 USA
 
 mail-brand-contact-form = contact form
-mail-brand-support-hint = Got questions? We're here to help! Simply reply to this email for support.
-mail-brand-reply-hint = Got questions? We're here to help! Reach out to us via our { $contact_form_link }.
+mail-brand-support-hint = Have questions? Thunderbird is here to help. Simply reply to this email for support.
+mail-brand-reply-hint = Have questions? Thunderbird is here to help. Get in touch using the { $contact_form_link }.
 
-mail-brand-footer = You are receiving this email because you signed up on our website for the Thunderbird Appointment Beta.
-
-                    Copyright © 2025 MZLA Technologies. All rights reserved.
-                    MZLA Technologies 149 New Montgomery St., 4th Floor San Francisco, CA 94501 USA
-mail-brand-footer-privacy = Privacy
+mail-brand-footer = Thunderbird is part of MZLA Technologies Corporation, a wholly owned subsidiary of Mozilla Foundation.
+mail-brand-footer-privacy = Privacy Policy
 mail-brand-footer-legal = Legal
+mail-brand-footer-participation = Participation
+mail-brand-footer-support = Need help? Visit Support
 
 ## Invitation
 
@@ -91,19 +90,16 @@ confirm-mail-plain = { $name } ({ $email }) is requesting to book a time slot in
 
                     {-brand-footer}
 # Variables:
-# $name (String) - Name of the person who requested the appointment
-# $email (String) - Email of the person who requested the appointment
-# $date (String) - Date of the requested appointment
+# $name_and_email (String) - Pre-formatted HTML: name followed by the email in parentheses
 # $schedule_name (String) - The name of the schedule used to book the appointment
+confirm-mail-html-heading = { $name_and_email } is requesting to book a time slot in { $schedule_name }.
+# Variables:
 # $duration (String) - Length of minutes the appointment will be
-confirm-mail-html-heading-name = { $name }
-confirm-mail-html-heading-email = ({ $email })
-confirm-mail-html-heading-text = is requesting to book a time slot in { $schedule_name }:
-confirm-mail-html-time = { $duration } mins
+confirm-mail-html-time = { $duration } minutes
+confirm-mail-html-meeting-with = Meeting with:
+confirm-mail-html-open-link = Open on Thunderbird Appointment
 
-confirm-mail-html-confirm-text = Click here to confirm the booking request:
 confirm-mail-html-confirm-action = Confirm
-confirm-mail-html-deny-text = Or here if you want to deny it:
 confirm-mail-html-deny-action = Decline
 
 ## Cancelled Appointment

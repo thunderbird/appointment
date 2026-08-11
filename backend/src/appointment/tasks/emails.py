@@ -31,11 +31,14 @@ def send_invite_email(owner_name, owner_email, date, duration, to, attachment, l
             sentry_sdk.capture_exception(e)
 
 
-def send_confirmation_email(url, attendee_name, attendee_email, date, duration, to, schedule_name, lang):
+def send_confirmation_email(
+    url, attendee_name, attendee_email, date, duration, to, schedule_name, appointment_slug, lang
+):
     # send confirmation mail to owner
     try:
         mail = ConfirmationMail(
-            f'{url}/1', f'{url}/0', attendee_name, attendee_email, date, duration, schedule_name, to=to, lang=lang
+            f'{url}/1', f'{url}/0', attendee_name, attendee_email, date, duration, schedule_name,
+            appointment_slug, to=to, lang=lang,
         )
         mail.send()
     except Exception as e:
