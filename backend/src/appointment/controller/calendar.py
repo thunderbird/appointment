@@ -1220,12 +1220,20 @@ class Tools:
             except caldav.lib.error.ReportError:
                 logging.debug('[Tools.existing_events_for_schedule] CalDAV server does not support FreeBusy API.')
                 pass
+            except (TestConnectionFailed, RemoteCalendarAuthenticationError) as ex:
+                # Bad credentials or an unparsable response from this calendar's server.
+                # Skip it rather than crashing the whole availability lookup.
+                logging.warning(f'[Tools.existing_events_for_schedule] CalDAV calendar {calendar.id} unreachable: {ex}')
+                continue
 
             # Okay maybe this server doesn't support freebusy, try the old way
             try:
                 existing_events.extend(con.list_events(start.strftime(DATEFMT), end.strftime(DATEFMT)))
             except requests.exceptions.ConnectionError:
                 # Connection error with remote caldav calendar, don't crash this route.
+                pass
+            except (TestConnectionFailed, RemoteCalendarAuthenticationError) as ex:
+                logging.warning(f'[Tools.existing_events_for_schedule] CalDAV calendar {calendar.id} unreachable: {ex}')
                 pass
 
         # handle already requested time slots
