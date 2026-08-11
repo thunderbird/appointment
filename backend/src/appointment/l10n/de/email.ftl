@@ -141,11 +141,13 @@ reject-mail-plain = { $owner_name } hat deine Buchungsanfrage für { $day } um {
 
 pending-mail-subject = Deine Buchungsanfrage wartet auf Bestätigung
 # Variables:
-# $owner_name (String) - Name of the person who owns the schedule
-# $day (String) - Localized date of the requested appointment
-# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
-# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
-pending-mail-html-heading = { $owner_name } wurde über deine Buchungsanfrage für { $day } um { $time_range } { $timezone } informiert. Du erhältst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
+# $name_and_email (String) - Vorformatiertes HTML: Name der/des Eigentümer:in gefolgt von der E-Mail-Adresse in Klammern
+pending-mail-html-heading = Deine Buchung mit { $name_and_email } wurde angefragt und wartet auf Bestätigung. Deine Termindetails findest du unten. Du erhältst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
+# Variables:
+# $duration (String) - Length of minutes the appointment will be
+pending-mail-html-time = { $duration } Minuten
+pending-mail-html-meeting-with = Termin mit:
+pending-mail-html-badge = Ausstehend
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $day (String) - Localized date of the requested appointment

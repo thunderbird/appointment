@@ -872,6 +872,9 @@ class Tools:
         background_tasks.add_task(
             send_pending_email,
             organizer.name,
+            owner_email=organizer.email,
+            attendee_email=attendee.email,
+            schedule_name=slot.schedule.name,
             date=date,
             duration=slot.duration,
             to=attendee.email,
