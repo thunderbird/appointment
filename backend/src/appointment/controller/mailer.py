@@ -301,6 +301,22 @@ class ConfirmationMail(BaseBookingMail):
         default_kwargs = {'subject': l10n('confirm-mail-subject', {'name': name}, kwargs['lang'])}
         super().__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
 
+    def _attachments(self):
+        """This message body only uses the clock icon, not the calendar one"""
+        path = os.path.join(BASE_PATH, 'templates/assets/img/icons')
+
+        with open(f'{path}/clock.png', 'rb') as fh:
+            clock_icon = fh.read()
+
+        return [
+            *Mailer._attachments(self),
+            Attachment(
+                mime=('image', 'png'),
+                filename='clock.png',
+                data=clock_icon,
+            ),
+        ]
+
     def text(self):
         return l10n(
             'confirm-mail-plain',
@@ -332,7 +348,7 @@ class ConfirmationMail(BaseBookingMail):
             lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
-            clock_icon_cid=self._attachments()[2].filename,
+            clock_icon_cid=self._attachments()[1].filename,
         )
 
 
