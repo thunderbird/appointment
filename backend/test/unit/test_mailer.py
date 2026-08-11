@@ -135,7 +135,16 @@ class TestMailer:
         now = datetime.datetime.now()
         fake_email = 'to@example.org'
 
-        mailer = RejectionMail(owner_name=subscriber.name, date=now, duration=30, to=fake_email)
+        mailer = RejectionMail(
+            owner_name=subscriber.name,
+            owner_email=subscriber.email,
+            attendee_email=fake_email,
+            schedule_name='test',
+            date=now,
+            duration=30,
+            to=fake_email,
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+        )
         assert mailer.html()
         assert mailer.text()
 

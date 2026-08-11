@@ -649,7 +649,7 @@ class TestVEventTimezoneFallback:
         )
 
     # Methods that require an explicit schedule_name argument
-    SCHEDULE_NAME_METHODS = {'send_invitation_vevent', 'send_hold_vevent'}
+    SCHEDULE_NAME_METHODS = {'send_invitation_vevent', 'send_hold_vevent', 'send_reject_vevent'}
 
     def _make_organizer(self):
         organizer = Mock()
