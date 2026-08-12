@@ -4,7 +4,7 @@ import json
 import logging
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from google.oauth2.credentials import Credentials
 from sqlalchemy.orm import Session
@@ -12,6 +12,83 @@ from sqlalchemy.orm import Session
 from .apis.google_client import GoogleClient
 from ..database import repo, models
 from ..tasks.google import stop_google_channel
+
+
+# How close to its expiration a channel may get before we stop trusting push
+# delivery. Google stops sending as soon as the channel lapses, so we need to
+# stop trusting it slightly *before* the recorded expiry rather than at it.
+CHANNEL_EXPIRY_MARGIN = timedelta(minutes=5)
+
+# The longest a channel may go without a successful sync before we stop trusting
+# it. Reconciliation (tasks.google.reconcile_google_channels) runs well inside
+# this window, so hitting it means push *and* reconciliation are both failing --
+# at which point we fall back to polling rather than serve unbounded staleness.
+MAX_SYNC_AGE = timedelta(hours=6)
+
+
+def _as_utc(value: datetime | None) -> datetime | None:
+    """Normalise a possibly naive DB datetime to an aware UTC one.
+
+    Columns are stored naive-UTC, but values that have just come off the wire are
+    aware. Comparing the two raises, so everything funnels through here.
+    """
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
+def is_push_active(channel: models.GoogleCalendarChannel | None, now: datetime | None = None) -> bool:
+    """Whether push delivery on this channel can be trusted in place of polling.
+
+    This is deliberately conservative: every uncertain case answers False, which
+    only costs a Google API call. Answering True when push is in fact dead is the
+    failure that shows users stale availability, so it has to be earned:
+
+      * the channel must exist and still be registered with Google,
+      * it must not be at or near its expiration,
+      * it must have completed an initial sync (so we hold a sync token), and
+      * that sync must be recent enough that a silently dead channel is caught.
+    """
+    if channel is None:
+        return False
+
+    now = now or datetime.now(tz=timezone.utc)
+
+    expiration = _as_utc(channel.expiration)
+    if expiration is None or expiration - CHANNEL_EXPIRY_MARGIN <= now:
+        return False
+
+    # No sync token means we have never established a delta chain for this
+    # calendar, so a notification could not tell us what changed.
+    if not channel.sync_token:
+        return False
+
+    last_synced_at = _as_utc(channel.last_synced_at)
+    if last_synced_at is None or now - last_synced_at > MAX_SYNC_AGE:
+        return False
+
+    return True
+
+
+def push_backed_calendar_ids(db: Session, calendars: list[models.Calendar]) -> set[str]:
+    """The remote (Google) calendar ids among `calendars` that have live push.
+
+    Returns remote ids -- i.e. `Calendar.user` -- because the freebusy call sites
+    work in Google's ids rather than ours.
+    """
+    now = datetime.now(tz=timezone.utc)
+    backed = set()
+
+    for calendar in calendars:
+        if calendar.provider != models.CalendarProvider.google:
+            continue
+        channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
+        if is_push_active(channel, now):
+            backed.add(calendar.user)
+
+    return backed
 
 
 def get_webhook_url() -> str | None:
@@ -78,6 +155,10 @@ def setup_watch_channel(db: Session, google_client: GoogleClient, calendar: mode
                 expiration=expiration_dt,
                 state=state,
                 sync_token=sync_token,
+                # Only stamp the watermark if we actually got a token. Without
+                # one there is no delta chain, so the channel must not yet be
+                # trusted in place of polling.
+                last_synced_at=datetime.now(tz=timezone.utc) if sync_token else None,
             )
     except Exception as e:
         logging.warning(f'[google_watch] Failed to set up watch channel for calendar {calendar.id}: {e}')

@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import os
@@ -215,3 +216,14 @@ def get_expiry_time_with_grace_period(expiry: int):
     grace_period = max(int(os.getenv('OIDC_EXP_GRACE_PERIOD', 0)), 120)
     expiry += grace_period
     return expiry
+
+
+def stable_hash(values) -> str:
+    """A short, deterministic hash of an iterable of strings.
+
+    Used to keep cache keys bounded when the key covers a set of calendar ids.
+    Deterministic across processes and restarts, unlike hash(), so a cache entry
+    written by one worker is found by the next.
+    """
+    joined = '\x00'.join(str(v) for v in values)
+    return hashlib.sha256(joined.encode('utf-8')).hexdigest()[:16]

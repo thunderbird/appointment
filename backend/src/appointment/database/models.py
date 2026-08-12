@@ -481,6 +481,15 @@ class GoogleCalendarChannel(Base):
     sync_token = Column(String, nullable=True)
     state = Column(encrypted_type(String, length=36), nullable=True)
 
+    # Push-health bookkeeping. These drive the decision to trust push delivery
+    # instead of polling Google on every request (see controller.google_watch).
+    # last_synced_at is the only one that gates trust: it is the watermark of the
+    # last *successful* incremental sync, so it advances on both push-triggered
+    # and reconciliation syncs.
+    last_synced_at = Column(DateTime, nullable=True)
+    last_notification_at = Column(DateTime, nullable=True)
+    last_message_number = Column(Integer, nullable=True)
+
     calendar: Mapped[Calendar] = relationship('Calendar', back_populates='google_channel')
 
     def __str__(self):

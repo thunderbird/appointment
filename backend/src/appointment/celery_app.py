@@ -3,7 +3,7 @@ import os
 import sentry_sdk
 from celery import Celery
 from dotenv import load_dotenv
-from appointment.defines import ONE_DAY_IN_SECONDS, SEVEN_DAYS_IN_SECONDS
+from appointment.defines import ONE_DAY_IN_SECONDS, ONE_HOUR_IN_SECONDS, SEVEN_DAYS_IN_SECONDS
 
 
 def _base_redis_url() -> str:
@@ -42,7 +42,14 @@ def create_celery_app() -> Celery:
     sentry_sdk.set_extra('CELERY_TASK_ALWAYS_EAGER', task_always_eager)
 
     google_channel_ttl = float(os.getenv('GOOGLE_CHANNEL_TTL_IN_SECONDS', SEVEN_DAYS_IN_SECONDS))
-    google_channel_renew_interval = google_channel_ttl - ONE_DAY_IN_SECONDS
+    # Run renewal well inside the channel lifetime so a failed run has several
+    # more attempts before anything expires. Capped at an hour because the task
+    # is a no-op for channels outside the renewal threshold.
+    google_channel_renew_interval = min(
+        float(os.getenv('GOOGLE_CHANNEL_RENEW_INTERVAL_SECONDS', ONE_HOUR_IN_SECONDS)),
+        max(google_channel_ttl - ONE_DAY_IN_SECONDS, 60.0),
+    )
+    google_reconcile_interval = float(os.getenv('GOOGLE_RECONCILE_INTERVAL_SECONDS', 900))
 
     app = Celery('appointment')
 
@@ -64,9 +71,18 @@ def create_celery_app() -> Celery:
                 'task': 'appointment.tasks.health.heartbeat',
                 'schedule': 60.0,
             },
+            # Renewal only acts on channels inside the expiry threshold, so
+            # running it often is cheap and makes it self-healing: at the old
+            # TTL-minus-a-day cadence a single failed run let channels lapse,
+            # with no second attempt before expiry.
             'renew-google-channels': {
                 'task': 'appointment.tasks.google.renew_google_channels',
                 'schedule': google_channel_renew_interval,
+            },
+            # Bounds how long a dropped push notification can go unnoticed.
+            'reconcile-google-channels': {
+                'task': 'appointment.tasks.google.reconcile_google_channels',
+                'schedule': google_reconcile_interval,
             },
         },
     })
