@@ -57,6 +57,6 @@ export default [
     },
   },
   {
-    ignores: ['**/.*', 'src/assets/*', 'src/elements/arts/*', 'src/locales/*', 'node_modules/*'],
+    ignores: ['**/.*', 'src/assets/*', 'src/elements/arts/*', 'src/locales/*', 'node_modules/*', 'dist/*'],
   },
 ];
