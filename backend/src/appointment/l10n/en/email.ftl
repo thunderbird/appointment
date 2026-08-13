@@ -15,7 +15,7 @@ mail-brand-contact-form = contact form
 mail-brand-support-hint = Have questions? Thunderbird is here to help. Simply reply to this email for support.
 mail-brand-reply-hint = Have questions? Thunderbird is here to help. Get in touch using the { $contact_form_link }.
 
-mail-brand-footer = Thunderbird is part of MZLA Technologies Corporation, a wholly owned subsidiary of the not-for-profit Mozilla.org.
+mail-brand-footer = Thunderbird is part of { $mzla_link }, a wholly owned subsidiary of the not-for-profit Mozilla.org.
 mail-brand-footer-privacy = Privacy Policy
 mail-brand-footer-legal = Legal
 mail-brand-footer-participation = Participation Guidelines

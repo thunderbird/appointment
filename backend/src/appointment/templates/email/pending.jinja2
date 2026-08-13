@@ -12,15 +12,15 @@
   <div style="
     display: inline-flex;
     align-items: center;
-    gap: 3px;
-    border: 1px solid {{ colour_ti_warning }};
-    border-radius: 3px;
-    padding: 2px;
+    gap: 4px;
+    border: 1px solid {{ colour_warning_default }};
+    border-radius: 999px;
+    padding: 0 4px 0 12px;
     margin-bottom: 12px;
     background-color: {{ colour_warning_soft }};
-    color: {{ colour_ti_warning }};
-    font-size: 10px;
-    font-weight: 700;
+    color: {{ colour_icon_secondary }};
+    font-size: 11px;
+    font-weight: 600;
     text-transform: uppercase;
   ">
     {{ warning_image_small|safe }} {{ l10n('pending-mail-html-badge', lang=lang) }}

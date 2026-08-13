@@ -247,7 +247,7 @@ class InvitationMail(BaseBookingMail):
 
         with open(f'{path}/clock.png', 'rb') as fh:
             clock_icon = fh.read()
-        with open(f'{path}/circle-check.png', 'rb') as fh:
+        with open(f'{path}/check-circle-success.png', 'rb') as fh:
             check_icon = fh.read()
 
         return [
@@ -259,7 +259,7 @@ class InvitationMail(BaseBookingMail):
             ),
             Attachment(
                 mime=('image', 'png'),
-                filename='circle-check.png',
+                filename='check-circle-success.png',
                 data=check_icon,
             ),
         ]
@@ -412,7 +412,7 @@ class CancelMail(Mailer):
 
         with open(f'{path}/clock.png', 'rb') as fh:
             clock_icon = fh.read()
-        with open(f'{path}/triangle-error.png', 'rb') as fh:
+        with open(f'{path}/check-circle-error.png', 'rb') as fh:
             error_icon = fh.read()
 
         return [
@@ -424,7 +424,7 @@ class CancelMail(Mailer):
             ),
             Attachment(
                 mime=('image', 'png'),
-                filename='triangle-error.png',
+                filename='check-circle-error.png',
                 data=error_icon,
             ),
         ]
@@ -493,7 +493,7 @@ class RejectionMail(Mailer):
 
         with open(f'{path}/clock.png', 'rb') as fh:
             clock_icon = fh.read()
-        with open(f'{path}/triangle-error.png', 'rb') as fh:
+        with open(f'{path}/check-circle-error.png', 'rb') as fh:
             error_icon = fh.read()
 
         return [
@@ -505,7 +505,7 @@ class RejectionMail(Mailer):
             ),
             Attachment(
                 mime=('image', 'png'),
-                filename='triangle-error.png',
+                filename='check-circle-error.png',
                 data=error_icon,
             ),
         ]
@@ -567,7 +567,7 @@ class PendingRequestMail(Mailer):
 
         with open(f'{path}/clock.png', 'rb') as fh:
             clock_icon = fh.read()
-        with open(f'{path}/circle-warning.png', 'rb') as fh:
+        with open(f'{path}/check-circle-warning.png', 'rb') as fh:
             warning_icon = fh.read()
 
         return [
@@ -579,7 +579,7 @@ class PendingRequestMail(Mailer):
             ),
             Attachment(
                 mime=('image', 'png'),
-                filename='circle-warning.png',
+                filename='check-circle-warning.png',
                 data=warning_icon,
             ),
         ]
