@@ -32,8 +32,9 @@ invite-mail-subject = Buchung bestätigt von {-brand-name}
 invite-mail-plain = {-brand-footer}
 
 # Variables:
-# $name_and_email (String) - Vorformatiertes HTML: Name der/des Eigentümer:in gefolgt von der E-Mail-Adresse in Klammern
-invite-mail-html-heading = Deine Buchung mit { $name_and_email } wurde BESTÄTIGT. Deine Termindetails findest du unten.
+# $name (String) - Name der Person, die den Termin angefragt hat
+# $email (String) - E-Mail-Adresse der Person, die den Termin angefragt hat
+invite-mail-html-heading = Deine Buchung mit { $name } ({ $email }) wurde BESTÄTIGT. Deine Termindetails findest du unten.
 invite-mail-html-badge = Bestätigt
 # Variables:
 # $meeting_link_url (String) - URL for the meeting link
@@ -99,7 +100,7 @@ confirm-mail-plain = { $name } ({ $email }) hat soeben dieses Zeitfenster aus de
 # $date (String) - Date of the requested appointment
 # $schedule_name (String) - The name of the schedule used to book the appointment
 # $duration (String) - Length of minutes the appointment will be
-confirm-mail-html-heading = { $name_and_email } fordert die Buchung eines Zeitfensters in { $schedule_name } an.
+confirm-mail-html-heading = { $name } ({ $email }) fordert die Buchung eines Zeitfensters in { $schedule_name } an.
 confirm-mail-html-open-link = In Thunderbird Appointment öffnen
 
 confirm-mail-html-confirm-action = Buchung bestätigen
@@ -109,8 +110,9 @@ confirm-mail-html-deny-action = Buchung ablehnen
 
 cancel-mail-subject = Buchungsanfrage abgesagt
 # Variables:
-# $name_and_email (String) - Vorformatiertes HTML: Name der/des Eigentümer:in gefolgt von der E-Mail-Adresse in Klammern
-cancel-mail-html-heading = Die folgende Buchung wurde von { $name_and_email } ABGESAGT.
+# $owner_name (String) - Name der Person, der der Terminplan gehört
+# $owner_email (String) - E-Mail-Adresse der Person, der der Terminplan gehört
+cancel-mail-html-heading = Die folgende Buchung wurde von { $owner_name } ({ $owner_email }) ABGESAGT.
 cancel-mail-html-badge = Abgesagt
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
@@ -124,8 +126,9 @@ cancel-mail-plain = { $owner_name } hat deine Buchungsanfrage für { $day } um {
 
 reject-mail-subject = Buchungsanfrage abgelehnt
 # Variables:
-# $name_and_email (String) - Vorformatiertes HTML: Name der/des Eigentümer:in gefolgt von der E-Mail-Adresse in Klammern
-reject-mail-html-heading = Die folgende Buchungsanfrage wurde von { $name_and_email } ABGELEHNT.
+# $owner_name (String) - Name der Person, der der Terminplan gehört
+# $owner_email (String) - E-Mail-Adresse der Person, der der Terminplan gehört
+reject-mail-html-heading = Die folgende Buchungsanfrage wurde von { $owner_name } ({ $owner_email }) ABGELEHNT.
 reject-mail-html-badge = Abgelehnt
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
@@ -139,8 +142,9 @@ reject-mail-plain = { $owner_name } hat deine Buchungsanfrage für { $day } um {
 
 pending-mail-subject = Deine Buchungsanfrage wartet auf Bestätigung
 # Variables:
-# $name_and_email (String) - Vorformatiertes HTML: Name der/des Eigentümer:in gefolgt von der E-Mail-Adresse in Klammern
-pending-mail-html-heading = Deine Buchung mit { $name_and_email } wurde angefragt und wartet auf Bestätigung. Deine Termindetails findest du unten. Du erhältst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
+# $owner_name (String) - Name der Person, der der Terminplan gehört
+# $owner_email (String) - E-Mail-Adresse der Person, der der Terminplan gehört
+pending-mail-html-heading = Deine Buchung mit { $owner_name } ({ $owner_email }) wurde angefragt und wartet auf Bestätigung. Deine Termindetails findest du unten. Du erhältst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
 pending-mail-html-badge = Ausstehend
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule

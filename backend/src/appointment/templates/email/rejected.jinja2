@@ -4,9 +4,8 @@
 {% set triangle_image_small = '<img style="width: 12px; height: 12px;" alt="" src="cid:%(cid)s" />'|format(cid=triangle_icon_cid) %}
 {# Code begins! #}
 {% block introduction %}
-  {% set name_and_email = '<strong>%(name)s</strong> (%(email)s)'|format(name=owner_name|escape, email=owner_email|escape) %}
-  <div style="color: {{ colour_text_base }}; font-size: 20px; font-weight: 700;">
-    {{ l10n('reject-mail-html-heading', {'name_and_email': name_and_email}, lang)|safe }}
+  <div style="color: {{ colour_text_base }}; font-size: 20px; font-weight: 600;">
+    {{ l10n('reject-mail-html-heading', {'owner_name': owner_name, 'owner_email': owner_email}, lang) }}
   </div>
 {% endblock %}
 {% block information %}
@@ -26,20 +25,18 @@
   ">
     {{ triangle_image_small|safe }} {{ l10n('reject-mail-html-badge', lang=lang) }}
   </div>
-  <div style="font-size: 16px; font-weight: 700; color: {{ colour_icon_secondary }}; margin-bottom: 8px;">
+  <div style="font-size: 20px; font-weight: 600; color: {{ colour_icon_secondary }}; margin-bottom: 4px;">
     {{ schedule_name }}
   </div>
-  <div style="font-weight: 700; margin-bottom: 4px;">
+  <div style="margin-bottom: 4px;">
     {{ day }} {{ start_time }} {{ timezone }}
   </div>
-  <div style="color: {{ colour_icon_secondary }}; display: flex; align-items: center; gap: 3px; font-size: 9px; font-weight: 700; text-transform: uppercase; margin-bottom: 16px;">
+  <div style="color: {{ colour_icon_secondary }}; display: flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 16px;">
     {{ clock_image_small|safe }} {{ l10n('mail-html-time', {'duration': duration}, lang) }}
   </div>
   <hr style="border: none; border-top: 1px solid {{ colour_border }}; margin: 0 0 16px 0;" />
-  <div style="color: {{ colour_text_base }}; font-size: 11px; margin-bottom: 2px;">
-    {{ l10n('mail-html-meeting-with', lang=lang) }}
-  </div>
-  <div>
+  <div style="color: {{ colour_text_base }}; font-size: 14px;">
+    {{ l10n('mail-html-meeting-with', lang=lang) }}<br />
     {{ attendee_email }}
   </div>
 {% endblock %}

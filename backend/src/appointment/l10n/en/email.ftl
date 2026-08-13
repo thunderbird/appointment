@@ -32,8 +32,9 @@ invite-mail-subject = Booking confirmed from {-brand-name}
 invite-mail-plain = {-brand-footer}
 
 # Variables:
-# $name_and_email (String) - Pre-formatted HTML: owner's name followed by their email in parentheses
-invite-mail-html-heading = Your booking with { $name_and_email } has been CONFIRMED. Please find your meeting request details below.
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
+invite-mail-html-heading = Your booking with { $name } ({ $email }) has been CONFIRMED. Please find your meeting request details below.
 invite-mail-html-badge = Confirmed
 # Variables:
 # $meeting_link_url (String) - URL for the meeting link
@@ -94,9 +95,10 @@ confirm-mail-plain = { $name } ({ $email }) is requesting to book a time slot in
 
                     {-brand-footer}
 # Variables:
-# $name_and_email (String) - Pre-formatted HTML: name followed by the email in parentheses
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
 # $schedule_name (String) - The name of the schedule used to book the appointment
-confirm-mail-html-heading = { $name_and_email } is requesting to book a time slot in { $schedule_name }.
+confirm-mail-html-heading = { $name } ({ $email }) is requesting to book a time slot in { $schedule_name }.
 confirm-mail-html-open-link = Open on Thunderbird Appointment
 
 confirm-mail-html-confirm-action = Confirm
@@ -106,8 +108,9 @@ confirm-mail-html-deny-action = Decline
 
 cancel-mail-subject = Booking request cancelled
 # Variables:
-# $name_and_email (String) - Pre-formatted HTML: owner's name followed by their email in parentheses
-cancel-mail-html-heading = The following booking was CANCELLED by { $name_and_email }.
+# $owner_name (String) - Name of the person who owns the schedule
+# $owner_email (String) - Email of the person who owns the schedule
+cancel-mail-html-heading = The following booking was CANCELLED by { $owner_name } ({ $owner_email }).
 cancel-mail-html-badge = Cancelled
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
@@ -121,8 +124,9 @@ cancel-mail-plain = { $owner_name } cancelled your booking request for { $day } 
 
 reject-mail-subject = Booking request declined
 # Variables:
-# $name_and_email (String) - Pre-formatted HTML: owner's name followed by their email in parentheses
-reject-mail-html-heading = The following booking request was DECLINED by { $name_and_email }.
+# $owner_name (String) - Name of the person who owns the schedule
+# $owner_email (String) - Email of the person who owns the schedule
+reject-mail-html-heading = The following booking request was DECLINED by { $owner_name } ({ $owner_email }).
 reject-mail-html-badge = Declined
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
@@ -136,8 +140,9 @@ reject-mail-plain = { $owner_name } denied your booking request for { $day } at 
 
 pending-mail-subject = Your booking request is pending approval
 # Variables:
-# $name_and_email (String) - Pre-formatted HTML: owner's name followed by their email in parentheses
-pending-mail-html-heading = Your booking with { $name_and_email } has been requested and PENDING confirmation. Please find your meeting details below. You will receive another email once that request has been approved or declined.
+# $owner_name (String) - Name of the person who owns the schedule
+# $owner_email (String) - Email of the person who owns the schedule
+pending-mail-html-heading = Your booking with { $owner_name } ({ $owner_email }) has been requested and PENDING confirmation. Please find your meeting details below. You will receive another email once that request has been approved or declined.
 pending-mail-html-badge = Pending
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
