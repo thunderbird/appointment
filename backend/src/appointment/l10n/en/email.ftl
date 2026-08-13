@@ -34,7 +34,8 @@ invite-mail-plain = {-brand-footer}
 # Variables:
 # $name (String) - Name of the person who requested the appointment
 # $email (String) - Email of the person who requested the appointment
-invite-mail-html-heading = Your booking with { $name } ({ $email }) has been CONFIRMED. Please find your meeting request details below.
+invite-mail-html-heading = Your booking with { $name } ({ $email }) has been requested and CONFIRMED.
+invite-mail-html-subheading = An invite is attached to this email.
 invite-mail-html-badge = Confirmed
 # Variables:
 # $meeting_link_url (String) - URL for the meeting link
@@ -99,7 +100,7 @@ confirm-mail-plain = { $name } ({ $email }) is requesting to book a time slot in
 # $email (String) - Email of the person who requested the appointment
 # $schedule_name (String) - The name of the schedule used to book the appointment
 confirm-mail-html-heading = { $name } ({ $email }) is requesting to book a time slot in { $schedule_name }.
-confirm-mail-html-open-link = Open on Thunderbird Appointment
+confirm-mail-html-open-link = Open in Appointment
 
 confirm-mail-html-confirm-action = Confirm
 confirm-mail-html-deny-action = Decline
@@ -142,7 +143,8 @@ pending-mail-subject = Your booking request is pending approval
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $owner_email (String) - Email of the person who owns the schedule
-pending-mail-html-heading = Your booking with { $owner_name } ({ $owner_email }) has been requested and PENDING confirmation. Please find your meeting details below. You will receive another email once that request has been approved or declined.
+pending-mail-html-heading = Your booking with { $owner_name } ({ $owner_email }) has been requested and PENDING confirmation.
+pending-mail-html-subheading = You will receive another email once that request has been approved or declined.
 pending-mail-html-badge = Pending
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule

@@ -4,8 +4,11 @@
 {% set check_image_small = '<img style="width: 12px; height: 12px;" alt="" src="cid:%(cid)s" />'|format(cid=check_icon_cid) %}
 {# Code begins! #}
 {% block introduction %}
-  <div style="color: {{ colour_text_base }}; font-size: 20px; font-weight: 600;">
+  <div style="color: {{ colour_text_base }}; font-size: 20px; font-weight: 600; margin-bottom: 16px;">
     {{ l10n('invite-mail-html-heading', {'name': name, 'email': email}, lang) }}
+  </div>
+  <div style="color: {{ colour_text_base }}; font-size: 14px; line-height: 1.23;">
+    {{ l10n('invite-mail-html-subheading', lang=lang) }}
   </div>
 {% endblock %}
 {% block information %}
@@ -15,7 +18,7 @@
     gap: 4px;
     border: 1px solid {{ colour_ti_success }};
     border-radius: 999px;
-    padding: 0 4px 0 12px;
+    padding: 0 12px 0 4px;
     margin-bottom: 12px;
     background-color: {{ colour_success_soft }};
     color: {{ colour_icon_secondary }};
@@ -42,7 +45,7 @@
     </a>
   </div>
   {% endif %}
-  <div style="color: {{ colour_text_base }}; font-size: 14px;">
+  <div style="color: {{ colour_text_base }}; font-size: 14px; line-height: 1.23;">
     {{ l10n('mail-html-meeting-with', lang=lang) }}<br />
     {{ attendee_email }}
   </div>

@@ -4,8 +4,11 @@
 {% set warning_image_small = '<img style="width: 12px; height: 12px;" alt="" src="cid:%(cid)s" />'|format(cid=warning_icon_cid) %}
 {# Code begins! #}
 {% block introduction %}
-  <div style="color: {{ colour_text_base }}; font-size: 20px; font-weight: 600;">
+  <div style="color: {{ colour_text_base }}; font-size: 20px; font-weight: 600; margin-bottom: 16px;">
     {{ l10n('pending-mail-html-heading', {'owner_name': owner_name, 'owner_email': owner_email}, lang) }}
+  </div>
+  <div style="color: {{ colour_text_base }}; font-size: 17px; line-height: 22px; letter-spacing: -0.43px;">
+    {{ l10n('pending-mail-html-subheading', lang=lang) }}
   </div>
 {% endblock %}
 {% block information %}
@@ -15,7 +18,7 @@
     gap: 4px;
     border: 1px solid {{ colour_warning_default }};
     border-radius: 999px;
-    padding: 0 4px 0 12px;
+    padding: 0 12px 0 4px;
     margin-bottom: 12px;
     background-color: {{ colour_warning_soft }};
     color: {{ colour_icon_secondary }};
@@ -35,7 +38,7 @@
     {{ clock_image_small|safe }} {{ l10n('mail-html-time', {'duration': duration}, lang) }}
   </div>
   <hr style="border: none; border-top: 1px solid {{ colour_border }}; margin: 0 0 16px 0;" />
-  <div style="color: {{ colour_text_base }}; font-size: 14px;">
+  <div style="color: {{ colour_text_base }}; font-size: 14px; line-height: 1.23;">
     {{ l10n('mail-html-meeting-with', lang=lang) }}<br />
     {{ attendee_email }}
   </div>

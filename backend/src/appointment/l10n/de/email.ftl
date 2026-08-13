@@ -34,7 +34,8 @@ invite-mail-plain = {-brand-footer}
 # Variables:
 # $name (String) - Name der Person, die den Termin angefragt hat
 # $email (String) - E-Mail-Adresse der Person, die den Termin angefragt hat
-invite-mail-html-heading = Deine Buchung mit { $name } ({ $email }) wurde BESTÄTIGT. Deine Termindetails findest du unten.
+invite-mail-html-heading = Deine Buchung mit { $name } ({ $email }) wurde angefragt und BESTÄTIGT.
+invite-mail-html-subheading = Die Einladung ist an diese E-Mail angehängt.
 invite-mail-html-badge = Bestätigt
 # Variables:
 # $meeting_link_url (String) - URL for the meeting link
@@ -101,7 +102,7 @@ confirm-mail-plain = { $name } ({ $email }) hat soeben dieses Zeitfenster aus de
 # $schedule_name (String) - The name of the schedule used to book the appointment
 # $duration (String) - Length of minutes the appointment will be
 confirm-mail-html-heading = { $name } ({ $email }) fordert die Buchung eines Zeitfensters in { $schedule_name } an.
-confirm-mail-html-open-link = In Thunderbird Appointment öffnen
+confirm-mail-html-open-link = In Appointment öffnen
 
 confirm-mail-html-confirm-action = Buchung bestätigen
 confirm-mail-html-deny-action = Buchung ablehnen
@@ -144,7 +145,8 @@ pending-mail-subject = Deine Buchungsanfrage wartet auf Bestätigung
 # Variables:
 # $owner_name (String) - Name der Person, der der Terminplan gehört
 # $owner_email (String) - E-Mail-Adresse der Person, der der Terminplan gehört
-pending-mail-html-heading = Deine Buchung mit { $owner_name } ({ $owner_email }) wurde angefragt und wartet auf Bestätigung. Deine Termindetails findest du unten. Du erhältst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
+pending-mail-html-heading = Deine Buchung mit { $owner_name } ({ $owner_email }) wurde angefragt und wartet auf Bestätigung.
+pending-mail-html-subheading = Du erhältst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
 pending-mail-html-badge = Ausstehend
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule

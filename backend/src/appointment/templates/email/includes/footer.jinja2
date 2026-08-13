@@ -20,6 +20,6 @@
     >{{ l10n('mail-brand-footer-support', lang=lang if lang else None) }}</a>
   </div>
   {% for copy in copy_list %}
-    <p style="color:{{ colour_text_base }}; font-size: 12px; display: inline-block;">{{ copy|safe }}&nbsp;</p>
+    <div style="color:{{ colour_text_base }}; font-size: 12px;">{{ copy|safe }}&nbsp;</div>
   {% endfor %}
 </div>

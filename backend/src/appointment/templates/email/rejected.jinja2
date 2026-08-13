@@ -15,7 +15,7 @@
     gap: 4px;
     border: 1px solid {{ colour_ti_critical }};
     border-radius: 999px;
-    padding: 0 4px 0 12px;
+    padding: 0 12px 0 4px;
     margin-bottom: 12px;
     background-color: {{ colour_danger_soft }};
     color: {{ colour_icon_secondary }};
@@ -35,7 +35,7 @@
     {{ clock_image_small|safe }} {{ l10n('mail-html-time', {'duration': duration}, lang) }}
   </div>
   <hr style="border: none; border-top: 1px solid {{ colour_border }}; margin: 0 0 16px 0;" />
-  <div style="color: {{ colour_text_base }}; font-size: 14px;">
+  <div style="color: {{ colour_text_base }}; font-size: 14px; line-height: 1.23;">
     {{ l10n('mail-html-meeting-with', lang=lang) }}<br />
     {{ attendee_email }}
   </div>
