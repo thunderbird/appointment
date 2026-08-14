@@ -70,7 +70,7 @@
     {% endif %}
     {% if not hide_contact_form_url_hint %}
     <div style="text-align: center; color: {{ colour_icon_secondary }};">
-      {% set link = '<a href="%(url)s" style="color: %(colour)s; text-decoration-offset: 2px;">%(label)s</a>'|format(url=homepage_url + '/contact', colour=colour_icon_secondary, label=l10n('mail-brand-contact-form', lang=lang if lang else None)) %}
+      {% set link = '<a href="%(url)s" style="color: %(colour)s; text-underline-offset: 2px;">%(label)s</a>'|format(url=homepage_url + '/contact', colour=colour_icon_secondary, label=l10n('mail-brand-contact-form', lang=lang if lang else None)) %}
       {{ l10n('mail-brand-reply-hint', {'contact_form_link': link}, lang if lang else None)|safe }}
     </div>
     {% endif %}
