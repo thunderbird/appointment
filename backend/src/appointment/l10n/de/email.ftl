@@ -40,8 +40,7 @@ invite-mail-html-badge = Bestätigt
 # Variables:
 # $meeting_link_url (String) - URL for the meeting link
 invite-mail-plain-meeting-link = Meeting beitreten: { $meeting_link_url }
-invite-mail-html-meeting-link = Meeting-Link
-invite-mail-html-invite-is-attached = Eine Einladung ist dieser E-Mail angehängt.
+invite-mail-html-meeting-link = Zoom-Link
 
 ## New Booking
 
@@ -98,9 +97,7 @@ confirm-mail-plain = { $name } ({ $email }) hat soeben dieses Zeitfenster aus de
 # Variables:
 # $name (String) - Name of the person who requested the appointment
 # $email (String) - Email of the person who requested the appointment
-# $date (String) - Date of the requested appointment
 # $schedule_name (String) - The name of the schedule used to book the appointment
-# $duration (String) - Length of minutes the appointment will be
 confirm-mail-html-heading = { $name } ({ $email }) fordert die Buchung eines Zeitfensters in { $schedule_name } an.
 confirm-mail-html-open-link = In Appointment öffnen
 

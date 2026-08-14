@@ -40,8 +40,7 @@ invite-mail-html-badge = Confirmed
 # Variables:
 # $meeting_link_url (String) - URL for the meeting link
 invite-mail-plain-meeting-link = Join Meeting: { $meeting_link_url }
-invite-mail-html-meeting-link = Meeting link
-invite-mail-html-invite-is-attached = An invite is attached to this email.
+invite-mail-html-meeting-link = Zoom link
 
 ## New Booking
 
