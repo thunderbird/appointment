@@ -1,3 +1,4 @@
+import hashlib
 import json
 import logging
 import os
@@ -104,6 +105,14 @@ def chunk_list(to_chunk: list, chunk_by: int):
     """Chunk a to_chunk list by chunk_by"""
     for i in range(0, len(to_chunk), chunk_by):
         yield to_chunk[i : i + chunk_by]
+
+
+def stable_hash(values) -> str:
+    """A short, deterministic hash of an ordered sequence of values, for use in cache keys
+    where the exact value set matters (e.g. a cache key must cover the exact calendar-id set
+    requested, or a subset query would be served an answer computed for a superset)."""
+    joined = '\x00'.join(str(v) for v in values)
+    return hashlib.sha256(joined.encode('utf-8')).hexdigest()[:16]
 
 
 def determine_database_driver(dialect: str) -> str:

@@ -31,6 +31,7 @@ from sqlalchemy.orm import Session
 from .. import utils
 from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE, APP_ENV_DEV
 from .apis.google_client import EventStatus, GoogleClient, ResponseStatus, SendUpdates
+from . import google_watch
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
 from ..controller.mailer import Attachment
@@ -38,6 +39,18 @@ from ..exceptions.calendar import TestConnectionFailed, RemoteCalendarAuthentica
 from ..exceptions.validation import RemoteCalendarConnectionError
 from ..l10n import l10n
 from ..tasks.emails import send_invite_email, send_pending_email, send_rejection_email, send_cancel_email
+
+
+def push_cache_expiry() -> int:
+    """Cache TTL, in seconds, for data covered by a live push channel.
+
+    This is a safety net, not the primary refresh mechanism -- a push notification busts the
+    cache as soon as the calendar changes (see tasks.google._bust_subscriber_cache). It bounds
+    how long a *silently* dropped notification can go unnoticed, so it trades staleness against
+    API volume. The booking write path re-validates against Google regardless (see
+    routes.schedule), so a stale read cannot produce a double booking.
+    """
+    return int(os.getenv('REDIS_EVENT_EXPIRE_SECONDS_PUSH', 3600))
 
 
 class RemoteEventState(Enum):
@@ -69,41 +82,86 @@ class BaseConnector:
 
         return ':'.join(parts)
 
-    def get_cached_events(self, key_scope):
-        """Retrieve any cached events, else returns None if redis is not available or there's no cache."""
+    def _get_cached(self, key_scope, deserialize):
+        """Shared get path for both the events cache and the free/busy cache -- they share one
+        keyspace (see bust_cached_events) and differ only in payload shape."""
         if self.redis_instance is None:
             return None
 
         key_scope = self.obscure_key(key_scope)
-
         timer_boot = time.perf_counter_ns()
 
-        encrypted_events = self.redis_instance.get(f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}')
-        if encrypted_events is None:
+        raw = self.redis_instance.get(f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}')
+        if raw is None:
             sentry_sdk.set_measurement('redis_get_miss_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
             return None
 
         sentry_sdk.set_measurement('redis_get_hit_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
+        return deserialize(json.loads(raw))
 
-        return [schemas.Event.model_load_redis(blob) for blob in json.loads(encrypted_events)]
-
-    def put_cached_events(
-        self, key_scope, events: list[schemas.Event], expiry=os.getenv('REDIS_EVENT_EXPIRE_SECONDS', 900)
-    ):
-        """Sets the passed cached events with an option to set a custom expiry time."""
+    def _put_cached(self, key_scope, payload, serialize, expiry=None):
+        """Shared set path for both the events cache and the free/busy cache."""
         if self.redis_instance is None:
             return False
+
+        if expiry is None:
+            expiry = os.getenv('REDIS_EVENT_EXPIRE_SECONDS', 900)
 
         key_scope = self.obscure_key(key_scope)
         timer_boot = time.perf_counter_ns()
 
-        encrypted_events = json.dumps([event.model_dump_redis() for event in events])
         self.redis_instance.set(
-            f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}', value=encrypted_events, ex=expiry
+            f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body()}:{key_scope}',
+            value=json.dumps(serialize(payload)),
+            ex=expiry,
         )
         sentry_sdk.set_measurement('redis_put_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
 
         return True
+
+    def get_cached_events(self, key_scope):
+        """Retrieve any cached events, else returns None if redis is not available or there's no cache."""
+        return self._get_cached(
+            key_scope, lambda blobs: [schemas.Event.model_load_redis(blob) for blob in blobs]
+        )
+
+    def put_cached_events(self, key_scope, events: list[schemas.Event], expiry=None):
+        """Sets the passed cached events with an option to set a custom expiry time."""
+        return self._put_cached(
+            key_scope, events, lambda evs: [event.model_dump_redis() for event in evs], expiry
+        )
+
+    def get_cached_busy_times(self, key_scope):
+        """Retrieve cached free/busy blocks, or None when unavailable/uncached.
+
+        Free/busy entries are plain {start, end} dicts of naive-UTC datetimes rather than
+        schemas.Event, but they share the remote-events key prefix so a single bust clears both.
+        Values round-trip back to datetimes so callers cannot tell a cache hit from a fresh fetch.
+        """
+        try:
+            return self._get_cached(
+                key_scope,
+                lambda entries: [
+                    {'start': datetime.fromisoformat(e['start']), 'end': datetime.fromisoformat(e['end'])}
+                    for e in entries
+                ],
+            )
+        except (ValueError, TypeError, KeyError):
+            # A malformed entry must not take down availability; treat as a miss.
+            return None
+
+    def put_cached_busy_times(self, key_scope, busy_times: list[dict], expiry=None):
+        """Cache free/busy blocks. Returns False when redis isn't available."""
+
+        def serialize(entries):
+            return [{'start': e['start'].isoformat(), 'end': e['end'].isoformat()} for e in entries]
+
+        try:
+            return self._put_cached(key_scope, busy_times, serialize, expiry)
+        except (AttributeError, KeyError, TypeError):
+            # Unexpected shape: skip caching rather than poison the cache.
+            logging.warning('[BaseConnector.put_cached_busy_times] Unexpected free/busy shape, not caching')
+            return False
 
     def bust_cached_events(self, all_calendars=False) -> int:
         """Delete cached events for a specific subscriber/calendar.
@@ -163,16 +221,65 @@ class GoogleConnector(BaseConnector):
         if google_tkn:
             self.google_token = Credentials.from_authorized_user_info(json.loads(google_tkn), self.google_client.SCOPES)
 
-    def get_busy_time(self, calendar_ids: list, start: str, end: str):
-        """Retrieve a list of { start, end } dicts that will indicate busy time for a user
-        Note: This does not use the remote_calendar_id from the class,
-        all calendars must be available under the google_token provided to the class"""
-        time_min = datetime.strptime(start, DATEFMT).isoformat() + 'Z'
-        time_max = datetime.strptime(end, DATEFMT).isoformat() + 'Z'
+    def _push_backed_remote_ids(self, calendar_ids: list) -> set:
+        """Which of `calendar_ids` currently have a live push channel.
 
+        Returns an empty set on any failure: not knowing means we poll, which is the safe
+        direction.
+        """
+        if self.db is None:
+            return set()
+
+        try:
+            calendars = repo.calendar.get_by_subscriber(self.db, self.subscriber_id, False)
+            wanted = set(calendar_ids)
+            relevant = [c for c in calendars if c.user in wanted]
+            return google_watch.push_backed_calendar_ids(self.db, relevant)
+        except Exception as ex:
+            logging.warning(f'[GoogleConnector._push_backed_remote_ids] Falling back to polling: {ex}')
+            return set()
+
+    def _fetch_free_busy(self, calendar_ids: list, time_min: str, time_max: str):
         results = []
         for calendars in utils.chunk_list(calendar_ids, chunk_by=5):
             results += self.google_client.get_free_busy(calendars, time_min, time_max, self.google_token)
+        return results
+
+    def get_busy_time(self, calendar_ids: list, start: str, end: str):
+        """Retrieve a list of { start, end } dicts that will indicate busy time for a user
+        Note: This does not use the remote_calendar_id from the class,
+        all calendars must be available under the google_token provided to the class
+
+        Calendars with a live push channel are served from cache when possible: a push
+        notification busts that cache, so the cached answer is refreshed on change rather than
+        on every request. Calendars without live push are always fetched fresh, exactly as
+        before -- this is the fix for issue #1607.
+        """
+        time_min = datetime.strptime(start, DATEFMT).isoformat() + 'Z'
+        time_max = datetime.strptime(end, DATEFMT).isoformat() + 'Z'
+
+        push_backed = self._push_backed_remote_ids(calendar_ids)
+        # Preserve caller ordering so results stay stable between requests.
+        cacheable = [cid for cid in calendar_ids if cid in push_backed]
+        uncacheable = [cid for cid in calendar_ids if cid not in push_backed]
+
+        results = []
+
+        if cacheable:
+            # The key has to cover the exact calendar set, or a request for a subset would be
+            # served an answer computed for a superset.
+            scope = f'freebusy_{utils.stable_hash(sorted(cacheable))}_{start}_{end}'
+            cached = self.get_cached_busy_times(scope)
+            if cached is not None:
+                results += cached
+            else:
+                fetched = self._fetch_free_busy(cacheable, time_min, time_max)
+                self.put_cached_busy_times(scope, fetched, expiry=push_cache_expiry())
+                results += fetched
+
+        if uncacheable:
+            results += self._fetch_free_busy(uncacheable, time_min, time_max)
+
         return results
 
     def test_connection(self) -> bool:
@@ -269,7 +376,8 @@ class GoogleConnector(BaseConnector):
                 )
             )
 
-        self.put_cached_events(cache_scope, events)
+        push_backed = self.remote_calendar_id in self._push_backed_remote_ids([self.remote_calendar_id])
+        self.put_cached_events(cache_scope, events, expiry=push_cache_expiry() if push_backed else None)
 
         return events
 
