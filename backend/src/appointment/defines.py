@@ -41,6 +41,7 @@ ACCOUNTS_CALDAV_SETUP_RETRY_DELAY_SECONDS = 2
 # Resolves to absolute appointment package path
 BASE_PATH = f'{sys.modules["appointment"].__path__[0]}'
 
+ONE_HOUR_IN_SECONDS = 3600
 ONE_DAY_IN_SECONDS = 86400
 SEVEN_DAYS_IN_SECONDS = 604800
 

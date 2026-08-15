@@ -1,5 +1,7 @@
 import json
 import logging
+import os
+from datetime import datetime, timedelta, UTC
 
 import sentry_sdk
 from google.oauth2.credentials import Credentials
@@ -11,7 +13,7 @@ from appointment.controller import zoom
 from appointment.database import repo, models, schemas
 from appointment.database.models import MeetingLinkProviderType
 from appointment.defines import FALLBACK_LOCALE
-from appointment.dependencies.database import get_engine_and_session
+from appointment.dependencies.database import get_engine_and_session, get_redis
 from appointment.dependencies.google import get_google_client
 from appointment.l10n import l10n
 
@@ -46,6 +48,110 @@ def stop_google_channel(self, channel_id: str, resource_id: str, token_json: str
     )
     google_client.stop_channel(channel_id, resource_id, token)
     log.info(f'Stopped Google Calendar channel {channel_id}')
+
+
+def reconcile_interval_seconds() -> int:
+    """How stale a channel may get before the reconciliation sweep re-syncs it."""
+    return int(os.getenv('GOOGLE_RECONCILE_INTERVAL_SECONDS', 900))
+
+
+@celery.task
+def reconcile_google_channels():
+    """Periodically sync channels that push has not refreshed recently.
+
+    Push delivery is best-effort: Google does not guarantee a notification for every change,
+    and a channel can go quiet because nothing happened or because delivery is broken -- the two
+    are indistinguishable from our side. This sweep removes the need to tell them apart by
+    syncing any channel that has not been refreshed within the reconcile interval, which bounds
+    how long a dropped notification can go unnoticed.
+
+    If this sweep itself stops working, last_synced_at ages past MAX_SYNC_AGE and
+    is_push_active() turns false, so read paths return to polling Google.
+    """
+    from appointment.controller.google_watch import MAX_SYNC_AGE
+
+    _, SessionLocal = get_engine_and_session()
+    db = SessionLocal()
+
+    reconciled = 0
+    skipped = 0
+
+    try:
+        interval = timedelta(seconds=reconcile_interval_seconds())
+        synced_before = (datetime.now(tz=UTC) - interval).replace(tzinfo=None)
+        channels = repo.google_calendar_channel.get_stale(db, synced_before=synced_before)
+
+        for channel in channels:
+            calendar = channel.calendar
+            if not calendar or not calendar.connected:
+                skipped += 1
+                continue
+
+            try:
+                sync_google_calendar_changes(channel.channel_id)
+                reconciled += 1
+            except Exception as ex:
+                # One bad channel must not stop the sweep for everyone else.
+                log.warning(f'[tasks.google] Reconcile failed for channel {channel.channel_id}: {ex}')
+                sentry_sdk.capture_exception(ex)
+                skipped += 1
+    finally:
+        db.close()
+
+    log.info(
+        f'[tasks.google] Reconciliation complete: {reconciled} synced, {skipped} skipped '
+        f'(channels unsynced for > {reconcile_interval_seconds()}s; '
+        f'push is distrusted entirely after {int(MAX_SYNC_AGE.total_seconds())}s)'
+    )
+
+
+def _bust_subscriber_cache(calendar: models.Calendar) -> None:
+    """Invalidate cached availability for the calendar's owner after a remote change.
+
+    Push notifications are what let read paths serve from cache between requests instead of
+    polling Google every time; this is what makes that safe to turn on.
+    """
+    from appointment.controller.calendar import BaseConnector
+
+    try:
+        redis_instance = get_redis()
+        connector = BaseConnector(calendar.owner_id, calendar.id, redis_instance)
+        connector.bust_cached_events(all_calendars=True)
+    except Exception as ex:
+        log.warning(f'[tasks.google] Failed to bust cache for subscriber {calendar.owner_id}: {ex}')
+
+
+def _recover_from_invalid_sync_token(
+    db: Session,
+    channel: models.GoogleCalendarChannel,
+    calendar: models.Calendar,
+    google_client: GoogleClient,
+    google_token,
+) -> None:
+    """Recover from a 410 Gone: the sync token is unrecoverable, so re-establish one via a
+    bounded full resync rather than silently discarding whatever changed in between.
+    """
+    window_days = int(os.getenv('GOOGLE_FULL_RESYNC_WINDOW_DAYS', 90))
+    now = datetime.now(tz=UTC)
+    time_min = (now - timedelta(days=window_days)).isoformat().replace('+00:00', 'Z')
+    time_max = (now + timedelta(days=window_days)).isoformat().replace('+00:00', 'Z')
+
+    try:
+        events = google_client.list_events(calendar.user, time_min, time_max, google_token)
+        if events:
+            _process_changed_events(db, calendar.id, events, google_client, google_token, calendar.user)
+    except Exception as ex:
+        # A failed re-scan must not prevent re-establishing the token below -- otherwise the
+        # channel is stuck retrying the same 410 forever.
+        log.warning(f'[tasks.google] Full resync scan failed for channel {channel.channel_id}: {ex}')
+        sentry_sdk.capture_exception(ex)
+
+    new_sync_token = google_client.get_initial_sync_token(calendar.user, google_token)
+    if new_sync_token:
+        repo.google_calendar_channel.record_sync(db, channel, new_sync_token)
+        _bust_subscriber_cache(calendar)
+    else:
+        log.warning(f'[tasks.google] Could not reestablish sync token for channel {channel.channel_id}')
 
 
 @celery.task(
@@ -89,25 +195,30 @@ def sync_google_calendar_changes(self, channel_id: str):
         if not channel.sync_token:
             sync_token = google_client.get_initial_sync_token(calendar.user, google_token)
             if sync_token:
-                repo.google_calendar_channel.update_sync_token(db, channel, sync_token)
+                repo.google_calendar_channel.record_sync(db, channel, sync_token)
 
         changed_events, new_sync_token = google_client.list_events_sync(
             calendar.user, channel.sync_token, google_token
         )
 
         if changed_events is None:
-            fresh_token = google_client.get_initial_sync_token(calendar.user, google_token)
-            if fresh_token:
-                repo.google_calendar_channel.update_sync_token(db, channel, fresh_token)
+            # 410 Gone: Google invalidated our sync token, so the delta we would have received
+            # is unrecoverable. Re-establishing the token alone would silently swallow those
+            # changes, so do a bounded full resync to catch up before resuming incremental sync.
+            _recover_from_invalid_sync_token(db, channel, calendar, google_client, google_token)
             return
-
-        if new_sync_token:
-            repo.google_calendar_channel.update_sync_token(db, channel, new_sync_token)
 
         if changed_events:
             _process_changed_events(
                 db, calendar.id, changed_events, google_client, google_token, calendar.user
             )
+
+        # Stamp the watermark only after the changes have been applied: it is what
+        # is_push_active() trusts, so it must never run ahead of the local state.
+        repo.google_calendar_channel.record_sync(db, channel, new_sync_token)
+
+        if changed_events:
+            _bust_subscriber_cache(calendar)
     finally:
         db.close()
 

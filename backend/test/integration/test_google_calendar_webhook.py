@@ -193,6 +193,67 @@ class TestGoogleCalendarWebhook:
         assert response.status_code == 200
         mock_sync_task.delay.assert_called_once_with('valid-channel')
 
+    @patch('appointment.routes.webhooks.sync_google_calendar_changes')
+    def test_notification_records_message_number_and_expiration(
+        self,
+        mock_sync_task,
+        with_db,
+        with_client,
+        make_pro_subscriber,
+        make_google_calendar,
+        make_external_connections,
+    ):
+        """The webhook should record the notification (message number + expiration) before
+        dispatching the sync task, so is_push_active()'s bookkeeping stays current even if the
+        sync task itself is slow or fails."""
+        subscriber = make_pro_subscriber()
+        google_creds = json.dumps({
+            'token': 'fake-token',
+            'refresh_token': 'fake-refresh',
+            'client_id': 'fake-client-id',
+            'client_secret': 'fake-secret',
+        })
+        ext_conn = make_external_connections(
+            subscriber.id,
+            type=models.ExternalConnectionType.google,
+            token=google_creds,
+        )
+        calendar = make_google_calendar(
+            subscriber_id=subscriber.id,
+            connected=True,
+            external_connection_id=ext_conn.id,
+        )
+
+        channel_state = 'notif-state-token'
+        with with_db() as db:
+            repo.google_calendar_channel.create(
+                db,
+                calendar_id=calendar.id,
+                channel_id='notif-channel',
+                resource_id='res-notif',
+                expiration=datetime.now(tz=timezone.utc) + timedelta(days=1),
+                state=channel_state,
+                sync_token='initial-sync-token',
+            )
+
+        response = with_client.post(
+            '/webhooks/google-calendar',
+            headers={
+                'X-Goog-Channel-Id': 'notif-channel',
+                'X-Goog-Resource-State': 'exists',
+                'X-Goog-Channel-Token': channel_state,
+                'X-Goog-Message-Number': '7',
+                'X-Goog-Channel-Expiration': 'Tue, 01 Sep 2026 12:00:00 GMT',
+            },
+        )
+        assert response.status_code == 200
+
+        with with_db() as db:
+            channel = repo.google_calendar_channel.get_by_channel_id(db, 'notif-channel')
+            assert channel.last_message_number == 7
+            assert channel.last_notification_at is not None
+            assert channel.expiration == datetime(2026, 9, 1, 12, 0, 0)
+
 
 class TestCalendarConnectWatchChannel:
     """Watch channels are managed at the schedule level, not on connect/disconnect.

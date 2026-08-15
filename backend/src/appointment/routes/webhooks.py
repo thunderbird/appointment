@@ -1,4 +1,6 @@
+import email.utils
 import logging
+from datetime import datetime
 
 import sentry_sdk
 from fastapi import APIRouter, Depends, Request, Response
@@ -12,6 +14,26 @@ from ..dependencies.zoom import get_webhook_auth as get_webhook_auth_zoom
 from ..tasks.google import sync_google_calendar_changes
 
 router = APIRouter()
+
+
+def _parse_message_number(raw: str | None) -> int | None:
+    """Parse Google's X-Goog-Message-Number header, or None if absent/malformed."""
+    if not raw:
+        return None
+    try:
+        return int(raw)
+    except ValueError:
+        return None
+
+
+def _parse_expiration(raw: str | None) -> datetime | None:
+    """Parse Google's X-Goog-Channel-Expiration header (RFC 1123), or None if absent/malformed."""
+    if not raw:
+        return None
+    try:
+        return email.utils.parsedate_to_datetime(raw)
+    except (TypeError, ValueError):
+        return None
 
 
 @router.post('/zoom-deauthorization')
@@ -75,6 +97,24 @@ def google_calendar_notification(
     if not calendar.connected:
         teardown_watch_channel(db, calendar)
         return success_response
+
+    message_number = _parse_message_number(request.headers.get('X-Goog-Message-Number'))
+    expiration = _parse_expiration(request.headers.get('X-Goog-Channel-Expiration'))
+    previous_message_number = repo.google_calendar_channel.record_notification(
+        db, channel, message_number=message_number, expiration=expiration
+    )
+    if message_number is not None and previous_message_number is not None:
+        gap = message_number - previous_message_number
+        if gap > 1:
+            logging.warning(
+                f'[webhooks.google_calendar] Possible dropped notification(s) for channel '
+                f'{channel_id}: message_number jumped from {previous_message_number} to {message_number}'
+            )
+        elif gap <= 0:
+            logging.info(
+                f'[webhooks.google_calendar] Duplicate/out-of-order notification for channel '
+                f'{channel_id}: message_number {message_number} <= previous {previous_message_number}'
+            )
 
     sync_google_calendar_changes.delay(channel_id)
 

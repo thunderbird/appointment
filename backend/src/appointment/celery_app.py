@@ -3,7 +3,7 @@ import os
 import sentry_sdk
 from celery import Celery
 from dotenv import load_dotenv
-from appointment.defines import ONE_DAY_IN_SECONDS, SEVEN_DAYS_IN_SECONDS
+from appointment.defines import ONE_DAY_IN_SECONDS, ONE_HOUR_IN_SECONDS, SEVEN_DAYS_IN_SECONDS
 
 
 def _base_redis_url() -> str:
@@ -42,7 +42,13 @@ def create_celery_app() -> Celery:
     sentry_sdk.set_extra('CELERY_TASK_ALWAYS_EAGER', task_always_eager)
 
     google_channel_ttl = float(os.getenv('GOOGLE_CHANNEL_TTL_IN_SECONDS', SEVEN_DAYS_IN_SECONDS))
-    google_channel_renew_interval = google_channel_ttl - ONE_DAY_IN_SECONDS
+    # Capped at an hour by default so a failed renewal run gets many more retries before the
+    # channel actually expires, rather than one shot ~a day out.
+    google_channel_renew_interval = min(
+        float(os.getenv('GOOGLE_CHANNEL_RENEW_INTERVAL_SECONDS', ONE_HOUR_IN_SECONDS)),
+        max(google_channel_ttl - ONE_DAY_IN_SECONDS, 60.0),
+    )
+    google_reconcile_interval = float(os.getenv('GOOGLE_RECONCILE_INTERVAL_SECONDS', 900))
 
     app = Celery('appointment')
 
@@ -67,6 +73,10 @@ def create_celery_app() -> Celery:
             'renew-google-channels': {
                 'task': 'appointment.tasks.google.renew_google_channels',
                 'schedule': google_channel_renew_interval,
+            },
+            'reconcile-google-channels': {
+                'task': 'appointment.tasks.google.reconcile_google_channels',
+                'schedule': google_reconcile_interval,
             },
         },
     })

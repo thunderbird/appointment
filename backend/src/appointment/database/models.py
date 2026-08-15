@@ -480,6 +480,9 @@ class GoogleCalendarChannel(Base):
     expiration = Column(DateTime)
     sync_token = Column(String, nullable=True)
     state = Column(encrypted_type(String, length=36), nullable=True)
+    last_synced_at = Column(DateTime, nullable=True)
+    last_notification_at = Column(DateTime, nullable=True)
+    last_message_number = Column(Integer, nullable=True)
 
     calendar: Mapped[Calendar] = relationship('Calendar', back_populates='google_channel')
 
