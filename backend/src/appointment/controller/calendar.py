@@ -105,28 +105,36 @@ class BaseConnector:
 
         return True
 
-    def bust_cached_events(self, all_calendars=False):
+    def bust_cached_events(self, all_calendars=False) -> int:
         """Delete cached events for a specific subscriber/calendar.
-        Optionally pass in all_calendars to remove all cached calendar events for a specific subscriber."""
+        Optionally pass in all_calendars to remove all cached calendar events for a specific subscriber.
+
+        Walks the whole keyspace with scan_iter -- a single SCAN batch is not guaranteed to be
+        complete, so a bust could silently leave entries behind. Two callers depend on this being
+        exhaustive: the booking write path re-checks availability immediately after busting, and
+        push notifications use it to invalidate on change.
+
+        Returns the number of keys deleted.
+        """
         if self.redis_instance is None:
-            return False
+            return 0
 
         timer_boot = time.perf_counter_ns()
+        match = f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*'
 
-        # Scan returns a tuple like: (Cursor start, [...keys found])
-        ret = self.redis_instance.scan(
-            0, f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*'
-        )
-
-        if len(ret[1]) == 0:
-            return False
-
-        # Expand the list in position 1, which is a list of keys found from the scan
-        self.redis_instance.delete(*ret[1])
+        deleted = 0
+        batch = []
+        for key in self.redis_instance.scan_iter(match=match, count=500):
+            batch.append(key)
+            if len(batch) >= 500:
+                deleted += self.redis_instance.delete(*batch)
+                batch = []
+        if batch:
+            deleted += self.redis_instance.delete(*batch)
 
         sentry_sdk.set_measurement('redis_bust_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
 
-        return True
+        return deleted
 
 
 class GoogleConnector(BaseConnector):
