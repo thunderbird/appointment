@@ -109,12 +109,19 @@ class BaseConnector:
         """Delete cached events for a specific subscriber/calendar.
         Optionally pass in all_calendars to remove all cached calendar events for a specific subscriber.
 
-        Walks the whole keyspace with scan_iter. A single SCAN call returns one
-        batch and a cursor, not the complete set, so the previous implementation
-        could silently leave entries behind whenever the keyspace did not happen
-        to fit in one batch. The booking write path busts and then immediately
-        re-checks availability, so a survivor there is a stale answer on the one
-        path that is meant to be authoritative.
+        Walks the whole keyspace with scan_iter.
+
+        The previous implementation read a single SCAN call and treated an empty
+        result as "nothing cached". Redis does not work that way: MATCH is
+        applied *after* a batch is pulled from the keyspace, so when our keys are
+        a small share of the DB the first call routinely comes back empty with a
+        non-zero cursor. That made the bust delete nothing at all, not merely
+        miss a few stragglers.
+
+        The booking write path busts and then immediately re-checks availability
+        against the remote calendar, and that re-check is what stops a slot being
+        double booked -- so a survivor turns the authoritative path into a stale
+        one. Ref: https://redis.io/docs/latest/commands/scan/
 
         Returns the number of keys deleted.
         """

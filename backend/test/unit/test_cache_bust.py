@@ -6,15 +6,26 @@ the one path that is supposed to be authoritative.
 """
 
 from appointment.controller.calendar import BaseConnector
+from appointment.defines import REDIS_REMOTE_EVENTS_KEY
 
 
 class BatchedFakeRedis:
-    """In-memory Redis whose SCAN returns one batch at a time, like the real one.
+    """In-memory Redis that iterates the way the real one does.
 
-    This is the whole point of the test: `scan()` is documented to return a
-    cursor plus *a* batch, not the complete key set. A fake that returns
-    everything in one call would let an implementation that reads a single batch
-    look correct.
+    Two properties matter here, and both come straight from the SCAN docs:
+
+    * A single call returns one batch plus a cursor, never the whole key set.
+      "the client should not consider the iteration complete as long as the
+      returned cursor is not zero."
+
+    * MATCH "is applied after elements are retrieved from the collection", so a
+      batch is sliced out of *all* keys first and only then filtered. When the
+      pattern matches a small share of the keyspace, "SCAN will likely return no
+      elements in most iterations" -- a call can legitimately return nothing
+      while plenty of matching keys are still to come.
+
+    A fake that filtered before batching would never produce that second case,
+    and an implementation reading a single batch would look correct.
     """
 
     BATCH = 10
@@ -37,16 +48,16 @@ class BatchedFakeRedis:
                 removed += 1
         return removed
 
-    def _matching(self, match):
-        prefix = match[:-1] if match and match.endswith('*') else match
-        return [k for k in self.store if prefix is None or k.startswith(prefix)]
-
     def scan(self, cursor, match=None):
-        """One batch plus a cursor, exactly as redis-py returns it."""
-        keys = self._matching(match)
-        batch = keys[cursor:cursor + self.BATCH]
+        all_keys = list(self.store)
+        batch = all_keys[cursor:cursor + self.BATCH]
         next_cursor = cursor + self.BATCH
-        return (0 if next_cursor >= len(keys) else next_cursor), batch
+
+        if match is not None:
+            prefix = match[:-1] if match.endswith('*') else match
+            batch = [k for k in batch if k.startswith(prefix)]
+
+        return (0 if next_cursor >= len(all_keys) else next_cursor), batch
 
     def scan_iter(self, match=None, count=None):
         cursor = 0
@@ -75,6 +86,33 @@ class TestBustCachedEvents:
 
         assert deleted == 95
         assert redis_instance.store == {}
+
+    def test_deletes_when_the_first_batch_matches_nothing(self):
+        """The realistic shape, and the one that makes the old code delete zero.
+
+        MATCH is applied after a batch is pulled from the keyspace, so when this
+        subscriber's keys sit behind a pile of unrelated ones the first SCAN
+        returns an empty list with a non-zero cursor. Reading a single batch
+        reads that as "nothing cached" and busts nothing at all.
+        """
+        redis_instance = BatchedFakeRedis()
+
+        for i in range(40):
+            redis_instance.set(f'unrelated:key:{i}', 'x')
+
+        con = _connector(redis_instance)
+        for i in range(12):
+            con.put_cached_events(f'scope-{i}', [])
+
+        # Precondition: the first batch really is empty, with more to come.
+        cursor, first_batch = redis_instance.scan(0, match=f'{REDIS_REMOTE_EVENTS_KEY}:*')
+        assert first_batch == []
+        assert cursor != 0
+
+        deleted = con.bust_cached_events(all_calendars=True)
+
+        assert deleted == 12
+        assert len(redis_instance.store) == 40
 
     def test_leaves_other_subscribers_alone(self):
         redis_instance = BatchedFakeRedis()
