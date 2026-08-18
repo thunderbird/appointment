@@ -161,6 +161,15 @@ def sync_google_calendar_changes(self, channel_id: str):
             _recover_from_invalid_sync_token(db, channel, calendar, google_client, google_token)
             return
 
+        if not new_sync_token:
+            # A completed pagination always ends with a nextSyncToken. Without one
+            # there is no delta chain to continue, so treating this as a successful
+            # empty sync would stamp the channel healthy on an invalid response and
+            # silence the task's retry policy. Raise before touching any state.
+            raise RuntimeError(
+                f'[tasks.google] No sync token returned for channel {channel_id}; refusing to record sync'
+            )
+
         if changed_events:
             _process_changed_events(
                 db, calendar.id, changed_events, google_client, google_token, calendar.user
@@ -220,12 +229,22 @@ def _recover_from_invalid_sync_token(
     An invalidated sync token means we cannot know what changed. Recovery is:
       1. drop the cache, so reads stop trusting anything derived from the lost
          delta and fall back to Google,
-      2. re-scan a bounded forward window and re-apply RSVP/cancellation state,
-         so bookings that changed during the blackout are not missed,
-      3. establish a fresh token and re-stamp the watermark.
+      2. re-scan a bounded window and re-apply RSVP/cancellation state, so
+         bookings that changed during the blackout are not missed,
+      3. only then establish a fresh token and re-stamp the watermark.
 
-    If step 3 fails the watermark is left alone, so is_push_active() ages the
-    channel out and read paths return to polling -- stale, never silently wrong.
+    The ordering of 2 and 3 is the whole safety property. A fresh sync token
+    starts its delta chain *after* the blackout, so once it is stored the lost
+    changes are unrecoverable by any later sync -- reconciliation cannot help,
+    because nothing is left that knows they were missed. Step 2 failing is
+    therefore the dangerous case, and it must abort recovery rather than fall
+    through: we keep the old (invalid) token, so the next attempt re-enters
+    recovery instead of skipping past the gap.
+
+    The cache is busted *before* the scan on purpose. is_push_active() does not
+    go false here -- last_synced_at is untouched by a 410, so the gate keeps
+    trusting the channel for up to MAX_SYNC_AGE -- which means anything derived
+    from the lost delta would keep being served if we waited for success.
     """
     log.info(f'[tasks.google] Sync token invalidated for channel {channel.channel_id}, running full resync')
 
@@ -234,9 +253,12 @@ def _recover_from_invalid_sync_token(
     now = datetime.now(tz=timezone.utc)
     window_days = int(os.getenv('GOOGLE_FULL_RESYNC_WINDOW_DAYS', 90))
     try:
+        # Symmetric window: an event that started before now may still be running
+        # or have been modified during the blackout, and a forward-only scan
+        # would never see it.
         events = google_client.list_events(
             calendar.user,
-            now.isoformat(),
+            (now - timedelta(days=window_days)).isoformat(),
             (now + timedelta(days=window_days)).isoformat(),
             google_token,
         )
@@ -245,11 +267,13 @@ def _recover_from_invalid_sync_token(
                 db, calendar.id, events, google_client, google_token, calendar.user
             )
     except Exception as ex:
-        # Fall through to re-establish the token regardless; the reconciliation
-        # sweep will retry, and until it succeeds the stale watermark keeps read
-        # paths polling.
+        # Do not re-establish the token: that would trade a recoverable gap for
+        # a permanent one. Raising hands the retry to the task's own policy, and
+        # on exhaustion the untouched watermark ages the channel out of trust so
+        # reads fall back to polling.
         log.warning(f'[tasks.google] Full resync scan failed for channel {channel.channel_id}: {ex}')
         sentry_sdk.capture_exception(ex)
+        raise
 
     fresh_token = google_client.get_initial_sync_token(calendar.user, google_token)
     if fresh_token:

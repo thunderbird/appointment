@@ -6,16 +6,23 @@ notifications, and a channel that goes quiet. In every case the requirement is
 the same -- local state either catches up, or stops claiming to be current.
 """
 
+import httplib2
 import json
 from datetime import datetime, timedelta, timezone
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import pytest
+from googleapiclient.errors import HttpError
 
 from appointment.controller.google_watch import is_push_active
 from appointment.database import models, repo
 
 MODULE = 'appointment.tasks.google'
+
+
+class BoomError(Exception):
+    """A distinctive failure, so tests assert on the real error rather than on
+    anything the task machinery might raise in its place."""
 
 
 def _google_token():
@@ -220,7 +227,10 @@ class TestInvalidSyncToken:
         """If we cannot get a new token we must stop claiming to be current.
 
         This is the property that turns an unrecoverable push failure into
-        degraded-but-correct polling instead of silent divergence.
+        degraded-but-correct polling instead of silent divergence. Asserted by
+        comparing against the watermark captured *before* the call -- assigning a
+        stale value here and re-checking is_push_active would only test that
+        function's arithmetic, and would pass even if recovery advanced it.
         """
         _, calendar = push_setup()
         client = _mock_client(
@@ -228,28 +238,197 @@ class TestInvalidSyncToken:
             get_initial_sync_token=Mock(return_value=None),
         )
 
+        with with_db() as db:
+            before = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id).last_synced_at
+
         _run_sync(with_db, client, FakeRedis())
 
         with with_db() as db:
             channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
-            # Watermark not advanced -> ages out -> reads fall back to polling.
-            stale = datetime.now(tz=timezone.utc) - timedelta(hours=7)
-            channel.last_synced_at = stale.replace(tzinfo=None)
-            assert is_push_active(channel) is False
+            assert channel.last_synced_at == before
 
-    def test_resync_scan_failure_still_reestablishes_the_token(self, with_db, push_setup):
-        """A failing re-scan must not leave the channel without a delta chain."""
+    def test_resync_scan_failure_does_not_reestablish_the_token(self, with_db, push_setup):
+        """A failed recovery scan must abort recovery, not paper over it.
+
+        A fresh sync token starts its delta chain after the blackout, so storing
+        one here would make the changes we failed to re-scan unrecoverable by any
+        later sync. Keeping the old (invalid) token means the next attempt
+        re-enters recovery instead of skipping past the gap.
+        """
         _, calendar = push_setup()
         client = _mock_client(
             list_events_sync=Mock(return_value=(None, None)),
-            list_events=Mock(side_effect=Exception('google exploded')),
+            list_events=Mock(side_effect=BoomError('google exploded')),
         )
+
+        with with_db() as db:
+            before = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id).last_synced_at
+
+        with pytest.raises(BoomError):
+            _run_sync(with_db, client, FakeRedis())
+
+        client.get_initial_sync_token.assert_not_called()
+        with with_db() as db:
+            channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
+            assert channel.sync_token == 'token-v1'
+            assert channel.last_synced_at == before
+
+    def test_resync_scans_a_window_starting_before_now(self, with_db, push_setup):
+        """Events that began before the blackout may still have changed during it."""
+        push_setup()
+        client = _mock_client(list_events_sync=Mock(return_value=(None, None)))
 
         _run_sync(with_db, client, FakeRedis())
 
+        _, time_min, time_max, _ = client.list_events.call_args.args
+        now = datetime.now(tz=timezone.utc)
+        # Meaningfully in the past, not merely a few microseconds earlier than
+        # the timestamp this assertion happens to compute.
+        assert datetime.fromisoformat(time_min) < now - timedelta(days=1)
+        assert datetime.fromisoformat(time_max) > now + timedelta(days=1)
+
+
+class TestSyncFailureIsNotSuccess:
+    """A failed sync must never look like a quiet one.
+
+    list_events_sync used to swallow non-410 errors and return ([], None), which
+    the caller could not distinguish from "nothing changed" -- so it stamped the
+    watermark, kept serving the un-busted cache, and hid the channel from the
+    reconciliation sweep, which filters on that same watermark. Persistent errors
+    therefore produced a channel that self-reported healthy forever.
+    """
+
+    def _captured(self, with_db, calendar_id):
+        with with_db() as db:
+            channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar_id)
+            return channel.last_synced_at, channel.sync_token
+
+    def test_transport_error_propagates_and_advances_nothing(self, with_db, push_setup):
+        _, calendar = push_setup()
+        client = _mock_client(list_events_sync=Mock(side_effect=BoomError('502 from google')))
+
+        before = self._captured(with_db, calendar.id)
+
+        with pytest.raises(BoomError):
+            _run_sync(with_db, client, FakeRedis())
+
+        assert self._captured(with_db, calendar.id) == before
+
+    def test_missing_sync_token_is_an_error_not_an_empty_sync(self, with_db, push_setup):
+        """A completed pagination always ends with a nextSyncToken."""
+        _, calendar = push_setup()
+        client = _mock_client(list_events_sync=Mock(return_value=([], None)))
+
+        before = self._captured(with_db, calendar.id)
+
+        with pytest.raises(RuntimeError):
+            _run_sync(with_db, client, FakeRedis())
+
+        assert self._captured(with_db, calendar.id) == before
+
+    def test_partial_page_failure_records_nothing(self, with_db, push_setup):
+        """Page 1 succeeded, page 2 returned a non-410 error.
+
+        Drives the real pagination loop rather than mocking its result, because
+        mocking that result is precisely what hid this bug: returning the items
+        gathered so far alongside a null token is indistinguishable from a clean
+        empty delta.
+        """
+        _, calendar = push_setup()
+
+        pages = [
+            {'items': [{'id': 'evt-1', 'status': 'confirmed'}], 'nextPageToken': 'page-2'},
+            HttpError(httplib2.Response({'status': 503}), b'{"error": {"message": "unavailable"}}'),
+        ]
+
+        def execute():
+            page = pages.pop(0)
+            if isinstance(page, Exception):
+                raise page
+            return page
+
+        service = MagicMock()
+        service.events.return_value.list.return_value.execute.side_effect = execute
+        service.__enter__.return_value = service
+        # A MagicMock __exit__ returns a truthy mock, which would suppress the
+        # very exception under test.
+        service.__exit__.return_value = False
+
+        from appointment.controller.apis.google_client import GoogleClient
+
+        client = _mock_client()
+        client.list_events_sync = lambda *a, **kw: GoogleClient.list_events_sync(
+            client, 'cal-id', 'token-v1', None
+        )
+
+        before = self._captured(with_db, calendar.id)
+
+        with patch('appointment.controller.apis.google_client.build', return_value=service):
+            with pytest.raises(HttpError):
+                _run_sync(with_db, client, FakeRedis())
+
+        assert self._captured(with_db, calendar.id) == before
+
+    def test_410_on_a_later_page_still_routes_to_recovery(self, with_db, push_setup):
+        """The one status that must not propagate: it means "resync", not "failed"."""
+        _, calendar = push_setup()
+
+        pages = [
+            {'items': [], 'nextPageToken': 'page-2'},
+            HttpError(httplib2.Response({'status': 410}), b'{}'),
+        ]
+
+        def execute():
+            page = pages.pop(0)
+            if isinstance(page, Exception):
+                raise page
+            return page
+
+        service = MagicMock()
+        service.events.return_value.list.return_value.execute.side_effect = execute
+        service.__enter__.return_value = service
+        # A MagicMock __exit__ returns a truthy mock, which would suppress the
+        # very exception under test.
+        service.__exit__.return_value = False
+
+        from appointment.controller.apis.google_client import GoogleClient
+
+        client = _mock_client()
+        client.list_events_sync = lambda *a, **kw: GoogleClient.list_events_sync(
+            client, 'cal-id', 'token-v1', None
+        )
+
+        with patch('appointment.controller.apis.google_client.build', return_value=service):
+            _run_sync(with_db, client, FakeRedis())
+
+        # Recovery ran rather than the error escaping.
+        client.list_events.assert_called_once()
+        with with_db() as db:
+            assert repo.google_calendar_channel.get_by_calendar_id(db, calendar.id).sync_token == 'fresh-token'
+
+    def test_persistently_failing_channel_ages_out_and_is_reconciled(self, with_db, push_setup):
+        """The layered defence, end to end.
+
+        Distinct from the assertions above: an untouched-but-recent watermark
+        still reads as trusted for up to MAX_SYNC_AGE, so ageing out has to be
+        tested from an already-stale starting point rather than inferred from
+        "nothing was advanced".
+        """
+        stale = datetime.now(tz=timezone.utc) - timedelta(hours=7)
+        _, calendar = push_setup(last_synced_at=stale)
+        client = _mock_client(list_events_sync=Mock(side_effect=BoomError('still broken')))
+
+        with pytest.raises(BoomError):
+            _run_sync(with_db, client, FakeRedis())
+
         with with_db() as db:
             channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
-            assert channel.sync_token == 'fresh-token'
+            # Reads fall back to polling ...
+            assert is_push_active(channel) is False
+            # ... and the sweep still sees it, rather than being told it is fresh.
+            synced_before = (datetime.now(tz=timezone.utc) - timedelta(minutes=15)).replace(tzinfo=None)
+            stale_ids = [c.id for c in repo.google_calendar_channel.get_stale(db, synced_before)]
+            assert channel.id in stale_ids
 
 
 class TestReconciliation:

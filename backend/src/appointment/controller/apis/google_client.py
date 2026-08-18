@@ -1,7 +1,7 @@
 import logging
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from enum import StrEnum
 
 import sentry_sdk
@@ -21,30 +21,6 @@ from ...exceptions.calendar import (
     FreeBusyTimeException
 )
 from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
-
-
-def parse_rfc3339_utc(value: str) -> datetime:
-    """Parse an RFC-3339 UTC timestamp from the Calendar API into a naive UTC datetime.
-
-    Google documents these fields as RFC-3339, which permits fractional seconds.
-    The previous strict '%Y-%m-%dT%H:%M:%SZ' parse raised ValueError on any value
-    that carried them, taking down the whole availability lookup; that was
-    observed against a contract-accurate Calendar twin returning '...T17:52:58.000Z'.
-
-    Returns naive UTC to match what the rest of the busy-time pipeline and the
-    CalDAV connector produce.
-    """
-    try:
-        parsed = datetime.fromisoformat(value)
-    except (TypeError, ValueError):
-        # Fall back to the historical strict format so any shape that used to
-        # parse still parses identically.
-        parsed = datetime.strptime(value, DATETIMEFMT)
-
-    if parsed.tzinfo is not None:
-        parsed = parsed.astimezone(timezone.utc).replace(tzinfo=None)
-
-    return parsed
 
 
 class SendUpdates(StrEnum):
@@ -217,8 +193,8 @@ class GoogleClient:
                         # Transform to datetimes to match caldav's behaviour
                         items += [
                             {
-                                'start': parse_rfc3339_utc(entry.get('start')),
-                                'end': parse_rfc3339_utc(entry.get('end')),
+                                'start': datetime.strptime(entry.get('start'), DATETIMEFMT),
+                                'end': datetime.strptime(entry.get('end'), DATETIMEFMT),
                             }
                             for entry in busy
                         ]
@@ -425,10 +401,14 @@ class GoogleClient:
                     if e.status_code == 410:
                         logging.info('[google_client.list_events_sync] Sync token expired, full sync needed')
                         return None, None
+                    # Anything else must propagate. Returning the partial items
+                    # collected so far is indistinguishable from "nothing
+                    # changed", which lets the caller stamp the channel healthy
+                    # and stop polling on the strength of a failed sync.
                     logging.warning(
                         f'[google_client.list_events_sync] Request Error: {e.status_code}/{e.error_details}'
                     )
-                    break
+                    raise
 
         return items, next_sync_token
 

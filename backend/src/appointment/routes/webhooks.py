@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 
 import sentry_sdk
 from fastapi import APIRouter, Depends, Request, Response
@@ -80,49 +81,36 @@ def google_calendar_notification(
     # Google re-states the channel's expiration on every notification, so keep our
     # copy honest -- it is what is_push_active() trusts.
     expiration = _parse_expiration(request.headers.get('X-Goog-Channel-Expiration'))
-    message_number = _parse_message_number(request.headers.get('X-Goog-Message-Number'))
 
-    previous_message_number = repo.google_calendar_channel.record_notification(
-        db, channel, message_number=message_number, expiration=expiration
-    )
-
-    # Message numbers are per-channel and monotonic, so they tell us whether
-    # delivery has been lossy. Neither case changes what we do -- the sync is
-    # driven by the stored sync token, which is a watermark and therefore both
-    # gap-filling and replay-safe -- but both are worth surfacing.
-    if message_number is not None and previous_message_number is not None:
-        if message_number > previous_message_number + 1:
-            logging.warning(
-                f'[webhooks.google_calendar] Missed {message_number - previous_message_number - 1} '
-                f'notification(s) on channel {channel_id}; the sync token will cover the gap'
-            )
-        elif message_number <= previous_message_number:
-            logging.info(
-                f'[webhooks.google_calendar] Duplicate/out-of-order notification {message_number} '
-                f'on channel {channel_id} (already saw {previous_message_number}); syncing anyway'
-            )
+    repo.google_calendar_channel.record_notification(db, channel, expiration=expiration)
 
     sync_google_calendar_changes.delay(channel_id)
 
     return success_response
 
 
-def _parse_message_number(raw: str | None) -> int | None:
-    if not raw:
-        return None
-    try:
-        return int(raw)
-    except (TypeError, ValueError):
-        logging.warning(f'[webhooks.google_calendar] Unparsable X-Goog-Message-Number: {raw!r}')
-        return None
-
-
 def _parse_expiration(raw: str | None) -> datetime | None:
-    """Parse the X-Goog-Channel-Expiration header (Unix milliseconds, as a string)."""
+    """Parse the X-Goog-Channel-Expiration header into an aware UTC datetime.
+
+    The header is an RFC-1123 date string, e.g. 'Tue, 19 Nov 2013 01:13:52 GMT' --
+    *not* the epoch-milliseconds integer that the watch API response body uses for
+    the same value (see google_watch.setup_watch_channel, which parses that one).
+    Ref: https://developers.google.com/workspace/calendar/api/guides/push
+
+    A naive result is rejected rather than assumed to be UTC: record_notification
+    stores whatever it is given as naive-UTC, so an unzoned parse would write a
+    timestamp of unknown offset into the column is_push_active() trusts.
+    """
     if not raw:
         return None
     try:
-        return datetime.fromtimestamp(int(raw) / 1000, tz=timezone.utc)
-    except (TypeError, ValueError, OSError, OverflowError):
+        parsed = parsedate_to_datetime(raw)
+    except (TypeError, ValueError):
         logging.warning(f'[webhooks.google_calendar] Unparsable X-Goog-Channel-Expiration: {raw!r}')
         return None
+
+    if parsed.tzinfo is None:
+        logging.warning(f'[webhooks.google_calendar] X-Goog-Channel-Expiration has no timezone: {raw!r}')
+        return None
+
+    return parsed.astimezone(timezone.utc)
