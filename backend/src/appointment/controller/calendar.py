@@ -107,26 +107,37 @@ class BaseConnector:
 
     def bust_cached_events(self, all_calendars=False):
         """Delete cached events for a specific subscriber/calendar.
-        Optionally pass in all_calendars to remove all cached calendar events for a specific subscriber."""
+        Optionally pass in all_calendars to remove all cached calendar events for a specific subscriber.
+
+        Walks the whole keyspace with scan_iter. A single SCAN call returns one
+        batch and a cursor, not the complete set, so the previous implementation
+        could silently leave entries behind whenever the keyspace did not happen
+        to fit in one batch. The booking write path busts and then immediately
+        re-checks availability, so a survivor there is a stale answer on the one
+        path that is meant to be authoritative.
+
+        Returns the number of keys deleted.
+        """
         if self.redis_instance is None:
-            return False
+            return 0
 
         timer_boot = time.perf_counter_ns()
+        match = f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*'
 
-        # Scan returns a tuple like: (Cursor start, [...keys found])
-        ret = self.redis_instance.scan(
-            0, f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*'
-        )
-
-        if len(ret[1]) == 0:
-            return False
-
-        # Expand the list in position 1, which is a list of keys found from the scan
-        self.redis_instance.delete(*ret[1])
+        deleted = 0
+        # Delete in batches; scan_iter keeps memory flat on large keyspaces.
+        batch = []
+        for key in self.redis_instance.scan_iter(match=match, count=500):
+            batch.append(key)
+            if len(batch) >= 500:
+                deleted += self.redis_instance.delete(*batch)
+                batch = []
+        if batch:
+            deleted += self.redis_instance.delete(*batch)
 
         sentry_sdk.set_measurement('redis_bust_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
 
-        return True
+        return deleted
 
 
 class GoogleConnector(BaseConnector):
