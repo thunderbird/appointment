@@ -11,6 +11,8 @@ import json
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock
 
+import pytest
+
 from appointment.controller.calendar import BaseConnector, GoogleConnector, push_cache_expiry
 from appointment.controller.google_watch import (
     CHANNEL_EXPIRY_MARGIN,
@@ -19,6 +21,7 @@ from appointment.controller.google_watch import (
     push_backed_calendar_ids,
 )
 from appointment.database import models, repo
+from appointment.routes.webhooks import _parse_expiration
 
 
 class FakeRedis:
@@ -178,6 +181,11 @@ class TestPushBackedCalendarIds:
 
 class TestGetBusyTimeCaching:
     """The hot path: freebusy was called on *every* availability request."""
+
+    @pytest.fixture(autouse=True)
+    def push_enabled(self, monkeypatch):
+        """Watch channels only exist under this flag, so the cache path needs it on."""
+        monkeypatch.setenv('GOOGLE_INVITE_ENABLED', 'True')
 
     @staticmethod
     def _connector(db, subscriber_id, calendar, redis_instance, google_client):
@@ -373,32 +381,6 @@ class TestGetBusyTimeCaching:
         assert 0 < expiry <= 24 * 3600
 
 
-class TestFreeBusyTimestampParsing:
-    """Free/busy timestamps are RFC-3339, which permits fractional seconds.
-
-    A strict '%Y-%m-%dT%H:%M:%SZ' parse raised on those and took the whole
-    availability lookup down with it; observed against a Calendar twin returning
-    '2026-08-20T17:52:58.000Z'.
-    """
-
-    def test_parses_whole_seconds(self):
-        from appointment.controller.apis.google_client import parse_rfc3339_utc
-
-        assert parse_rfc3339_utc('2026-08-20T17:52:58Z') == datetime(2026, 8, 20, 17, 52, 58)
-
-    def test_parses_fractional_seconds(self):
-        from appointment.controller.apis.google_client import parse_rfc3339_utc
-
-        assert parse_rfc3339_utc('2026-08-20T17:52:58.000Z') == datetime(2026, 8, 20, 17, 52, 58)
-
-    def test_normalises_offsets_to_naive_utc(self):
-        from appointment.controller.apis.google_client import parse_rfc3339_utc
-
-        parsed = parse_rfc3339_utc('2026-08-20T19:52:58+02:00')
-        assert parsed == datetime(2026, 8, 20, 17, 52, 58)
-        assert parsed.tzinfo is None
-
-
 class TestBusyTimeCacheRoundTrip:
     def test_cached_entries_are_indistinguishable_from_fresh_ones(self):
         """Callers must not be able to tell a cache hit from a Google call."""
@@ -449,7 +431,7 @@ class TestBustAllCachedEvents:
 
 
 class TestRecordNotification:
-    """Message-number bookkeeping used to spot lossy delivery."""
+    """What an inbound notification is allowed to change."""
 
     def _stored_channel(self, db, calendar_id):
         return repo.google_calendar_channel.create(
@@ -462,34 +444,6 @@ class TestRecordNotification:
             sync_token='token-x',
         )
 
-    def test_returns_previous_and_advances_high_water_mark(
-        self, with_db, make_google_calendar, make_pro_subscriber
-    ):
-        subscriber = make_pro_subscriber()
-        calendar = make_google_calendar(subscriber_id=subscriber.id, connected=True)
-
-        with with_db() as db:
-            channel = self._stored_channel(db, calendar.id)
-
-            assert repo.google_calendar_channel.record_notification(db, channel, message_number=1) is None
-            assert repo.google_calendar_channel.record_notification(db, channel, message_number=2) == 1
-            assert channel.last_message_number == 2
-
-    def test_duplicate_delivery_does_not_move_mark_backwards(
-        self, with_db, make_google_calendar, make_pro_subscriber
-    ):
-        """Google may deliver the same notification more than once."""
-        subscriber = make_pro_subscriber()
-        calendar = make_google_calendar(subscriber_id=subscriber.id, connected=True)
-
-        with with_db() as db:
-            channel = self._stored_channel(db, calendar.id)
-            repo.google_calendar_channel.record_notification(db, channel, message_number=5)
-            previous = repo.google_calendar_channel.record_notification(db, channel, message_number=3)
-
-            assert previous == 5
-            assert channel.last_message_number == 5
-
     def test_expiration_is_refreshed_from_the_notification(
         self, with_db, make_google_calendar, make_pro_subscriber
     ):
@@ -500,7 +454,7 @@ class TestRecordNotification:
 
         with with_db() as db:
             channel = self._stored_channel(db, calendar.id)
-            repo.google_calendar_channel.record_notification(db, channel, message_number=2, expiration=new_expiry)
+            repo.google_calendar_channel.record_notification(db, channel, expiration=new_expiry)
 
             assert abs((channel.expiration.replace(tzinfo=timezone.utc) - new_expiry).total_seconds()) < 2
 
@@ -513,9 +467,63 @@ class TestRecordNotification:
 
         with with_db() as db:
             channel = self._stored_channel(db, calendar.id)  # never synced
-            repo.google_calendar_channel.record_notification(db, channel, message_number=2)
+            repo.google_calendar_channel.record_notification(db, channel)
 
             assert is_push_active(channel) is False
+
+
+class TestPushDisabledSkipsLookups:
+    """Channels are only ever created under GOOGLE_INVITE_ENABLED.
+
+    With the flag off the lookups can only come back empty, and this runs on the
+    public availability path, so they must not be issued at all.
+    """
+
+    def test_no_db_work_when_the_flag_is_off(self, monkeypatch):
+        monkeypatch.setenv('GOOGLE_INVITE_ENABLED', 'False')
+
+        db = Mock()
+        con = GoogleConnector(
+            db=db,
+            redis_instance=None,
+            google_client=Mock(),
+            remote_calendar_id='remote-id',
+            calendar_id=1,
+            subscriber_id=1,
+            google_tkn=GOOGLE_CREDS,
+        )
+
+        assert con._push_backed_remote_ids(['remote-id']) == set()
+        assert con._push_backed_for_this_calendar() is False
+        db.query.assert_not_called()
+
+
+class TestParseExpirationHeader:
+    """X-Goog-Channel-Expiration is an RFC-1123 string, not epoch milliseconds.
+
+    The watch API *response body* uses epoch milliseconds for the same value, and
+    conflating the two meant this silently never worked. The literal example below
+    is the one from Google's push-notifications guide.
+    """
+
+    def test_parses_the_documented_rfc1123_form(self):
+        assert _parse_expiration('Tue, 19 Nov 2013 01:13:52 GMT') == datetime(
+            2013, 11, 19, 1, 13, 52, tzinfo=timezone.utc
+        )
+
+    def test_rejects_epoch_milliseconds(self):
+        """The shape this used to assume. It must not parse, quietly or otherwise."""
+        assert _parse_expiration('1763946832000') is None
+
+    def test_rejects_a_timezone_less_value(self):
+        """record_notification stores what it is given as naive UTC, so an
+        unzoned parse would write an unknown offset into the trust column."""
+        assert _parse_expiration('Mon, 24 Aug 2026 20:15:26 -0000') is None
+
+    def test_missing_and_malformed_headers_are_none(self):
+        assert _parse_expiration(None) is None
+        assert _parse_expiration('') is None
+        assert _parse_expiration('not a date') is None
 
 
 class TestGetStale:

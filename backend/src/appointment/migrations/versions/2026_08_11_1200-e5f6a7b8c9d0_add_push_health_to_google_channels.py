@@ -5,7 +5,6 @@ whether a channel can be trusted in place of polling:
 
   last_synced_at       - watermark of the last successful incremental sync
   last_notification_at - when a push notification was last received
-  last_message_number  - highest X-Goog-Message-Number seen on this channel
 
 Revision ID: e5f6a7b8c9d0
 Revises: d4e5f6a7b8c9
@@ -27,7 +26,6 @@ TABLE = 'google_calendar_channels'
 COLUMNS = (
     ('last_synced_at', sa.DateTime()),
     ('last_notification_at', sa.DateTime()),
-    ('last_message_number', sa.Integer()),
 )
 
 

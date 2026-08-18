@@ -98,32 +98,20 @@ def record_sync(db: Session, channel: models.GoogleCalendarChannel, sync_token: 
 def record_notification(
     db: Session,
     channel: models.GoogleCalendarChannel,
-    message_number: int | None = None,
     expiration: datetime | None = None,
-) -> int | None:
+):
     """Record an inbound push notification.
-
-    Returns the previously-seen message number so the caller can spot gaps
-    (dropped deliveries) and replays (duplicate deliveries).
 
     Google re-states the channel expiration on every notification, so we take the
     opportunity to correct our stored copy for free.
     """
-    previous = channel.last_message_number
-
-    if message_number is not None:
-        # Never let a replayed or out-of-order delivery walk the high-water mark
-        # backwards.
-        if previous is None or message_number > previous:
-            channel.last_message_number = message_number
-
     if expiration is not None:
         channel.expiration = expiration.replace(tzinfo=None) if expiration.tzinfo else expiration
 
     channel.last_notification_at = datetime.now(tz=timezone.utc).replace(tzinfo=None)
     db.commit()
     db.refresh(channel)
-    return previous
+    return channel
 
 
 def update_expiration(

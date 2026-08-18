@@ -230,13 +230,22 @@ class GoogleConnector(BaseConnector):
         if google_tkn:
             self.google_token = Credentials.from_authorized_user_info(json.loads(google_tkn), self.google_client.SCOPES)
 
+    def _push_is_enabled(self) -> bool:
+        """Whether watch channels can exist at all.
+
+        routes.schedule only ever creates them under this flag, so with it off the
+        channel lookups below are guaranteed to come back empty -- and this runs on
+        the public availability path, so the queries are worth skipping outright.
+        """
+        return self.db is not None and os.getenv('GOOGLE_INVITE_ENABLED') == 'True'
+
     def _push_backed_remote_ids(self, calendar_ids: list) -> set:
         """Which of `calendar_ids` currently have a live push channel.
 
         Returns an empty set on any failure: not knowing means we poll, which is
         the safe direction.
         """
-        if self.db is None:
+        if not self._push_is_enabled():
             return set()
 
         try:
@@ -247,6 +256,18 @@ class GoogleConnector(BaseConnector):
         except Exception as ex:
             logging.warning(f'[GoogleConnector._push_backed_remote_ids] Falling back to polling: {ex}')
             return set()
+
+    def _push_backed_for_this_calendar(self) -> bool:
+        """Whether this connector's own calendar has a live push channel."""
+        if not self._push_is_enabled() or self.calendar_id is None:
+            return False
+
+        try:
+            channel = repo.google_calendar_channel.get_by_calendar_id(self.db, self.calendar_id)
+            return google_watch.is_push_active(channel)
+        except Exception as ex:
+            logging.warning(f'[GoogleConnector._push_backed_for_this_calendar] Falling back to polling: {ex}')
+            return False
 
     def _fetch_free_busy(self, calendar_ids: list, time_min: str, time_max: str):
         results = []
@@ -386,8 +407,10 @@ class GoogleConnector(BaseConnector):
             )
 
         # With a live push channel this cache is invalidated on change, so it can
-        # be held far longer than the blind time-based default.
-        if self.remote_calendar_id in self._push_backed_remote_ids([self.remote_calendar_id]):
+        # be held far longer than the blind time-based default. This connector is
+        # already scoped to one calendar, so ask about that channel directly
+        # rather than listing every calendar the subscriber owns.
+        if self._push_backed_for_this_calendar():
             self.put_cached_events(cache_scope, events, expiry=push_cache_expiry())
         else:
             self.put_cached_events(cache_scope, events)
