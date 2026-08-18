@@ -123,8 +123,8 @@ probe() {
 }
 
 echo "== cache headers =="
-probe "hashed JS"            /assets/index-abc123.js      200 "public, max-age=300"
-probe "hashed CSS"           /assets/index-abc123.css     200 "public, max-age=300"
+probe "hashed JS"            /assets/index-abc123.js      200 "public, max-age=31536000, immutable"
+probe "hashed CSS"           /assets/index-abc123.css     200 "public, max-age=31536000, immutable"
 probe "missing asset"        /assets/missing-000.js        404 -
 probe "sourcemap (on disk)"  /assets/index-abc123.js.map   404 -
 probe "sourcemap (absent)"   /assets/nope.js.map           404 -
