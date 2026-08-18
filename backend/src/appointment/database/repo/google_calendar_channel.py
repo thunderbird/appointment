@@ -95,19 +95,13 @@ def record_sync(db: Session, channel: models.GoogleCalendarChannel, sync_token: 
     return channel
 
 
-def record_notification(
-    db: Session,
-    channel: models.GoogleCalendarChannel,
-    expiration: datetime | None = None,
-):
-    """Record an inbound push notification.
+def record_notification(db: Session, channel: models.GoogleCalendarChannel):
+    """Record that a push notification arrived on this channel.
 
-    Google re-states the channel expiration on every notification, so we take the
-    opportunity to correct our stored copy for free.
+    Observability only. Paired with last_synced_at it separates "Google stopped
+    telling us" from "we heard, and failed to act on it", which is otherwise not
+    something we can tell apart after the fact.
     """
-    if expiration is not None:
-        channel.expiration = expiration.replace(tzinfo=None) if expiration.tzinfo else expiration
-
     channel.last_notification_at = datetime.now(tz=timezone.utc).replace(tzinfo=None)
     db.commit()
     db.refresh(channel)

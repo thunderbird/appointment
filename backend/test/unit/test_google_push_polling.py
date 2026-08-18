@@ -21,7 +21,6 @@ from appointment.controller.google_watch import (
     push_backed_calendar_ids,
 )
 from appointment.database import models, repo
-from appointment.routes.webhooks import _parse_expiration
 
 
 class FakeRedis:
@@ -444,19 +443,26 @@ class TestRecordNotification:
             sync_token='token-x',
         )
 
-    def test_expiration_is_refreshed_from_the_notification(
+    def test_expiration_is_left_alone(
         self, with_db, make_google_calendar, make_pro_subscriber
     ):
-        """Google restates the expiry on every notification -- keep ours honest."""
+        """A channel's expiration is fixed when it is created and never moves.
+
+        Google has no renewal mechanism -- a channel is replaced, not extended --
+        so a notification carries no expiry news, and re-deriving it from the
+        header would only be a second chance to get it wrong.
+        """
         subscriber = make_pro_subscriber()
         calendar = make_google_calendar(subscriber_id=subscriber.id, connected=True)
-        new_expiry = datetime.now(tz=timezone.utc) + timedelta(days=7)
 
         with with_db() as db:
             channel = self._stored_channel(db, calendar.id)
-            repo.google_calendar_channel.record_notification(db, channel, expiration=new_expiry)
+            before = channel.expiration
 
-            assert abs((channel.expiration.replace(tzinfo=timezone.utc) - new_expiry).total_seconds()) < 2
+            repo.google_calendar_channel.record_notification(db, channel)
+
+            assert channel.expiration == before
+            assert channel.last_notification_at is not None
 
     def test_notification_does_not_by_itself_make_push_trusted(
         self, with_db, make_google_calendar, make_pro_subscriber
@@ -496,34 +502,6 @@ class TestPushDisabledSkipsLookups:
         assert con._push_backed_remote_ids(['remote-id']) == set()
         assert con._push_backed_for_this_calendar() is False
         db.query.assert_not_called()
-
-
-class TestParseExpirationHeader:
-    """X-Goog-Channel-Expiration is an RFC-1123 string, not epoch milliseconds.
-
-    The watch API *response body* uses epoch milliseconds for the same value, and
-    conflating the two meant this silently never worked. The literal example below
-    is the one from Google's push-notifications guide.
-    """
-
-    def test_parses_the_documented_rfc1123_form(self):
-        assert _parse_expiration('Tue, 19 Nov 2013 01:13:52 GMT') == datetime(
-            2013, 11, 19, 1, 13, 52, tzinfo=timezone.utc
-        )
-
-    def test_rejects_epoch_milliseconds(self):
-        """The shape this used to assume. It must not parse, quietly or otherwise."""
-        assert _parse_expiration('1763946832000') is None
-
-    def test_rejects_a_timezone_less_value(self):
-        """record_notification stores what it is given as naive UTC, so an
-        unzoned parse would write an unknown offset into the trust column."""
-        assert _parse_expiration('Mon, 24 Aug 2026 20:15:26 -0000') is None
-
-    def test_missing_and_malformed_headers_are_none(self):
-        assert _parse_expiration(None) is None
-        assert _parse_expiration('') is None
-        assert _parse_expiration('not a date') is None
 
 
 class TestGetStale:
