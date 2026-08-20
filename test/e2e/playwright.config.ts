@@ -91,6 +91,19 @@ export default defineConfig({
       dependencies: ['desktop-setup'],
     },
 
+    // Freight-verification sign-in smoke (@deployment-analysis, #1046). Standalone:
+    // no desktop-setup dependency (that project configures availability/settings, which
+    // this non-destructive gate must not do) and no saved storageState -- the spec does
+    // its own OIDC sign-in and asserts the dashboard renders. firefox-only per milestone.
+    {
+      name: 'deployment-analysis',
+      testMatch: /tests\/desktop\/deployment-analysis-signin\.spec\.ts$/,
+      use: {
+        ...devices['Desktop Firefox'],
+        screenshot: 'only-on-failure',
+      },
+    },
+
     /* Test against mobile viewports. */
     {
       name: 'Google-Pixel-7-View',
