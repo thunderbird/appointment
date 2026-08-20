@@ -97,7 +97,7 @@ export default defineConfig({
     // its own OIDC sign-in and asserts the dashboard renders. firefox-only per milestone.
     {
       name: 'deployment-analysis',
-      testMatch: /deployment-analysis-signin\.spec\.ts/,
+      testMatch: /tests\/desktop\/deployment-analysis-signin\.spec\.ts$/,
       use: {
         ...devices['Desktop Firefox'],
         screenshot: 'only-on-failure',
