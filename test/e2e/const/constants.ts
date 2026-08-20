@@ -34,6 +34,7 @@ export const PLAYWRIGHT_TAG_E2E_SUITE = '@e2e-suite';
 export const PLAYWRIGHT_TAG_PROD_NIGHTLY = '@prod-nightly';
 export const PLAYWRIGHT_TAG_E2E_SUITE_MOBILE = '@e2e-mobile-suite';
 export const PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY = '@prod-mobile-nightly';
+export const PLAYWRIGHT_TAG_DEPLOYMENT_ANALYSIS = '@deployment-analysis';
 
 // general settings options
 export const APPT_LANGUAGE_SETTING_EN = 'EN — English';
