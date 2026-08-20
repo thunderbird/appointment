@@ -32,12 +32,12 @@ test.describe('deployment analysis sign-in smoke', () => {
     // but that title is also present on the signed-OUT app, so it is NOT sufficient on its own.
     await navigateToAppointmentAndSignIn(page);
 
-    // The real gate: an element that ONLY renders for an authenticated subscriber. The desktop
-    // NavBar (`.nav-items-container`, NavBar.vue) is present only when user.authenticated, on
-    // BOTH /dashboard and the first-time-user /setup redirect, so this proves sign-in succeeded
-    // without conflating it with FTUE-complete. Scoped to the nav container so it resolves to a
-    // single element (a page-wide getByRole('link',{name:'Dashboard'}) also matches the footer).
-    const navDashboardLink = page.locator('.nav-items-container').getByRole('link', { name: 'Dashboard' });
-    await expect(navDashboardLink).toBeVisible({ timeout: 60_000 });
+    // The real gate: land on an AUTHENTICATED-ONLY route. A signed-in user is routed to
+    // /dashboard, or to /setup when they have not completed first-time setup (a fresh user, or
+    // after a tb-dev Neon branch reset). Both are auth-gated -- an unauthenticated user is
+    // bounced back to sign-in and reaches neither -- so matching either proves OIDC sign-in
+    // succeeded, independent of FTUE state. (Asserting a dashboard DOM element instead would
+    // false-fail on /setup, where the app chrome differs; verified in-cluster with a fresh user.)
+    await page.waitForURL(/\/(dashboard|setup)\/?$/, { timeout: 60_000 });
   });
 });
