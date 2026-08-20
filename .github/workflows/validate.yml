@@ -1,27 +1,29 @@
 name: validate
 
 concurrency:
-  group: validate
+  # A newer revision of the same PR supersedes the old one. Manual runs remain
+  # independent so they cannot cancel one another.
+  group: validate-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
 
 on:
-  push:
+  # Fork PRs push to the fork, never here, so `push` alone means external
+  # contributions are never validated before merge. On `pull_request` from a fork
+  # GitHub withholds every secret and forces GITHUB_TOKEN to read-only, and this
+  # repo already requires approval for outside collaborators' runs, so each one
+  # waits for a maintainer to click "Approve and run workflows".
+  pull_request:
     branches:
-      - '**'
-      - '!main'
+      - main
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 permissions:
-  id-token: write   # This is required for requesting the JWT
   contents: read    # This is required for actions/checkout
 
 jobs:
   detect-changes:
     runs-on: ubuntu-latest
-    environment:
-      name: staging
-      deployment: false
     outputs:
       validate-iac: ${{ steps.check.outputs.validate-iac }}
       validate-backend: ${{ steps.check.outputs.validate-backend }}
@@ -47,9 +49,6 @@ jobs:
   validate-backend:
     needs: detect-changes
     runs-on: ubuntu-latest
-    environment:
-      name: staging
-      deployment: false
     if: needs.detect-changes.outputs.validate-backend == 'true'
 
     steps:
@@ -90,9 +89,6 @@ jobs:
   validate-frontend:
     needs: detect-changes
     runs-on: ubuntu-latest
-    environment:
-      name: staging
-      deployment: false
     if: needs.detect-changes.outputs.validate-frontend == 'true'
     steps:
       - uses: actions/checkout@v7
@@ -146,9 +142,6 @@ jobs:
   validate-pulumi:
     needs: detect-changes
     runs-on: ubuntu-latest
-    environment:
-      name: staging
-      deployment: false
     if: needs.detect-changes.outputs.validate-pulumi == 'true'
     steps:
       - uses: actions/checkout@v7
@@ -174,3 +167,40 @@ jobs:
         run: |
           cd ./pulumi
           ruff check
+
+  # Branch protection should require only this stable check. The component jobs
+  # are intentionally skipped when their paths are unchanged, while this job
+  # still reports whether every applicable validation completed successfully.
+  validate-required:
+    if: always()
+    needs:
+      - detect-changes
+      - validate-backend
+      - validate-frontend
+      - validate-frontend-nginx
+      - validate-pulumi
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check validation results
+        env:
+          DETECT_CHANGES_RESULT: ${{ needs.detect-changes.result }}
+          BACKEND_RESULT: ${{ needs.validate-backend.result }}
+          FRONTEND_RESULT: ${{ needs.validate-frontend.result }}
+          FRONTEND_NGINX_RESULT: ${{ needs.validate-frontend-nginx.result }}
+          PULUMI_RESULT: ${{ needs.validate-pulumi.result }}
+        run: |
+          if [[ "$DETECT_CHANGES_RESULT" != "success" ]]; then
+            echo "detect-changes finished with: $DETECT_CHANGES_RESULT"
+            exit 1
+          fi
+
+          for result in \
+            "$BACKEND_RESULT" \
+            "$FRONTEND_RESULT" \
+            "$FRONTEND_NGINX_RESULT" \
+            "$PULUMI_RESULT"; do
+            if [[ "$result" != "success" && "$result" != "skipped" ]]; then
+              echo "A validation job finished with: $result"
+              exit 1
+            fi
+          done
