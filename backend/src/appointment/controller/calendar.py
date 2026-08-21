@@ -105,19 +105,14 @@ class BaseConnector:
 
         return True
 
-    def bust_cached_events(self, all_calendars=False) -> int:
+    def bust_cached_events(self, all_calendars=False) -> bool:
         """Delete cached events for a specific subscriber/calendar.
         Optionally pass in all_calendars to remove all cached calendar events for a specific subscriber.
 
-        Walks the whole keyspace with scan_iter -- a single SCAN batch is not guaranteed to be
-        complete, so a bust could silently leave entries behind. Two callers depend on this being
-        exhaustive: the booking write path re-checks availability immediately after busting, and
-        push notifications use it to invalidate on change.
-
-        Returns the number of keys deleted.
+        Returns whether any entries were deleted.
         """
         if self.redis_instance is None:
-            return 0
+            return False
 
         timer_boot = time.perf_counter_ns()
         match = f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*'
@@ -134,7 +129,7 @@ class BaseConnector:
 
         sentry_sdk.set_measurement('redis_bust_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
 
-        return deleted
+        return deleted > 0
 
 
 class GoogleConnector(BaseConnector):
