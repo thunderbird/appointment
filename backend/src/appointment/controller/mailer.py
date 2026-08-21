@@ -208,7 +208,6 @@ class InvitationMail(BaseBookingMail):
         }
         super().__init__(*args, **default_kwargs, **kwargs)
 
-
     def text(self):
         plain = super().text()
         if self.meeting_link_url:
