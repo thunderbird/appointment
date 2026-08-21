@@ -15,28 +15,32 @@ mail-brand-contact-form = Kontaktformular
 mail-brand-support-hint = Du hast Fragen? Wir helfen gern! Antworte einfach auf diese E-Mail für Support.
 mail-brand-reply-hint = Du hast Fragen? Wir helfen gern! Du erreichst uns über unser { $contact_form_link }.
 
-mail-brand-footer = Du erhälst diese E-Mail, weil Du dich auf unserer Website für Thunderbird Appointment Beta angemeldet hast.
-
-                    Copyright © 2025 MZLA Technologies. All rights reserved.
-                    MZLA Technologies 149 New Montgomery St., 4th Floor San Francisco, CA 94501 USA
-mail-brand-footer-privacy = Datenschutz
+mail-brand-footer = Thunderbird ist Teil der { $mzla_link }, einer hundertprozentigen Tochtergesellschaft der gemeinnützigen Organisation Mozilla.org.
+mail-brand-footer-privacy = Datenschutzrichtlinie
 mail-brand-footer-legal = Impressum
+mail-brand-footer-participation = Teilnahmerichtlinien
+mail-brand-footer-support = Hilfe benötigt? Support besuchen
+
+# Variables:
+# $duration (String) - Length of minutes the appointment will be
+mail-html-time = { $duration } Minuten
+mail-html-meeting-with = Termin mit:
 
 ## Invitation
 
 invite-mail-subject = Buchung bestätigt von {-brand-name}
 invite-mail-plain = {-brand-footer}
 
-invite-mail-html-heading-name = { $name }
-invite-mail-html-heading-email = ({ $email })
-invite-mail-html-heading-text = hat deine Buchung bestätigt:
-invite-mail-html-time = { $duration } min
+# Variables:
+# $name (String) - Name der Person, die den Termin angefragt hat
+# $email (String) - E-Mail-Adresse der Person, die den Termin angefragt hat
+invite-mail-html-heading = Deine Buchung mit { $name } ({ $email }) wurde angefragt und BESTÄTIGT.
+invite-mail-html-subheading = Die Einladung ist an diese E-Mail angehängt.
+invite-mail-html-badge = Bestätigt
 # Variables:
 # $meeting_link_url (String) - URL for the meeting link
 invite-mail-plain-meeting-link = Meeting beitreten: { $meeting_link_url }
-invite-mail-html-meeting-link = Meeting beitreten
-invite-mail-html-invite-is-attached = Deine Kalendereinladung ist angehängt.
-invite-mail-html-download = Download
+invite-mail-html-meeting-link = Zoom-Link
 
 ## New Booking
 
@@ -93,28 +97,21 @@ confirm-mail-plain = { $name } ({ $email }) hat soeben dieses Zeitfenster aus de
 # Variables:
 # $name (String) - Name of the person who requested the appointment
 # $email (String) - Email of the person who requested the appointment
-# $date (String) - Date of the requested appointment
 # $schedule_name (String) - The name of the schedule used to book the appointment
-# $duration (String) - Length of minutes the appointment will be
-confirm-mail-html-heading-name = { $name }
-confirm-mail-html-heading-email = ({ $email })
-confirm-mail-html-heading-text = fordert die Buchung eines Zeitfensters in { $schedule_name } an
-confirm-mail-html-time = { $duration } Minuten
+confirm-mail-html-heading = { $name } ({ $email }) fordert die Buchung eines Zeitfensters in { $schedule_name } an.
+confirm-mail-html-open-link = In Appointment öffnen
 
-confirm-mail-html-confirm-text = Dieser Link führt zur Bestätigung der Buchungsanfrage:
 confirm-mail-html-confirm-action = Buchung bestätigen
-confirm-mail-html-deny-text = Dieser Link führt zur Ablehnung der Buchungsanfrage:
 confirm-mail-html-deny-action = Buchung ablehnen
 
 ## Cancelled Appointment
 
 cancel-mail-subject = Buchungsanfrage abgesagt
 # Variables:
-# $owner_name (String) - Name of the person who owns the schedule
-# $day (String) - Localized date of the requested appointment
-# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
-# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
-cancel-mail-html-heading = { $owner_name } hat deine Buchungsanfrage für { $day } um { $time_range } { $timezone } abgesagt.
+# $owner_name (String) - Name der Person, der der Terminplan gehört
+# $owner_email (String) - E-Mail-Adresse der Person, der der Terminplan gehört
+cancel-mail-html-heading = Die folgende Buchung wurde von { $owner_name } ({ $owner_email }) ABGESAGT.
+cancel-mail-html-badge = Abgesagt
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $day (String) - Localized date of the requested appointment
@@ -127,11 +124,10 @@ cancel-mail-plain = { $owner_name } hat deine Buchungsanfrage für { $day } um {
 
 reject-mail-subject = Buchungsanfrage abgelehnt
 # Variables:
-# $owner_name (String) - Name of the person who owns the schedule
-# $day (String) - Localized date of the requested appointment
-# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
-# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
-reject-mail-html-heading = { $owner_name } hat deine Buchungsanfrage für { $day } um { $time_range } { $timezone } abgelehnt.
+# $owner_name (String) - Name der Person, der der Terminplan gehört
+# $owner_email (String) - E-Mail-Adresse der Person, der der Terminplan gehört
+reject-mail-html-heading = Die folgende Buchungsanfrage wurde von { $owner_name } ({ $owner_email }) ABGELEHNT.
+reject-mail-html-badge = Abgelehnt
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $day (String) - Localized date of the requested appointment
@@ -144,11 +140,11 @@ reject-mail-plain = { $owner_name } hat deine Buchungsanfrage für { $day } um {
 
 pending-mail-subject = Deine Buchungsanfrage wartet auf Bestätigung
 # Variables:
-# $owner_name (String) - Name of the person who owns the schedule
-# $day (String) - Localized date of the requested appointment
-# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
-# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
-pending-mail-html-heading = { $owner_name } wurde über deine Buchungsanfrage für { $day } um { $time_range } { $timezone } informiert. Du erhältst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
+# $owner_name (String) - Name der Person, der der Terminplan gehört
+# $owner_email (String) - E-Mail-Adresse der Person, der der Terminplan gehört
+pending-mail-html-heading = Deine Buchung mit { $owner_name } ({ $owner_email }) wurde angefragt und wartet auf Bestätigung.
+pending-mail-html-subheading = Du erhältst eine weitere E-Mail, sobald die Anfrage genehmigt oder abgelehnt wurde.
+pending-mail-html-badge = Ausstehend
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $day (String) - Localized date of the requested appointment

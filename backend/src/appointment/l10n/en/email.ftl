@@ -12,31 +12,35 @@
                 MZLA Technologies 149 New Montgomery St., 4th Floor San Francisco, CA 94501 USA
 
 mail-brand-contact-form = contact form
-mail-brand-support-hint = Got questions? We're here to help! Simply reply to this email for support.
-mail-brand-reply-hint = Got questions? We're here to help! Reach out to us via our { $contact_form_link }.
+mail-brand-support-hint = Have questions? Thunderbird is here to help. Simply reply to this email for support.
+mail-brand-reply-hint = Have questions? Thunderbird is here to help. Get in touch using the { $contact_form_link }.
 
-mail-brand-footer = You are receiving this email because you signed up on our website for the Thunderbird Appointment Beta.
-
-                    Copyright © 2025 MZLA Technologies. All rights reserved.
-                    MZLA Technologies 149 New Montgomery St., 4th Floor San Francisco, CA 94501 USA
-mail-brand-footer-privacy = Privacy
+mail-brand-footer = Thunderbird is part of { $mzla_link }, a wholly owned subsidiary of the not-for-profit Mozilla.org.
+mail-brand-footer-privacy = Privacy Policy
 mail-brand-footer-legal = Legal
+mail-brand-footer-participation = Participation Guidelines
+mail-brand-footer-support = Need help? Visit Support
+
+# Variables:
+# $duration (String) - Length of minutes the appointment will be
+mail-html-time = { $duration } minutes
+mail-html-meeting-with = Meeting with:
 
 ## Invitation
 
 invite-mail-subject = Booking confirmed from {-brand-name}
 invite-mail-plain = {-brand-footer}
 
-invite-mail-html-heading-name = { $name }
-invite-mail-html-heading-email = ({ $email })
-invite-mail-html-heading-text = has accepted your booking:
-invite-mail-html-time = { $duration } mins
+# Variables:
+# $name (String) - Name of the person who requested the appointment
+# $email (String) - Email of the person who requested the appointment
+invite-mail-html-heading = Your booking with { $name } ({ $email }) has been requested and CONFIRMED.
+invite-mail-html-subheading = An invite is attached to this email.
+invite-mail-html-badge = Confirmed
 # Variables:
 # $meeting_link_url (String) - URL for the meeting link
 invite-mail-plain-meeting-link = Join Meeting: { $meeting_link_url }
-invite-mail-html-meeting-link = Join Meeting
-invite-mail-html-invite-is-attached = Your calendar invite is attached.
-invite-mail-html-download = Download
+invite-mail-html-meeting-link = Zoom link
 
 ## New Booking
 
@@ -93,17 +97,11 @@ confirm-mail-plain = { $name } ({ $email }) is requesting to book a time slot in
 # Variables:
 # $name (String) - Name of the person who requested the appointment
 # $email (String) - Email of the person who requested the appointment
-# $date (String) - Date of the requested appointment
 # $schedule_name (String) - The name of the schedule used to book the appointment
-# $duration (String) - Length of minutes the appointment will be
-confirm-mail-html-heading-name = { $name }
-confirm-mail-html-heading-email = ({ $email })
-confirm-mail-html-heading-text = is requesting to book a time slot in { $schedule_name }:
-confirm-mail-html-time = { $duration } mins
+confirm-mail-html-heading = { $name } ({ $email }) is requesting to book a time slot in { $schedule_name }.
+confirm-mail-html-open-link = Open in Appointment
 
-confirm-mail-html-confirm-text = Click here to confirm the booking request:
 confirm-mail-html-confirm-action = Confirm
-confirm-mail-html-deny-text = Or here if you want to deny it:
 confirm-mail-html-deny-action = Decline
 
 ## Cancelled Appointment
@@ -111,10 +109,9 @@ confirm-mail-html-deny-action = Decline
 cancel-mail-subject = Booking request cancelled
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $day (String) - Localized date of the requested appointment
-# $time_range (String) - Time range of the requested appointment (e.g. "2:00PM - 2:30PM")
-# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
-cancel-mail-html-heading = { $owner_name } cancelled your booking request for { $day } at { $time_range } { $timezone }.
+# $owner_email (String) - Email of the person who owns the schedule
+cancel-mail-html-heading = The following booking was CANCELLED by { $owner_name } ({ $owner_email }).
+cancel-mail-html-badge = Cancelled
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $day (String) - Localized date of the requested appointment
@@ -128,10 +125,9 @@ cancel-mail-plain = { $owner_name } cancelled your booking request for { $day } 
 reject-mail-subject = Booking request declined
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $day (String) - Localized date of the requested appointment
-# $time_range (String) - Time range of the requested appointment (e.g. "2:00PM - 2:30PM")
-# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
-reject-mail-html-heading = { $owner_name } denied your booking request for { $day } at { $time_range } { $timezone }.
+# $owner_email (String) - Email of the person who owns the schedule
+reject-mail-html-heading = The following booking request was DECLINED by { $owner_name } ({ $owner_email }).
+reject-mail-html-badge = Declined
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $day (String) - Localized date of the requested appointment
@@ -145,10 +141,10 @@ reject-mail-plain = { $owner_name } denied your booking request for { $day } at 
 pending-mail-subject = Your booking request is pending approval
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
-# $day (String) - Localized date of the requested appointment
-# $time_range (String) - Time range of the requested appointment (e.g. "2:00PM - 2:30PM")
-# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
-pending-mail-html-heading = { $owner_name } has been notified of your booking request for { $day } at { $time_range } { $timezone }. You will receive another email once that request has been approved or declined.
+# $owner_email (String) - Email of the person who owns the schedule
+pending-mail-html-heading = Your booking with { $owner_name } ({ $owner_email }) has been requested and PENDING confirmation.
+pending-mail-html-subheading = You will receive another email once that request has been approved or declined.
+pending-mail-html-badge = Pending
 # Variables:
 # $owner_name (String) - Name of the person who owns the schedule
 # $day (String) - Localized date of the requested appointment

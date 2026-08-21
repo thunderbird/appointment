@@ -714,7 +714,7 @@ class TestVEventTimezoneFallback:
         attendee = self._make_attendee('America/New_York')
 
         method = getattr(tools, method_name)
-        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee)
+        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee, schedule_name='Test Schedule')
 
         bg.add_task.assert_called_once()
         call_kwargs = bg.add_task.call_args
@@ -737,7 +737,7 @@ class TestVEventTimezoneFallback:
         attendee = self._make_attendee(bad_tz)
 
         method = getattr(tools, method_name)
-        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee)
+        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee, schedule_name='Test Schedule')
 
         bg.add_task.assert_called_once()
         call_kwargs = bg.add_task.call_args
@@ -760,7 +760,7 @@ class TestVEventTimezoneFallback:
         attendee = self._make_attendee(tz=None)
 
         method = getattr(tools, method_name)
-        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee)
+        method(bg, self._make_appointment(), slot, self._make_organizer(), attendee, schedule_name='Test Schedule')
 
         bg.add_task.assert_called_once()
         call_kwargs = bg.add_task.call_args
@@ -775,7 +775,9 @@ class TestVEventTimezoneFallback:
         slot.meeting_link_url = 'https://zoom.us/j/12345'
         appointment = self._make_appointment(location_url='https://fallback.example.com')
 
-        tools.send_invitation_vevent(bg, appointment, slot, self._make_organizer(), self._make_attendee())
+        tools.send_invitation_vevent(
+            bg, appointment, slot, self._make_organizer(), self._make_attendee(), schedule_name='Test Schedule',
+        )
 
         call_kwargs = bg.add_task.call_args
         assert call_kwargs.kwargs['meeting_link_url'] == 'https://zoom.us/j/12345'
@@ -788,7 +790,9 @@ class TestVEventTimezoneFallback:
         slot.meeting_link_url = None
         appointment = self._make_appointment(location_url='https://fallback.example.com')
 
-        tools.send_invitation_vevent(bg, appointment, slot, self._make_organizer(), self._make_attendee())
+        tools.send_invitation_vevent(
+            bg, appointment, slot, self._make_organizer(), self._make_attendee(), schedule_name='Test Schedule',
+        )
 
         call_kwargs = bg.add_task.call_args
         assert call_kwargs.kwargs['meeting_link_url'] == 'https://fallback.example.com'
@@ -801,7 +805,9 @@ class TestVEventTimezoneFallback:
         slot.meeting_link_url = None
         appointment = self._make_appointment(location_url=None)
 
-        tools.send_invitation_vevent(bg, appointment, slot, self._make_organizer(), self._make_attendee())
+        tools.send_invitation_vevent(
+            bg, appointment, slot, self._make_organizer(), self._make_attendee(), schedule_name='Test Schedule',
+        )
 
         call_kwargs = bg.add_task.call_args
         assert call_kwargs.kwargs['meeting_link_url'] is None

@@ -1,9 +1,45 @@
 {% extends "includes/base.jinja2" %}
+{# Helper vars #}
+{% set clock_icon_img = '<img style="width: 12px; height: 12px; margin-right: 3px;" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAfCAYAAADwbH0HAAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAANlSURBVHgBxVcxTxRBFH7v3SbSkGBiI9VZuDQaSWjUBKE3d15CAxXYIJXALwA6CxOhlIajAqw2HCYaG+m95EyozobqqEwuobE45vm92dsFidyth6dfAjO7M/u++Wbee/OO6D+Bs0wqlUpDLRoY5TN9pkqTzJJX0qHYADfRrzH+iPSwUnkXZbHJXQndwCIrLyVEGQweK1M5ENqOot3jDvN+j2JxZhbq1lNC5qqqVvFFlZ07UQ0a8WsZVGmFohwqa4GUwmQBaNYqld1yZuJCceYNSJZSQtJNOpMqZYCKhkI6j+5kTMDrlcrOclfip4XpLbycw9CpEm2S4x3qBaIzsIMF6CDaMpQ/vzicu/hgStEsgLThiF6y40PqFcpHIPzEwhMQMD4ycn+oXj/6mAyniguF6TlM2DKlIH0B0nonu5Jz+/ABUifFjvx+6+mtKRfmuf39nW3/vf0rlabzaFb8RGxvN1I/T2kYzXC3eWbLHxng4KwWKSlxq0WzGMybI/V8pp1gNs02IgThuZQSM5szmVrdpD5BiWPbyoumWgqFmVJbbT1ryPSEM6qmqpEFEffteFOqUJ/BloAMLS0h1vWB9R1rV4e6Lhy3d1RkAh7Oo341Lug7MTs98R2lfIDU6N1b1Z1SD2BxXzoMNy7GuSo3GGdq5yzUI7BTjQyzrhwJYKBpqrGSYVsRZYQ742LG6/x8GewG272maHx9IbXxbeozRCSMe1qzrfYXgagboz4DOxu2O18FCdSXKsr8L4gL1qJ4+CxBMFCzc8bbMVySfSPPmW2mEOn5GIVBJFFUbqrTDb+SuHLoC1zbNnzq/FqE6vVEtaByoL8MbxO2TS2KwHJKbKoxsNxe0bym3nd9WCGgvgTyxteSyjMtfVCW1MLw/k1k8idM7pFyroqk/p2uASPNsb5G9xaEbRwc7L1Kxn6puUD+4e7IvTtIC+MgnxKmUySVI+oBEhd7q0Zq5/r+YG/h4nju8gff6kdRrJwe4vExC43lhFFH0wllgPde0VXoncLjDVN6mdRwZc6z4g+jKyDMt2fW8YuiAiesOyf15FKxVCvIenge87nAwtK/9866/EcFfQIrAlGPzUH1bLqALvC5H+EZBD/WoyhqXjmPMsKXSOomYfmB3eHJdeqJLN87h9TLEQhrnQgT/AQbzY8cHnIK+wAAAABJRU5ErkJggg==" />' %}
+{% set warning_icon_img = '<img style="width: 12px; height: 12px; margin-right: 4px;" alt="" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAABYlAAAWJQFJUiTwAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAOdEVYdFNvZnR3YXJlAEZpZ21hnrGWYwAAAfNJREFUeAHtVj12wjAMlkyHssEJGk4AIxvhCNyA3oCegPYEpVvHrp16BMLWrekNMnYjY6eoEqQhP7YxSXjtwPce72FH9vdJli0BXPDHwFOMF37PV4maEJLPSz2e8tJPMQCFQPhJKnlZBXHouKWbACFGwiWb++AECljkAwsJjlniEeIee7wkhAXUABKsEpWIkNhoA2ZyD0m98d8RNENImMxYRASuAsRzJl+3QJ4XMdVFQumsJewtkgtG6Z4VVCKwT7id960jjUKQn6tEYJ/t54Fu70IE2PsRe/8BZ0Q5CsUIJGoOjUAREwzkZ7LARPn5cUEAIg2hETlNTdftQEITowConfkH8vT9sCQxehYB2IN2yD3LAs8iwEKTnS1FDcgrKAuIbMZCJIR7EbXJY4uAvHdFCIEQ/Yqo7zkVSvVV4RPhBhF8w0ovFZFleq2wc89gFMBFIABStpcwEyGDOmcuDUt+XKkFd5P+2r3xOBUUPG620/xM5RZIJwNngm7vTnniPfqOxjfdPufCGNoEwtMq2D6Xp/XvgEruy9naDBQSyJ4aKt2kdC4crlk7Ipic9zL1hR3TMj6KeDy4fuWD69Y+Dg47k98y+ZfZxAHSJbGQJTreDuJshzbaco2QEdfzOXs1xF3lzIpXRPKKIm64qQhciC/4N/gBZDIPaEt0Ql8AAAAASUVORK5CYII=" />' %}
 {# Code begins! #}
 {% block introduction %}
-  <div style="color: {{ colour_text_base }}; text-align: center; line-height: 16px;">
-    <p>
-      {{ l10n('pending-mail-html-heading', {'owner_name': owner_name, 'day': day, 'time_range': time_range, 'timezone': timezone}, lang=lang) }}
-    </p>
+  <div style="color: {{ colour_text_base }}; font-size: 20px; font-weight: 600; margin-bottom: 16px;">
+    {{ l10n('pending-mail-html-heading', {'owner_name': owner_name, 'owner_email': owner_email}, lang) }}
+  </div>
+  <div style="color: {{ colour_text_base }}; font-size: 17px; line-height: 22px; letter-spacing: -0.43px;">
+    {{ l10n('pending-mail-html-subheading', lang=lang) }}
+  </div>
+{% endblock %}
+{% block information %}
+  <div style="
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid {{ colour_warning_default }};
+    border-radius: 999px;
+    padding: 0 12px 0 4px;
+    margin-bottom: 12px;
+    background-color: {{ colour_warning_soft }};
+    color: {{ colour_icon_secondary }};
+    font-size: 11px;
+    line-height: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  ">
+    {{ warning_icon_img|safe }} {{ l10n('pending-mail-html-badge', lang=lang) }}
+  </div>
+  <div style="font-size: 20px; font-weight: 600; color: {{ colour_icon_secondary }}; margin-bottom: 4px;">
+    {{ schedule_name }}
+  </div>
+  <div style="margin-bottom: 4px;">
+    {{ day }} {{ start_time }} {{ timezone }}
+  </div>
+  <div style="color: {{ colour_icon_secondary }}; display: flex; align-items: center; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 16px;">
+    {{ clock_icon_img|safe }} {{ l10n('mail-html-time', {'duration': duration}, lang) }}
+  </div>
+  <hr style="border: none; border-top: 1px solid {{ colour_border }}; margin: 0 0 16px 0;" />
+  <div style="color: {{ colour_text_base }}; font-size: 14px; line-height: 1.23;">
+    {{ l10n('mail-html-meeting-with', lang=lang) }}<br />
+    {{ attendee_email }}
   </div>
 {% endblock %}
