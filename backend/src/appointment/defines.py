@@ -10,6 +10,7 @@ DATEFMT = '%Y-%m-%d'
 DATETIMEFMT = '%Y-%m-%dT%H:%M:%SZ'
 
 # list of redis keys
+REDIS_CACHE_BUST_BATCH_SIZE = 500
 REDIS_REMOTE_EVENTS_KEY = 'rmt_events'
 REDIS_USER_SESSION_PROFILE_KEY = ':1:tb_accounts_user_session'  # Used with shared redis cache
 REDIS_OIDC_TOKEN_KEY = 'introspect_token'
