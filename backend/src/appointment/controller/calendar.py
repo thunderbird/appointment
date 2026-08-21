@@ -29,7 +29,14 @@ from enum import Enum
 from sqlalchemy.orm import Session
 
 from .. import utils
-from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE, APP_ENV_DEV
+from ..defines import (
+    REDIS_CACHE_BUST_BATCH_SIZE,
+    REDIS_REMOTE_EVENTS_KEY,
+    DATEFMT,
+    DEFAULT_CALENDAR_COLOUR,
+    FALLBACK_LOCALE,
+    APP_ENV_DEV,
+)
 from .apis.google_client import EventStatus, GoogleClient, ResponseStatus, SendUpdates
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
@@ -105,28 +112,31 @@ class BaseConnector:
 
         return True
 
-    def bust_cached_events(self, all_calendars=False):
+    def bust_cached_events(self, all_calendars=False) -> bool:
         """Delete cached events for a specific subscriber/calendar.
-        Optionally pass in all_calendars to remove all cached calendar events for a specific subscriber."""
+        Optionally pass in all_calendars to remove all cached calendar events for a specific subscriber.
+
+        Returns whether any entries were deleted.
+        """
         if self.redis_instance is None:
             return False
 
         timer_boot = time.perf_counter_ns()
+        match = f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*'
 
-        # Scan returns a tuple like: (Cursor start, [...keys found])
-        ret = self.redis_instance.scan(
-            0, f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*'
-        )
-
-        if len(ret[1]) == 0:
-            return False
-
-        # Expand the list in position 1, which is a list of keys found from the scan
-        self.redis_instance.delete(*ret[1])
+        deleted = 0
+        batch = []
+        for key in self.redis_instance.scan_iter(match=match, count=REDIS_CACHE_BUST_BATCH_SIZE):
+            batch.append(key)
+            if len(batch) >= REDIS_CACHE_BUST_BATCH_SIZE:
+                deleted += self.redis_instance.delete(*batch)
+                batch = []
+        if batch:
+            deleted += self.redis_instance.delete(*batch)
 
         sentry_sdk.set_measurement('redis_bust_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
 
-        return True
+        return deleted > 0
 
 
 class GoogleConnector(BaseConnector):
