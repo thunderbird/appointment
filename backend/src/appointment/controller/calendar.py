@@ -29,7 +29,14 @@ from enum import Enum
 from sqlalchemy.orm import Session
 
 from .. import utils
-from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE, APP_ENV_DEV
+from ..defines import (
+    REDIS_CACHE_BUST_BATCH_SIZE,
+    REDIS_REMOTE_EVENTS_KEY,
+    DATEFMT,
+    DEFAULT_CALENDAR_COLOUR,
+    FALLBACK_LOCALE,
+    APP_ENV_DEV,
+)
 from .apis.google_client import EventStatus, GoogleClient, ResponseStatus, SendUpdates
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
@@ -119,9 +126,9 @@ class BaseConnector:
 
         deleted = 0
         batch = []
-        for key in self.redis_instance.scan_iter(match=match, count=500):
+        for key in self.redis_instance.scan_iter(match=match, count=REDIS_CACHE_BUST_BATCH_SIZE):
             batch.append(key)
-            if len(batch) >= 500:
+            if len(batch) >= REDIS_CACHE_BUST_BATCH_SIZE:
                 deleted += self.redis_instance.delete(*batch)
                 batch = []
         if batch:
