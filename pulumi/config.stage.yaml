@@ -14,6 +14,7 @@
 .fxa_callback: &VAR_FXA_CALLBACK {name: "FXA_CALLBACK", value: "https://appointment-stage.tb.pro/fxa"}
 .google_auth_callback: &VAR_GOOGLE_AUTH_CALLBACK {name: "GOOGLE_AUTH_CALLBACK", value: "https://appointment-stage.tb.pro/api/v1/google/callback"}
 .google_invite_enabled: &VAR_GOOGLE_INVITE_ENABLED {name: "GOOGLE_INVITE_ENABLED", value: "True"}
+.google_channel_ttl_in_seconds: &VAR_GOOGLE_CHANNEL_TTL_IN_SECONDS {name: "GOOGLE_CHANNEL_TTL_IN_SECONDS", value: "604800"}
 .jwt_algo: &VAR_JWT_ALGO {name: "JWT_ALGO", value: "HS256"}
 .jwt_expire_in_mins: &VAR_JWT_EXPIRE_IN_MINS {name: "JWT_EXPIRE_IN_MINS", value: "10000"}
 .log_level: &VAR_LOG_LEVEL {name: "LOG_LEVEL", value: "ERROR"}
@@ -40,6 +41,7 @@
 .zoom_api_enabled: &VAR_ZOOM_API_ENABLED {name: "ZOOM_API_ENABLED", value: "True"}
 .zoom_api_new_app: &VAR_ZOOM_API_NEW_APP {name: "ZOOM_API_NEW_APP", value: "False"}
 .zoom_auth_callback: &VAR_ZOOM_AUTH_CALLBACK {name: "ZOOM_AUTH_CALLBACK", value: "https://appointment-stage.tb.pro/api/v1/zoom/callback"}
+.zoom_token_ttl_in_seconds: &VAR_ZOOM_TOKEN_TTL_IN_SECONDS {name: "ZOOM_TOKEN_TTL_IN_SECONDS", value: "604800"}
 
 # These variables are also common to our environments, but are pulled from secret stores instead
 .app_admin_allow_list: &SECRET_APP_ADMIN_ALLOW_LIST {name: "APP_ADMIN_ALLOW_LIST", valueFrom: "arn:aws:secretsmanager:eu-central-1:768512802988:secret:appointment/stage/fxa-admin-list-71QqCa"}
@@ -281,6 +283,7 @@ resources:
               - *VAR_FXA_CALLBACK
               - *VAR_GOOGLE_AUTH_CALLBACK
               - *VAR_GOOGLE_INVITE_ENABLED
+              - *VAR_GOOGLE_CHANNEL_TTL_IN_SECONDS
               - *VAR_JWT_ALGO
               - *VAR_JWT_EXPIRE_IN_MINS
               - *VAR_LOG_LEVEL
@@ -307,6 +310,7 @@ resources:
               - *VAR_ZOOM_API_ENABLED
               - *VAR_ZOOM_API_NEW_APP
               - *VAR_ZOOM_AUTH_CALLBACK
+              - *VAR_ZOOM_TOKEN_TTL_IN_SECONDS
               - name: CONTAINER_ROLE
                 value: api
 
@@ -350,6 +354,7 @@ resources:
                 - *VAR_FXA_CALLBACK
                 - *VAR_GOOGLE_AUTH_CALLBACK
                 - *VAR_GOOGLE_INVITE_ENABLED
+                - *VAR_GOOGLE_CHANNEL_TTL_IN_SECONDS
                 - *VAR_JWT_ALGO
                 - *VAR_JWT_EXPIRE_IN_MINS
                 - *VAR_LOG_LEVEL
@@ -375,6 +380,7 @@ resources:
                 - *VAR_TIER_PRO_CALENDAR_LIMIT
                 - *VAR_ZOOM_API_ENABLED
                 - *VAR_ZOOM_API_NEW_APP
+                - *VAR_ZOOM_TOKEN_TTL_IN_SECONDS
                 - name: CONTAINER_ROLE
                   value: worker
         flower:
@@ -404,6 +410,7 @@ resources:
                 - *VAR_FXA_CALLBACK
                 - *VAR_GOOGLE_AUTH_CALLBACK
                 - *VAR_GOOGLE_INVITE_ENABLED
+                - *VAR_GOOGLE_CHANNEL_TTL_IN_SECONDS
                 - *VAR_JWT_ALGO
                 - *VAR_JWT_EXPIRE_IN_MINS
                 - *VAR_LOG_LEVEL
@@ -429,6 +436,7 @@ resources:
                 - *VAR_TIER_PRO_CALENDAR_LIMIT
                 - *VAR_ZOOM_API_ENABLED
                 - *VAR_ZOOM_API_NEW_APP
+                - *VAR_ZOOM_TOKEN_TTL_IN_SECONDS
                 - name: CONTAINER_ROLE
                   value: flower
                 - name: FLOWER_UNAUTHENTICATED_API
