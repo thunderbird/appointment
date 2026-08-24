@@ -1,6 +1,5 @@
-"""Tests for parse_rfc3339_utc(): the fix for get_free_busy() raising ValueError on any
-Google Calendar timestamp carrying fractional seconds (observed against a contract-accurate
-Calendar twin returning '...T17:52:58.000Z').
+"""Tests for parse_rfc3339_utc timestamp parsing. 
+Covers whole seconds, fractional seconds, offsets, and malformed input.
 """
 
 import pytest
