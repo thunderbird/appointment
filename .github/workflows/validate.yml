@@ -84,7 +84,7 @@ jobs:
 
       - name: Backend formatting check
         run: |
-          cd ./backend && ruff format
+          cd ./backend && ruff format --check
 
   validate-frontend:
     needs: detect-changes
