@@ -24,16 +24,8 @@ from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredential
 
 
 def parse_iso8601_utc(value: str) -> datetime:
-    """Parse an RFC-3339 UTC timestamp from the Calendar API into a naive UTC datetime.
-
-    Google documents these fields as RFC-3339, which permits fractional seconds. The previous
-    strict '%Y-%m-%dT%H:%M:%SZ' parse raised ValueError on any value that carried them, taking
-    down the whole availability lookup; that was observed against a contract-accurate Calendar
-    twin returning '...T17:52:58.000Z'.
-
-    Returns naive UTC to match what the rest of the busy-time pipeline and the CalDAV connector
-    produce.
-    """
+    """Parse an ISO-8601 timestamp (supporting RFC-3339, fractional seconds) into a naive UTC datetime.
+    Useful when calendar providers return ISO-8601 conform timestamps instead of plain datetime strings."""
     try:
         parsed = datetime.fromisoformat(value)
     except (TypeError, ValueError):
