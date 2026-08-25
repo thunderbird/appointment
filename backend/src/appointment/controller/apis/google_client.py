@@ -8,8 +8,6 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from appointment.utils import parse_iso8601_utc
-
 from ... import utils
 from ...database import repo
 from ...database.models import CalendarProvider
@@ -194,8 +192,8 @@ class GoogleClient:
                         # Transform to datetimes to match caldav's behaviour
                         items += [
                             {
-                                'start': parse_iso8601_utc(entry.get('start')),
-                                'end': parse_iso8601_utc(entry.get('end')),
+                                'start': utils.parse_iso8601_utc(entry.get('start')),
+                                'end': utils.parse_iso8601_utc(entry.get('end')),
                             }
                             for entry in busy
                         ]

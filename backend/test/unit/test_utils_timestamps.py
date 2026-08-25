@@ -1,4 +1,4 @@
-"""Tests for parse_iso8601_utc timestamp parsing. 
+"""Tests for parse_iso8601_utc timestamp parsing.
 Covers whole seconds, fractional seconds, offsets, and malformed input.
 """
 
