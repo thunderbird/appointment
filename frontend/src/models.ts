@@ -245,7 +245,6 @@ export type SettingsForm = {
   displayName?: string;
   language?: string;
   startOfWeek?: number;
-  timeFormat?: number;
   changedCalendars?: { [id: number]: boolean };
   changedCalendarColors?: { [id: number]: string };
 };
@@ -257,7 +256,6 @@ export type SettingsForm = {
 export type UserConfig = {
   language: string;
   colourScheme: string;
-  timeFormat: number;
   timezone: string;
   startOfWeek: number;
 };
@@ -272,7 +270,6 @@ export type Subscriber = {
   language?: string;
   timezone?: string;
   colour_scheme?: string;
-  time_mode?: number;
   start_of_week?: number;
   avatar_url?: string;
   is_setup?: boolean;

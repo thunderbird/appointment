@@ -56,7 +56,6 @@ export const useSettingsStore = defineStore('settings', () => {
     initialState.value.language = userStore.data.settings.language;
     initialState.value.startOfWeek = userStore.data.settings.startOfWeek;
     initialState.value.defaultTimeZone = userStore.data.settings.timezone;
-    initialState.value.timeFormat = userStore.data.settings.timeFormat;
 
     // Connected Applications section
     initialState.value.defaultCalendarId = scheduleStore.firstSchedule?.calendar_id;
