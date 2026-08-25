@@ -266,9 +266,7 @@ class TestCalDAV:
         username2 = 'username2'
         type_id2 = json.dumps(['url2', username2])
         ec2 = make_external_connections(TEST_USER_ID, type=models.ExternalConnectionType.caldav, type_id=type_id2)
-        make_caldav_calendar(
-            subscriber_id=TEST_USER_ID, user=username2, connected=True, external_connection_id=ec2.id
-        )
+        make_caldav_calendar(subscriber_id=TEST_USER_ID, user=username2, connected=True, external_connection_id=ec2.id)
 
         # Create a schedule that uses the first calendar (making it the "default" calendar)
         make_schedule(calendar_id=calendar1.id)
@@ -843,7 +841,7 @@ class TestOIDCToken:
             mock_introspect.return_value = {
                 'sub': oidc_id,
                 'email': email,
-                'preferred_username': email, # preferred_username is the thundermail address
+                'preferred_username': email,  # preferred_username is the thundermail address
                 'name': 'OIDC User',
             }
 
@@ -921,6 +919,7 @@ class TestOIDCToken:
             subscriber = repo.subscriber.get_by_email(db, email)
             assert subscriber is not None
             assert subscriber.email == email.lower()
+
 
 class TestWaffleFlags:
     """Tests for the /auth/waffle-flags endpoint."""

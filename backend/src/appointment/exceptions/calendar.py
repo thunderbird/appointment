@@ -9,6 +9,7 @@ class EventNotPatchedException(Exception):
 
     pass
 
+
 class EventNotDeletedException(Exception):
     """Raise if an event cannot be deleted on a remote calendar"""
 
@@ -26,6 +27,7 @@ class TestConnectionFailed(Exception):
 
     def __init__(self, reason: str | None = None):
         self.reason = reason
+
 
 class RemoteCalendarAuthenticationError(Exception):
     """Raise if the calendar authentication fails"""

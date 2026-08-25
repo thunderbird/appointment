@@ -41,9 +41,7 @@ def renew_google_channels():
 def stop_google_channel(self, channel_id: str, resource_id: str, token_json: str):
     """Stop a Google Calendar push notification channel, with automatic retries."""
     google_client = get_google_client()
-    token = Credentials.from_authorized_user_info(
-        json.loads(token_json), google_client.SCOPES
-    )
+    token = Credentials.from_authorized_user_info(json.loads(token_json), google_client.SCOPES)
     google_client.stop_channel(channel_id, resource_id, token)
     log.info(f'Stopped Google Calendar channel {channel_id}')
 
@@ -91,9 +89,7 @@ def sync_google_calendar_changes(self, channel_id: str):
             if sync_token:
                 repo.google_calendar_channel.update_sync_token(db, channel, sync_token)
 
-        changed_events, new_sync_token = google_client.list_events_sync(
-            calendar.user, channel.sync_token, google_token
-        )
+        changed_events, new_sync_token = google_client.list_events_sync(calendar.user, channel.sync_token, google_token)
 
         if changed_events is None:
             fresh_token = google_client.get_initial_sync_token(calendar.user, google_token)
@@ -105,16 +101,18 @@ def sync_google_calendar_changes(self, channel_id: str):
             repo.google_calendar_channel.update_sync_token(db, channel, new_sync_token)
 
         if changed_events:
-            _process_changed_events(
-                db, calendar.id, changed_events, google_client, google_token, calendar.user
-            )
+            _process_changed_events(db, calendar.id, changed_events, google_client, google_token, calendar.user)
     finally:
         db.close()
 
 
 def _process_changed_events(
-    db, calendar_id: int, changed_events: list[dict],
-    google_client: GoogleClient, google_token, remote_calendar_id: str,
+    db,
+    calendar_id: int,
+    changed_events: list[dict],
+    google_client: GoogleClient,
+    google_token,
+    remote_calendar_id: str,
 ):
     """Walk through changed events and dispatch to the appropriate RSVP / cancellation handler."""
     for event in changed_events:
@@ -141,8 +139,13 @@ def _process_changed_events(
         self_attendee = next((a for a in attendees if a.get('self')), None)
         if self_attendee:
             _handle_subscriber_rsvp(
-                db, appointment, slot, self_attendee.get('responseStatus'),
-                google_client, google_token, remote_calendar_id,
+                db,
+                appointment,
+                slot,
+                self_attendee.get('responseStatus'),
+                google_client,
+                google_token,
+                remote_calendar_id,
             )
 
         attendee_email = slot.attendee.email.lower()
@@ -154,10 +157,7 @@ def _process_changed_events(
             continue
 
         response_status = google_attendee.get('responseStatus')
-        _handle_bookee_rsvp(
-            db, appointment, slot, response_status, google_client, google_token, remote_calendar_id
-        )
-
+        _handle_bookee_rsvp(db, appointment, slot, response_status, google_client, google_token, remote_calendar_id)
 
 
 def _handle_event_cancelled(
@@ -172,10 +172,7 @@ def _handle_event_cancelled(
     slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.cancelled)
     repo.slot.update(db, slot.id, slot_update)
 
-    log.info(
-        f'[tasks.google] Event cancelled for appointment {appointment.id}, '
-        f'slot {slot.id} marked as cancelled'
-    )
+    log.info(f'[tasks.google] Event cancelled for appointment {appointment.id}, slot {slot.id} marked as cancelled')
 
 
 def _handle_subscriber_rsvp(
@@ -230,7 +227,10 @@ def _handle_subscriber_rsvp(
                     body['attendees'] = remote_event['attendees']
 
                 google_client.patch_event(
-                    remote_calendar_id, appointment.external_id, body, google_token,
+                    remote_calendar_id,
+                    appointment.external_id,
+                    body,
+                    google_token,
                 )
             except Exception:
                 log.warning('[tasks.google] Failed to confirm event in Google')
@@ -248,7 +248,9 @@ def _handle_subscriber_rsvp(
             if appointment.external_id:
                 try:
                     google_client.delete_event(
-                        remote_calendar_id, appointment.external_id, google_token,
+                        remote_calendar_id,
+                        appointment.external_id,
+                        google_token,
                         send_updates=SendUpdates.ALL,
                     )
                 except Exception:
@@ -281,13 +283,7 @@ def _handle_bookee_rsvp(
                 except Exception:
                     log.warning('[tasks.google] Failed to delete declined event from Google')
 
-            log.info(
-                f'[tasks.google] Bookee declined appointment {appointment.id}, '
-                f'slot {slot.id} marked as declined'
-            )
+            log.info(f'[tasks.google] Bookee declined appointment {appointment.id}, slot {slot.id} marked as declined')
 
     elif response_status == ResponseStatus.ACCEPTED:
-        log.info(
-            f'[tasks.google] Bookee accepted appointment {appointment.id}, '
-            f'slot {slot.id}'
-        )
+        log.info(f'[tasks.google] Bookee accepted appointment {appointment.id}, slot {slot.id}')

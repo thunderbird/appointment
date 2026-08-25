@@ -70,6 +70,7 @@ def backfill_channels():
     except FileExistsError:
         print('backfill-google-channels is already running, skipping.')
 
+
 @router.command('refresh-zoom-tokens')
 def refresh_tokens():
     from ..tasks.zoom import refresh_zoom_tokens as refresh_zoom_tokens_task

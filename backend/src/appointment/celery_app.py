@@ -49,34 +49,36 @@ def create_celery_app() -> Celery:
 
     app = Celery('appointment')
 
-    app.config_from_object({
-        'broker_url': broker_url,
-        'result_backend': result_backend,
-        'result_expires': result_expires,
-        'task_always_eager': task_always_eager,
-        'broker_connection_retry_on_startup': True,
-        'task_default_queue': 'appointment',
-        'task_serializer': 'json',
-        'result_serializer': 'json',
-        'accept_content': ['json'],
-        'timezone': 'UTC',
-        'enable_utc': True,
-        'beat_scheduler': 'redbeat.RedBeatScheduler',
-        'beat_schedule': {
-            'heartbeat-every-60s': {
-                'task': 'appointment.tasks.health.heartbeat',
-                'schedule': 60.0,
+    app.config_from_object(
+        {
+            'broker_url': broker_url,
+            'result_backend': result_backend,
+            'result_expires': result_expires,
+            'task_always_eager': task_always_eager,
+            'broker_connection_retry_on_startup': True,
+            'task_default_queue': 'appointment',
+            'task_serializer': 'json',
+            'result_serializer': 'json',
+            'accept_content': ['json'],
+            'timezone': 'UTC',
+            'enable_utc': True,
+            'beat_scheduler': 'redbeat.RedBeatScheduler',
+            'beat_schedule': {
+                'heartbeat-every-60s': {
+                    'task': 'appointment.tasks.health.heartbeat',
+                    'schedule': 60.0,
+                },
+                'renew-google-channels': {
+                    'task': 'appointment.tasks.google.renew_google_channels',
+                    'schedule': google_channel_renew_interval,
+                },
+                'refresh-zoom-tokens': {
+                    'task': 'appointment.tasks.zoom.refresh_zoom_tokens',
+                    'schedule': zoom_token_renew_interval,
+                },
             },
-            'renew-google-channels': {
-                'task': 'appointment.tasks.google.renew_google_channels',
-                'schedule': google_channel_renew_interval,
-            },
-            'refresh-zoom-tokens': {
-                'task': 'appointment.tasks.zoom.refresh_zoom_tokens',
-                'schedule': zoom_token_renew_interval,
-            },
-        },
-    })
+        }
+    )
 
     app.autodiscover_tasks(['appointment'])
 

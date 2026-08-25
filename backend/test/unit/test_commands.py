@@ -571,6 +571,7 @@ class TestRenewGoogleChannels:
             assert updated.state is not None
             assert updated.state != 'old-state'
 
+
 class TestRefreshZoomTokens:
     """Tests that the refresh command correctly renews Zoom OAuth tokens."""
 
@@ -632,9 +633,7 @@ class TestRefreshZoomTokens:
         assert setup_token['expires_at'] == 0
 
         with with_db() as db:
-            connections = repo.external_connection.get_by_type(
-                db, 1, models.ExternalConnectionType.zoom
-            )
+            connections = repo.external_connection.get_by_type(db, 1, models.ExternalConnectionType.zoom)
             assert len(connections) == 1
             stored_token = json.loads(connections[0].token)
             assert stored_token['access_token'] == 'new-access-token'
@@ -759,9 +758,7 @@ class TestRefreshZoomTokens:
         with with_db() as db:
             assert repo.external_connection.get_zoom(db) == []
 
-    def test_invalid_token_payload_does_not_stop_others(
-        self, with_db, make_external_connections, make_pro_subscriber
-    ):
+    def test_invalid_token_payload_does_not_stop_others(self, with_db, make_external_connections, make_pro_subscriber):
         """If one stored token is invalid JSON, the command should still refresh other users."""
         make_external_connections(
             subscriber_id=1,
@@ -805,4 +802,3 @@ class TestRefreshZoomTokens:
                 db, subscriber_2.id, models.ExternalConnectionType.zoom
             )[0]
             assert json.loads(valid_connection.token)['refresh_token'] == 'new-refresh-token'
-

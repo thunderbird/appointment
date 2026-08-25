@@ -30,15 +30,19 @@ def run():
     # Find connected Google calendars that are the default in a schedule
     # and don't yet have a watch channel
     schedule_calendar_ids = [
-        s.calendar_id for s in
-        db.query(models.Schedule.calendar_id).filter(models.Schedule.calendar_id != None).all()  # noqa: E711
+        s.calendar_id
+        for s in db.query(models.Schedule.calendar_id).filter(models.Schedule.calendar_id != None).all()  # noqa: E711
     ]
 
-    all_calendars = db.query(models.Calendar).filter(
-        models.Calendar.provider == models.CalendarProvider.google,
-        models.Calendar.connected == True,  # noqa: E712
-        models.Calendar.id.in_(schedule_calendar_ids),
-    ).all()
+    all_calendars = (
+        db.query(models.Calendar)
+        .filter(
+            models.Calendar.provider == models.CalendarProvider.google,
+            models.Calendar.connected == True,  # noqa: E712
+            models.Calendar.id.in_(schedule_calendar_ids),
+        )
+        .all()
+    )
 
     candidates = []
     for cal in all_calendars:
@@ -60,9 +64,7 @@ def run():
             continue
 
         try:
-            token = Credentials.from_authorized_user_info(
-                json.loads(ext_conn.token), google_client.SCOPES
-            )
+            token = Credentials.from_authorized_user_info(json.loads(ext_conn.token), google_client.SCOPES)
         except Exception as e:
             print(f'  Calendar {calendar.id}: failed to parse token ({e}), skipping.')
             skipped += 1

@@ -309,7 +309,6 @@ class CalendarOut(CalendarBase):
     provider: CalendarProvider | None = CalendarProvider.caldav
 
 
-
 """ SUBSCRIBER model schemas
 """
 

@@ -41,7 +41,7 @@ class ZoomClient:
 
     def check_expiry(self, token: dict | None, threshold: float):
         """Checks expires_at and sets expires_in to a negative number to trigger refresh
-           if already expired or within the given renewal threshold
+        if already expired or within the given renewal threshold
         """
         if not token:
             return token

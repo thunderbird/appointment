@@ -27,13 +27,7 @@ def get_all_subscriber(
     per_page = data.per_page
 
     total_count = db.query(models.Subscriber).count()
-    subscribers = (
-        db.query(models.Subscriber)
-        .order_by('time_created')
-        .offset(page * per_page)
-        .limit(per_page)
-        .all()
-    )
+    subscribers = db.query(models.Subscriber).order_by('time_created').offset(page * per_page).limit(per_page).all()
 
     return schemas.SubscriberAdminOut(
         items=subscribers,

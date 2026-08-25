@@ -325,10 +325,12 @@ class GoogleConnector(BaseConnector):
                 'start': {'dateTime': event.start.isoformat()},
                 'end': {'dateTime': event.end.isoformat()},
                 'attendees': [
-                    {'displayName': organizer.name, 'email': organizer_email,
-                     'responseStatus': ResponseStatus.ACCEPTED},
-                    {'displayName': attendee.name, 'email': attendee.email,
-                     'responseStatus': ResponseStatus.ACCEPTED},
+                    {
+                        'displayName': organizer.name,
+                        'email': organizer_email,
+                        'responseStatus': ResponseStatus.ACCEPTED,
+                    },
+                    {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': ResponseStatus.ACCEPTED},
                 ],
                 'organizer': {
                     'displayName': organizer.name,
@@ -658,7 +660,7 @@ class CalDavConnector(BaseConnector):
 
             def is_midnight_one_day_span(vevent):
                 """For a given vevent object, check if it is an event spanning from midnight
-                   to midnight for exactly 24h.
+                to midnight for exactly 24h.
                 """
                 dtstart = vevent['DTSTART'].dt
                 dtend = vevent['DTEND'].dt
@@ -668,21 +670,19 @@ class CalDavConnector(BaseConnector):
                     return False
 
                 starts_at_midnight = (
-                    dtstart.hour == 0 and dtstart.minute == 0 and
-                    dtstart.second == 0 and dtstart.microsecond == 0
+                    dtstart.hour == 0 and dtstart.minute == 0 and dtstart.second == 0 and dtstart.microsecond == 0
                 )
                 ends_at_midnight = (
-                    dtend.hour == 0 and dtend.minute == 0 and
-                    dtend.second == 0 and dtend.microsecond == 0
+                    dtend.hour == 0 and dtend.minute == 0 and dtend.second == 0 and dtend.microsecond == 0
                 )
 
                 exactly_one_day = (dtend - dtstart) == timedelta(days=1)
 
                 return starts_at_midnight and ends_at_midnight and exactly_one_day
-            
+
             def has_domain(url, whitelist):
                 """Return True if the given url contains a whitelisted domain.
-                   Always True for development environments.
+                Always True for development environments.
                 """
                 if os.getenv('APP_ENV') == APP_ENV_DEV:
                     return True
