@@ -181,8 +181,6 @@
     "slotIsAvailableAgain": "Time slot now available for bookings."
   },
   "label": {
-    "12hAmPm": "12:00 AM/PM (12-hour)",
-    "24h": "24:00 (24-hour)",
     "DDMMYYYY": "DD/MM/YYYY",
     "MMDDYYYY": "MM/DD/YYYY",
     "accepted": "Accepted",
@@ -458,7 +456,6 @@
     "time": "Time",
     "timeCreated": "Time Created",
     "timeDeleted": "Time Deleted",
-    "timeFormat": "Time Format",
     "timeOfTheEvent": "Time of the event:",
     "timeUpdated": "Time Updated",
     "timeZone": "Timezone",

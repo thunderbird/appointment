@@ -181,8 +181,6 @@
     "slotIsAvailableAgain": "Das Zeitfenster ist jetzt wieder buchbar."
   },
   "label": {
-    "12hAmPm": "12:00 Uhr (12-Stunden-Format)",
-    "24h": "24:00 (24-Stunden-Format)",
     "DDMMYYYY": "TT/MM/YYYY",
     "MMDDYYYY": "MM/TT/YYYY",
     "accepted": "Akzeptiert",
@@ -457,7 +455,6 @@
     "time": "Zeit",
     "timeCreated": "Erstellt am",
     "timeDeleted": "Gelöscht am",
-    "timeFormat": "Zeitformat",
     "timeOfTheEvent": "Uhrzeit der Veranstaltung:",
     "timeUpdated": "Geändert am",
     "timeZone": "Zeitzone",
