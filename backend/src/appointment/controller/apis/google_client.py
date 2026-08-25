@@ -37,8 +37,7 @@ def parse_iso8601_utc(value: str) -> datetime:
     try:
         parsed = datetime.fromisoformat(value)
     except (TypeError, ValueError):
-        # Fall back to the historical strict format so any shape that used to parse still
-        # parses identically.
+        # Fall back to string parsed time in the defined default format
         parsed = datetime.strptime(value, DATETIMEFMT)
 
     if parsed.tzinfo is not None:
