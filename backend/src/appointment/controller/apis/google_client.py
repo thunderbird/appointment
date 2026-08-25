@@ -23,7 +23,7 @@ from ...exceptions.calendar import (
 from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
 
 
-def parse_rfc3339_utc(value: str) -> datetime:
+def parse_iso8601_utc(value: str) -> datetime:
     """Parse an RFC-3339 UTC timestamp from the Calendar API into a naive UTC datetime.
 
     Google documents these fields as RFC-3339, which permits fractional seconds. The previous
