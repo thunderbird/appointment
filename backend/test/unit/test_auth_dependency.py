@@ -181,9 +181,7 @@ class TestAuthDependency:
             oidc_id = uuid.uuid4().hex
             access_token = uuid.uuid4().hex
 
-            make_external_connections(
-                subscriber_id=subscriber.id, type_id=oidc_id, type=ExternalConnectionType.oidc
-            )
+            make_external_connections(subscriber_id=subscriber.id, type_id=oidc_id, type=ExternalConnectionType.oidc)
 
             request = mock.MagicMock()
 

@@ -700,12 +700,15 @@ class TestVEventTimezoneFallback:
     def _make_attendee(self, tz='America/New_York'):
         return schemas.AttendeeBase(email='attendee@example.com', name='Attendee', timezone=tz)
 
-    @pytest.mark.parametrize('method_name,email_func_path', [
-        ('send_invitation_vevent', 'appointment.controller.mailer.send_invite_email'),
-        ('send_hold_vevent', 'appointment.controller.mailer.send_pending_email'),
-        ('send_reject_vevent', 'appointment.controller.mailer.send_rejection_email'),
-        ('send_cancel_vevent', 'appointment.controller.mailer.send_cancel_email'),
-    ])
+    @pytest.mark.parametrize(
+        'method_name,email_func_path',
+        [
+            ('send_invitation_vevent', 'appointment.controller.mailer.send_invite_email'),
+            ('send_hold_vevent', 'appointment.controller.mailer.send_pending_email'),
+            ('send_reject_vevent', 'appointment.controller.mailer.send_rejection_email'),
+            ('send_cancel_vevent', 'appointment.controller.mailer.send_cancel_email'),
+        ],
+    )
     def test_valid_timezone_is_applied(self, method_name, email_func_path):
         tools = self._make_tools()
         tools.create_vevent = Mock(return_value=b'VCALENDAR')
@@ -722,12 +725,15 @@ class TestVEventTimezoneFallback:
         expected = slot.start.replace(tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo('America/New_York'))
         assert date_arg == expected
 
-    @pytest.mark.parametrize('method_name,email_func_path', [
-        ('send_invitation_vevent', 'appointment.controller.mailer.send_invite_email'),
-        ('send_hold_vevent', 'appointment.controller.mailer.send_pending_email'),
-        ('send_reject_vevent', 'appointment.controller.mailer.send_rejection_email'),
-        ('send_cancel_vevent', 'appointment.controller.mailer.send_cancel_email'),
-    ])
+    @pytest.mark.parametrize(
+        'method_name,email_func_path',
+        [
+            ('send_invitation_vevent', 'appointment.controller.mailer.send_invite_email'),
+            ('send_hold_vevent', 'appointment.controller.mailer.send_pending_email'),
+            ('send_reject_vevent', 'appointment.controller.mailer.send_rejection_email'),
+            ('send_cancel_vevent', 'appointment.controller.mailer.send_cancel_email'),
+        ],
+    )
     @pytest.mark.parametrize('bad_tz', ['Invalid/Timezone', 'Not_A_Zone', ''])
     def test_invalid_timezone_falls_back_to_utc(self, method_name, email_func_path, bad_tz):
         tools = self._make_tools()
@@ -746,12 +752,15 @@ class TestVEventTimezoneFallback:
         assert date_arg == expected
         assert date_arg.tzinfo == timezone.utc
 
-    @pytest.mark.parametrize('method_name', [
-        'send_invitation_vevent',
-        'send_hold_vevent',
-        'send_reject_vevent',
-        'send_cancel_vevent',
-    ])
+    @pytest.mark.parametrize(
+        'method_name',
+        [
+            'send_invitation_vevent',
+            'send_hold_vevent',
+            'send_reject_vevent',
+            'send_cancel_vevent',
+        ],
+    )
     def test_none_timezone_defaults_to_utc(self, method_name):
         tools = self._make_tools()
         tools.create_vevent = Mock(return_value=b'VCALENDAR')

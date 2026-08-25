@@ -196,9 +196,7 @@ class TestIsAValidBookingTimeWithCustomAvailability:
         schedule.availabilities = availabilities or []
 
         # Mock the timezone_offset property
-        schedule.timezone_offset = time_updated.replace(
-            tzinfo=zoneinfo.ZoneInfo(timezone)
-        ).utcoffset()
+        schedule.timezone_offset = time_updated.replace(tzinfo=zoneinfo.ZoneInfo(timezone)).utcoffset()
 
         return schedule
 

@@ -19,8 +19,14 @@ from appointment.defines import APP_ENV_DEV
 def send_invite_email(owner_name, owner_email, date, duration, to, attachment, lang, meeting_link_url=None):
     try:
         mail = InvitationMail(
-            name=owner_name, email=owner_email, date=date, duration=duration,
-            to=to, attachments=[attachment], lang=lang, meeting_link_url=meeting_link_url,
+            name=owner_name,
+            email=owner_email,
+            date=date,
+            duration=duration,
+            to=to,
+            attachments=[attachment],
+            lang=lang,
+            meeting_link_url=meeting_link_url,
         )
         mail.send()
     except Exception as e:
@@ -62,7 +68,12 @@ def send_new_booking_email(name, email, date, duration, to, schedule_name, lang)
 def send_pending_email(owner_name, date, duration, to, attachment, lang):
     try:
         mail = PendingRequestMail(
-            owner_name=owner_name, date=date, duration=duration, to=to, attachments=[attachment], lang=lang,
+            owner_name=owner_name,
+            date=date,
+            duration=duration,
+            to=to,
+            attachments=[attachment],
+            lang=lang,
         )
         mail.send()
     except Exception as e:
@@ -76,7 +87,12 @@ def send_pending_email(owner_name, date, duration, to, attachment, lang):
 def send_cancel_email(owner_name, date, duration, to, attachment, lang):
     try:
         mail = CancelMail(
-            owner_name=owner_name, date=date, duration=duration, to=to, attachments=[attachment], lang=lang,
+            owner_name=owner_name,
+            date=date,
+            duration=duration,
+            to=to,
+            attachments=[attachment],
+            lang=lang,
         )
         mail.send()
     except Exception as e:
@@ -90,7 +106,12 @@ def send_cancel_email(owner_name, date, duration, to, attachment, lang):
 def send_rejection_email(owner_name, date, duration, to, attachment, lang):
     try:
         mail = RejectionMail(
-            owner_name=owner_name, date=date, duration=duration, to=to, attachments=[attachment], lang=lang,
+            owner_name=owner_name,
+            date=date,
+            duration=duration,
+            to=to,
+            attachments=[attachment],
+            lang=lang,
         )
         mail.send()
     except Exception as e:

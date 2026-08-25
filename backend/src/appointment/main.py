@@ -64,11 +64,13 @@ def _common_setup():
     use_log_stream = os.getenv('LOG_USE_STREAM', False)
 
     log_handler = logging.StreamHandler(sys.stdout) if use_log_stream else logging.FileHandler('appointment.log')
-    log_handler.setFormatter(DefaultFormatter(
-        fmt='%(asctime)s %(levelprefix)s %(message)s',
-        datefmt='%Y-%m-%d %H:%M:%S',
-        use_colors=True,
-    ))
+    log_handler.setFormatter(
+        DefaultFormatter(
+            fmt='%(asctime)s %(levelprefix)s %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S',
+            use_colors=True,
+        )
+    )
 
     logging.basicConfig(level=getattr(logging, level), handlers=[log_handler])
 

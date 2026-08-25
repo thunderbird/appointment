@@ -58,9 +58,7 @@ def _check_google(ec: ExternalConnections) -> ExternalConnectionStatus:
             os.getenv('GOOGLE_AUTH_CALLBACK'),
         )
 
-        creds = Credentials.from_authorized_user_info(
-            json.loads(ec.token), google_client.SCOPES
-        )
+        creds = Credentials.from_authorized_user_info(json.loads(ec.token), google_client.SCOPES)
 
         if creds.expired and creds.refresh_token:
             creds.refresh(Request())

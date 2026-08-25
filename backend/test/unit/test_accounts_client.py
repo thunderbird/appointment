@@ -15,9 +15,7 @@ class TestAccountsClientWaffleFlags:
         mock_response.raise_for_status.return_value = None
         mock_response.json.return_value = {'flags': {'new-dashboard': True, 'beta-feature': False}}
 
-        with patch(
-            'appointment.controller.apis.accounts_client.requests.get', return_value=mock_response
-        ) as mock_get:
+        with patch('appointment.controller.apis.accounts_client.requests.get', return_value=mock_response) as mock_get:
             flags = accounts_client.get_waffle_flags('a-keycloak-access-token')
 
         assert flags == {'flags': {'new-dashboard': True, 'beta-feature': False}}

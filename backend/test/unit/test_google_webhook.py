@@ -91,9 +91,7 @@ class TestHandleBookeeRsvp:
             db_appointment = repo.appointment.get(db, appointment_id)
             db_slot = repo.slot.get(db, slot_id)
 
-            _handle_bookee_rsvp(
-                db, db_appointment, db_slot, 'declined', mock_client, mock_token, calendar.user
-            )
+            _handle_bookee_rsvp(db, db_appointment, db_slot, 'declined', mock_client, mock_token, calendar.user)
 
             db.refresh(db_slot)
             assert db_slot.booking_status == models.BookingStatus.declined
@@ -115,9 +113,7 @@ class TestHandleBookeeRsvp:
             db_appointment = repo.appointment.get(db, appointment_id)
             db_slot = repo.slot.get(db, slot_id)
 
-            _handle_bookee_rsvp(
-                db, db_appointment, db_slot, 'accepted', mock_client, mock_token, calendar.user
-            )
+            _handle_bookee_rsvp(db, db_appointment, db_slot, 'accepted', mock_client, mock_token, calendar.user)
 
             db.refresh(db_slot)
             assert db_slot.booking_status == models.BookingStatus.requested
@@ -148,9 +144,7 @@ class TestHandleBookeeRsvp:
             db_appointment = repo.appointment.get(db, appointment.id)
             db_slot = db_appointment.slots[0]
 
-            _handle_bookee_rsvp(
-                db, db_appointment, db_slot, 'accepted', mock_client, mock_token, calendar.user
-            )
+            _handle_bookee_rsvp(db, db_appointment, db_slot, 'accepted', mock_client, mock_token, calendar.user)
 
             db.refresh(db_slot)
             assert db_slot.booking_status == models.BookingStatus.booked
@@ -170,9 +164,7 @@ class TestHandleBookeeRsvp:
             db_appointment = repo.appointment.get(db, appointment_id)
             db_slot = repo.slot.get(db, slot_id)
 
-            _handle_bookee_rsvp(
-                db, db_appointment, db_slot, 'needsAction', mock_client, mock_token, calendar.user
-            )
+            _handle_bookee_rsvp(db, db_appointment, db_slot, 'needsAction', mock_client, mock_token, calendar.user)
 
             db.refresh(db_slot)
             assert db_slot.booking_status == models.BookingStatus.requested
@@ -182,7 +174,12 @@ class TestHandleSubscriberRsvp:
     """Tests for _handle_subscriber_rsvp, focused on meeting-link and event-update behaviour."""
 
     def _make_test_objects(
-        self, with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,
+        self,
+        with_db,
+        make_google_calendar,
+        make_appointment,
+        make_attendee,
+        make_appointment_slot,
         meeting_link_provider=models.MeetingLinkProviderType.none,
         location_url='https://meet.example.com',
     ):
@@ -214,7 +211,11 @@ class TestHandleSubscriberRsvp:
     ):
         """Accepting via Google should patch the event with summary, location, and description."""
         calendar, appointment_id, slot_id = self._make_test_objects(
-            with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,
+            with_db,
+            make_google_calendar,
+            make_appointment,
+            make_attendee,
+            make_appointment_slot,
         )
 
         mock_client = Mock()
@@ -231,8 +232,13 @@ class TestHandleSubscriberRsvp:
             db_slot = repo.slot.get(db, slot_id)
 
             _handle_subscriber_rsvp(
-                db, db_appointment, db_slot, 'accepted',
-                mock_client, mock_token, calendar.user,
+                db,
+                db_appointment,
+                db_slot,
+                'accepted',
+                mock_client,
+                mock_token,
+                calendar.user,
             )
 
         mock_client.patch_event.assert_called_once()
@@ -246,14 +252,23 @@ class TestHandleSubscriberRsvp:
 
     @patch('appointment.controller.zoom.create_meeting_link')
     def test_accept_creates_zoom_link_when_configured(
-        self, mock_create_zoom,
-        with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,
+        self,
+        mock_create_zoom,
+        with_db,
+        make_google_calendar,
+        make_appointment,
+        make_attendee,
+        make_appointment_slot,
     ):
         """When meeting_link_provider is zoom, a Zoom link should be created and used as location."""
         mock_create_zoom.return_value = 'https://zoom.us/j/123456'
 
         calendar, appointment_id, slot_id = self._make_test_objects(
-            with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,
+            with_db,
+            make_google_calendar,
+            make_appointment,
+            make_attendee,
+            make_appointment_slot,
             meeting_link_provider=models.MeetingLinkProviderType.zoom,
         )
 
@@ -266,8 +281,13 @@ class TestHandleSubscriberRsvp:
             db_slot = repo.slot.get(db, slot_id)
 
             _handle_subscriber_rsvp(
-                db, db_appointment, db_slot, 'accepted',
-                mock_client, mock_token, calendar.user,
+                db,
+                db_appointment,
+                db_slot,
+                'accepted',
+                mock_client,
+                mock_token,
+                calendar.user,
             )
 
         mock_create_zoom.assert_called_once()
@@ -279,7 +299,11 @@ class TestHandleSubscriberRsvp:
     ):
         """The organizer (self) attendee responseStatus should be set to accepted."""
         calendar, appointment_id, slot_id = self._make_test_objects(
-            with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,
+            with_db,
+            make_google_calendar,
+            make_appointment,
+            make_attendee,
+            make_appointment_slot,
         )
 
         mock_client = Mock()
@@ -296,8 +320,13 @@ class TestHandleSubscriberRsvp:
             db_slot = repo.slot.get(db, slot_id)
 
             _handle_subscriber_rsvp(
-                db, db_appointment, db_slot, 'accepted',
-                mock_client, mock_token, calendar.user,
+                db,
+                db_appointment,
+                db_slot,
+                'accepted',
+                mock_client,
+                mock_token,
+                calendar.user,
             )
 
         patch_body = mock_client.patch_event.call_args.args[2]
@@ -334,8 +363,13 @@ class TestHandleSubscriberRsvp:
             db_slot = db_appointment.slots[0]
 
             _handle_subscriber_rsvp(
-                db, db_appointment, db_slot, 'accepted',
-                mock_client, mock_token, calendar.user,
+                db,
+                db_appointment,
+                db_slot,
+                'accepted',
+                mock_client,
+                mock_token,
+                calendar.user,
             )
 
         mock_client.patch_event.assert_not_called()
@@ -464,17 +498,23 @@ class TestSetupWatchChannel:
         self, with_db, make_google_calendar, make_external_connections, make_pro_subscriber
     ):
         subscriber = make_pro_subscriber()
-        google_creds = json.dumps({
-            'token': 'fake-token',
-            'refresh_token': 'fake-refresh',
-            'client_id': 'fake-client-id',
-            'client_secret': 'fake-secret',
-        })
+        google_creds = json.dumps(
+            {
+                'token': 'fake-token',
+                'refresh_token': 'fake-refresh',
+                'client_id': 'fake-client-id',
+                'client_secret': 'fake-secret',
+            }
+        )
         ext_conn = make_external_connections(
-            subscriber.id, type=models.ExternalConnectionType.google, token=google_creds,
+            subscriber.id,
+            type=models.ExternalConnectionType.google,
+            token=google_creds,
         )
         calendar = make_google_calendar(
-            subscriber_id=subscriber.id, connected=True, external_connection_id=ext_conn.id,
+            subscriber_id=subscriber.id,
+            connected=True,
+            external_connection_id=ext_conn.id,
         )
 
         mock_client = Mock()
@@ -503,17 +543,23 @@ class TestSetupWatchChannel:
         self, with_db, make_google_calendar, make_external_connections, make_pro_subscriber
     ):
         subscriber = make_pro_subscriber()
-        google_creds = json.dumps({
-            'token': 'fake-token',
-            'refresh_token': 'fake-refresh',
-            'client_id': 'fake-client-id',
-            'client_secret': 'fake-secret',
-        })
+        google_creds = json.dumps(
+            {
+                'token': 'fake-token',
+                'refresh_token': 'fake-refresh',
+                'client_id': 'fake-client-id',
+                'client_secret': 'fake-secret',
+            }
+        )
         ext_conn = make_external_connections(
-            subscriber.id, type=models.ExternalConnectionType.google, token=google_creds,
+            subscriber.id,
+            type=models.ExternalConnectionType.google,
+            token=google_creds,
         )
         calendar = make_google_calendar(
-            subscriber_id=subscriber.id, connected=True, external_connection_id=ext_conn.id,
+            subscriber_id=subscriber.id,
+            connected=True,
+            external_connection_id=ext_conn.id,
         )
 
         with with_db() as db:
@@ -563,17 +609,23 @@ class TestTeardownWatchChannel:
         self, mock_stop_task, with_db, make_google_calendar, make_external_connections, make_pro_subscriber
     ):
         subscriber = make_pro_subscriber()
-        google_creds = json.dumps({
-            'token': 'fake-token',
-            'refresh_token': 'fake-refresh',
-            'client_id': 'fake-client-id',
-            'client_secret': 'fake-secret',
-        })
+        google_creds = json.dumps(
+            {
+                'token': 'fake-token',
+                'refresh_token': 'fake-refresh',
+                'client_id': 'fake-client-id',
+                'client_secret': 'fake-secret',
+            }
+        )
         ext_conn = make_external_connections(
-            subscriber.id, type=models.ExternalConnectionType.google, token=google_creds,
+            subscriber.id,
+            type=models.ExternalConnectionType.google,
+            token=google_creds,
         )
         calendar = make_google_calendar(
-            subscriber_id=subscriber.id, connected=True, external_connection_id=ext_conn.id,
+            subscriber_id=subscriber.id,
+            connected=True,
+            external_connection_id=ext_conn.id,
         )
 
         with with_db() as db:

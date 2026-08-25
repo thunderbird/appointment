@@ -172,9 +172,8 @@ def get_subscriber_without_oidc_by_email(db: Session, email: str):
 
 def get_zoom(db: Session) -> list[models.ExternalConnections] | None:
     """Return all external connections by Zoom type"""
-    query = (
-        db.query(models.ExternalConnections)
-        .filter(models.ExternalConnections.type == models.ExternalConnectionType.zoom)
+    query = db.query(models.ExternalConnections).filter(
+        models.ExternalConnections.type == models.ExternalConnectionType.zoom
     )
 
     result = query.all()
