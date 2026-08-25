@@ -1,11 +1,11 @@
-"""Tests for parse_rfc3339_utc timestamp parsing. 
+"""Tests for parse_iso8601_utc timestamp parsing. 
 Covers whole seconds, fractional seconds, offsets, and malformed input.
 """
 
 import pytest
 from datetime import datetime
 
-from appointment.controller.apis.google_client import parse_rfc3339_utc
+from appointment.utils import parse_iso8601_utc
 
 
 class TestFreeBusyTimestampParsing:
@@ -20,7 +20,7 @@ class TestFreeBusyTimestampParsing:
         ],
     )
     def test_well_formed_strings_round_trip_to_naive_utc(self, value, expected):
-        result = parse_rfc3339_utc(value)
+        result = parse_iso8601_utc(value)
         assert result.tzinfo is None
         assert result == expected
 
@@ -37,4 +37,4 @@ class TestFreeBusyTimestampParsing:
     )
     def test_malformed_input_raises(self, value):
         with pytest.raises((ValueError, TypeError)):
-            parse_rfc3339_utc(value)
+            parse_iso8601_utc(value)

@@ -1,7 +1,6 @@
 import logging
 import os
 import uuid
-from datetime import datetime, UTC
 from enum import StrEnum
 
 import sentry_sdk
@@ -9,11 +8,13 @@ from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
+from appointment.utils import parse_iso8601_utc
+
 from ... import utils
 from ...database import repo
 from ...database.models import CalendarProvider
 from ...database.schemas import CalendarConnection
-from ...defines import DATETIMEFMT, SEVEN_DAYS_IN_SECONDS
+from ...defines import SEVEN_DAYS_IN_SECONDS
 from ...exceptions.calendar import (
     EventNotCreatedException,
     EventNotDeletedException,
@@ -21,21 +22,6 @@ from ...exceptions.calendar import (
     FreeBusyTimeException
 )
 from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
-
-
-def parse_iso8601_utc(value: str) -> datetime:
-    """Parse an ISO-8601 timestamp (supporting RFC-3339, fractional seconds) into a naive UTC datetime.
-    Useful when calendar providers return ISO-8601 conform timestamps instead of plain datetime strings."""
-    try:
-        parsed = datetime.fromisoformat(value)
-    except (TypeError, ValueError):
-        # Fall back to string parsed time in the defined default format
-        parsed = datetime.strptime(value, DATETIMEFMT)
-
-    if parsed.tzinfo is not None:
-        parsed = parsed.astimezone(UTC).replace(tzinfo=None)
-
-    return parsed
 
 
 class SendUpdates(StrEnum):
@@ -208,8 +194,8 @@ class GoogleClient:
                         # Transform to datetimes to match caldav's behaviour
                         items += [
                             {
-                                'start': parse_rfc3339_utc(entry.get('start')),
-                                'end': parse_rfc3339_utc(entry.get('end')),
+                                'start': parse_iso8601_utc(entry.get('start')),
+                                'end': parse_iso8601_utc(entry.get('end')),
                             }
                             for entry in busy
                         ]
