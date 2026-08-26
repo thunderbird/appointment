@@ -55,7 +55,6 @@ export const APPT_BROWSER_STORE_LANGUAGE_EN = 'en';
 export const APPT_BROWSER_STORE_LANGUAGE_DE = 'de';
 export const APPT_BROWSER_STORE_THEME_LIGHT = 'light';
 export const APPT_BROWSER_STORE_THEME_DARK = 'dark';
-export const APPT_BROWSER_STORE_12HR_TIME = 12;
 export const APPT_BROWSER_STORE_START_WEEK_SUN = 7;
 export const APPT_BROWSER_STORE_START_WEEK_MON = 1;
 

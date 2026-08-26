@@ -5,7 +5,7 @@ import { dayjsKey } from '@/keys';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
-import { initialEventPopupData, showEventPopup } from '@/utils';
+import { initialEventPopupData, showEventPopup, timeFormat } from '@/utils';
 import { Appointment, EventPopup as EventPopupType, GridElement, GridTimeSlot, RemoteEvent, Slot } from '@/models';
 import { BookingStatus, ColourSchemes, DateFormatStrings } from '@/definitions';
 import { Dayjs } from 'dayjs';
@@ -45,6 +45,8 @@ const { selectedEvent } = storeToRefs(useBookingViewStore());
 const calendarContainerRef = ref<HTMLElement | null>(null);
 const calendarHeaderRef = ref<HTMLElement | null>(null);
 const popup = ref<EventPopupType>({ ...initialEventPopupData });
+
+const hourFormat = computed(() => timeFormat());
 
 // Scroll sync state
 let pendingScrollSync: number | null = null;
@@ -210,6 +212,9 @@ const timeSlotsForGrid = computed(() => {
   const endTime = dj('00:00', 'HH:mm').add(1, 'day');
   const slotDuration = 60;
 
+  // Hour label format based on the browser's locale (e.g. "9 AM" or "09")
+  const hourLabelFormat = hourFormat.value === 'HH:mm' ? 'HH:mm' : 'h A';
+
   let currentTime = startTime;
 
   // Start grid rows at 1
@@ -218,8 +223,8 @@ const timeSlotsForGrid = computed(() => {
   while (currentTime.isBefore(endTime)) {
     // Create the slot for the current time
     slots.push({
-      // The text to display (e.g., "9 AM" or empty for non-hour slots)
-      text: currentTime.minute() === 0 ? currentTime.format('h A') : '',
+      // The text to display (e.g., "9 AM"/"09" or empty for non-hour slots)
+      text: currentTime.minute() === 0 ? currentTime.format(hourLabelFormat) : '',
       // The start time in a consistent format, useful for keys
       startTime: currentTime.format('HH:mm'),
       // Grid properties

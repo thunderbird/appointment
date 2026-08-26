@@ -23,7 +23,6 @@ import { isOidcAuth, isPasswordAuth } from '@/composables/authSchemes';
 const initialUserConfigObject = {
   language: null,
   colourScheme: null,
-  timeFormat: null,
   timezone: null,
   startOfWeek: null,
 } as UserConfig;
@@ -61,11 +60,9 @@ export const useUserStore = defineStore('user', () => {
 
   // Init user config if not already available
   const dj = inject(dayjsKey);
-  const detectedTimeFormat = Number(dj('2022-05-24 20:00:00').format('LT').split(':')[0]) > 12 ? 24 : 12;
   const defaultSettings = {
     language: i18n.locale.value,
     colourScheme: ColourSchemes.System,
-    timeFormat: detectedTimeFormat,
     timezone: dj.tz.guess(),
     startOfWeek: 7,
   };
@@ -158,7 +155,6 @@ export const useUserStore = defineStore('user', () => {
       settings: {
         language: subscriber.language,
         colourScheme: subscriber.colour_scheme,
-        timeFormat: subscriber.time_mode,
         timezone: subscriber.timezone,
         startOfWeek: subscriber.start_of_week,
       },
