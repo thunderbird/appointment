@@ -1,4 +1,4 @@
-# **Thunderbird Pro Services Privacy Notice**
+# **Thundermail Services Privacy Notice**
 
 Last updated December 3, 2024
 
@@ -26,8 +26,8 @@ You can connect your Google, Microsoft, or Apple calendar to Thunderbird Appoint
 
 To use Appointment, you must connect one or more calendars:
 
-* To connect a Google Calendar, you must login to Google to authorize Appointment to access your calendar data. We then store an OAuth authentication token that we use to retrieve data from your calendars.  
-* To connect a calendar on a CalDAV server, you must provide the server URL and your username and password for that server. We store these credentials in an encrypted database and use them to retrieve calendar data on your behalf.
+- To connect a Google Calendar, you must login to Google to authorize Appointment to access your calendar data. We then store an OAuth authentication token that we use to retrieve data from your calendars.
+- To connect a calendar on a CalDAV server, you must provide the server URL and your username and password for that server. We store these credentials in an encrypted database and use them to retrieve calendar data on your behalf.
 
 If you connect a calendar to Appointment, we will receive basic information about your calendar invites such as the title, date, stated location, the name and emails of the attendees, and any text in the appointment. We use your calendar data to display your scheduled appointments to you, and to display your “free/busy” times (without any appointment details) to others to allow them to book appointments with you.
 
@@ -47,13 +47,12 @@ We use third-party metrics and analytics services to enable us to make better de
 
 ## **Use of OAuth Information**
 
-OAuth is a secure authorization protocol that allows third-party applications to access resources without sharing login credentials. Thunderbird uses OAuth to connect with certain email or calendar providers that mandate or prefer its use, such as Google, Yahoo, and Microsoft. 
+OAuth is a secure authorization protocol that allows third-party applications to access resources without sharing login credentials. Thunderbird uses OAuth to connect with certain email or calendar providers that mandate or prefer its use, such as Google, Yahoo, and Microsoft.
 
-When using OAuth to authorize access to your email or calendars, all data is strictly exchanged over an encrypted connection between your browser and the OAuth service. Thunderbird does not collect, access, or store any sensitive information exchanged during this process. When authentication is complete, we receive an OAuth token, which we store in an encrypted database so that we can access the account on your behalf. 
+When using OAuth to authorize access to your email or calendars, all data is strictly exchanged over an encrypted connection between your browser and the OAuth service. Thunderbird does not collect, access, or store any sensitive information exchanged during this process. When authentication is complete, we receive an OAuth token, which we store in an encrypted database so that we can access the account on your behalf.
 
 ## **Thunderbird May Disclose Information To:**
 
 In addition to the reasons stated in the [Mozilla Privacy Policy](https://www.mozilla.org/privacy/), we may share your personal information with the following:
 
 **Mozilla Affiliates**: Thunderbird is a project of MZLA Technologies Corporation, a subsidiary of Mozilla Foundation and an affiliate of Mozilla Corporation, and as such, shares some of the same infrastructure. This means that, from time to time, your data (e.g., crash reports, and technical and interaction data) may be disclosed to Mozilla Corporation and Mozilla Foundation. If so, it will be maintained in accordance with the commitments we make in this Privacy Notice.
-
