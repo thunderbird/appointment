@@ -785,7 +785,12 @@ class TestVEventTimezoneFallback:
         appointment = self._make_appointment(location_url='https://fallback.example.com')
 
         tools.send_invitation_vevent(
-            bg, appointment, slot, self._make_organizer(), self._make_attendee(), schedule_name='Test Schedule',
+            bg,
+            appointment,
+            slot,
+            self._make_organizer(),
+            self._make_attendee(),
+            schedule_name='Test Schedule',
         )
 
         call_kwargs = bg.add_task.call_args
@@ -800,7 +805,12 @@ class TestVEventTimezoneFallback:
         appointment = self._make_appointment(location_url='https://fallback.example.com')
 
         tools.send_invitation_vevent(
-            bg, appointment, slot, self._make_organizer(), self._make_attendee(), schedule_name='Test Schedule',
+            bg,
+            appointment,
+            slot,
+            self._make_organizer(),
+            self._make_attendee(),
+            schedule_name='Test Schedule',
         )
 
         call_kwargs = bg.add_task.call_args
@@ -815,7 +825,12 @@ class TestVEventTimezoneFallback:
         appointment = self._make_appointment(location_url=None)
 
         tools.send_invitation_vevent(
-            bg, appointment, slot, self._make_organizer(), self._make_attendee(), schedule_name='Test Schedule',
+            bg,
+            appointment,
+            slot,
+            self._make_organizer(),
+            self._make_attendee(),
+            schedule_name='Test Schedule',
         )
 
         call_kwargs = bg.add_task.call_args
