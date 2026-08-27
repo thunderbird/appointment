@@ -1,7 +1,7 @@
 {% extends "includes/base.jinja2" %}
 {# Helper vars #}
-{% set clock_icon_img = '<img style="display: inline-block; width: 12px; height: 12px; margin-right: 3px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
-{% set success_icon_img = '<img style="display: inline-block; width: 12px; height: 12px; margin-right: 4px;" alt="" src="cid:%(cid)s" />'|format(cid=check_icon_cid) %}
+{% set clock_icon_img = '<img style="display: block; width: 12px; height: 12px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
+{% set success_icon_img = '<img style="display: inline-block; width: 16px; height: 16px; vertical-align: middle;" alt="" src="cid:%(cid)s" />'|format(cid=check_icon_cid) %}
 {# Code begins! #}
 {% block introduction %}
   <div style="color: {{ colour_text_base }}; font-size: 20px; font-weight: 600; margin-bottom: 16px;">
@@ -13,8 +13,7 @@
 {% endblock %}
 {% block information %}
   <div style="
-    display: inline-flex;
-    align-items: center;
+    display: inline-block;
     border: 1px solid {{ colour_ti_success }};
     border-radius: 999px;
     padding: 0 12px 0 4px;
@@ -26,7 +25,10 @@
     font-weight: 600;
     text-transform: uppercase;
   ">
-    {{ success_icon_img|safe }} {{ l10n('invite-mail-html-badge', lang=lang) }}
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="display: inline-table; vertical-align: middle;"><tr>
+      <td style="vertical-align: middle;">{{ success_icon_img|safe }}</td>
+      <td class="apmt-badge-text" style="vertical-align: middle; padding-left: 4px; white-space: nowrap; font-size: 11px; line-height: 12px; font-weight: 600; text-transform: uppercase; color: {{ colour_icon_secondary }};">{{ l10n('invite-mail-html-badge', lang=lang) }}</td>
+    </tr></table>
   </div>
   <div style="font-size: 20px; font-weight: 600; color: {{ colour_icon_secondary }}; margin-bottom: 4px;">
     {{ schedule_name }}
@@ -34,8 +36,11 @@
   <div style="margin-bottom: 4px;">
     {{ day }} {{ start_time }} {{ timezone }}
   </div>
-  <div style="color: {{ colour_icon_secondary }}; display: flex; align-items: center; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 16px;">
-    {{ clock_icon_img|safe }} {{ l10n('mail-html-time', {'duration': duration}, lang) }}
+  <div style="color: {{ colour_icon_secondary }}; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 16px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="display: inline-table; vertical-align: middle;"><tr>
+      <td style="vertical-align: middle;">{{ clock_icon_img|safe }}</td>
+      <td style="vertical-align: middle; padding-left: 3px; white-space: nowrap; font-size: 10px; line-height: 12px; font-weight: 700; text-transform: uppercase; color: {{ colour_icon_secondary }};">{{ l10n('mail-html-time', {'duration': duration}, lang) }}</td>
+    </tr></table>
   </div>
   <hr style="border: none; border-top: 1px solid {{ colour_border }}; margin: 0 0 16px 0;" />
   {% if meeting_link_url %}

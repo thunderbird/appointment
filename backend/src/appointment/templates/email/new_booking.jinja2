@@ -1,6 +1,6 @@
 {% extends "includes/base.jinja2" %}
 {# Helper vars #}
-{% set clock_icon_img = '<img style="display: inline-block; width: 11px; height: 11px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
+{% set clock_icon_img = '<img style="display: inline-block; width: 12px; height: 12px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
 {% set clock_img = '<img style="display: inline-block; width: 15px; height: 15px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
 {% set calendar_img = '<img style="display: inline-block; width: 14px; height: 14px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=calendar_icon_cid) %}
 {# Code begins! #}
@@ -42,7 +42,7 @@
       font-weight: 700;
       height: 16px;
       ">
-      {{ clock_icon_img|safe }} {{ l10n('new-booking-html-time', {'duration': duration}, lang=lang) }}
+      {{ clock_icon_img|safe }} <span style="margin-left: 3px;">{{ l10n('new-booking-html-time', {'duration': duration}, lang=lang) }}</span>
     </div>
   </div>
 {% endblock %}
