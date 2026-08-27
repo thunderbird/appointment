@@ -1,7 +1,6 @@
 import logging
 import os
 import uuid
-from datetime import datetime
 from enum import StrEnum
 
 import sentry_sdk
@@ -13,7 +12,7 @@ from ... import utils
 from ...database import repo
 from ...database.models import CalendarProvider
 from ...database.schemas import CalendarConnection
-from ...defines import DATETIMEFMT, SEVEN_DAYS_IN_SECONDS
+from ...defines import SEVEN_DAYS_IN_SECONDS
 from ...exceptions.calendar import (
     EventNotCreatedException,
     EventNotDeletedException,
@@ -197,8 +196,8 @@ class GoogleClient:
                         # Transform to datetimes to match caldav's behaviour
                         items += [
                             {
-                                'start': datetime.strptime(entry.get('start'), DATETIMEFMT),
-                                'end': datetime.strptime(entry.get('end'), DATETIMEFMT),
+                                'start': utils.parse_iso8601_utc(entry.get('start')),
+                                'end': utils.parse_iso8601_utc(entry.get('end')),
                             }
                             for entry in busy
                         ]

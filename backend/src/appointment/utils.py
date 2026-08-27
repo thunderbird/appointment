@@ -3,7 +3,7 @@ import logging
 import os
 import urllib.parse
 from urllib import parse
-from datetime import time, datetime, timedelta
+from datetime import UTC, time, datetime, timedelta
 
 from functools import cache
 
@@ -13,6 +13,7 @@ from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 
 from appointment.database import repo
 from appointment.database.models import secret
+from appointment.defines import DATETIMEFMT
 from appointment.exceptions.misc import UnexpectedBehaviourWarning
 
 ph = PasswordHasher()
@@ -215,3 +216,18 @@ def get_expiry_time_with_grace_period(expiry: int):
     grace_period = max(int(os.getenv('OIDC_EXP_GRACE_PERIOD', 0)), 120)
     expiry += grace_period
     return expiry
+
+
+def parse_iso8601_utc(value: str) -> datetime:
+    """Parse an ISO-8601 timestamp (supporting RFC-3339, fractional seconds) into a naive UTC datetime.
+    Useful when calendar providers return ISO-8601 conform timestamps instead of plain datetime strings."""
+    try:
+        parsed = datetime.fromisoformat(value)
+    except (TypeError, ValueError):
+        # Fall back to string parsed time in the defined default format
+        parsed = datetime.strptime(value, DATETIMEFMT)
+
+    if parsed.tzinfo is not None:
+        parsed = parsed.astimezone(UTC).replace(tzinfo=None)
+
+    return parsed
