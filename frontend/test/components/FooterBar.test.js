@@ -49,7 +49,7 @@ describe('FooterBar', () => {
     // verify we show the external Thunderbird Pro link and no support link
     const proLink = wrapper.find(`a[href="${import.meta.env.VITE_TB_PRO_URL}"]`);
     expect(proLink.exists()).toBe(true);
-    expect(proLink.text()).toBe(i18ninstance.global.t('label.exploreThunderbirdPro'));
+    expect(proLink.text()).toBe(i18ninstance.global.t('label.exploreThundermail'));
     expect(wrapper.find('.contact-support-link').exists()).toBe(false);
   });
 
