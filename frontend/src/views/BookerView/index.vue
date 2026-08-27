@@ -65,7 +65,7 @@ const handleError = (data: Exception) => {
 
   const errorDetail = data?.detail as ExceptionDetail;
 
-  if (errorDetail?.id === 'SCHEDULE_NOT_ACTIVE') {
+  if (errorDetail?.id === 'INVALID_LINK' || errorDetail?.id === 'SCHEDULE_NOT_ACTIVE') {
     errorHeading.value = '';
     errorBody.value = errorDetail.message;
   } else if (errorDetail?.id === 'RATE_LIMIT_EXCEEDED') {

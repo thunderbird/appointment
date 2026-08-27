@@ -3,7 +3,7 @@ import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { dayjsKey } from '@/keys';
 import { ColourSchemes } from '@/definitions';
-import { BubbleSelect, SegmentedControl, SelectInput } from '@thunderbirdops/services-ui';
+import { BubbleSelect, SelectInput } from '@thunderbirdops/services-ui';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useUserStore } from '@/stores/user-store';
 import { storeToRefs } from 'pinia';
@@ -57,25 +57,6 @@ const defaultTimeZone = computed({
   get: () => currentState.value.defaultTimeZone,
   set: (value) => {
     settingsStore.$patch({ currentState: { defaultTimeZone: value } });
-  },
-});
-
-// Time Format
-const timeFormatOptions = computed(() => [
-  {
-    label: t('label.12hAmPm'),
-    value: 12,
-  },
-  {
-    label: t('label.24h'),
-    value: 24,
-  },
-]);
-
-const timeFormat = computed({
-  get: () => currentState.value.timeFormat,
-  set: (value) => {
-    settingsStore.$patch({ currentState: { timeFormat: value } });
   },
 });
 
@@ -152,10 +133,6 @@ export default {
       {{ t('label.defaultTimeZone') }}
     </select-input>
 
-    <segmented-control name="time-format" v-model="timeFormat" :options="timeFormatOptions">
-      {{ t('label.timeFormat') }}
-    </segmented-control>
-
     <bubble-select
       name="start-of-week"
       class="start-of-week-bubble-select"
@@ -192,9 +169,5 @@ h2 {
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 0.5rem;
-}
-
-:deep(.segment-list) {
-  flex-wrap: wrap;
 }
 </style>

@@ -62,7 +62,7 @@ class TestAppointment:
         # Create mock events with various missing properties
         class MockEvent:
             """A fake caldav event, as returned by calendar.search(), whose icalendar_component
-               is a real icalendar.Event so it can go through recurring_ical_events expansion.
+            is a real icalendar.Event so it can go through recurring_ical_events expansion.
             """
 
             def __init__(self, has_dtstart=True, has_summary=True, has_dtend=True, has_duration=False):

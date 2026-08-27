@@ -10,6 +10,7 @@ DATEFMT = '%Y-%m-%d'
 DATETIMEFMT = '%Y-%m-%dT%H:%M:%SZ'
 
 # list of redis keys
+REDIS_CACHE_BUST_BATCH_SIZE = 500
 REDIS_REMOTE_EVENTS_KEY = 'rmt_events'
 REDIS_USER_SESSION_PROFILE_KEY = ':1:tb_accounts_user_session'  # Used with shared redis cache
 REDIS_OIDC_TOKEN_KEY = 'introspect_token'
@@ -31,11 +32,19 @@ DEFAULT_CALENDAR_COLOUR = '#c276c5'
 # List of Google CalDAV domains
 GOOGLE_CALDAV_DOMAINS = ['googleusercontent.com', 'google.com', 'gmail.com']
 
+# Code Accounts returns when a subscriber's Thundermail mailbox hasn't finished provisioning yet
+# (see thunderbird-accounts mail/views.py `appointment_caldav_setup`). It's a transient race, not
+# a permanent failure, so Appointment retries a few times with backoff before giving up.
+ACCOUNTS_MAIL_NOT_READY_CODE = 'mail_account_not_ready'
+ACCOUNTS_CALDAV_SETUP_MAX_ATTEMPTS = 3
+ACCOUNTS_CALDAV_SETUP_RETRY_DELAY_SECONDS = 2
+
 # Resolves to absolute appointment package path
 BASE_PATH = f'{sys.modules["appointment"].__path__[0]}'
 
 ONE_DAY_IN_SECONDS = 86400
 SEVEN_DAYS_IN_SECONDS = 604800
+
 
 # This has to be lazy loaded because the env vars are not available at import time in main.py
 @cache

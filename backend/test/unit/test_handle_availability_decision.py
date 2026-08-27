@@ -33,8 +33,13 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
         return subscriber
 
     def _setup(
-        self, with_db, make_google_calendar, make_appointment,
-        make_attendee, make_appointment_slot, has_external_id=True,
+        self,
+        with_db,
+        make_google_calendar,
+        make_appointment,
+        make_attendee,
+        make_appointment_slot,
+        has_external_id=True,
     ):
         calendar = make_google_calendar(connected=True)
         attendee = make_attendee(email='bookee@example.com', name='Bookee')
@@ -59,13 +64,22 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
     @patch('appointment.routes.schedule.get_remote_connection')
     @patch.dict('os.environ', {'GOOGLE_INVITE_ENABLED': 'True'})
     def test_confirm_patches_existing_hold_event(
-        self, mock_get_remote_connection,
-        with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,
+        self,
+        mock_get_remote_connection,
+        with_db,
+        make_google_calendar,
+        make_appointment,
+        make_attendee,
+        make_appointment_slot,
     ):
         """When a hold event exists (has external_id), confirm_event should be called."""
         calendar, appointment = self._setup(
-            with_db, make_google_calendar, make_appointment,
-            make_attendee, make_appointment_slot, has_external_id=True,
+            with_db,
+            make_google_calendar,
+            make_appointment,
+            make_attendee,
+            make_appointment_slot,
+            has_external_id=True,
         )
 
         mock_connector = MagicMock()
@@ -83,8 +97,15 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
             db.add(slot.attendee)
 
             handle_schedule_availability_decision(
-                True, google_calendar, schedule, subscriber, slot,
-                db, None, None, background_tasks,
+                True,
+                google_calendar,
+                schedule,
+                subscriber,
+                slot,
+                db,
+                None,
+                None,
+                background_tasks,
             )
 
             db.refresh(slot)
@@ -101,14 +122,23 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
     @patch('appointment.routes.schedule.save_remote_event')
     @patch.dict('os.environ', {'GOOGLE_INVITE_ENABLED': 'True'})
     def test_confirm_creates_event_when_no_hold_exists(
-        self, mock_save_remote_event,
-        with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,
+        self,
+        mock_save_remote_event,
+        with_db,
+        make_google_calendar,
+        make_appointment,
+        make_attendee,
+        make_appointment_slot,
     ):
         """When no hold event exists (no external_id), save_remote_event should be called
         with send_google_notification=True and booking_confirmation=False."""
         calendar, appointment = self._setup(
-            with_db, make_google_calendar, make_appointment,
-            make_attendee, make_appointment_slot, has_external_id=False,
+            with_db,
+            make_google_calendar,
+            make_appointment,
+            make_attendee,
+            make_appointment_slot,
+            has_external_id=False,
         )
 
         mock_event = schemas.Event(
@@ -133,8 +163,15 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
             db.add(slot.attendee)
 
             handle_schedule_availability_decision(
-                True, google_calendar, schedule, subscriber, slot,
-                db, None, None, background_tasks,
+                True,
+                google_calendar,
+                schedule,
+                subscriber,
+                slot,
+                db,
+                None,
+                None,
+                background_tasks,
             )
 
             db.refresh(slot)
@@ -152,14 +189,23 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
     @patch('appointment.routes.schedule.save_remote_event')
     @patch.dict('os.environ', {'GOOGLE_INVITE_ENABLED': 'True'})
     def test_confirm_creates_event_does_not_send_branded_vevent(
-        self, mock_save_remote_event,
-        with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,
+        self,
+        mock_save_remote_event,
+        with_db,
+        make_google_calendar,
+        make_appointment,
+        make_attendee,
+        make_appointment_slot,
     ):
         """For Google invites, the branded vevent email should NOT be sent
         (Google handles notifications via sendUpdates)."""
         calendar, appointment = self._setup(
-            with_db, make_google_calendar, make_appointment,
-            make_attendee, make_appointment_slot, has_external_id=False,
+            with_db,
+            make_google_calendar,
+            make_appointment,
+            make_attendee,
+            make_appointment_slot,
+            has_external_id=False,
         )
 
         mock_event = schemas.Event(
@@ -183,8 +229,15 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
             db.add(slot.attendee)
 
             handle_schedule_availability_decision(
-                True, google_calendar, schedule, subscriber, slot,
-                db, None, None, background_tasks,
+                True,
+                google_calendar,
+                schedule,
+                subscriber,
+                slot,
+                db,
+                None,
+                None,
+                background_tasks,
             )
 
         for call in background_tasks.add_task.call_args_list:
@@ -194,14 +247,23 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
     @patch('appointment.routes.schedule.save_remote_event')
     @patch.dict('os.environ', {'GOOGLE_INVITE_ENABLED': 'False'})
     def test_flag_disabled_uses_non_google_path(
-        self, mock_save_remote_event,
-        with_db, make_google_calendar, make_appointment, make_attendee, make_appointment_slot,
+        self,
+        mock_save_remote_event,
+        with_db,
+        make_google_calendar,
+        make_appointment,
+        make_attendee,
+        make_appointment_slot,
     ):
         """When GOOGLE_INVITE_ENABLED is False, a Google calendar should fall back
         to the import/branded-email path (send_google_notification defaults to False)."""
         calendar, appointment = self._setup(
-            with_db, make_google_calendar, make_appointment,
-            make_attendee, make_appointment_slot, has_external_id=False,
+            with_db,
+            make_google_calendar,
+            make_appointment,
+            make_attendee,
+            make_appointment_slot,
+            has_external_id=False,
         )
 
         mock_event = schemas.Event(
@@ -226,8 +288,15 @@ class TestHandleScheduleAvailabilityDecisionGoogle:
             db.add(slot.attendee)
 
             handle_schedule_availability_decision(
-                True, google_calendar, schedule, subscriber, slot,
-                db, None, None, background_tasks,
+                True,
+                google_calendar,
+                schedule,
+                subscriber,
+                slot,
+                db,
+                None,
+                None,
+                background_tasks,
             )
 
             db.refresh(slot)

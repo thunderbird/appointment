@@ -18,7 +18,7 @@ from ...exceptions.calendar import (
     EventNotCreatedException,
     EventNotDeletedException,
     EventNotPatchedException,
-    FreeBusyTimeException
+    FreeBusyTimeException,
 )
 from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredentials
 
@@ -26,6 +26,7 @@ from ...exceptions.google_api import GoogleScopeChanged, GoogleInvalidCredential
 class SendUpdates(StrEnum):
     """Maps to the Google Calendar API ``sendUpdates`` parameter.
     Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events/delete"""
+
     ALL = 'all'
     EXTERNAL_ONLY = 'externalOnly'
     NONE = 'none'
@@ -34,6 +35,7 @@ class SendUpdates(StrEnum):
 class EventStatus(StrEnum):
     """Maps to the Google Calendar API event ``status`` field.
     Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events#status"""
+
     CONFIRMED = 'confirmed'
     TENTATIVE = 'tentative'
     CANCELLED = 'cancelled'
@@ -42,6 +44,7 @@ class EventStatus(StrEnum):
 class ResponseStatus(StrEnum):
     """Maps to the Google Calendar API attendee ``responseStatus`` field.
     Ref: https://developers.google.com/workspace/calendar/api/v3/reference/events"""
+
     NEEDS_ACTION = 'needsAction'
     DECLINED = 'declined'
     TENTATIVE = 'tentative'
@@ -75,7 +78,8 @@ class GoogleClient:
     def _create_flow(self, *, autogenerate_code_verifier: bool = False) -> Flow:
         """Create a fresh Flow instance for an OAuth exchange."""
         return Flow.from_client_config(
-            self.config, self.SCOPES,
+            self.config,
+            self.SCOPES,
             redirect_uri=self.callback_url,
             autogenerate_code_verifier=autogenerate_code_verifier,
         )
@@ -298,9 +302,7 @@ class GoogleClient:
     def insert_event(self, calendar_id, body, token, send_updates: SendUpdates = SendUpdates.ALL):
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
-                return service.events().insert(
-                    calendarId=calendar_id, body=body, sendUpdates=send_updates
-                ).execute()
+                return service.events().insert(calendarId=calendar_id, body=body, sendUpdates=send_updates).execute()
             except HttpError as e:
                 logging.warning(f'[google_client.insert_event] Request Error: {e.status_code}/{e.error_details}')
                 raise EventNotCreatedException()
@@ -340,17 +342,19 @@ class GoogleClient:
             'type': 'web_hook',
             'address': webhook_url,
             'token': state,
-            'params': {
-                'ttl': ttl
-            },
+            'params': {'ttl': ttl},
         }
 
         with build('calendar', 'v3', credentials=token, cache_discovery=False) as service:
             try:
-                response = service.events().watch(
-                    calendarId=calendar_id,
-                    body=body,
-                ).execute()
+                response = (
+                    service.events()
+                    .watch(
+                        calendarId=calendar_id,
+                        body=body,
+                    )
+                    .execute()
+                )
             except HttpError as e:
                 logging.error(f'[google_client.watch_events] Request Error: {e.status_code}/{e.error_details}')
                 return None

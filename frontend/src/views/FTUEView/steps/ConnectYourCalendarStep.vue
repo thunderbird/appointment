@@ -33,7 +33,10 @@ const onContinueButtonClick = async () => {
         const { data, error } = await calendarStore.connectOIDCCalendar();
 
         if (data.value?.detail?.message) {
-          ftueStore.errorMessage = { title: data.value?.detail?.message };
+          ftueStore.errorMessage = {
+            title: data.value?.detail?.message,
+            details: data.value?.detail?.reason,
+          };
           return;
         }
 
@@ -66,6 +69,12 @@ const onContinueButtonClick = async () => {
 <template>
   <notice-bar :type="NoticeBarTypes.Critical" v-if="errorMessage" class="notice-bar">
     {{ errorMessage.title }}
+
+    <template v-if="errorMessage.details">
+      <br />
+      <br />
+    </template>
+    {{ errorMessage.details }}
   </notice-bar>
 
   <step-title :title="t('ftue.connectYourCalendar')" />

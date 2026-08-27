@@ -6,7 +6,7 @@ Create Date: 2025-02-11 12:54:51.256163
 
 """
 from alembic import op
-from appointment.database.models import TimeMode
+import enum
 
 
 # revision identifiers, used by Alembic.
@@ -14,6 +14,11 @@ revision = '330fdd8cd0f8'
 down_revision = '16c0299eff23'
 branch_labels = None
 depends_on = None
+
+
+class TimeMode(enum.Enum):
+    h12 = 12
+    h24 = 24
 
 
 def upgrade() -> None:

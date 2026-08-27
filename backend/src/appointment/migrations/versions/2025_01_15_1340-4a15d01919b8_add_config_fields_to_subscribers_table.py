@@ -5,10 +5,11 @@ Revises: 0c99f6a02f3b
 Create Date: 2025-01-15 13:40:12.022117
 
 """
+import enum
 import os
 from alembic import op
 import sqlalchemy as sa
-from appointment.database.models import ColourScheme, TimeMode
+from appointment.database.models import ColourScheme
 
 
 def secret():
@@ -20,6 +21,11 @@ revision = '4a15d01919b8'
 down_revision = '0c99f6a02f3b'
 branch_labels = None
 depends_on = None
+
+
+class TimeMode(enum.Enum):
+    h12 = 12
+    h24 = 24
 
 
 def upgrade() -> None:

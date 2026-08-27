@@ -3,13 +3,17 @@ from datetime import date, datetime, timedelta
 from unittest.mock import MagicMock
 from zoneinfo import ZoneInfo
 
+import caldav.lib.error
 import icalendar
+import lxml.etree
 import pytest
 
 from appointment.database.models import CalendarProvider
 from appointment.controller.calendar import CalDavConnector, GoogleConnector
 from appointment.database import schemas, models, repo
 from appointment.defines import GOOGLE_CALDAV_DOMAINS
+from appointment.exceptions.calendar import TestConnectionFailed as CaldavTestConnectionFailed
+from appointment.exceptions.calendar import RemoteCalendarAuthenticationError
 
 from sqlalchemy import select
 
@@ -652,6 +656,81 @@ class TestCaldavListEvents:
         events = connector.list_events('2024-01-01', '2024-01-02')
 
         connector.put_cached_events.assert_called_once_with('2024-01-01_2024-01-02', events)
+
+
+class TestCaldavListEventsErrors:
+    """Tests for CalDavConnector.list_events() converting caldav/lxml errors into typed exceptions."""
+
+    def make_connector(self, search_side_effect):
+        connector = CalDavConnector(
+            db=None,
+            subscriber_id=1,
+            calendar_id=1,
+            redis_instance=None,
+            url='https://test.com/caldav',
+            user='test',
+            password='test',
+        )
+        calendar_mock = MagicMock()
+        calendar_mock.search.side_effect = search_side_effect
+        connector.client = MagicMock()
+        connector.client.calendar = MagicMock(return_value=calendar_mock)
+        connector.get_cached_events = MagicMock(return_value=None)
+        return connector
+
+    def test_list_events_xml_syntax_error_raises_test_connection_failed(self):
+        def raise_xml_syntax_error(*args, **kwargs):
+            # Trigger a real lxml.etree.XMLSyntaxError, as raised when the caldav
+            # library tries to parse a non-XML (e.g. JSON auth error) response body.
+            lxml.etree.fromstring(b'not xml')
+
+        connector = self.make_connector(raise_xml_syntax_error)
+
+        with pytest.raises(CaldavTestConnectionFailed):
+            connector.list_events('2024-01-01', '2024-01-02')
+
+    def test_list_events_authorization_error_raises_remote_calendar_authentication_error(self):
+        connector = self.make_connector(caldav.lib.error.AuthorizationError(reason='Unauthorized'))
+
+        with pytest.raises(RemoteCalendarAuthenticationError):
+            connector.list_events('2024-01-01', '2024-01-02')
+
+
+class TestCaldavGetBusyTime:
+    """Tests for CalDavConnector.get_busy_time() converting caldav/lxml errors into typed exceptions."""
+
+    def make_connector(self, freebusy_side_effect):
+        connector = CalDavConnector(
+            db=None,
+            subscriber_id=1,
+            calendar_id=1,
+            redis_instance=None,
+            url='https://test.com/caldav',
+            user='test',
+            password='test',
+        )
+        calendar_mock = MagicMock()
+        calendar_mock.freebusy_request.side_effect = freebusy_side_effect
+        connector.client = MagicMock()
+        connector.client.calendar = MagicMock(return_value=calendar_mock)
+        return connector
+
+    def test_get_busy_time_xml_syntax_error_raises_test_connection_failed(self):
+        def raise_xml_syntax_error(*args, **kwargs):
+            # Trigger a real lxml.etree.XMLSyntaxError, as raised when the caldav
+            # library tries to parse a non-XML (e.g. JSON auth error) response body.
+            lxml.etree.fromstring(b'not xml')
+
+        connector = self.make_connector(raise_xml_syntax_error)
+
+        with pytest.raises(CaldavTestConnectionFailed):
+            connector.get_busy_time(['https://test.com/caldav'], '2024-01-01', '2024-01-02')
+
+    def test_get_busy_time_authorization_error_raises_remote_calendar_authentication_error(self):
+        connector = self.make_connector(caldav.lib.error.AuthorizationError(reason='Unauthorized'))
+
+        with pytest.raises(RemoteCalendarAuthenticationError):
+            connector.get_busy_time(['https://test.com/caldav'], '2024-01-01', '2024-01-02')
 
 
 class TestCaldavListEventsMidnightSpanWorkaround:

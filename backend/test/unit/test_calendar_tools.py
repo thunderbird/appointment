@@ -1,5 +1,6 @@
-from appointment.controller.calendar import Tools, GoogleConnector
+from appointment.controller.calendar import Tools, GoogleConnector, CalDavConnector
 from appointment.database import schemas, models
+from appointment.exceptions.calendar import RemoteCalendarAuthenticationError
 from datetime import datetime, timedelta, time, date, timezone
 from unittest.mock import Mock, MagicMock, PropertyMock
 from starlette_context import request_cycle_context
@@ -180,6 +181,43 @@ class TestTools:
             now + timedelta(minutes=60),  # requested slot
             now + timedelta(minutes=90),  # booked slot
         ]
+
+    def test_existing_events_for_schedule_skips_caldav_calendar_on_auth_failure(
+        self, monkeypatch, with_db, make_pro_subscriber, make_caldav_calendar, make_schedule
+    ):
+        """One CalDAV calendar with bad/expired credentials shouldn't prevent availability
+        from being computed for the subscriber's other calendars."""
+        subscriber = make_pro_subscriber()
+        bad_calendar = make_caldav_calendar(
+            subscriber_id=subscriber.id, connected=True, url='https://bad.example.com/caldav'
+        )
+        good_calendar = make_caldav_calendar(
+            subscriber_id=subscriber.id, connected=True, url='https://good.example.com/caldav'
+        )
+        schedule = make_schedule(calendar_id=good_calendar.id)
+
+        with with_db() as db:
+            db.add(schedule)
+            db.refresh(schedule)
+
+            def mock_get_busy_time(self, calendar_ids, start, end):
+                if self.url == bad_calendar.url:
+                    raise RemoteCalendarAuthenticationError(reason='Unauthorized')
+                return [{'start': datetime.now(), 'end': datetime.now() + timedelta(hours=1)}]
+
+            monkeypatch.setattr(CalDavConnector, 'get_busy_time', mock_get_busy_time)
+
+            events = Tools.existing_events_for_schedule(
+                schedule=schedule,
+                calendars=[bad_calendar, good_calendar],
+                subscriber=subscriber,
+                google_client=Mock(),
+                db=db,
+                redis=None,
+            )
+
+        # Only the healthy calendar's busy time should come through
+        assert len(events) == 1
 
 
 class TestVCreate:
@@ -662,12 +700,15 @@ class TestVEventTimezoneFallback:
     def _make_attendee(self, tz='America/New_York'):
         return schemas.AttendeeBase(email='attendee@example.com', name='Attendee', timezone=tz)
 
-    @pytest.mark.parametrize('method_name,email_func_path', [
-        ('send_invitation_vevent', 'appointment.controller.mailer.send_invite_email'),
-        ('send_hold_vevent', 'appointment.controller.mailer.send_pending_email'),
-        ('send_reject_vevent', 'appointment.controller.mailer.send_rejection_email'),
-        ('send_cancel_vevent', 'appointment.controller.mailer.send_cancel_email'),
-    ])
+    @pytest.mark.parametrize(
+        'method_name,email_func_path',
+        [
+            ('send_invitation_vevent', 'appointment.controller.mailer.send_invite_email'),
+            ('send_hold_vevent', 'appointment.controller.mailer.send_pending_email'),
+            ('send_reject_vevent', 'appointment.controller.mailer.send_rejection_email'),
+            ('send_cancel_vevent', 'appointment.controller.mailer.send_cancel_email'),
+        ],
+    )
     def test_valid_timezone_is_applied(self, method_name, email_func_path):
         tools = self._make_tools()
         tools.create_vevent = Mock(return_value=b'VCALENDAR')
@@ -684,12 +725,15 @@ class TestVEventTimezoneFallback:
         expected = slot.start.replace(tzinfo=timezone.utc).astimezone(zoneinfo.ZoneInfo('America/New_York'))
         assert date_arg == expected
 
-    @pytest.mark.parametrize('method_name,email_func_path', [
-        ('send_invitation_vevent', 'appointment.controller.mailer.send_invite_email'),
-        ('send_hold_vevent', 'appointment.controller.mailer.send_pending_email'),
-        ('send_reject_vevent', 'appointment.controller.mailer.send_rejection_email'),
-        ('send_cancel_vevent', 'appointment.controller.mailer.send_cancel_email'),
-    ])
+    @pytest.mark.parametrize(
+        'method_name,email_func_path',
+        [
+            ('send_invitation_vevent', 'appointment.controller.mailer.send_invite_email'),
+            ('send_hold_vevent', 'appointment.controller.mailer.send_pending_email'),
+            ('send_reject_vevent', 'appointment.controller.mailer.send_rejection_email'),
+            ('send_cancel_vevent', 'appointment.controller.mailer.send_cancel_email'),
+        ],
+    )
     @pytest.mark.parametrize('bad_tz', ['Invalid/Timezone', 'Not_A_Zone', ''])
     def test_invalid_timezone_falls_back_to_utc(self, method_name, email_func_path, bad_tz):
         tools = self._make_tools()
@@ -708,12 +752,15 @@ class TestVEventTimezoneFallback:
         assert date_arg == expected
         assert date_arg.tzinfo == timezone.utc
 
-    @pytest.mark.parametrize('method_name', [
-        'send_invitation_vevent',
-        'send_hold_vevent',
-        'send_reject_vevent',
-        'send_cancel_vevent',
-    ])
+    @pytest.mark.parametrize(
+        'method_name',
+        [
+            'send_invitation_vevent',
+            'send_hold_vevent',
+            'send_reject_vevent',
+            'send_cancel_vevent',
+        ],
+    )
     def test_none_timezone_defaults_to_utc(self, method_name):
         tools = self._make_tools()
         tools.create_vevent = Mock(return_value=b'VCALENDAR')

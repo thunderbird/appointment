@@ -56,7 +56,6 @@ const restHandlers = [
       level: 1,
       timezone: 'America/Vancouver',
       language: 'de',
-      time_mode: 12,
       colour_scheme: 'dark',
       start_of_week: 7,
       avatar_url: null,
@@ -174,7 +173,6 @@ describe('User Store', () => {
     expect(user.data.level).toBeTruthy();
     expect(user.data.settings.timezone).toBeTruthy();
     expect(user.data.settings.language).toBeTruthy();
-    expect(user.data.settings.timeFormat).toBeTruthy();
     expect(user.data.settings.colourScheme).toBeTruthy();
     expect(user.data.settings.startOfWeek).toBeTruthy();
     expect(user.data.signedUrl).toBeTruthy();

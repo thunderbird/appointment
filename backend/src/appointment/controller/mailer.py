@@ -467,7 +467,7 @@ class NewBookingMail(BaseBookingMail):
                 'email': self.email,
                 'date': self.date,
             },
-            lang=self.lang
+            lang=self.lang,
         )
 
     def html(self):

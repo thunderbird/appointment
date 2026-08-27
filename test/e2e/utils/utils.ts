@@ -12,7 +12,6 @@ import {
   APPT_TIMEZONE_SETTING_PRIMARY,
   APPT_BROWSER_STORE_LANGUAGE_EN,
   APPT_BROWSER_STORE_THEME_LIGHT,
-  APPT_BROWSER_STORE_12HR_TIME,
   APPT_BROWSER_STORE_START_WEEK_SUN,
   TIMEOUT_1_SECOND,
   TIMEOUT_2_SECONDS,
@@ -98,7 +97,6 @@ export const setDefaultUserSettingsLocalStore = async (page: Page, setTimeZone: 
   localUserStoreData['settings'] = {
       "language": APPT_BROWSER_STORE_LANGUAGE_EN,
       "colourScheme": APPT_BROWSER_STORE_THEME_LIGHT,
-      "timeFormat": APPT_BROWSER_STORE_12HR_TIME,
       "timezone": setTimeZone,
       "startOfWeek": APPT_BROWSER_STORE_START_WEEK_SUN,
   }

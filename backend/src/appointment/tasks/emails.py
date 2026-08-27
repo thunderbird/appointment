@@ -22,8 +22,15 @@ def send_invite_email(
 ):
     try:
         mail = InvitationMail(
-            schedule_name=schedule_name, attendee_email=attendee_email, name=owner_name, email=owner_email,
-            date=date, duration=duration, to=to, attachments=[attachment], lang=lang,
+            schedule_name=schedule_name,
+            attendee_email=attendee_email,
+            name=owner_name,
+            email=owner_email,
+            date=date,
+            duration=duration,
+            to=to,
+            attachments=[attachment],
+            lang=lang,
             meeting_link_url=meeting_link_url,
         )
         mail.send()
@@ -69,8 +76,15 @@ def send_new_booking_email(name, email, date, duration, to, schedule_name, lang)
 def send_pending_email(owner_name, owner_email, attendee_email, schedule_name, date, duration, to, attachment, lang):
     try:
         mail = PendingRequestMail(
-            owner_name=owner_name, owner_email=owner_email, attendee_email=attendee_email,
-            schedule_name=schedule_name, date=date, duration=duration, to=to, attachments=[attachment], lang=lang,
+            owner_name=owner_name,
+            owner_email=owner_email,
+            attendee_email=attendee_email,
+            schedule_name=schedule_name,
+            date=date,
+            duration=duration,
+            to=to,
+            attachments=[attachment],
+            lang=lang,
         )
         mail.send()
     except Exception as e:
@@ -84,8 +98,15 @@ def send_pending_email(owner_name, owner_email, attendee_email, schedule_name, d
 def send_cancel_email(owner_name, owner_email, attendee_email, schedule_name, date, duration, to, attachment, lang):
     try:
         mail = CancelMail(
-            owner_name=owner_name, owner_email=owner_email, attendee_email=attendee_email,
-            schedule_name=schedule_name, date=date, duration=duration, to=to, attachments=[attachment], lang=lang,
+            owner_name=owner_name,
+            owner_email=owner_email,
+            attendee_email=attendee_email,
+            schedule_name=schedule_name,
+            date=date,
+            duration=duration,
+            to=to,
+            attachments=[attachment],
+            lang=lang,
         )
         mail.send()
     except Exception as e:
@@ -99,8 +120,15 @@ def send_cancel_email(owner_name, owner_email, attendee_email, schedule_name, da
 def send_rejection_email(owner_name, owner_email, attendee_email, schedule_name, date, duration, to, attachment, lang):
     try:
         mail = RejectionMail(
-            owner_name=owner_name, owner_email=owner_email, attendee_email=attendee_email,
-            schedule_name=schedule_name, date=date, duration=duration, to=to, attachments=[attachment], lang=lang,
+            owner_name=owner_name,
+            owner_email=owner_email,
+            attendee_email=attendee_email,
+            schedule_name=schedule_name,
+            date=date,
+            duration=duration,
+            to=to,
+            attachments=[attachment],
+            lang=lang,
         )
         mail.send()
     except Exception as e:

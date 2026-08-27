@@ -6,6 +6,7 @@ import pytest
 
 from appointment.controller.calendar import CalDavConnector, Tools
 from appointment.database import models
+from appointment.defines import ACCOUNTS_MAIL_NOT_READY_CODE, ACCOUNTS_CALDAV_SETUP_MAX_ATTEMPTS
 from appointment.exceptions.calendar import TestConnectionFailed
 
 from sqlalchemy import select
@@ -196,6 +197,97 @@ class TestOidcAutodiscoverAuth:
         assert response.status_code == 400, response.text
         assert response.json()['detail']['id'] == 'REMOTE_CALENDAR_CONNECTION_ERROR'
 
+    def _mock_tb_accounts_not_ready(self):
+        mock_response = MagicMock()
+        mock_response.ok = False
+        mock_response.json.return_value = {
+            'success': False,
+            'error': 'Thundermail account setup is still in progress. Please try again shortly.',
+            'code': ACCOUNTS_MAIL_NOT_READY_CODE,
+        }
+        return mock_response
+
+    def test_oidc_auth_retries_when_mail_account_not_ready(self, with_client, with_db, monkeypatch):
+        """Should retry (with backoff) when TB Accounts reports the mailbox is still being
+        provisioned, and succeed once it becomes ready without surfacing an error to the user."""
+        monkeypatch.setenv('TB_ACCOUNTS_HOST', 'https://accounts.test.example')
+        monkeypatch.setenv('APPOINTMENT_CALDAV_SECRET', 'test-secret')
+        monkeypatch.setenv('TB_ACCOUNTS_CALDAV_URL', 'https://caldav.test.example')
+
+        monkeypatch.setattr(Tools, 'dns_caldav_lookup', lambda *a, **kw: (None, None))
+        monkeypatch.setattr(Tools, 'well_known_caldav_lookup', lambda *a, **kw: None)
+        monkeypatch.setattr('appointment.routes.caldav.time.sleep', lambda *a, **kw: None)
+
+        class MockCalDavConnector:
+            @staticmethod
+            def __init__(self, db, redis_instance, url, user, password, subscriber_id, calendar_id):
+                pass
+
+            @staticmethod
+            def test_connection(self):
+                return True
+
+            @staticmethod
+            def sync_calendars(self, external_connection_id=None):
+                pass
+
+        monkeypatch.setattr(CalDavConnector, '__init__', MockCalDavConnector.__init__)
+        monkeypatch.setattr(CalDavConnector, 'test_connection', MockCalDavConnector.test_connection)
+        monkeypatch.setattr(CalDavConnector, 'sync_calendars', MockCalDavConnector.sync_calendars)
+
+        with patch(
+            'appointment.routes.caldav.requests.post',
+            side_effect=[self._mock_tb_accounts_not_ready(), self._mock_tb_accounts_success()],
+        ) as mock_post:
+            response = with_client.post('/caldav/oidc/auth', headers=auth_headers)
+
+        assert response.status_code == 200, response.text
+        assert mock_post.call_count == 2
+
+    def test_oidc_auth_gives_up_after_max_attempts_when_still_not_ready(self, with_client, monkeypatch):
+        """Should stop retrying after the max attempt count and surface TB Accounts' own message
+        as `reason` instead of a generic error."""
+        monkeypatch.setenv('TB_ACCOUNTS_HOST', 'https://accounts.test.example')
+        monkeypatch.setenv('APPOINTMENT_CALDAV_SECRET', 'test-secret')
+        monkeypatch.setenv('TB_ACCOUNTS_CALDAV_URL', 'https://caldav.test.example')
+
+        monkeypatch.setattr(Tools, 'dns_caldav_lookup', lambda *a, **kw: (None, None))
+        monkeypatch.setattr(Tools, 'well_known_caldav_lookup', lambda *a, **kw: None)
+        monkeypatch.setattr('appointment.routes.caldav.time.sleep', lambda *a, **kw: None)
+
+        not_ready_response = self._mock_tb_accounts_not_ready()
+
+        with patch('appointment.routes.caldav.requests.post', return_value=not_ready_response) as mock_post:
+            response = with_client.post('/caldav/oidc/auth', headers=auth_headers)
+
+        assert response.status_code == 400, response.text
+        assert mock_post.call_count == ACCOUNTS_CALDAV_SETUP_MAX_ATTEMPTS
+        detail = response.json()['detail']
+        assert detail['id'] == 'REMOTE_CALENDAR_CONNECTION_ERROR'
+        assert detail['reason'] == not_ready_response.json.return_value['error']
+
+    def test_oidc_auth_surfaces_accounts_error_reason(self, with_client, monkeypatch):
+        """A non-retryable failure from TB Accounts should surface its own message as `reason`
+        instead of the generic connection error."""
+        monkeypatch.setenv('TB_ACCOUNTS_HOST', 'https://accounts.test.example')
+        monkeypatch.setenv('APPOINTMENT_CALDAV_SECRET', 'test-secret')
+        monkeypatch.setenv('TB_ACCOUNTS_CALDAV_URL', 'https://caldav.test.example')
+
+        monkeypatch.setattr(Tools, 'dns_caldav_lookup', lambda *a, **kw: (None, None))
+        monkeypatch.setattr(Tools, 'well_known_caldav_lookup', lambda *a, **kw: None)
+
+        failure_message = 'An error has occurred while setting up the Appointment CalDAV.'
+        failure_response = MagicMock()
+        failure_response.ok = False
+        failure_response.json.return_value = {'success': False, 'error': failure_message}
+
+        with patch('appointment.routes.caldav.requests.post', return_value=failure_response) as mock_post:
+            response = with_client.post('/caldav/oidc/auth', headers=auth_headers)
+
+        assert response.status_code == 400, response.text
+        assert mock_post.call_count == 1
+        assert response.json()['detail']['reason'] == failure_message
+
     def test_oidc_auth_connection_test_fails(self, with_client, monkeypatch):
         """Should raise RemoteCalendarConnectionError when CalDAV connection test fails."""
         monkeypatch.setenv('TB_ACCOUNTS_HOST', 'https://accounts.test.example')
@@ -270,9 +362,7 @@ class TestOidcAutodiscoverAuth:
         captured_urls = []
 
         monkeypatch.setattr(Tools, 'dns_caldav_lookup', lambda *a, **kw: (None, None))
-        monkeypatch.setattr(
-            Tools, 'well_known_caldav_lookup', lambda *a, **kw: 'https://wellknown.test.example/caldav'
-        )
+        monkeypatch.setattr(Tools, 'well_known_caldav_lookup', lambda *a, **kw: 'https://wellknown.test.example/caldav')
 
         def capturing_init(self, db, redis_instance, url, user, password, subscriber_id, calendar_id):
             captured_urls.append(url)
@@ -365,4 +455,3 @@ class TestOidcAutodiscoverAuth:
         """Request without auth headers should be rejected."""
         response = with_client.post('/caldav/oidc/auth')
         assert response.status_code == 401, response.text
-

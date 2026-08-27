@@ -34,6 +34,7 @@ export const PLAYWRIGHT_TAG_E2E_SUITE = '@e2e-suite';
 export const PLAYWRIGHT_TAG_PROD_NIGHTLY = '@prod-nightly';
 export const PLAYWRIGHT_TAG_E2E_SUITE_MOBILE = '@e2e-mobile-suite';
 export const PLAYWRIGHT_TAG_PROD_MOBILE_NIGHTLY = '@prod-mobile-nightly';
+export const PLAYWRIGHT_TAG_DEPLOYMENT_ANALYSIS = '@deployment-analysis';
 
 // general settings options
 export const APPT_LANGUAGE_SETTING_EN = 'EN — English';
@@ -54,7 +55,6 @@ export const APPT_BROWSER_STORE_LANGUAGE_EN = 'en';
 export const APPT_BROWSER_STORE_LANGUAGE_DE = 'de';
 export const APPT_BROWSER_STORE_THEME_LIGHT = 'light';
 export const APPT_BROWSER_STORE_THEME_DARK = 'dark';
-export const APPT_BROWSER_STORE_12HR_TIME = 12;
 export const APPT_BROWSER_STORE_START_WEEK_SUN = 7;
 export const APPT_BROWSER_STORE_START_WEEK_MON = 1;
 
