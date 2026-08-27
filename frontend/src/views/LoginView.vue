@@ -41,7 +41,7 @@ onMounted(async () => {
     await router.replace(route.path);
   }
 
-  // This route will be used by the TB Pro Appointment landing page
+  // This route will be used by the Thundermail Appointment landing page
   // in its login button. This will redirect the user to the OIDC login page
   // if they are not authenticated, otherwise it will redirect to the dashboard.
   if (isOidcAuth) {
@@ -111,7 +111,7 @@ const onEnter = () => {
 
 <template>
   <!--
-    If the user is coming from the TB Pro Appointment landing page, and the auth scheme is OIDC
+    If the user is coming from the Thundermail Appointment landing page, and the auth scheme is OIDC
     we don't need to show anything here since we are redirecting.
   -->
   <div v-if="!isOidcAuth" class="login-wrapper">

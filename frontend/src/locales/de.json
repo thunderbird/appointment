@@ -563,7 +563,7 @@
           "consent": "Ich verstehe, dass meine Appointment-Daten dauerhaft gelöscht werden.",
           "impactHint": "Alle Buchungskalender werden auf „Inaktiv“ gesetzt und alle anstehenden Buchungen werden storniert.",
           "permanenceHint": "Dies wird alle Appointment-Daten dauerhaft löschen.",
-          "tbproHint": "Dein Thunderbird Pro-Abo wird davon nicht beeinflusst."
+          "tbproHint": "Dein Thundermail-Abo wird davon nicht beeinflusst."
         }
       },
       "calendars": {

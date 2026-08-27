@@ -142,7 +142,7 @@
       "connectedApplications": {
         "caldav": "CalDAV Connection",
         "google": "Google Calendar",
-        "oidc": "Thunderbird Pro",
+        "oidc": "Thundermail",
         "zoom": "Zoom"
       }
     },
@@ -564,7 +564,7 @@
           "consent": "I understand my appointment data will be permanently deleted.",
           "impactHint": "All booking calendars will be set to “Inactive” and all upcoming bookings will be cancelled.",
           "permanenceHint": "This will permanently delete all Appointment data.",
-          "tbproHint": "Your Thunderbird Pro subscription will not be affected."
+          "tbproHint": "Your Thundermail subscription will not be affected."
         }
       },
       "calendars": {
@@ -578,7 +578,7 @@
             "link": "Google API Services User Data Policy",
             "text": "Thunderbird Appointment use and transfer of information received from Google APIs to any other app will adhere to {0}, including the Limited Use requirements."
           },
-          "oidc": "This is the account associated with your login. If you delete your Thunderbird Pro account your data with Thunderbird Appointment will also be removed.",
+          "oidc": "This is the account associated with your login. If you delete your Thundermail account your data with Thunderbird Appointment will also be removed.",
           "zoom": "You can connect your Zoom account to enable instant meeting invites with your appointments."
         },
         "connectionUnreachableDefault": "The connection to the {providerName} server could not be established. Please reconnect or set the default calendar under a different account to remove this account.",
