@@ -111,6 +111,9 @@ class Mailer:
         # add body as html and text parts
         message.set_content(self.text())
         message.add_alternative(self.html(), subtype='html')
+        # Keep a reference to the html part since the content at index [1] changes
+        # when we call add_attachment() in the loop
+        html_part = message.get_payload()[1]
 
         # add attachment(s) as multimedia parts
         for a in self._attachments():
@@ -123,7 +126,7 @@ class Mailer:
                 )
             else:
                 # Attach it to the html payload
-                message.get_payload()[1].add_related(
+                html_part.add_related(
                     a.data,
                     a.mime_main,
                     a.mime_sub,
