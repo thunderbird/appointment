@@ -1,7 +1,7 @@
 {% set mzla_link = '<a href="%(url)s" style="color:%(colour)s;">%(label)s</a>'|format(url='https://blog.thunderbird.net/2020/01/thunderbirds-new-home', colour=colour_text_base, label='MZLA Technologies Corporation') %}
 {% set copy_list = l10n('mail-brand-footer', {'mzla_link': mzla_link}, lang if lang else None).split("\n") %}
 <div style="font-size: 11px; font-weight: 400; text-align: center;">
-  <div class="apmt-row" style="margin-bottom: 12px; gap: 12px; justify-content: center;">
+  <div style="margin-bottom: 12px;">
     <a
       href="{{ homepage_url }}/privacy"
       style="color:{{ colour_text_base }}; padding: 6px 12px; white-space: nowrap;"
