@@ -64,7 +64,6 @@ async function updatePreferences() {
     timezone: currentState.value.defaultTimeZone,
     language: currentState.value.language,
     colour_scheme: currentState.value.colourScheme,
-    time_mode: currentState.value.timeFormat,
     start_of_week: currentState.value.startOfWeek,
   };
 
@@ -74,7 +73,6 @@ async function updatePreferences() {
     timezone: userStore.data.settings.timezone,
     language: userStore.data.settings.language,
     colour_scheme: userStore.data.settings.colourScheme,
-    time_mode: userStore.data.settings.timeFormat,
     start_of_week: userStore.data.settings.startOfWeek,
   };
 

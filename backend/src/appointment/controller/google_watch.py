@@ -27,9 +27,7 @@ def get_google_token(google_client: GoogleClient, external_connection: models.Ex
     if not external_connection.token:
         return None
 
-    return Credentials.from_authorized_user_info(
-        json.loads(external_connection.token), google_client.SCOPES
-    )
+    return Credentials.from_authorized_user_info(json.loads(external_connection.token), google_client.SCOPES)
 
 
 def setup_watch_channel(db: Session, google_client: GoogleClient, calendar: models.Calendar) -> bool:
@@ -95,7 +93,9 @@ def teardown_watch_channel(db: Session, calendar: models.Calendar) -> bool:
 
     if calendar.external_connection and calendar.external_connection.token:
         stop_google_channel.delay(
-            channel.channel_id, channel.resource_id, calendar.external_connection.token,
+            channel.channel_id,
+            channel.resource_id,
+            calendar.external_connection.token,
         )
 
     repo.google_calendar_channel.delete(db, channel)
@@ -110,11 +110,7 @@ def teardown_watch_channels_for_connection(
     if not google_connection or not google_connection.token:
         return
 
-    calendars = (
-        db.query(models.Calendar)
-        .filter(models.Calendar.external_connection_id == google_connection.id)
-        .all()
-    )
+    calendars = db.query(models.Calendar).filter(models.Calendar.external_connection_id == google_connection.id).all()
 
     for calendar in calendars:
         channel = repo.google_calendar_channel.get_by_calendar_id(db, calendar.id)
@@ -122,7 +118,9 @@ def teardown_watch_channels_for_connection(
             continue
 
         stop_google_channel.delay(
-            channel.channel_id, channel.resource_id, google_connection.token,
+            channel.channel_id,
+            channel.resource_id,
+            google_connection.token,
         )
 
         repo.google_calendar_channel.delete(db, channel)

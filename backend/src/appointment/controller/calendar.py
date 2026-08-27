@@ -29,7 +29,14 @@ from enum import Enum
 from sqlalchemy.orm import Session
 
 from .. import utils
-from ..defines import REDIS_REMOTE_EVENTS_KEY, DATEFMT, DEFAULT_CALENDAR_COLOUR, FALLBACK_LOCALE, APP_ENV_DEV
+from ..defines import (
+    REDIS_CACHE_BUST_BATCH_SIZE,
+    REDIS_REMOTE_EVENTS_KEY,
+    DATEFMT,
+    DEFAULT_CALENDAR_COLOUR,
+    FALLBACK_LOCALE,
+    APP_ENV_DEV,
+)
 from .apis.google_client import EventStatus, GoogleClient, ResponseStatus, SendUpdates
 from ..database.models import CalendarProvider, BookingStatus
 from ..database import schemas, models, repo
@@ -105,28 +112,31 @@ class BaseConnector:
 
         return True
 
-    def bust_cached_events(self, all_calendars=False):
+    def bust_cached_events(self, all_calendars=False) -> bool:
         """Delete cached events for a specific subscriber/calendar.
-        Optionally pass in all_calendars to remove all cached calendar events for a specific subscriber."""
+        Optionally pass in all_calendars to remove all cached calendar events for a specific subscriber.
+
+        Returns whether any entries were deleted.
+        """
         if self.redis_instance is None:
             return False
 
         timer_boot = time.perf_counter_ns()
+        match = f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*'
 
-        # Scan returns a tuple like: (Cursor start, [...keys found])
-        ret = self.redis_instance.scan(
-            0, f'{REDIS_REMOTE_EVENTS_KEY}:{self.get_key_body(only_subscriber=all_calendars)}:*'
-        )
-
-        if len(ret[1]) == 0:
-            return False
-
-        # Expand the list in position 1, which is a list of keys found from the scan
-        self.redis_instance.delete(*ret[1])
+        deleted = 0
+        batch = []
+        for key in self.redis_instance.scan_iter(match=match, count=REDIS_CACHE_BUST_BATCH_SIZE):
+            batch.append(key)
+            if len(batch) >= REDIS_CACHE_BUST_BATCH_SIZE:
+                deleted += self.redis_instance.delete(*batch)
+                batch = []
+        if batch:
+            deleted += self.redis_instance.delete(*batch)
 
         sentry_sdk.set_measurement('redis_bust_time', time.perf_counter_ns() - timer_boot, 'nanosecond')
 
-        return True
+        return deleted > 0
 
 
 class GoogleConnector(BaseConnector):
@@ -315,10 +325,12 @@ class GoogleConnector(BaseConnector):
                 'start': {'dateTime': event.start.isoformat()},
                 'end': {'dateTime': event.end.isoformat()},
                 'attendees': [
-                    {'displayName': organizer.name, 'email': organizer_email,
-                     'responseStatus': ResponseStatus.ACCEPTED},
-                    {'displayName': attendee.name, 'email': attendee.email,
-                     'responseStatus': ResponseStatus.ACCEPTED},
+                    {
+                        'displayName': organizer.name,
+                        'email': organizer_email,
+                        'responseStatus': ResponseStatus.ACCEPTED,
+                    },
+                    {'displayName': attendee.name, 'email': attendee.email, 'responseStatus': ResponseStatus.ACCEPTED},
                 ],
                 'organizer': {
                     'displayName': organizer.name,
@@ -648,7 +660,7 @@ class CalDavConnector(BaseConnector):
 
             def is_midnight_one_day_span(vevent):
                 """For a given vevent object, check if it is an event spanning from midnight
-                   to midnight for exactly 24h.
+                to midnight for exactly 24h.
                 """
                 dtstart = vevent['DTSTART'].dt
                 dtend = vevent['DTEND'].dt
@@ -658,21 +670,19 @@ class CalDavConnector(BaseConnector):
                     return False
 
                 starts_at_midnight = (
-                    dtstart.hour == 0 and dtstart.minute == 0 and
-                    dtstart.second == 0 and dtstart.microsecond == 0
+                    dtstart.hour == 0 and dtstart.minute == 0 and dtstart.second == 0 and dtstart.microsecond == 0
                 )
                 ends_at_midnight = (
-                    dtend.hour == 0 and dtend.minute == 0 and
-                    dtend.second == 0 and dtend.microsecond == 0
+                    dtend.hour == 0 and dtend.minute == 0 and dtend.second == 0 and dtend.microsecond == 0
                 )
 
                 exactly_one_day = (dtend - dtstart) == timedelta(days=1)
 
                 return starts_at_midnight and ends_at_midnight and exactly_one_day
-            
+
             def has_domain(url, whitelist):
                 """Return True if the given url contains a whitelisted domain.
-                   Always True for development environments.
+                Always True for development environments.
                 """
                 if os.getenv('APP_ENV') == APP_ENV_DEV:
                     return True

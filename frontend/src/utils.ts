@@ -82,13 +82,10 @@ export const enumToObject = (e: object): { [key in string]: number } => {
   return o;
 };
 
-// handle time format, return dayjs format string
-// can be either set by the user (local storage) or detected from system.
-// This functions works independent from Pinia stores so that
-// it can be called even if stores are not initialized yet.
+// Handle time format, return dayjs format string.
+// Detected from system, falling back to the configured default.
 export const timeFormat = (): string => {
   const fallbackFormat = config.defaultHourFormat ?? 12;
-  const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}') as User;
 
   let use12HourTime = null;
   try {
@@ -98,13 +95,9 @@ export const timeFormat = (): string => {
     // Catch any range error raised by invalid language/locale codes and pass
   }
 
-  // `.hour12` is an optional value and can be undefined (we cast it as null.) So default to our env value, and if not null use it.
-  let detected = fallbackFormat;
-  if (use12HourTime !== null) {
-    detected = use12HourTime ? 12 : 24;
-  }
-
-  const format = Number(user.settings?.timeFormat ?? detected);
+  // `.hour12` is an optional value and can be undefined (we cast it as null.)
+  // So default to our env value, and if not null use it.
+  const format = Number(use12HourTime !== null ? (use12HourTime ? 12 : 24) : fallbackFormat);
   return format === 24 ? 'HH:mm' : 'hh:mma';
 };
 

@@ -362,9 +362,7 @@ class TestOidcAutodiscoverAuth:
         captured_urls = []
 
         monkeypatch.setattr(Tools, 'dns_caldav_lookup', lambda *a, **kw: (None, None))
-        monkeypatch.setattr(
-            Tools, 'well_known_caldav_lookup', lambda *a, **kw: 'https://wellknown.test.example/caldav'
-        )
+        monkeypatch.setattr(Tools, 'well_known_caldav_lookup', lambda *a, **kw: 'https://wellknown.test.example/caldav')
 
         def capturing_init(self, db, redis_instance, url, user, password, subscriber_id, calendar_id):
             captured_urls.append(url)
@@ -457,4 +455,3 @@ class TestOidcAutodiscoverAuth:
         """Request without auth headers should be rejected."""
         response = with_client.post('/caldav/oidc/auth')
         assert response.status_code == 401, response.text
-

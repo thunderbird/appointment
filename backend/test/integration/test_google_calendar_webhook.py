@@ -49,12 +49,14 @@ class TestGoogleCalendarWebhook:
     ):
         """A notification with a mismatched state token should be silently ignored."""
         subscriber = make_pro_subscriber()
-        google_creds = json.dumps({
-            'token': 'fake-token',
-            'refresh_token': 'fake-refresh',
-            'client_id': 'fake-client-id',
-            'client_secret': 'fake-secret',
-        })
+        google_creds = json.dumps(
+            {
+                'token': 'fake-token',
+                'refresh_token': 'fake-refresh',
+                'client_id': 'fake-client-id',
+                'client_secret': 'fake-secret',
+            }
+        )
         ext_conn = make_external_connections(
             subscriber.id,
             type=models.ExternalConnectionType.google,
@@ -98,12 +100,14 @@ class TestGoogleCalendarWebhook:
     ):
         """If the calendar is no longer connected, the channel should be cleaned up."""
         subscriber = make_pro_subscriber()
-        google_creds = json.dumps({
-            'token': 'fake-token',
-            'refresh_token': 'fake-refresh',
-            'client_id': 'fake-client-id',
-            'client_secret': 'fake-secret',
-        })
+        google_creds = json.dumps(
+            {
+                'token': 'fake-token',
+                'refresh_token': 'fake-refresh',
+                'client_id': 'fake-client-id',
+                'client_secret': 'fake-secret',
+            }
+        )
         ext_conn = make_external_connections(
             subscriber.id,
             type=models.ExternalConnectionType.google,
@@ -142,23 +146,19 @@ class TestGoogleCalendarWebhook:
 
     @patch('appointment.routes.webhooks.sync_google_calendar_changes')
     def test_valid_notification_returns_200(
-        self,
-        mock_sync_task,
-        with_db,
-        with_client,
-        make_pro_subscriber,
-        make_google_calendar,
-        make_external_connections
+        self, mock_sync_task, with_db, with_client, make_pro_subscriber, make_google_calendar, make_external_connections
     ):
         """A valid notification for a connected calendar should return 200
         immediately and dispatch the sync task."""
         subscriber = make_pro_subscriber()
-        google_creds = json.dumps({
-            'token': 'fake-token',
-            'refresh_token': 'fake-refresh',
-            'client_id': 'fake-client-id',
-            'client_secret': 'fake-secret',
-        })
+        google_creds = json.dumps(
+            {
+                'token': 'fake-token',
+                'refresh_token': 'fake-refresh',
+                'client_id': 'fake-client-id',
+                'client_secret': 'fake-secret',
+            }
+        )
         ext_conn = make_external_connections(
             subscriber.id,
             type=models.ExternalConnectionType.google,
@@ -203,17 +203,23 @@ class TestCalendarConnectWatchChannel:
     ):
         """Connecting a Google calendar alone should not create a watch channel.
         Channels are created when the calendar is set as default in a schedule."""
-        google_creds = json.dumps({
-            'token': 'fake-token',
-            'refresh_token': 'fake-refresh',
-            'client_id': 'fake-client-id',
-            'client_secret': 'fake-secret',
-        })
+        google_creds = json.dumps(
+            {
+                'token': 'fake-token',
+                'refresh_token': 'fake-refresh',
+                'client_id': 'fake-client-id',
+                'client_secret': 'fake-secret',
+            }
+        )
         ext_conn = make_external_connections(
-            TEST_USER_ID, type=models.ExternalConnectionType.google, token=google_creds,
+            TEST_USER_ID,
+            type=models.ExternalConnectionType.google,
+            token=google_creds,
         )
         calendar = make_google_calendar(
-            subscriber_id=TEST_USER_ID, connected=False, external_connection_id=ext_conn.id,
+            subscriber_id=TEST_USER_ID,
+            connected=False,
+            external_connection_id=ext_conn.id,
         )
 
         response = with_client.post(f'/cal/{calendar.id}/connect', headers=auth_headers)
@@ -228,17 +234,23 @@ class TestCalendarConnectWatchChannel:
     ):
         """Disconnecting a Google calendar should not tear down its watch channel.
         Channels are managed when the schedule's default calendar changes."""
-        google_creds = json.dumps({
-            'token': 'fake-token',
-            'refresh_token': 'fake-refresh',
-            'client_id': 'fake-client-id',
-            'client_secret': 'fake-secret',
-        })
+        google_creds = json.dumps(
+            {
+                'token': 'fake-token',
+                'refresh_token': 'fake-refresh',
+                'client_id': 'fake-client-id',
+                'client_secret': 'fake-secret',
+            }
+        )
         ext_conn = make_external_connections(
-            TEST_USER_ID, type=models.ExternalConnectionType.google, token=google_creds,
+            TEST_USER_ID,
+            type=models.ExternalConnectionType.google,
+            token=google_creds,
         )
         calendar = make_google_calendar(
-            subscriber_id=TEST_USER_ID, connected=True, external_connection_id=ext_conn.id,
+            subscriber_id=TEST_USER_ID,
+            connected=True,
+            external_connection_id=ext_conn.id,
         )
 
         with with_db() as db:
@@ -280,9 +292,14 @@ class TestGoogleCalendarEventRsvp:
 
     @pytest.fixture
     def rsvp_setup(
-        self, with_db,
-        make_pro_subscriber, make_google_calendar, make_external_connections,
-        make_appointment, make_attendee, make_appointment_slot,
+        self,
+        with_db,
+        make_pro_subscriber,
+        make_google_calendar,
+        make_external_connections,
+        make_appointment,
+        make_attendee,
+        make_appointment_slot,
     ):
         """Create an opened appointment with a requested slot, linked to a Google calendar."""
         subscriber = make_pro_subscriber()
@@ -331,8 +348,13 @@ class TestGoogleCalendarEventRsvp:
             appt = repo.appointment.get(db, appointment.id)
             slot = appt.slots[0]
             _handle_subscriber_rsvp(
-                db, appt, slot, 'accepted',
-                mock_google_client, mock_token, self.REMOTE_CALENDAR_ID,
+                db,
+                appt,
+                slot,
+                'accepted',
+                mock_google_client,
+                mock_token,
+                self.REMOTE_CALENDAR_ID,
             )
 
         appt, slot = self._reload(with_db, appointment.id)
@@ -361,8 +383,13 @@ class TestGoogleCalendarEventRsvp:
             appt = repo.appointment.get(db, appointment.id)
             slot = appt.slots[0]
             _handle_subscriber_rsvp(
-                db, appt, slot, 'accepted',
-                mock_google_client, mock_token, self.REMOTE_CALENDAR_ID,
+                db,
+                appt,
+                slot,
+                'accepted',
+                mock_google_client,
+                mock_token,
+                self.REMOTE_CALENDAR_ID,
             )
 
         _, slot = self._reload(with_db, appointment.id)
@@ -377,8 +404,13 @@ class TestGoogleCalendarEventRsvp:
             appt = repo.appointment.get(db, appointment.id)
             slot = appt.slots[0]
             _handle_bookee_rsvp(
-                db, appt, slot, 'accepted',
-                mock_google_client, mock_token, self.REMOTE_CALENDAR_ID,
+                db,
+                appt,
+                slot,
+                'accepted',
+                mock_google_client,
+                mock_token,
+                self.REMOTE_CALENDAR_ID,
             )
 
         appt, slot = self._reload(with_db, appointment.id)
@@ -395,15 +427,22 @@ class TestGoogleCalendarEventRsvp:
             appt = repo.appointment.get(db, appointment.id)
             slot = appt.slots[0]
             _handle_subscriber_rsvp(
-                db, appt, slot, 'declined',
-                mock_google_client, mock_token, self.REMOTE_CALENDAR_ID,
+                db,
+                appt,
+                slot,
+                'declined',
+                mock_google_client,
+                mock_token,
+                self.REMOTE_CALENDAR_ID,
             )
 
         _, slot = self._reload(with_db, appointment.id)
         assert slot.booking_status == models.BookingStatus.declined
 
         mock_google_client.delete_event.assert_called_once_with(
-            self.REMOTE_CALENDAR_ID, self.GOOGLE_EVENT_ID, mock_token,
+            self.REMOTE_CALENDAR_ID,
+            self.GOOGLE_EVENT_ID,
+            mock_token,
             send_updates=SendUpdates.ALL,
         )
 
@@ -413,15 +452,21 @@ class TestGoogleCalendarEventRsvp:
 
         with with_db() as db:
             slot_update = models.BookingStatus.declined
-            repo.slot.update(db, repo.appointment.get(db, appointment.id).slots[0].id,
-                             schemas.SlotUpdate(booking_status=slot_update))
+            repo.slot.update(
+                db, repo.appointment.get(db, appointment.id).slots[0].id, schemas.SlotUpdate(booking_status=slot_update)
+            )
 
         with with_db() as db:
             appt = repo.appointment.get(db, appointment.id)
             slot = appt.slots[0]
             _handle_subscriber_rsvp(
-                db, appt, slot, 'declined',
-                mock_google_client, mock_token, self.REMOTE_CALENDAR_ID,
+                db,
+                appt,
+                slot,
+                'declined',
+                mock_google_client,
+                mock_token,
+                self.REMOTE_CALENDAR_ID,
             )
 
         mock_google_client.delete_event.assert_not_called()
@@ -434,8 +479,13 @@ class TestGoogleCalendarEventRsvp:
             appt = repo.appointment.get(db, appointment.id)
             slot = appt.slots[0]
             _handle_bookee_rsvp(
-                db, appt, slot, 'declined',
-                mock_google_client, mock_token, self.REMOTE_CALENDAR_ID,
+                db,
+                appt,
+                slot,
+                'declined',
+                mock_google_client,
+                mock_token,
+                self.REMOTE_CALENDAR_ID,
             )
 
         _, slot = self._reload(with_db, appointment.id)
@@ -462,7 +512,8 @@ class TestGoogleCalendarEventRsvp:
         with with_db() as db:
             appt = repo.appointment.get(db, appointment.id)
             repo.slot.update(
-                db, appt.slots[0].id,
+                db,
+                appt.slots[0].id,
                 schemas.SlotUpdate(booking_status=models.BookingStatus.cancelled),
             )
 

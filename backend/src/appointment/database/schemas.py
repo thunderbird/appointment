@@ -27,7 +27,6 @@ from .models import (
     ExternalConnectionType,
     MeetingLinkProviderType,
     ColourScheme,
-    TimeMode,
     IsoWeekday,
 )
 from .. import utils, defines
@@ -309,7 +308,6 @@ class CalendarOut(CalendarBase):
     provider: CalendarProvider | None = CalendarProvider.caldav
 
 
-
 """ SUBSCRIBER model schemas
 """
 
@@ -322,7 +320,6 @@ class SubscriberIn(BaseModel):
     secondary_email: str | None = None
     language: str | None = FALLBACK_LOCALE
     colour_scheme: ColourScheme = ColourScheme.system
-    time_mode: TimeMode = TimeMode.h12
     start_of_week: IsoWeekday = IsoWeekday.sunday
 
 

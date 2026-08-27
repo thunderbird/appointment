@@ -68,9 +68,7 @@ class TestScheduleSlug:
 
         assert [s.id for s in schedules] == sorted([first.id, second.id, third.id])
 
-    def test_get_by_slug_is_scoped_to_owner(
-        self, with_db, make_schedule, make_pro_subscriber, make_caldav_calendar
-    ):
+    def test_get_by_slug_is_scoped_to_owner(self, with_db, make_schedule, make_pro_subscriber, make_caldav_calendar):
         slug = 'scoped01'
         make_schedule(slug=slug)
 

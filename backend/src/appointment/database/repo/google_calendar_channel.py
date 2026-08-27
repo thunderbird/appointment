@@ -11,26 +11,16 @@ from .. import models
 
 def get_by_calendar_id(db: Session, calendar_id: int) -> models.GoogleCalendarChannel | None:
     return (
-        db.query(models.GoogleCalendarChannel)
-        .filter(models.GoogleCalendarChannel.calendar_id == calendar_id)
-        .first()
+        db.query(models.GoogleCalendarChannel).filter(models.GoogleCalendarChannel.calendar_id == calendar_id).first()
     )
 
 
 def get_by_channel_id(db: Session, channel_id: str) -> models.GoogleCalendarChannel | None:
-    return (
-        db.query(models.GoogleCalendarChannel)
-        .filter(models.GoogleCalendarChannel.channel_id == channel_id)
-        .first()
-    )
+    return db.query(models.GoogleCalendarChannel).filter(models.GoogleCalendarChannel.channel_id == channel_id).first()
 
 
 def get_expiring(db: Session, before: datetime) -> list[models.GoogleCalendarChannel]:
-    return (
-        db.query(models.GoogleCalendarChannel)
-        .filter(models.GoogleCalendarChannel.expiration < before)
-        .all()
-    )
+    return db.query(models.GoogleCalendarChannel).filter(models.GoogleCalendarChannel.expiration < before).all()
 
 
 def create(

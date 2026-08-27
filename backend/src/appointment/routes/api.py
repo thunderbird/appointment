@@ -87,7 +87,6 @@ def update_me(
         unique_hash=me.unique_hash,
         language=me.language,
         colour_scheme=me.colour_scheme,
-        time_mode=me.time_mode,
         start_of_week=me.start_of_week,
     )
 

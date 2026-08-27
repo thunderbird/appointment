@@ -49,9 +49,7 @@ def get_by_slug(db: Session, slug: str, subscriber_id: int) -> models.Schedule |
 def slug_taken(db: Session, slug: str, owner_id: int) -> bool:
     """True if the owner already has a schedule using this slug."""
     return (
-        db.query(models.Schedule)
-        .filter(models.Schedule.slug == slug, models.Schedule.owner_id == owner_id)
-        .first()
+        db.query(models.Schedule).filter(models.Schedule.slug == slug, models.Schedule.owner_id == owner_id).first()
         is not None
     )
 

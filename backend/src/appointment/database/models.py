@@ -97,11 +97,6 @@ class ColourScheme(enum.Enum):
     light = 'light'
 
 
-class TimeMode(enum.Enum):
-    h12 = 12
-    h24 = 24
-
-
 # Use ISO 8601 format to specify day of week
 class IsoWeekday(enum.Enum):
     monday = 1
@@ -177,7 +172,6 @@ class Subscriber(HasSoftDelete, Base):
     language = Column(encrypted_type(String), nullable=False, default=FALLBACK_LOCALE, index=True)
     timezone = Column(encrypted_type(String), index=True)
     colour_scheme = Column(Enum(ColourScheme), default=ColourScheme.system, nullable=False, index=True)
-    time_mode = Column(Enum(TimeMode), default=TimeMode.h12, nullable=False, index=True)
     start_of_week = Column(Enum(IsoWeekday), default=IsoWeekday.sunday, nullable=False, index=True)
 
     # Only accept the times greater than the one specified in the `iat` claim of the jwt token
