@@ -15,4 +15,4 @@ contact_links:
     about: A bug report for the mail server deployment of Thundermail
   - name: Bug Report (Thunderbird Send / Pro Add-on)
     url: https://github.com/thunderbird/tbpro-add-on/issues/new
-    about: A bug report for Thunderbird Send and the Thunderbird Pro add-on (send.tb.pro)
+    about: A bug report for Thunderbird Send and the Thundermail add-on (send.tb.pro)

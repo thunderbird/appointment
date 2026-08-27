@@ -31,7 +31,7 @@ jobs:
           MESSAGE: >-
             Thanks for your contribution! Your pull request has been merged and is being deployed to
             our staging instance. If all goes well we'll include it in the next production deployment.
-            We appreciate the time and effort you put into improving Thunderbird Pro. If you haven't
+            We appreciate the time and effort you put into improving Thundermail. If you haven't
             already, you're welcome to join our Matrix chat for contributors. It's where we discuss
             development and help each other out.
 
