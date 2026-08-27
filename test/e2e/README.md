@@ -20,9 +20,9 @@ pnpm exec playwright install
 
 ## E2E Test Prerequisites
 
-The E2E tests require an existing TB Pro account and other settings that are read this from your local .env file. This includes:
+The E2E tests require an existing Thundermail account and other settings that are read this from your local .env file. This includes:
 
-- Credentials for an existing TB Pro account (TB Pro email and associated password)
+- Credentials for an existing Thundermail account (Thundermail email and associated password)
 - The account user's display name and share link:
   - The display name is found in Appointment => Settings => Account => Display name.
   - The share link is found in Appointment => Settings => Account => My Link.
@@ -164,7 +164,7 @@ You can run the E2E tests from your local machine but against browsers provided 
 
 <b>For security reasons when running the tests on BrowserStack I recommend that you use a dedicated test Appointment account / credentials (NOT your own personal Appointment credentials).</b>
 
-Once you have credentials for an existing TB Pro test account, edit your local `.env` file and add these details (more information found above):
+Once you have credentials for an existing Thundermail test account, edit your local `.env` file and add these details (more information found above):
 
 ```dotenv
 TB_ACCTS_EMAIL=<existing-tb-accounts-user-email>

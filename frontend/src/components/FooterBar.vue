@@ -14,7 +14,7 @@ const userStore = useUserStore();
 
 const { authenticated: isAuthenticated } = storeToRefs(userStore);
 
-const appointmentNotLoggedInNavItems = [{ route: tbProUrl, i18nKey: 'exploreThunderbirdPro', external: true }];
+const appointmentNotLoggedInNavItems = [{ route: tbProUrl, i18nKey: 'exploreThundermail', external: true }];
 
 const appointmentLoggedInNavItems = [
   { route: 'dashboard', i18nKey: 'dashboard' },

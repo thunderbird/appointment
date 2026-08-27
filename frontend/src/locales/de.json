@@ -292,7 +292,7 @@
     "defaultTimeZone": "Standard Zeitzone",
     "delete": "Löschen",
     "deleteAllAppointmentData": "Alle Appointment-Daten löschen",
-    "deleteAllAppointmentDataInfo": "Dein TB Pro-Abonnement bleibt davon unberührt.",
+    "deleteAllAppointmentDataInfo": "Dein Thundermail-Abonnement bleibt davon unberührt.",
     "deleteBooking": "Buchung löschen",
     "deny": "Ablehnen",
     "denyBooking": "Buchung ablehnen",
@@ -320,7 +320,7 @@
     "endTime": "Endzeit",
     "enterDescriptionToSchedulingPage": "Gib eine Beschreibung ein, die auf der Buchungsseite angezeigt wird",
     "error": "Fehler",
-    "exploreThunderbirdPro": "Thunderbird Pro erkunden",
+    "exploreThundermail": "Thundermail erkunden",
     "faq": "FAQ",
     "farthestBooking": "Späteste Buchung",
     "filter": "Filter",
@@ -563,7 +563,7 @@
           "consent": "Ich verstehe, dass meine Appointment-Daten dauerhaft gelöscht werden.",
           "impactHint": "Alle Buchungskalender werden auf „Inaktiv“ gesetzt und alle anstehenden Buchungen werden storniert.",
           "permanenceHint": "Dies wird alle Appointment-Daten dauerhaft löschen.",
-          "tbproHint": "Dein Thunderbird Pro-Abo wird davon nicht beeinflusst."
+          "tbproHint": "Dein Thundermail-Abo wird davon nicht beeinflusst."
         }
       },
       "calendars": {
