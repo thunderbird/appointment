@@ -524,7 +524,12 @@ def request_schedule_availability_slot(
 
             if not use_google_invite:
                 Tools().send_hold_vevent(
-                    background_tasks, slot.appointment, slot, subscriber, slot.attendee, schedule_name=schedule.name,
+                    background_tasks,
+                    slot.appointment,
+                    slot,
+                    subscriber,
+                    slot.attendee,
+                    schedule_name=schedule.name,
                 )
 
         # If no confirmation is needed, directly confirm the booking and send invitation mail
@@ -644,7 +649,12 @@ def handle_schedule_availability_decision(
         # For Google, the delete with sendUpdates handles the cancellation notification.
         if not use_google_invite:
             Tools().send_reject_vevent(
-                background_tasks, appointment, slot, subscriber, slot.attendee, schedule_name=schedule.name,
+                background_tasks,
+                appointment,
+                slot,
+                subscriber,
+                slot.attendee,
+                schedule_name=schedule.name,
             )
 
         # mark the slot as BookingStatus.declined
@@ -741,7 +751,12 @@ def handle_schedule_availability_decision(
 
     if not use_google_invite:
         Tools().send_invitation_vevent(
-            background_tasks, appointment, slot, subscriber, slot.attendee, schedule_name=schedule.name,
+            background_tasks,
+            appointment,
+            slot,
+            subscriber,
+            slot.attendee,
+            schedule_name=schedule.name,
         )
 
     return True

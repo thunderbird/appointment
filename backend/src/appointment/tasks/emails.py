@@ -17,7 +17,15 @@ from appointment.defines import APP_ENV_DEV
 
 
 def send_invite_email(
-    owner_name, owner_email, schedule_name, attendee_email, date, duration, to, attachment, lang,
+    owner_name,
+    owner_email,
+    schedule_name,
+    attendee_email,
+    date,
+    duration,
+    to,
+    attachment,
+    lang,
     meeting_link_url=None,
 ):
     try:
@@ -48,8 +56,16 @@ def send_confirmation_email(
     # send confirmation mail to owner
     try:
         mail = ConfirmationMail(
-            f'{url}/1', f'{url}/0', attendee_name, attendee_email, date, duration, schedule_name,
-            appointment_slug, to=to, lang=lang,
+            f'{url}/1',
+            f'{url}/0',
+            attendee_name,
+            attendee_email,
+            date,
+            duration,
+            schedule_name,
+            appointment_slug,
+            to=to,
+            lang=lang,
         )
         mail.send()
     except Exception as e:
