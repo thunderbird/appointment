@@ -1,3 +1,4 @@
+import fnmatch
 from datetime import datetime, timedelta
 
 DATEFMT = '%Y-%m-%d'
@@ -25,3 +26,27 @@ FAKER_RANDOM_VALUE = '___faker_random_value___'
 def factory_has_value(val) -> bool:
     """For factories"""
     return val != FAKER_RANDOM_VALUE
+
+
+class FakeRedis:
+    def __init__(self):
+        self.store = {}
+
+    def get(self, key):
+        return self.store.get(key)
+
+    def set(self, key, value, ex=None):
+        self.store[key] = value
+        return True
+
+    def delete(self, *keys):
+        deleted = 0
+        for key in keys:
+            if key in self.store:
+                del self.store[key]
+                deleted += 1
+        return deleted
+
+    def scan_iter(self, match=None, count=None):
+        pattern = match or '*'
+        return iter([k for k in list(self.store.keys()) if fnmatch.fnmatch(k, pattern)])
