@@ -1,8 +1,8 @@
 {% extends "includes/base.jinja2" %}
 {# Helper vars #}
-{% set clock_image_small = '<img style="width: 11px; height: 11px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
-{% set clock_image = '<img style="width: 15px; height: 15px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
-{% set calendar_image = '<img style="width: 14px; height: 14px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=calendar_icon_cid) %}
+{% set clock_icon_img = '<img style="display: inline-block; width: 12px; height: 12px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
+{% set clock_img = '<img style="display: inline-block; width: 15px; height: 15px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
+{% set calendar_img = '<img style="display: inline-block; width: 14px; height: 14px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=calendar_icon_cid) %}
 {# Code begins! #}
 {% block introduction %}
   <div style="color: {{ colour_text_base }}; text-align: center; line-height: 16px;">
@@ -22,11 +22,11 @@
     {# Time details #}
     <div style="width: 100%; font-weight: 700; margin: 24px 12px;">
       <div style="margin-bottom: 6px;">
-        {{ clock_image|safe }} {{ time_range }}
+        {{ clock_img|safe }} {{ time_range }}
         <span style="color: {{ colour_icon_secondary }}; font-size: 9px">{{ timezone }}</span>
       </div>
       <div>
-        {{ calendar_image|safe }} {{ day }}
+        {{ calendar_img|safe }} {{ day }}
       </div>
     </div>
     {# Chip #}
@@ -42,7 +42,7 @@
       font-weight: 700;
       height: 16px;
       ">
-      {{ clock_image_small|safe }} {{ l10n('new-booking-html-time', {'duration': duration}, lang=lang) }}
+      {{ clock_icon_img|safe }} <span style="margin-left: 3px;">{{ l10n('new-booking-html-time', {'duration': duration}, lang=lang) }}</span>
     </div>
   </div>
 {% endblock %}

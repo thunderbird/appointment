@@ -16,9 +16,22 @@ from appointment.controller.mailer import (
 from appointment.defines import APP_ENV_DEV
 
 
-def send_invite_email(owner_name, owner_email, date, duration, to, attachment, lang, meeting_link_url=None):
+def send_invite_email(
+    owner_name,
+    owner_email,
+    schedule_name,
+    attendee_email,
+    date,
+    duration,
+    to,
+    attachment,
+    lang,
+    meeting_link_url=None,
+):
     try:
         mail = InvitationMail(
+            schedule_name=schedule_name,
+            attendee_email=attendee_email,
             name=owner_name,
             email=owner_email,
             date=date,
@@ -37,11 +50,22 @@ def send_invite_email(owner_name, owner_email, date, duration, to, attachment, l
             sentry_sdk.capture_exception(e)
 
 
-def send_confirmation_email(url, attendee_name, attendee_email, date, duration, to, schedule_name, lang):
+def send_confirmation_email(
+    url, attendee_name, attendee_email, date, duration, to, schedule_name, appointment_slug, lang
+):
     # send confirmation mail to owner
     try:
         mail = ConfirmationMail(
-            f'{url}/1', f'{url}/0', attendee_name, attendee_email, date, duration, schedule_name, to=to, lang=lang
+            f'{url}/1',
+            f'{url}/0',
+            attendee_name,
+            attendee_email,
+            date,
+            duration,
+            schedule_name,
+            appointment_slug,
+            to=to,
+            lang=lang,
         )
         mail.send()
     except Exception as e:
@@ -65,10 +89,13 @@ def send_new_booking_email(name, email, date, duration, to, schedule_name, lang)
             sentry_sdk.capture_exception(e)
 
 
-def send_pending_email(owner_name, date, duration, to, attachment, lang):
+def send_pending_email(owner_name, owner_email, attendee_email, schedule_name, date, duration, to, attachment, lang):
     try:
         mail = PendingRequestMail(
             owner_name=owner_name,
+            owner_email=owner_email,
+            attendee_email=attendee_email,
+            schedule_name=schedule_name,
             date=date,
             duration=duration,
             to=to,
@@ -84,10 +111,13 @@ def send_pending_email(owner_name, date, duration, to, attachment, lang):
             sentry_sdk.capture_exception(e)
 
 
-def send_cancel_email(owner_name, date, duration, to, attachment, lang):
+def send_cancel_email(owner_name, owner_email, attendee_email, schedule_name, date, duration, to, attachment, lang):
     try:
         mail = CancelMail(
             owner_name=owner_name,
+            owner_email=owner_email,
+            attendee_email=attendee_email,
+            schedule_name=schedule_name,
             date=date,
             duration=duration,
             to=to,
@@ -103,10 +133,13 @@ def send_cancel_email(owner_name, date, duration, to, attachment, lang):
             sentry_sdk.capture_exception(e)
 
 
-def send_rejection_email(owner_name, date, duration, to, attachment, lang):
+def send_rejection_email(owner_name, owner_email, attendee_email, schedule_name, date, duration, to, attachment, lang):
     try:
         mail = RejectionMail(
             owner_name=owner_name,
+            owner_email=owner_email,
+            attendee_email=attendee_email,
+            schedule_name=schedule_name,
             date=date,
             duration=duration,
             to=to,

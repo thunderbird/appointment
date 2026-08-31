@@ -1,16 +1,25 @@
-{% set colour_text_secondary = '#4C4D58' %}
-{% set colour_tbpro_apmt_primary = '#008080' %}
-{% set copy_list = l10n('mail-brand-footer', lang=lang if lang else None).split("\n") %}
-<div style="color: {{ colour_text_secondary }}; font-size: 10px; line-height: 12px; font-weight: 400; text-align: center;">
-  <p style="display: flex; justify-content: center; gap: 8px; margin-bottom: 12px;">
-    <a href="{{ homepage_url }}/privacy" style="color:{{ colour_tbpro_apmt_primary }};">
-      {{ l10n('mail-brand-footer-privacy', lang=lang if lang else None) }}
-    </a>
-    <a href="{{ homepage_url }}/terms" style="color:{{ colour_tbpro_apmt_primary }};">
-      {{ l10n('mail-brand-footer-legal', lang=lang if lang else None) }}
-    </a>
-  </p>
+{% set mzla_link = '<a href="%(url)s" style="color:%(colour)s;">%(label)s</a>'|format(url='https://blog.thunderbird.net/2020/01/thunderbirds-new-home', colour=colour_text_base, label='MZLA Technologies Corporation') %}
+{% set copy_list = l10n('mail-brand-footer', {'mzla_link': mzla_link}, lang if lang else None).split("\n") %}
+<div style="font-size: 11px; font-weight: 400; text-align: center;">
+  <div style="margin-bottom: 12px;">
+    <a
+      href="{{ homepage_url }}/privacy"
+      style="color:{{ colour_text_base }}; padding: 6px 12px; white-space: nowrap;"
+    >{{ l10n('mail-brand-footer-privacy', lang=lang if lang else None) }}</a>
+    <a
+      href="{{ homepage_url }}/terms"
+      style="color:{{ colour_text_base }}; padding: 6px 12px; white-space: nowrap;"
+    >{{ l10n('mail-brand-footer-legal', lang=lang if lang else None) }}</a>
+    <a
+      href="https://www.mozilla.org/about/governance/policies/participation/"
+      style="color:{{ colour_text_base }}; padding: 6px 12px; white-space: nowrap;"
+    >{{ l10n('mail-brand-footer-participation', lang=lang if lang else None) }}</a>
+    <a
+      href="https://support.tb.pro/hc/en-us"
+      style="color:{{ colour_text_base }}; padding: 6px 12px; white-space: nowrap;"
+    >{{ l10n('mail-brand-footer-support', lang=lang if lang else None) }}</a>
+  </div>
   {% for copy in copy_list %}
-    <p style="margin: 0;">{{ copy }}&nbsp;</p>
+    <div style="color:{{ colour_text_base }}; font-size: 12px;">{{ copy|safe }}&nbsp;</div>
   {% endfor %}
 </div>

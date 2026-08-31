@@ -1,81 +1,75 @@
 {% extends "includes/base.jinja2" %}
-{% set show_contact_form_support_hint = True %}
 {# Helper vars #}
-{% set clock_image_small = '<img style="width: 11px; height: 11px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
-{% set clock_image = '<img style="width: 15px; height: 15px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
-{% set calendar_image = '<img style="width: 14px; height: 14px; position: relative; top: 2px;" alt="" src="cid:%(cid)s" />'|format(cid=calendar_icon_cid) %}
+{% set clock_icon_img = '<img style="display: block; width: 12px; height: 12px;" alt="" src="cid:%(cid)s" />'|format(cid=clock_icon_cid) %}
 {# Code begins! #}
 {% block introduction %}
-  <div style="color: {{ colour_text_base }}; text-align: center; line-height: 16px;">
-    <p style="font-weight: 700; margin: 0;">
-      {{ l10n('confirm-mail-html-heading-name', {'name': name}, lang) }}
-    </p>
-    <p style="color: {{ colour_text_muted }}; font-size: 9px; line-height: 10px; font-weight: 700; margin: 0;">
-      {{ l10n('confirm-mail-html-heading-email', {'email': email}, lang) }}
-    </p>
-    <p style="font-weight: 400; margin: 0;">
-      {{ l10n('confirm-mail-html-heading-text', {'schedule_name': schedule_name}, lang) }}
-    </p>
+  <div style="color: {{ colour_text_base }}; font-size: 20px; font-weight: 600;">
+    {{ l10n('confirm-mail-html-heading', {'name': name, 'email': email, 'schedule_name': schedule_name}, lang) }}
   </div>
 {% endblock %}
 {% block information %}
-  <div style="display: flex">
-    {# Time details #}
-    <div style="width: 100%; font-weight: 700; margin: 24px 12px;">
-      <div style="margin-bottom: 6px;">
-        {{ clock_image|safe }} {{ time_range }}
-        <span style="color: {{ colour_icon_secondary }}; font-size: 9px">{{ timezone }}</span>
-      </div>
-      <div>
-        {{ calendar_image|safe }} {{ day }}
-      </div>
-    </div>
-    {# Chip #}
-    <div style="
-      min-width: 60px;
-      margin-left: auto;
-      margin-right: 0;
-      text-align: center;
-      background-color: {{ colour_tbpro_apmt_secondary }};
-      padding: 3px 12px;
-      border-radius: 3px;
-      font-size: 9px;
-      font-weight: 700;
-      height: 16px;
-      ">
-      {{ clock_image_small|safe }} {{ l10n('confirm-mail-html-time', {'duration': duration}, lang) }}
-    </div>
+  <div style="font-size: 20px; font-weight: 600; color: {{ colour_icon_secondary }}; margin-bottom: 4px;">
+    {{ schedule_name }}
   </div>
+  <div style="margin-bottom: 4px;">
+    {{ day }} {{ start_time }} {{ timezone }}
+  </div>
+  <div style="color: {{ colour_icon_secondary }}; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-bottom: 16px;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="display: inline-table; vertical-align: middle;"><tr>
+      <td style="vertical-align: middle;">{{ clock_icon_img|safe }}</td>
+      <td style="vertical-align: middle; padding-left: 3px; white-space: nowrap; font-size: 10px; line-height: 12px; font-weight: 700; text-transform: uppercase; color: {{ colour_icon_secondary }};">{{ l10n('mail-html-time', {'duration': duration}, lang) }}</td>
+    </tr></table>
+  </div>
+  <hr style="border: none; border-top: 1px solid {{ colour_border }}; margin: 0 0 16px 0;" />
+  <div style="color: {{ colour_text_base }}; font-size: 14px; margin-bottom: 16px; line-height: 1.23;">
+    {{ l10n('mail-html-meeting-with', lang=lang) }}<br />
+    {{ email }}
+  </div>
+  <a href="{{ homepage_url }}/bookings/{{ appointment_slug }}" style="color: {{ colour_primary_pressed }}; text-decoration: underline; font-size: 13px;">
+    {{ l10n('confirm-mail-html-open-link', lang=lang) }}
+  </a>
 {% endblock %}
 {% block call_to_action %}
-  <div style="margin-bottom: 12px">
-    <a
-      href="{{ confirm }}"
-      style="
-        display: inline-block;
-        font-size: 13px;
-        padding: 12px 24px;
-        color: {{ colour_neutral }};
-        background: {{ colour_tbpro_apmt_primary }};
-        border-radius: 3px;
-        border: 1px solid {{ colour_tbpro_apmt_primary_hover }};
-        box-shadow: 0px 6px 3px -4px rgba(21, 47, 60, 0.30);
-        text-decoration:none;
-        white-space: nowrap;
-        "
-    >{{ l10n('confirm-mail-html-confirm-action', lang=lang) }}</a>
-  </div>
-  <div>
+  <div class="apmt-row" style="gap: 16px;">
     <a
       href="{{ deny }}"
       style="
-        display: inline-block;
+        background: {{ colour_neutral }};
+        border-radius: 3px;
+        border: 1px solid {{ colour_primary }};
+        box-shadow: 0 2px 4px 0 #0000001f;
+        box-sizing: border-box;
+        color: {{ colour_primary }};
+        display: block;
+        flex: 1 1 0;
         font-size: 13px;
+        font-weight: 700;
+        min-width: 128px;
         padding: 12px 24px;
-        color: {{ colour_tbpro_apmt_primary }};
-        text-decoration-line: underline;
-        font-weight: 400;
+        text-align: center;
+        text-decoration: none;
+        white-space: nowrap;
         "
     >{{ l10n('confirm-mail-html-deny-action', lang=lang) }}</a>
+    <a
+      href="{{ confirm }}"
+      style="
+        background: {{ colour_primary }};
+        border-radius: 3px;
+        border: 1px solid {{ colour_primary }};
+        box-shadow: 0 2px 4px 0 #0000001f;
+        box-sizing: border-box;
+        color: {{ colour_neutral }};
+        display: block;
+        flex: 1 1 0;
+        font-size: 13px;
+        font-weight: 700;
+        min-width: 128px;
+        padding: 12px 24px;
+        text-align: center;
+        text-decoration: none;
+        white-space: nowrap;
+        "
+    >{{ l10n('confirm-mail-html-confirm-action', lang=lang) }}</a>
   </div>
 {% endblock %}

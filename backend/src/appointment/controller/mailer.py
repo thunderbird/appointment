@@ -111,6 +111,9 @@ class Mailer:
         # add body as html and text parts
         message.set_content(self.text())
         message.add_alternative(self.html(), subtype='html')
+        # Keep a reference to the html part since the content at index [1] changes
+        # when we call add_attachment() in the loop
+        html_part = message.get_payload()[1]
 
         # add attachment(s) as multimedia parts
         for a in self._attachments():
@@ -123,7 +126,7 @@ class Mailer:
                 )
             else:
                 # Attach it to the html payload
-                message.get_payload()[1].add_related(
+                html_part.add_related(
                     a.data,
                     a.mime_main,
                     a.mime_sub,
@@ -193,7 +196,7 @@ class BaseBookingMail(Mailer):
 
         # If value is key then there's no localization available, set a default.
         if self.time_format == 'time-format':
-            self.time_format = '%I:%M%p'
+            self.time_format = '%I:%M %p'
 
         date_end = self.date + datetime.timedelta(minutes=self.duration)
 
@@ -228,16 +231,41 @@ class BaseBookingMail(Mailer):
 
 
 class InvitationMail(BaseBookingMail):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, schedule_name, attendee_email, *args, **kwargs):
         """Init Mailer with invitation/booking-accepted specific defaults
         To: Bookee
         """
+        self.schedule_name = schedule_name
+        self.attendee_email = attendee_email
         lang = kwargs.get('lang')
         default_kwargs = {
             'subject': l10n('invite-mail-subject', lang=lang),
             'plain': l10n('invite-mail-plain', lang=lang),
         }
         super().__init__(*args, **default_kwargs, **kwargs)
+
+    def _attachments(self):
+        """This message body only uses the clock and check icons, not the calendar one"""
+        path = os.path.join(BASE_PATH, 'templates/assets/img/icons')
+
+        with open(f'{path}/clock.png', 'rb') as fh:
+            clock_icon = fh.read()
+        with open(f'{path}/check-circle-success.png', 'rb') as fh:
+            check_icon = fh.read()
+
+        return [
+            *Mailer._attachments(self),
+            Attachment(
+                mime=('image', 'png'),
+                filename='clock.png',
+                data=clock_icon,
+            ),
+            Attachment(
+                mime=('image', 'png'),
+                filename='check-circle-success.png',
+                data=check_icon,
+            ),
+        ]
 
     def text(self):
         plain = super().text()
@@ -252,7 +280,9 @@ class InvitationMail(BaseBookingMail):
         return get_template('invite.jinja2').render(
             name=self.name,
             email=self.email,
-            time_range=self.time_range,
+            attendee_email=self.attendee_email,
+            schedule_name=self.schedule_name,
+            start_time=self.date.strftime(self.time_format),
             timezone=self.timezone,
             day=self.day,
             duration=self.duration,
@@ -260,8 +290,8 @@ class InvitationMail(BaseBookingMail):
             lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
-            calendar_icon_cid=self._attachments()[2].filename,
-            clock_icon_cid=self._attachments()[3].filename,
+            clock_icon_cid=self._attachments()[2].filename,
+            check_icon_cid=self._attachments()[3].filename,
         )
 
 
@@ -287,15 +317,44 @@ class ZoomMeetingFailedMail(Mailer):
 
 
 class ConfirmationMail(BaseBookingMail):
-    def __init__(self, confirm_url, deny_url, name, email, date, duration, schedule_name, *args, **kwargs):
+    def __init__(
+        self,
+        confirm_url,
+        deny_url,
+        name,
+        email,
+        date,
+        duration,
+        schedule_name,
+        appointment_slug,
+        *args,
+        **kwargs,
+    ):
         """Init Mailer with action-required:confirm/deny specific defaults
         To: Event owner
         """
         self.confirmUrl = confirm_url
         self.denyUrl = deny_url
         self.schedule_name = schedule_name
+        self.appointment_slug = appointment_slug
         default_kwargs = {'subject': l10n('confirm-mail-subject', {'name': name}, kwargs['lang'])}
         super().__init__(name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs)
+
+    def _attachments(self):
+        """This message body only uses the clock icon, not the calendar one"""
+        path = os.path.join(BASE_PATH, 'templates/assets/img/icons')
+
+        with open(f'{path}/clock.png', 'rb') as fh:
+            clock_icon = fh.read()
+
+        return [
+            *Mailer._attachments(self),
+            Attachment(
+                mime=('image', 'png'),
+                filename='clock.png',
+                data=clock_icon,
+            ),
+        ]
 
     def text(self):
         return l10n(
@@ -317,44 +376,70 @@ class ConfirmationMail(BaseBookingMail):
         return get_template('confirm.jinja2').render(
             name=self.name,
             email=self.email,
-            time_range=self.time_range,
+            start_time=self.date.strftime(self.time_format),
             timezone=self.timezone,
             day=self.day,
             duration=self.duration,
             confirm=self.confirmUrl,
             deny=self.denyUrl,
             schedule_name=self.schedule_name,
+            appointment_slug=self.appointment_slug,
             lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
-            calendar_icon_cid=self._attachments()[1].filename,
-            clock_icon_cid=self._attachments()[2].filename,
+            clock_icon_cid=self._attachments()[1].filename,
         )
 
 
 class CancelMail(Mailer):
-    def __init__(self, owner_name, date, duration, *args, **kwargs):
+    def __init__(self, owner_name, owner_email, attendee_email, schedule_name, date, duration, *args, **kwargs):
         """Init Mailer with cancel specific defaults
         To: Bookee
         Reply-To: Event owner
         """
         self.owner_name = owner_name
+        self.owner_email = owner_email
+        self.attendee_email = attendee_email
+        self.schedule_name = schedule_name
         self.date = date
         self.duration = duration
         default_kwargs = {'subject': l10n('cancel-mail-subject', lang=kwargs.get('lang'))}
         super(CancelMail, self).__init__(*args, **default_kwargs, **kwargs)
 
         # Localize date and time
-        time_format = l10n('time-format', lang=self.lang)
-        if time_format == 'time-format':
-            time_format = '%I:%M%p'
+        self.time_format = l10n('time-format', lang=self.lang)
+        if self.time_format == 'time-format':
+            self.time_format = '%I:%M %p'
 
         date_end = self.date + datetime.timedelta(minutes=self.duration)
-        self.time_range = ' - '.join([date.strftime(time_format), date_end.strftime(time_format)])
+        self.time_range = ' - '.join([date.strftime(self.time_format), date_end.strftime(self.time_format)])
         self.timezone = ''
         if self.date.tzinfo:
             self.timezone = f'({date.strftime("%Z")})'
         self.day = format_date(date, format='full', locale=self.lang or FALLBACK_LOCALE)
+
+    def _attachments(self):
+        """Icons for the message body"""
+        path = os.path.join(BASE_PATH, 'templates/assets/img/icons')
+
+        with open(f'{path}/clock.png', 'rb') as fh:
+            clock_icon = fh.read()
+        with open(f'{path}/check-circle-error.png', 'rb') as fh:
+            error_icon = fh.read()
+
+        return [
+            *super()._attachments(),
+            Attachment(
+                mime=('image', 'png'),
+                filename='clock.png',
+                data=clock_icon,
+            ),
+            Attachment(
+                mime=('image', 'png'),
+                filename='check-circle-error.png',
+                data=error_icon,
+            ),
+        ]
 
     def text(self):
         return l10n(
@@ -371,21 +456,31 @@ class CancelMail(Mailer):
     def html(self):
         return get_template('cancelled.jinja2').render(
             owner_name=self.owner_name,
+            owner_email=self.owner_email,
+            attendee_email=self.attendee_email,
+            schedule_name=self.schedule_name,
             day=self.day,
-            time_range=self.time_range,
+            start_time=self.date.strftime(self.time_format),
             timezone=self.timezone,
-            tbpro_logo_cid=self._attachments()[0].filename,
+            duration=self.duration,
             lang=self.lang,
+            # Image cids
+            tbpro_logo_cid=self._attachments()[0].filename,
+            clock_icon_cid=self._attachments()[2].filename,
+            triangle_icon_cid=self._attachments()[3].filename,
         )
 
 
 class RejectionMail(Mailer):
-    def __init__(self, owner_name, date, duration, *args, **kwargs):
+    def __init__(self, owner_name, owner_email, attendee_email, schedule_name, date, duration, *args, **kwargs):
         """Init Mailer with rejection specific defaults
         To: Bookee
         Reply-To: Event owner
         """
         self.owner_name = owner_name
+        self.owner_email = owner_email
+        self.attendee_email = attendee_email
+        self.schedule_name = schedule_name
         self.date = date
         self.duration = duration
         default_kwargs = {'subject': l10n('reject-mail-subject', lang=kwargs.get('lang'))}
@@ -393,16 +488,39 @@ class RejectionMail(Mailer):
         self.method = 'CANCEL'
 
         # Localize date and time
-        time_format = l10n('time-format', lang=self.lang)
-        if time_format == 'time-format':
-            time_format = '%I:%M%p'
+        self.time_format = l10n('time-format', lang=self.lang)
+        if self.time_format == 'time-format':
+            self.time_format = '%I:%M %p'
 
         date_end = self.date + datetime.timedelta(minutes=self.duration)
-        self.time_range = ' - '.join([date.strftime(time_format), date_end.strftime(time_format)])
+        self.time_range = ' - '.join([date.strftime(self.time_format), date_end.strftime(self.time_format)])
         self.timezone = ''
         if self.date.tzinfo:
             self.timezone = f'({date.strftime("%Z")})'
         self.day = format_date(date, format='full', locale=self.lang or FALLBACK_LOCALE)
+
+    def _attachments(self):
+        """Icons for the message body"""
+        path = os.path.join(BASE_PATH, 'templates/assets/img/icons')
+
+        with open(f'{path}/clock.png', 'rb') as fh:
+            clock_icon = fh.read()
+        with open(f'{path}/check-circle-error.png', 'rb') as fh:
+            error_icon = fh.read()
+
+        return [
+            *super()._attachments(),
+            Attachment(
+                mime=('image', 'png'),
+                filename='clock.png',
+                data=clock_icon,
+            ),
+            Attachment(
+                mime=('image', 'png'),
+                filename='check-circle-error.png',
+                data=error_icon,
+            ),
+        ]
 
     def text(self):
         return l10n(
@@ -414,36 +532,69 @@ class RejectionMail(Mailer):
     def html(self):
         return get_template('rejected.jinja2').render(
             owner_name=self.owner_name,
+            owner_email=self.owner_email,
+            attendee_email=self.attendee_email,
+            schedule_name=self.schedule_name,
             day=self.day,
-            time_range=self.time_range,
+            start_time=self.date.strftime(self.time_format),
             timezone=self.timezone,
-            tbpro_logo_cid=self._attachments()[0].filename,
+            duration=self.duration,
             lang=self.lang,
+            # Image cids
+            tbpro_logo_cid=self._attachments()[0].filename,
+            clock_icon_cid=self._attachments()[2].filename,
+            triangle_icon_cid=self._attachments()[3].filename,
         )
 
 
 class PendingRequestMail(Mailer):
-    def __init__(self, owner_name, date, duration, *args, **kwargs):
+    def __init__(self, owner_name, owner_email, attendee_email, schedule_name, date, duration, *args, **kwargs):
         """Init Mailer with pending-request specific defaults
         To: Bookee
         """
         self.owner_name = owner_name
+        self.owner_email = owner_email
+        self.attendee_email = attendee_email
+        self.schedule_name = schedule_name
         self.date = date
         self.duration = duration
         default_kwargs = {'subject': l10n('pending-mail-subject', lang=kwargs.get('lang'))}
         super(PendingRequestMail, self).__init__(*args, **default_kwargs, **kwargs)
 
         # Localize date and time
-        time_format = l10n('time-format', lang=self.lang)
-        if time_format == 'time-format':
-            time_format = '%I:%M%p'
+        self.time_format = l10n('time-format', lang=self.lang)
+        if self.time_format == 'time-format':
+            self.time_format = '%I:%M %p'
 
         date_end = self.date + datetime.timedelta(minutes=self.duration)
-        self.time_range = ' - '.join([date.strftime(time_format), date_end.strftime(time_format)])
+        self.time_range = ' - '.join([date.strftime(self.time_format), date_end.strftime(self.time_format)])
         self.timezone = ''
         if self.date.tzinfo:
             self.timezone = f'({date.strftime("%Z")})'
         self.day = format_date(date, format='full', locale=self.lang or FALLBACK_LOCALE)
+
+    def _attachments(self):
+        """Icons for the message body"""
+        path = os.path.join(BASE_PATH, 'templates/assets/img/icons')
+
+        with open(f'{path}/clock.png', 'rb') as fh:
+            clock_icon = fh.read()
+        with open(f'{path}/check-circle-warning.png', 'rb') as fh:
+            warning_icon = fh.read()
+
+        return [
+            *super()._attachments(),
+            Attachment(
+                mime=('image', 'png'),
+                filename='clock.png',
+                data=clock_icon,
+            ),
+            Attachment(
+                mime=('image', 'png'),
+                filename='check-circle-warning.png',
+                data=warning_icon,
+            ),
+        ]
 
     def text(self):
         return l10n(
@@ -455,11 +606,18 @@ class PendingRequestMail(Mailer):
     def html(self):
         return get_template('pending.jinja2').render(
             owner_name=self.owner_name,
+            owner_email=self.owner_email,
+            attendee_email=self.attendee_email,
+            schedule_name=self.schedule_name,
             day=self.day,
-            time_range=self.time_range,
+            start_time=self.date.strftime(self.time_format),
             timezone=self.timezone,
-            tbpro_logo_cid=self._attachments()[0].filename,
+            duration=self.duration,
             lang=self.lang,
+            # Image cids
+            tbpro_logo_cid=self._attachments()[0].filename,
+            clock_icon_cid=self._attachments()[2].filename,
+            warning_icon_cid=self._attachments()[3].filename,
         )
 
 

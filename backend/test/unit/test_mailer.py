@@ -1,4 +1,5 @@
 import datetime
+import re
 from unittest.mock import MagicMock
 
 from starlette_context import request_cycle_context
@@ -25,6 +26,8 @@ class TestMailer:
             to=fake_email,
             name='fake',
             email='fake@example.org',
+            schedule_name='test',
+            attendee_email='fake@example.org',
             date=datetime.datetime.now(),
             duration=30,
             attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
@@ -37,6 +40,8 @@ class TestMailer:
             to='to@example.org',
             name='fake',
             email='fake@example.org',
+            schedule_name='test',
+            attendee_email='fake@example.org',
             date=datetime.datetime.now(),
             duration=30,
             attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
@@ -51,6 +56,8 @@ class TestMailer:
             to='to@example.org',
             name='fake',
             email='fake@example.org',
+            schedule_name='test',
+            attendee_email='fake@example.org',
             date=datetime.datetime.now(),
             duration=30,
             attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
@@ -75,6 +82,7 @@ class TestMailer:
             to=fake_email,
             duration=30,
             schedule_name='test',
+            appointment_slug='test-slug',
             lang='en',
         )
         assert mailer.html()
@@ -106,7 +114,16 @@ class TestMailer:
         now = datetime.datetime.now()
         fake_email = 'to@example.org'
 
-        mailer = PendingRequestMail(owner_name=subscriber.name, date=now, duration=30, to=fake_email)
+        mailer = PendingRequestMail(
+            owner_name=subscriber.name,
+            owner_email=subscriber.email,
+            attendee_email=fake_email,
+            schedule_name='test',
+            date=now,
+            duration=30,
+            to=fake_email,
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+        )
         assert mailer.html()
         assert mailer.text()
 
@@ -119,7 +136,16 @@ class TestMailer:
         now = datetime.datetime.now()
         fake_email = 'to@example.org'
 
-        mailer = RejectionMail(owner_name=subscriber.name, date=now, duration=30, to=fake_email)
+        mailer = RejectionMail(
+            owner_name=subscriber.name,
+            owner_email=subscriber.email,
+            attendee_email=fake_email,
+            schedule_name='test',
+            date=now,
+            duration=30,
+            to=fake_email,
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+        )
         assert mailer.html()
         assert mailer.text()
 
@@ -132,13 +158,57 @@ class TestMailer:
         now = datetime.datetime.now()
         fake_email = 'to@example.org'
 
-        mailer = CancelMail(owner_name=subscriber.name, date=now, duration=30, to=fake_email, lang='en')
+        mailer = CancelMail(
+            owner_name=subscriber.name,
+            owner_email=subscriber.email,
+            attendee_email=fake_email,
+            schedule_name='test',
+            date=now,
+            duration=30,
+            to=fake_email,
+            lang='en',
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+        )
         assert mailer.html()
         assert mailer.text()
 
         for idx, content in enumerate([mailer.text(), mailer.html()]):
             fault = 'text' if idx == 0 else 'html'
             assert subscriber.name in content, fault
+
+    def test_cancel_icons_attached_alongside_html_with_ics_present(self, faker, with_l10n, make_pro_subscriber):
+        """Regression test: adding the ics attachment used to reindex message.get_payload(), causing icons
+        attached afterwards to end up as siblings of the ics part instead of the html part, so their cids
+        never resolved correctly in mail clients."""
+        subscriber = make_pro_subscriber()
+
+        mailer = CancelMail(
+            owner_name=subscriber.name,
+            owner_email=subscriber.email,
+            attendee_email='to@example.org',
+            schedule_name='test',
+            date=datetime.datetime.now(),
+            duration=30,
+            to='to@example.org',
+            lang='en',
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+        )
+        message = mailer.build()
+
+        html_part = next(part for part in message.walk() if part.get_content_type() == 'text/html')
+        referenced_cids = set(re.findall(r'cid:([\w.\-]+)', html_part.get_content()))
+        assert referenced_cids, 'expected the html to reference at least one cid image'
+
+        html_container = next(
+            part for part in message.walk() if part.is_multipart() and html_part in part.get_payload()
+        )
+        sibling_cids = {
+            part.get('Content-ID').strip('<>') for part in html_container.get_payload() if part.get('Content-ID')
+        }
+
+        assert referenced_cids <= sibling_cids, (
+            f'html references {referenced_cids} but only {sibling_cids} are attached alongside it'
+        )
 
     def test_zoom_invite_failed(self, faker, with_l10n):
         fake_title = faker.name()
@@ -162,6 +232,8 @@ class TestMailer:
             to='to@example.org',
             name='fake',
             email='fake@example.org',
+            schedule_name='test',
+            attendee_email='fake@example.org',
             date=datetime.datetime.now(),
             duration=30,
             attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
@@ -209,6 +281,8 @@ class TestMailer:
                 to='bookee@example.org',
                 name='Owner Name',
                 email='owner@example.org',
+                schedule_name='test',
+                attendee_email='bookee@example.org',
                 date=now,
                 duration=30,
                 attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],

@@ -489,6 +489,7 @@ def request_schedule_availability_slot(
                 date=date,
                 duration=slot.duration,
                 schedule_name=schedule.name,
+                appointment_slug=appointment.slug,
                 to=subscriber.preferred_email,
                 lang=subscriber.language,
             )
@@ -522,7 +523,14 @@ def request_schedule_availability_slot(
                 repo.appointment.update_external_id(db, appointment, event.external_id)
 
             if not use_google_invite:
-                Tools().send_hold_vevent(background_tasks, slot.appointment, slot, subscriber, slot.attendee)
+                Tools().send_hold_vevent(
+                    background_tasks,
+                    slot.appointment,
+                    slot,
+                    subscriber,
+                    slot.attendee,
+                    schedule_name=schedule.name,
+                )
 
         # If no confirmation is needed, directly confirm the booking and send invitation mail
         else:
@@ -640,7 +648,14 @@ def handle_schedule_availability_decision(
         # For non-Google calendars, send branded rejection email to the bookee.
         # For Google, the delete with sendUpdates handles the cancellation notification.
         if not use_google_invite:
-            Tools().send_reject_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
+            Tools().send_reject_vevent(
+                background_tasks,
+                appointment,
+                slot,
+                subscriber,
+                slot.attendee,
+                schedule_name=schedule.name,
+            )
 
         # mark the slot as BookingStatus.declined
         slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.declined)
@@ -735,7 +750,14 @@ def handle_schedule_availability_decision(
     slot = repo.slot.book(db, slot.id)
 
     if not use_google_invite:
-        Tools().send_invitation_vevent(background_tasks, appointment, slot, subscriber, slot.attendee)
+        Tools().send_invitation_vevent(
+            background_tasks,
+            appointment,
+            slot,
+            subscriber,
+            slot.attendee,
+            schedule_name=schedule.name,
+        )
 
     return True
 
