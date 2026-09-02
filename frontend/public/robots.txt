@@ -1,0 +1,23 @@
+User-agent: *
+
+# Booker pages render a subscriber's name and booking slug
+Disallow: /user/
+
+# Contains a single-use auth token in the URL
+Disallow: /post-login/
+
+# Authenticated areas
+Disallow: /dashboard
+Disallow: /availability
+Disallow: /bookings
+Disallow: /settings
+Disallow: /setup
+Disallow: /logout
+Disallow: /admin/
+
+# Legacy paths that redirect into the authenticated areas above
+Disallow: /schedule
+Disallow: /calendar/
+Disallow: /appointments/
+
+Sitemap: https://appointment.tb.pro/sitemap.txt

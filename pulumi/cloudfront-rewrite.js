@@ -7,6 +7,7 @@ async function handler(event) {
     "/fxa",
     "/assets",
     "/sitemap.txt",
+    "/robots.txt",
     "/favicon.svg",
     "/site.webmanifest",
     "/apple-touch-icon.png",
