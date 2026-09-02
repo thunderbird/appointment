@@ -20,6 +20,7 @@ const emit = defineEmits<{ 'link-refreshed': [] }>();
 
 const refreshLinkModalRef = useTemplateRef('refreshLinkModalRef');
 const copyButtonLabel = ref(t('label.copy'));
+const refreshingLink = ref(false);
 
 const linkSlug = computed({
   get: () => currentState.value.slug || userStore.mySlug,
@@ -31,21 +32,31 @@ const linkSlug = computed({
 const shortUrlWithoutProtocol = computed(() => userStore.data.userLink.replace(/https?:\/\//g, ''));
 
 async function refreshLinkConfirm() {
-  await userStore.changeSignedUrl();
-  await userStore.profile();
+  if (refreshingLink.value) {
+    return;
+  }
 
-  // Update link slug in the "Customize Your Link" text field
-  // We need to update both initialState and currentState for the isDirty comparison
-  availabilityStore.$patch({
-    initialState: { slug: userStore.mySlug },
-    currentState: { slug: userStore.mySlug },
-  });
+  refreshingLink.value = true;
 
-  refreshLinkModalRef.value.hide();
-  emit('link-refreshed');
+  try {
+    await userStore.changeSignedUrl();
+    await userStore.profile();
 
-  if (usePosthog) {
-    posthog.capture(MetricEvents.RefreshLink);
+    // Update link slug in the "Customize Your Link" text field
+    // We need to update both initialState and currentState for the isDirty comparison
+    availabilityStore.$patch({
+      initialState: { slug: userStore.mySlug },
+      currentState: { slug: userStore.mySlug },
+    });
+
+    refreshLinkModalRef.value.hide();
+    emit('link-refreshed');
+
+    if (usePosthog) {
+      posthog.capture(MetricEvents.RefreshLink);
+    }
+  } finally {
+    refreshingLink.value = false;
   }
 }
 
@@ -97,7 +108,7 @@ export default {
   </text-input>
 
   <!-- Refresh link confirmation modal -->
-  <refresh-link-modal ref="refreshLinkModalRef" @confirmed="refreshLinkConfirm()" />
+  <refresh-link-modal ref="refreshLinkModalRef" :loading="refreshingLink" @confirmed="refreshLinkConfirm()" />
 </template>
 
 <style scoped>
