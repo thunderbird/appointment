@@ -363,11 +363,11 @@ main {
   }
 
   &.standalone {
-    background: linear-gradient(360deg, #ffffff 31.25%, var(--colour-primary-soft) 321.87%);
+    background: linear-gradient(to top, #ffffff, var(--colour-primary-soft) 300%);
 
     .dark & {
       /* TODO: No design token yet for that color */
-      background: linear-gradient(360deg, var(--colour-neutral-base) 31.25%, #24a39d 321.87%);
+      background: linear-gradient(to top, var(--colour-neutral-base), #24a39d 300%);
     }
   }
 }
