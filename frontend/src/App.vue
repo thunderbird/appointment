@@ -125,6 +125,7 @@ const routeHasModal = computed(() => ['login'].includes(typeof route.name === 's
 const routeIsFTUE = computed(() => ['setup'].includes(typeof route.name === 'string' ? route.name : ''));
 const routeIsPostLogin = computed(() => ['post-login'].includes(typeof route.name === 'string' ? route.name : ''));
 const routeIsLogout = computed(() => ['logout'].includes(typeof route.name === 'string' ? route.name : ''));
+const routeIsMaintenance = computed(() => ['maintenance'].includes(typeof route.name === 'string' ? route.name : ''));
 // The router.ts file has a beforeEach guard that redirects to the OIDC login
 // but we are flashing a NotFoundView briefly which is uh... not ideal
 const routeNameUndefinedDueToAbortedNav = computed(() => !route.name && !user?.authenticated && isOidcAuth);
@@ -309,16 +310,19 @@ onMounted(async () => {
       {{ notificationMessage }}
     </site-notification>
 
-    <!-- Desktop NavBar show / hide is handled in CSS land -->
-    <nav-bar :nav-items="navItems" />
+    <template v-if="!routeIsMaintenance">
+      <!-- Desktop NavBar show / hide is handled in CSS land -->
+      <nav-bar :nav-items="navItems" />
 
-    <!-- Mobile NavBar show / hide is handled in CSS land -->
-    <nav-bar-mobile />
+      <!-- Mobile NavBar show / hide is handled in CSS land -->
+      <nav-bar-mobile />
+    </template>
 
     <main
       :class="{
         'private-route': !routeIsPublic,
         'public-route': routeIsPublic && !routeHasModal,
+        standalone: routeIsMaintenance,
       }"
     >
       <router-view />
@@ -356,6 +360,15 @@ main {
     flex-grow: 1;
     min-height: 0;
     padding-block-end: 1rem;
+  }
+
+  &.standalone {
+    background: linear-gradient(360deg, #ffffff 31.25%, var(--colour-primary-soft) 321.87%);
+
+    .dark & {
+      /* TODO: No design token yet for that color */
+      background: linear-gradient(360deg, var(--colour-neutral-base) 31.25%, #24a39d 321.87%);
+    }
   }
 }
 

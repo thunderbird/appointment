@@ -507,6 +507,14 @@
       "unknown-error": "An unknown error occurred."
     }
   },
+  "maintenance": {
+    "checkBackSoon": "Please check back soon.",
+    "moreInformation": "For more information, check {statusPage}{lineBreak}or visit the {supportKnowledgeBase}.",
+    "statusPage": "status.tb.pro",
+    "supportKnowledgeBase": "Appointment support knowledge base",
+    "title": "Undergoing maintenance",
+    "unavailable": "Thunderbird Appointment is temporarily unavailable."
+  },
   "navBar": {
     "shareMyLink": "Share my link"
   },
