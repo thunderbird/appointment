@@ -71,7 +71,7 @@ const { t } = useI18n();
   }
 
   .subline {
-    line-height: 132%;
+    line-height: 1.32;
   }
 
   .more-information {
