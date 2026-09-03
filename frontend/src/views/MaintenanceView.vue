@@ -64,7 +64,7 @@ const { t } = useI18n();
       text-decoration: underline;
       text-underline-offset: 3px;
 
-      @media (prefers-color-scheme: dark) {
+      .dark & {
         color: var(--colour-primary-hover);
       }
     }
