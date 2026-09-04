@@ -1,17 +1,18 @@
+import { config } from '@/config';
 import { defineAsyncComponent } from 'vue';
+import { isOidcAuth } from '@/composables/authSchemes';
+import { LOGIN_REDIRECT_KEY } from '@/definitions';
 import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
+import { userManager } from '@/composables/oidcUserManager';
+import { useUserStore } from '@/stores/user-store';
 import BookerView from '@/views/BookerView/index.vue';
+import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
 import DashboardView from '@/views/DashboardView/index.vue';
 import HomeView from '@/views/HomeView.vue';
 import LoginView from '@/views/LoginView.vue';
-import PostLoginView from '@/views/PostLoginView.vue';
-import { useUserStore } from '@/stores/user-store';
 import LogoutView from '@/views/LogoutView.vue';
-import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
-import { isOidcAuth } from '@/composables/authSchemes';
-import { userManager } from '@/composables/oidcUserManager';
-import { config } from '@/config';
-import { LOGIN_REDIRECT_KEY } from '@/definitions';
+import MaintenanceView from '@/views/MaintenanceView.vue';
+import PostLoginView from '@/views/PostLoginView.vue';
 
 // lazy loaded components
 const AvailabilityView = defineAsyncComponent(() => import('@/views/AvailabilityView/index.vue'));
@@ -164,6 +165,15 @@ const routes: RouteRecordRaw[] = [
     component: SubscriberPanelView,
     meta: {
       // disableMetrics: true,
+    },
+  },
+  // Maintenance
+  {
+    path: '/maintenance',
+    name: 'maintenance',
+    component: MaintenanceView,
+    meta: {
+      isPublic: true,
     },
   },
 ];

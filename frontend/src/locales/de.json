@@ -506,6 +506,14 @@
       "unknown-error": "Ein unbekannter Fehler ist aufgetreten."
     }
   },
+  "maintenance": {
+    "checkBackSoon": "Bitte schau später nochmal vorbei.",
+    "moreInformation": "Weitere Informationen findest Du auf {statusPage}{lineBreak}oder in der {supportKnowledgeBase}.",
+    "statusPage": "status.tb.pro",
+    "supportKnowledgeBase": "Appointment-Support-Wissensdatenbank",
+    "title": "Wartungsarbeiten",
+    "unavailable": "Thunderbird Appointment ist vorübergehend nicht verfügbar."
+  },
   "navBar": {
     "shareMyLink": "Meinen Link teilen"
   },
