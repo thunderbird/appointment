@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { ModalDialog, PrimaryButton } from '@thunderbirdops/services-ui';
+import { ModalDialog, PrimaryButton, IconButton, NoticeBar, NoticeBarTypes } from '@thunderbirdops/services-ui';
+import { PhX } from '@phosphor-icons/vue';
 import { useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 const { t } = useI18n();
-const emit = defineEmits(['confirmed']);
+const emit = defineEmits(['confirmed', 'dismiss-error']);
 
 defineProps<{
   loading?: boolean;
+  errorMessage?: string;
 }>();
 
 const modal = useTemplateRef('modal');
@@ -27,12 +29,26 @@ defineExpose({ show, hide });
 
 <template>
   <!-- Refresh link modal -->
-  <modal-dialog ref="modal" class="refresh-link-modal" :class="{ 'is-loading': loading }" :close-outside="!loading">
+  <modal-dialog
+    ref="modal"
+    class="refresh-link-modal"
+    :class="{ 'is-loading': loading }"
+    :close-outside="!loading"
+  >
     <template #header>
       {{ t('label.refreshLink') }}
     </template>
 
     <div class="refresh-link-modal-container">
+      <notice-bar v-if="errorMessage" class="notice-bar" :type="NoticeBarTypes.Critical">
+        {{ errorMessage }}
+        <template #cta>
+          <icon-button @click="emit('dismiss-error')" :title="t('label.close')">
+            <ph-x />
+          </icon-button>
+        </template>
+      </notice-bar>
+
       {{ t('text.refreshLinkNotice') }}
     </div>
 
@@ -61,6 +77,12 @@ defineExpose({ show, hide });
 </template>
 
 <style scoped>
+.refresh-link-modal-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .refresh-link-modal.is-loading :deep(.modal-close) {
   pointer-events: none;
   cursor: not-allowed;

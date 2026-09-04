@@ -33,6 +33,8 @@
     "noConnectedCalendars": "Kalendereinrichtung zum Fortfahren erforderlich. {0}.",
     "noConnectedCalendarsLink": "Zu den Einstellungen wechseln.",
     "noSpecialCharacters": "Bitte die Sonderzeichen entfernen und nochmal versuchen.",
+    "refreshLinkError": "Dein Link konnte nicht aktualisiert werden. Bitte nochmal versuchen.",
+    "refreshLinkReloadError": "Dein Link wurde aktualisiert, konnte aber nicht neu geladen werden. Bitte lade die Seite neu.",
     "routeNotFound": "Entschuldigung, diese Seite wurde nicht gefunden.",
     "scheduleRemoteCalendarConnectionDetails": "Bitte kontaktiere den Eigentümer der Buchungsseite direkt, um dieses Problem zu beheben.",
     "scheduleRemoteCalendarConnectionError": "Es konnte keine Verbindung zum Kalender hergestellt werden.",

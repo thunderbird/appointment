@@ -33,6 +33,8 @@
     "noConnectedCalendars": "Calendar setup required. Connect a calendar to continue. {0}.",
     "noConnectedCalendarsLink": "Go to settings",
     "noSpecialCharacters": "Please remove the special characters and try again.",
+    "refreshLinkError": "Your link couldn't be refreshed. Please try again.",
+    "refreshLinkReloadError": "Your link was refreshed, but we couldn't reload it. Please refresh the page.",
     "routeNotFound": "Sorry, this page could not be found.",
     "scheduleRemoteCalendarConnectionDetails": "Please contact the owner of the booking page directly to resolve this issue.",
     "scheduleRemoteCalendarConnectionError": "We couldn't connect to the calendar.",
