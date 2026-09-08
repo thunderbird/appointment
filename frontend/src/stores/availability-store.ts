@@ -32,23 +32,12 @@ export const useAvailabilityStore = defineStore('availability', () => {
     const scheduleStore = createScheduleStore(fetch);
     const externalConnectionStore = createExternalConnectionsStore(fetch);
 
-    const { isLoaded: isCalendarStoreLoaded, connectedCalendars } = toRefs(calendarStore);
-    const { isLoaded: isExternalConnectionStoreLoaded } = toRefs(externalConnectionStore);
-    const { isLoaded: isScheduleStoreLoaded, firstSchedule } = toRefs(scheduleStore);
+    const { connectedCalendars } = toRefs(calendarStore);
+    const { firstSchedule } = toRefs(scheduleStore);
 
     // First, let's make sure that all stores are loaded
     // so that we can initialize the currentState properly
-    if (!isCalendarStoreLoaded.value) {
-      await calendarStore.fetch();
-    }
-
-    if (!isExternalConnectionStoreLoaded.value) {
-      await externalConnectionStore.fetch();
-    }
-
-    if (!isScheduleStoreLoaded.value) {
-      await scheduleStore.fetch();
-    }
+    await Promise.all([calendarStore.fetch(), externalConnectionStore.fetch(), scheduleStore.fetch()]);
 
     if (firstSchedule.value) {
       initialState.value = deepClone({ ...firstSchedule.value });
