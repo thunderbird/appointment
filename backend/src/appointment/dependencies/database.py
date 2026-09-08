@@ -3,7 +3,7 @@ import os
 import time
 from typing import Optional
 
-import sentry_sdk.metrics
+import sentry_sdk
 from redis import Redis, RedisCluster
 from redis.backoff import ExponentialBackoff
 from redis.retry import Retry
