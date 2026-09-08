@@ -127,7 +127,11 @@ export default {
 </script>
 
 <template>
-  <div class="availability-page-container">
+  <div class="availability-page-container" :class="{ loading: !isLoaded }">
+    <div class="availability-loading" v-if="!isLoaded">
+      <loading-spinner />
+    </div>
+
     <h1 class="page-title" :class="{ isDirty: isDirty }">
       {{ t('label.availability') }}
     </h1>
@@ -165,7 +169,7 @@ export default {
       </template>
     </notice-bar>
 
-    <form v-if="isLoaded" ref="availability-form" @submit.prevent>
+    <form ref="availability-form" @submit.prevent>
       <div class="page-content">
         <section>
           <availability-settings />
@@ -182,9 +186,6 @@ export default {
         </div>
       </div>
     </form>
-    <div v-else class="availability-loading-container">
-      <loading-spinner />
-    </div>
 
     <div class="footer-save-panel" v-if="isDirty">
       <link-button @click="onRevertChanges" :disabled="savingInProgress">
@@ -199,6 +200,22 @@ export default {
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
+
+.availability-page-container {
+  &.loading {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .availability-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+  }
+}
 
 :deep(.base.link.filled) {
   font-size: 0.75rem;
@@ -233,12 +250,6 @@ export default {
   grid-template-columns: 1fr;
   gap: 2rem;
   margin-block-end: 2rem;
-}
-
-.availability-loading-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .page-content-right {

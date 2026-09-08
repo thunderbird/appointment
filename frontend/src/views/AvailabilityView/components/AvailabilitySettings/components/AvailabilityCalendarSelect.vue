@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed } from 'vue';
 import { storeToRefs } from 'pinia';
 import { SelectOption } from '@/models';
 import { SelectInput } from '@thunderbirdops/services-ui';
@@ -12,7 +12,7 @@ const calendarStore = useCalendarStore();
 const availabilityStore = useAvailabilityStore();
 
 const { currentState } = storeToRefs(availabilityStore);
-const { isLoaded, connectedCalendars } = storeToRefs(calendarStore);
+const { connectedCalendars } = storeToRefs(calendarStore);
 
 const calendarOptions = computed<SelectOption[]>(() =>
   connectedCalendars.value.map((calendar) => ({
@@ -26,12 +26,6 @@ const selectedCalendar = computed({
   set: (value) => {
     availabilityStore.$patch({ currentState: { calendar_id: value } });
   },
-});
-
-onMounted(async () => {
-  if (!isLoaded.value) {
-    await calendarStore.fetch();
-  }
 });
 </script>
 
