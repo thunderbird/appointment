@@ -20,6 +20,8 @@ const emit = defineEmits<{ 'link-refreshed': [] }>();
 
 const refreshLinkModalRef = useTemplateRef('refreshLinkModalRef');
 const copyButtonLabel = ref(t('label.copy'));
+const refreshingLink = ref(false);
+const refreshLinkError = ref('');
 
 const linkSlug = computed({
   get: () => currentState.value.slug || userStore.mySlug,
@@ -31,22 +33,52 @@ const linkSlug = computed({
 const shortUrlWithoutProtocol = computed(() => userStore.data.userLink.replace(/https?:\/\//g, ''));
 
 async function refreshLinkConfirm() {
-  await userStore.changeSignedUrl();
-  await userStore.profile();
-
-  // Update link slug in the "Customize Your Link" text field
-  // We need to update both initialState and currentState for the isDirty comparison
-  availabilityStore.$patch({
-    initialState: { slug: userStore.mySlug },
-    currentState: { slug: userStore.mySlug },
-  });
-
-  refreshLinkModalRef.value.hide();
-  emit('link-refreshed');
-
-  if (usePosthog) {
-    posthog.capture(MetricEvents.RefreshLink);
+  if (refreshingLink.value) {
+    return;
   }
+
+  refreshingLink.value = true;
+  refreshLinkError.value = '';
+
+  try {
+    const { error } = await userStore.changeSignedUrl();
+
+    if (error) {
+      refreshLinkError.value = typeof error === 'string' && error ? error : t('error.refreshLinkError');
+      return;
+    }
+
+    const { error: profileError } = await userStore.profile();
+
+    if (profileError) {
+      // Highly unlikely to happen, but just in case we fail to reload the profile
+      refreshLinkError.value = t('error.refreshLinkReloadError');
+      return;
+    }
+
+    // Update link slug in the "Customize Your Link" text field
+    // We need to update both initialState and currentState for the isDirty comparison
+    availabilityStore.$patch({
+      initialState: { slug: userStore.mySlug },
+      currentState: { slug: userStore.mySlug },
+    });
+
+    refreshLinkModalRef.value.hide();
+    emit('link-refreshed');
+
+    if (usePosthog) {
+      posthog.capture(MetricEvents.RefreshLink);
+    }
+  } catch {
+    refreshLinkError.value = t('error.refreshLinkError');
+  } finally {
+    refreshingLink.value = false;
+  }
+}
+
+function openRefreshLinkModal() {
+  refreshLinkError.value = '';
+  refreshLinkModalRef.value.show();
 }
 
 async function copyLink() {
@@ -79,7 +111,7 @@ export default {
     v-model="linkSlug"
   >
     {{ t('label.customizeYourLink') }}:
-    <button @click="refreshLinkModalRef.show()">
+    <button @click="openRefreshLinkModal">
       <ph-arrow-clockwise size="24" :aria-label="t('label.refreshLink')" />
     </button>
   </text-input>
@@ -97,7 +129,13 @@ export default {
   </text-input>
 
   <!-- Refresh link confirmation modal -->
-  <refresh-link-modal ref="refreshLinkModalRef" @confirmed="refreshLinkConfirm()" />
+  <refresh-link-modal
+    ref="refreshLinkModalRef"
+    :loading="refreshingLink"
+    :error-message="refreshLinkError"
+    @confirmed="refreshLinkConfirm()"
+    @dismiss-error="refreshLinkError = ''"
+  />
 </template>
 
 <style scoped>
