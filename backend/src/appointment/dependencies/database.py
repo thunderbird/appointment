@@ -3,38 +3,29 @@ import os
 import time
 from typing import Optional
 
-import sentry_sdk
+import sentry_sdk.metrics
 from redis import Redis, RedisCluster
 from redis.backoff import ExponentialBackoff
 from redis.retry import Retry
 from sqlalchemy import create_engine
-from sqlalchemy.engine import Engine
 from sqlalchemy.orm import sessionmaker
 from ..utils import get_database_url
 
 
 _redis_instance: Optional[RedisCluster] = None
 
-_engine: Optional[Engine] = None
-_session_local = None
-
 
 def get_engine_and_session():
-    """Lazily create the engine/session pool once and reuse it, instead of opening a new
-    connection pool on every call."""
-    global _engine, _session_local
+    database_url = get_database_url()
+    connect_args = {}
 
-    if _engine is None:
-        database_url = get_database_url()
-        connect_args = {}
+    if 'sqlite://' in database_url:
+        connect_args = {'check_same_thread': False}
 
-        if 'sqlite://' in database_url:
-            connect_args = {'check_same_thread': False}
+    engine = create_engine(database_url, connect_args=connect_args)
+    session_local = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-        _engine = create_engine(database_url, connect_args=connect_args)
-        _session_local = sessionmaker(autocommit=False, autoflush=False, bind=_engine)
-
-    return _engine, _session_local
+    return engine, session_local
 
 
 def get_db():
