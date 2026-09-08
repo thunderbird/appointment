@@ -23,7 +23,7 @@ const call = inject(callKey);
 const userStore = useUserStore();
 const scheduleStore = createScheduleStore(call);
 const availabilityStore = createAvailabilityStore(call);
-const { currentState, isDirty } = storeToRefs(availabilityStore);
+const { currentState, isDirty, isLoaded } = storeToRefs(availabilityStore);
 
 const savingInProgress = ref(false);
 const validationError = ref<Alert>(null);
@@ -164,7 +164,7 @@ export default {
       </template>
     </notice-bar>
 
-    <form ref="availability-form" @submit.prevent>
+    <form v-if="isLoaded" ref="availability-form" @submit.prevent>
       <div class="page-content">
         <section>
           <availability-settings />
