@@ -15,6 +15,7 @@ import { DateFormatStrings } from '@/definitions';
 import AvailabilitySettings from './components/AvailabilitySettings/index.vue';
 import BookingPageDetails from './components/BookingPageDetails/index.vue';
 import BookingPageLink from './components/BookingPageLink/index.vue';
+import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);
@@ -23,7 +24,7 @@ const call = inject(callKey);
 const userStore = useUserStore();
 const scheduleStore = createScheduleStore(call);
 const availabilityStore = createAvailabilityStore(call);
-const { currentState, isDirty } = storeToRefs(availabilityStore);
+const { currentState, isDirty, isLoaded } = storeToRefs(availabilityStore);
 
 const savingInProgress = ref(false);
 const validationError = ref<Alert>(null);
@@ -126,7 +127,11 @@ export default {
 </script>
 
 <template>
-  <div class="availability-page-container">
+  <div class="availability-page-container" :class="{ loading: !isLoaded }">
+    <div class="availability-loading" v-if="!isLoaded">
+      <loading-spinner />
+    </div>
+
     <h1 class="page-title" :class="{ isDirty: isDirty }">
       {{ t('label.availability') }}
     </h1>
@@ -195,6 +200,22 @@ export default {
 
 <style scoped>
 @import '@/assets/styles/custom-media.pcss';
+
+.availability-page-container {
+  &.loading {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  .availability-loading {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+  }
+}
 
 :deep(.base.link.filled) {
   font-size: 0.75rem;
