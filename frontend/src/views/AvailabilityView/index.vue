@@ -15,6 +15,7 @@ import { DateFormatStrings } from '@/definitions';
 import AvailabilitySettings from './components/AvailabilitySettings/index.vue';
 import BookingPageDetails from './components/BookingPageDetails/index.vue';
 import BookingPageLink from './components/BookingPageLink/index.vue';
+import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 
 const { t } = useI18n();
 const dj = inject(dayjsKey);
@@ -181,6 +182,9 @@ export default {
         </div>
       </div>
     </form>
+    <div v-else class="availability-loading-container">
+      <loading-spinner />
+    </div>
 
     <div class="footer-save-panel" v-if="isDirty">
       <link-button @click="onRevertChanges" :disabled="savingInProgress">
@@ -229,6 +233,12 @@ export default {
   grid-template-columns: 1fr;
   gap: 2rem;
   margin-block-end: 2rem;
+}
+
+.availability-loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .page-content-right {
