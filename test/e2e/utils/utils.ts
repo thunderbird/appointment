@@ -21,6 +21,38 @@ import {
 
 const authFile = path.join(__dirname, '../test-results/.auth/user.json');
 
+export type TestPlatform = 'desktop' | 'android' | 'ios';
+
+/**
+ * Determine the current platform from Playwright's project name.
+ *
+ * BrowserStack names its real-device projects `android-chrome` and
+ * `ios-safari`. The local emulated mobile project is named
+ * `Google-Pixel-7-View`, so Pixel and View are also treated as Android/mobile
+ * indicators. All other configured project names represent desktop browsers.
+ *
+ * Keep passing the original project name to page objects and sign-in helpers;
+ * they use the exact name for their own targeted platform workarounds. This
+ * utility provides the broader platform category used by shared test flows.
+ */
+export const getTestPlatform = (projectName: string): TestPlatform => {
+  const normalizedProjectName = projectName.toLowerCase();
+
+  if (normalizedProjectName.includes('ios') || normalizedProjectName.includes('iphone')) {
+    return 'ios';
+  }
+
+  if (
+    normalizedProjectName.includes('android') ||
+    normalizedProjectName.includes('pixel') ||
+    normalizedProjectName.includes('view')
+  ) {
+    return 'android';
+  }
+
+  return 'desktop';
+};
+
 
 /**
  * Navigate to Appointment (at the APPT_URL in the test/e2e/.env file). If already signed in

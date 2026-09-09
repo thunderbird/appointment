@@ -143,13 +143,29 @@ export class BookingPage {
   async finishBooking(bookerName: string, bookerEmail: string) {
     await this.bookSelectionNameInput.fill(bookerName);
     await this.bookSelectionEmailInput.fill(bookerEmail);
+    const isIOS = this.testPlatform.toLowerCase().includes('ios');
 
-    // when clicking the book appt button for some reason on android it won't click it unless we force it; but
-    // force doesn't work on ios
-    if (this.testPlatform.includes('android')) { 
-      await this.bookApptBtn.click({ force: true });
-    } else {
+    // Confirm that the custom text-input components have received the values
+    // before submitting. This is especially useful for the shared anonymous
+    // flow, where both fields must pass native form validation before the
+    // component's bookEvent handler will send the booking request. BrowserStack
+    // iOS does not implement Playwright's `toHaveValue` assertion, so retain
+    // these checks everywhere except that platform.
+    if (!isIOS) {
+      await expect(this.bookSelectionNameInput).toHaveValue(bookerName);
+      await expect(this.bookSelectionEmailInput).toHaveValue(bookerEmail);
+    }
+    await expect(this.bookApptBtn).toBeVisible();
+    await expect(this.bookApptBtn).toBeEnabled();
+
+    // BrowserStack iOS does not support Playwright's forced click reliably, so
+    // keep its normal click path. Android has historically required force, and
+    // the consolidated anonymous flow also needs it on desktop Firefox to make
+    // the services-ui PrimaryButton consistently dispatch its click handler.
+    if (isIOS) {
       await this.bookApptBtn.click();
+    } else {
+      await this.bookApptBtn.click({ force: true });
     }
     // slight delay so on mobile we can see if any errors show up in BrowserStack test playback videos
     await this.page.waitForTimeout(TIMEOUT_2_SECONDS);
