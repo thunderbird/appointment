@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
-import { AvailabilityPage } from '../../pages/availability-page';
-import { BookingPage } from '../../pages/booking-page';
-import { ensureWeAreSignedIn } from '../../utils/utils';
+import { AvailabilityPage } from '../pages/availability-page';
+import { BookingPage } from '../pages/booking-page';
+import { ensureWeAreSignedIn } from '../utils/utils';
 
 import {
   PLAYWRIGHT_TAG_E2E_SUITE,
@@ -12,7 +12,7 @@ import {
   TIMEOUT_3_SECONDS,
   TIMEOUT_10_SECONDS,
   TIMEOUT_60_SECONDS,
- } from '../../const/constants';
+ } from '../const/constants';
 
 let availabilityPage: AvailabilityPage;
 let bookApptPage: BookingPage;

@@ -1,9 +1,9 @@
 import { test as setup, expect } from '@playwright/test';
-import { AvailabilityPage } from '../../pages/availability-page';
-import { SettingsPage } from '../../pages/settings-page';
+import { AvailabilityPage } from '../pages/availability-page';
+import { SettingsPage } from '../pages/settings-page';
 import path from 'path';
 
-import { navigateToAppointmentAndSignIn, setDefaultUserSettingsLocalStore } from '../../utils/utils';
+import { navigateToAppointmentAndSignIn, setDefaultUserSettingsLocalStore } from '../utils/utils';
 
 import {
     APPT_DASHBOARD_HOME_PAGE,
@@ -12,10 +12,10 @@ import {
     TIMEOUT_2_SECONDS,
     TIMEOUT_5_SECONDS,
     TIMEOUT_30_SECONDS,
-} from "../../const/constants";
+} from "../const/constants";
 
 const fs = require('fs');
-const directoryPath = path.join(__dirname, '../../test-results/.auth');
+const directoryPath = path.join(__dirname, '../test-results/.auth');
 
 fs.mkdir(directoryPath, (err: any) => {
   if (err) {
@@ -33,7 +33,7 @@ fs.mkdir(directoryPath, (err: any) => {
 });
 
 // We write it here so it is blown away and re-created at the start of every test run; and is in .gitignore
-const authFile = path.join(__dirname, '../../test-results/.auth/user.json');
+const authFile = path.join(__dirname, '../test-results/.auth/user.json');
 
 setup('desktop browser authenticate', async ({ page }) => {
   console.log('inside authenticate setup, about to call navigate and sign in');
