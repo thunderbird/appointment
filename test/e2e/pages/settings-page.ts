@@ -233,7 +233,10 @@ export class SettingsPage {
     await this.scrollIntoView(this.saveBtnEN);
     await this.saveBtnEN.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-    await expect(this.savedSuccessfullyTextEN).toBeVisible();
+    // Saving preferences can be slow against production on BrowserStack. Use
+    // an explicit timeout so the confirmation banner is not constrained by
+    // Playwright's shorter default assertion timeout.
+    await expect(this.savedSuccessfullyTextEN).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
   }
 }
