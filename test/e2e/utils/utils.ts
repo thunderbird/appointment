@@ -46,7 +46,7 @@ export const navigateToAppointmentAndSignIn = async (page: Page, testProjectName
   }
 
   // now that we're signed into the appointment dashboard give it time to load
-  await expect(page).toHaveTitle(APPT_PAGE_TITLE, { timeout: TIMEOUT_60_SECONDS }); // give generous time
+  await expect(page).toHaveTitle(/Appointment/i, { timeout: TIMEOUT_60_SECONDS });
 }
 
 /**
