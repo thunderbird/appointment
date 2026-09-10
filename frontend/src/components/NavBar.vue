@@ -58,14 +58,8 @@ const copyLink = async () => {
 
     <template v-if="user?.authenticated">
       <nav class="nav-items-container">
-        <nav-bar-item
-          v-for="item in navItems"
-          :key="item"
-          :active="isNavEntryActive(item)"
-          :label="t(`label.${item}`)"
-          :link-name="item"
-          :warning="item === 'settings' && externalConnectionStore.hasUnhealthyConnections"
-        />
+        <nav-bar-item v-for="item in navItems" :key="item" :active="isNavEntryActive(item)" :label="t(`label.${item}`)"
+          :link-name="item" :warning="item === 'settings' && externalConnectionStore.hasUnhealthyConnections" />
       </nav>
 
       <div class="nav-items-right-container">
@@ -125,11 +119,10 @@ const copyLink = async () => {
     width: 100%;
     height: 68px;
     padding-inline: 1rem;
-    box-shadow:
-      0 10px 15px -3px rgb(0 0 0 / 0.1),
-      0 4px 6px -4px rgb(0 0 0 / 0.1);
+    background-color: #F7F7F8;
+    box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.10);
+    backdrop-filter: blur(12px);
     overflow: visible;
-    background-image: linear-gradient(to top, #1a202c, #1c3f47); /* one-off colours to approximate Zeplin gradient */
     z-index: 50;
   }
 
@@ -158,7 +151,7 @@ const copyLink = async () => {
     display: flex;
     align-items: center;
     position: relative;
-    color: #f3f4f6; /* TODO: hard-coded as we don't have light mode for NavBar yet */
+    color: #18181B;
 
     &:active {
       color: var(--colour-accent-teal);
@@ -185,7 +178,7 @@ const copyLink = async () => {
 
   .appointment-logo {
     img {
-      height: 2.25rem;
+      height: 3rem;
     }
   }
 }
@@ -199,6 +192,17 @@ const copyLink = async () => {
 @media (prefers-reduced-motion: no-preference) {
   .nav-copy-link-tooltip {
     transition: opacity 250ms ease-out;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .header-desktop {
+    background-color: #111113;
+  }
+
+  .nav-copy-link-button {
+    /* TODO: This colour should be --colour-ti-secondary but it's not updated in services-ui yet */
+    color: #d4d4d8;
   }
 }
 </style>
