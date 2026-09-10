@@ -184,12 +184,14 @@ export class SettingsPage {
       await this.scrollIntoView(this.saveBtnEN);
       await this.saveBtnEN.click();
       await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-      await expect(this.savedSuccessfullyTextDE).toBeVisible();
+      // Saving and applying a language change can be slow on BrowserStack,
+      // especially when iOS re-renders the localized confirmation banner.
+      await expect(this.savedSuccessfullyTextDE).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     } else {
       await this.scrollIntoView(this.saveBtnDE);
       await this.saveBtnDE.click();
       await this.page.waitForTimeout(TIMEOUT_1_SECOND);
-      await expect(this.savedSuccessfullyTextEN).toBeVisible();
+      await expect(this.savedSuccessfullyTextEN).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     }
     await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
   }
