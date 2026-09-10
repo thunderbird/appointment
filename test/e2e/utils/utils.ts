@@ -1,7 +1,7 @@
 // utility functions that may be used by any tests
 import { TBAcctsPage } from "../pages/tb-accts-page";
 import { SettingsPage } from '../pages/settings-page';
-import { expect, type Page } from '@playwright/test';
+import { expect, type Page, type Response } from '@playwright/test';
 import path from 'path';
 
 import {
@@ -64,21 +64,121 @@ export const getTestPlatform = (projectName: string): TestPlatform => {
 export const navigateToAppointmentAndSignIn = async (page: Page, testProjectName: string = 'desktop') => {
   console.log(`navigating to appointment ${APPT_TARGET_ENV} (${APPT_URL})`);   
   const tbAcctsSignInPage = new TBAcctsPage(page);
-  await page.goto(`${APPT_URL}`);
-  await page.waitForTimeout(TIMEOUT_5_SECONDS);
+  type SignInState = 'authenticated' | 'local-sign-in' | 'oidc-sign-in' | 'loading';
 
-  // local dev can use 'password' only or oidc; check if local stack and using password only
-  if (APPT_TARGET_ENV == 'dev' && await tbAcctsSignInPage.localDevEmailInput.isVisible()) {
-    await tbAcctsSignInPage.localApptSignIn();
-  } else {
-    // using oidc/keyloak in any env; if we are already signed in then we can skip this
-    if (await tbAcctsSignInPage.signInHeaderText.isVisible() && await tbAcctsSignInPage.signInButton.isEnabled()) {
+  let profileLoadedSuccessfully = false;
+
+  // The dashboard validates the access token by loading the user's profile.
+  // Start observing before navigation so a fast response cannot be missed.
+  const trackProfileResponse = (response: Response) => {
+    const isProfileRequest = (
+      response.request().method() === 'GET' &&
+      new URL(response.url()).pathname.endsWith('/me')
+    );
+
+    if (isProfileRequest && response.ok()) {
+      profileLoadedSuccessfully = true;
+    }
+  };
+
+  page.on('response', trackProfileResponse);
+  await page.goto(`${APPT_URL}`);
+
+  const getSignInState = async (): Promise<SignInState> => {
+    // A successful profile response proves that the backend accepted the
+    // current access token. URL or title alone can reflect stale client state.
+    if (profileLoadedSuccessfully) {
+      return 'authenticated';
+    }
+
+    if (APPT_TARGET_ENV == 'dev' && await tbAcctsSignInPage.localDevEmailInput.isVisible()) {
+      return 'local-sign-in';
+    }
+
+    if (await tbAcctsSignInPage.signInHeaderText.isVisible()) {
+      return 'oidc-sign-in';
+    }
+
+    return 'loading';
+  };
+
+  const completeSignInIfRequired = async () => {
+    // Expired sessions can pass through several Appointment and Keycloak
+    // redirects before a login form is rendered. Poll the actual auth state so
+    // a slow redirect cannot make the helper skip the required sign-in.
+    await expect
+      .poll(getSignInState, {
+        timeout: TIMEOUT_60_SECONDS,
+        message: 'Waiting for an authenticated Appointment session or a sign-in form',
+      })
+      .not.toBe('loading');
+
+    const signInState = await getSignInState();
+
+    // Local dev can use password-only auth or OIDC, depending on configuration.
+    if (signInState === 'local-sign-in') {
+      await tbAcctsSignInPage.localApptSignIn();
+    } else if (signInState === 'oidc-sign-in') {
       await tbAcctsSignInPage.signIn(testProjectName);
     }
+
+    // If a login was required, wait for its profile request to prove that the
+    // replacement token was accepted before allowing another navigation.
+    await expect
+      .poll(() => profileLoadedSuccessfully, {
+        timeout: TIMEOUT_60_SECONDS,
+        message: 'Waiting for Appointment to validate the signed-in user profile',
+      })
+      .toBeTruthy();
+  };
+
+  await completeSignInIfRequired();
+
+  // A token can still be valid during beforeEach but expire midway through a
+  // stateful settings test. Decode only its expiry inside the browser and
+  // refresh proactively when less than two minutes remain. Opaque/non-JWT
+  // tokens return null and continue to use backend profile validation alone.
+  const accessTokenSecondsRemaining = await page.evaluate(() => {
+    try {
+      const storedUser = JSON.parse(window.localStorage.getItem('tba/user') ?? 'null');
+      const accessToken = storedUser?.accessToken;
+      const encodedPayload = accessToken?.split('.')[1];
+
+      if (!encodedPayload) {
+        return null;
+      }
+
+      const base64Payload = encodedPayload
+        .replace(/-/g, '+')
+        .replace(/_/g, '/')
+        .padEnd(Math.ceil(encodedPayload.length / 4) * 4, '=');
+      const expiresAt = JSON.parse(window.atob(base64Payload))?.exp;
+
+      return typeof expiresAt === 'number' ? expiresAt - Date.now() / 1000 : null;
+    } catch {
+      return null;
+    }
+  });
+
+  if (accessTokenSecondsRemaining !== null && accessTokenSecondsRemaining < 120) {
+    console.log('Appointment access token is close to expiry; refreshing the sign-in session');
+    profileLoadedSuccessfully = false;
+
+    // Removing only Appointment's client-side user record makes the root route
+    // start the configured login flow. An active OIDC SSO cookie may complete
+    // it automatically; otherwise the helper waits for and fills the form.
+    await page.evaluate(() => window.localStorage.removeItem('tba/user'));
+    await page.goto(`${APPT_URL}`);
+    await completeSignInIfRequired();
   }
 
-  // now that we're signed into the appointment dashboard give it time to load
+  // The successful profile response above is the authoritative authentication
+  // check. Do not additionally wait for a specific client-side route here:
+  // BrowserStack iOS can continue reporting the transient post-login URL even
+  // after Appointment has rendered the authenticated UI. Each caller performs
+  // an explicit page.goto() to the page it needs immediately after this helper.
   await expect(page).toHaveTitle(/Appointment/i, { timeout: TIMEOUT_60_SECONDS });
+  page.off('response', trackProfileResponse);
 }
 
 /**
