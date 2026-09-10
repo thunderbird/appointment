@@ -210,6 +210,12 @@ export const ProviderDisplayName: Record<string, string> = {
   zoom: 'Zoom',
 };
 
+/**
+ * External informational pages linked from the footer
+ */
+export const STATUS_PAGE_URL = 'https://status.tb.pro/';
+export const IDEAS_PAGE_URL = 'https://ideas.tb.pro/';
+
 export default {
   AlertSchemes,
   AuthSchemes,
