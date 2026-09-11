@@ -110,7 +110,7 @@ user.init(call);
 provide(callKey, call);
 
 // menu items for main navigation
-const navItems = ['dashboard', 'availability', 'bookings', 'settings'];
+const navItems = ['dashboard', 'availability', 'bookings'];
 
 // db tables
 const calendarStore = createCalendarStore(call);

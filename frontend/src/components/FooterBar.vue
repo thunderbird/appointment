@@ -125,7 +125,7 @@ const appointmentLoggedInNavItems = [
     font-weight: 400;
     font-size: 0.6875rem;
     text-transform: none;
-    color: #d4d4d8; /* TODO: This colour should be --colour-ti-secondary but it's not updated in services-ui yet */
+    color: var(--colour-ti-secondary);
 
     a {
       text-decoration: underline;

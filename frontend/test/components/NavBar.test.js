@@ -62,13 +62,17 @@ describe('NavBar', () => {
     for (let link of allRouterLinks) {
       foundLinks.push(link.props().to.name);
     }
-    // we expect the routes we sent in above in ourProps navItems as well as the dashboard route
-    // from the logo link
-    const expRoutes = navItems.concat(['dashboard']);
+    // we expect the routes we sent in above in ourProps navItems, the dashboard route from the
+    // logo link, and the settings route from the cog icon rendered next to the user avatar
+    const expRoutes = navItems.concat(['dashboard', 'settings']);
     expect(foundLinks.length).toBe(expRoutes.length);
     for (let expRoute of expRoutes) {
       expect(foundLinks, 'expected link component to be rendered').toContain(expRoute);
     }
+
+    // verify the settings cog link is rendered next to the user avatar
+    const settingsLink = wrapper.find('.nav-settings-button');
+    expect(settingsLink.exists(), 'expected settings cog link to be rendered next to the avatar').toBe(true);
 
     // open the user menu dropdown by clicking the avatar
     const userAvatar = wrapper.find('.user-menu .avatar');

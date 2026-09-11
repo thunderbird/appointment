@@ -5,7 +5,7 @@ import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import { TooltipPosition } from '@/definitions';
-import { PhLinkSimple, PhSun, PhMoon } from '@phosphor-icons/vue';
+import { PhLinkSimple, PhSun, PhMoon, PhGear, PhWarningCircle } from '@phosphor-icons/vue';
 import { ToolTip, BaseButton } from '@thunderbirdops/services-ui';
 import UserMenu from '@/components/UserMenu.vue';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
@@ -66,20 +66,10 @@ const copyLink = async () => {
           :active="isNavEntryActive(item)"
           :label="item === 'dashboard' ? t('label.calendar') : t(`label.${item}`)"
           :link-name="item"
-          :warning="item === 'settings' && externalConnectionStore.hasUnhealthyConnections"
         />
       </nav>
 
       <div class="nav-items-right-container">
-        <button
-          class="nav-colour-scheme-toggle-button"
-          @click="toggleColourScheme"
-          :aria-label="isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme')"
-        >
-          <ph-sun v-if="isDark" :size="24" />
-          <ph-moon v-else :size="24" />
-        </button>
-
         <div v-if="user.myLink" class="nav-copy-link-button-container">
           <button class="nav-copy-link-button" @click="copyLink" aria-labelledby="copy-meeting-link-button">
             <ph-link-simple id="copy-meeting-link-button" :size="24" />
@@ -88,6 +78,25 @@ const copyLink = async () => {
             </tool-tip>
           </button>
         </div>
+
+        <router-link
+          :to="{ name: 'settings' }"
+          class="nav-settings-button"
+          :class="{ active: isNavEntryActive('settings') }"
+          :aria-label="t('label.settings')"
+        >
+          <ph-gear :size="24" />
+          <ph-warning-circle v-if="true || externalConnectionStore.hasUnhealthyConnections" class="warning-icon" weight="fill" />
+        </router-link>
+
+        <button
+          class="nav-colour-scheme-toggle-button"
+          @click="toggleColourScheme"
+          :aria-label="isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme')"
+        >
+          <ph-sun v-if="isDark" :size="24" />
+          <ph-moon v-else :size="24" />
+        </button>
 
         <user-menu :username="user.data.username" :avatar-url="user.data.avatarUrl" />
       </div>
@@ -178,9 +187,21 @@ const copyLink = async () => {
     display: flex;
     align-items: center;
     color: #18181b;
+  }
 
-    &:active {
-      color: var(--colour-accent-teal);
+  .nav-settings-button {
+    display: flex;
+    align-items: center;
+    position: relative;
+    color: #18181b;
+
+    .warning-icon {
+      position: absolute;
+      top: -0.25rem;
+      right: -0.25rem;
+      color: var(--colour-danger-default);
+      width: 1rem;
+      height: 1rem;
     }
   }
 
@@ -239,8 +260,8 @@ const copyLink = async () => {
 }
 
 .header-desktop.dark .nav-copy-link-button,
-.header-desktop.dark .nav-colour-scheme-toggle-button {
-  /* TODO: This colour should be --colour-ti-secondary but it's not updated in services-ui yet */
-  color: #d4d4d8;
+.header-desktop.dark .nav-colour-scheme-toggle-button,
+.header-desktop.dark .nav-settings-button {
+  color: var(--colour-ti-secondary);
 }
 </style>
