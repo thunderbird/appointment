@@ -22,7 +22,7 @@ const userStore = useUserStore();
 const { t } = useI18n();
 
 const navItems = [
-  { route: 'dashboard', i18nKey: 'dashboard', icon: PhHouse },
+  { route: 'dashboard', i18nKey: 'calendar', icon: PhHouse },
   { route: 'bookings', i18nKey: 'bookings', icon: PhCalendarCheck },
   { route: 'availability', i18nKey: 'availability', icon: PhCalendarDot },
   { route: 'settings', i18nKey: 'settings', icon: PhGear },

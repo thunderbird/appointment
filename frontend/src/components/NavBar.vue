@@ -58,8 +58,14 @@ const copyLink = async () => {
 
     <template v-if="user?.authenticated">
       <nav class="nav-items-container">
-        <nav-bar-item v-for="item in navItems" :key="item" :active="isNavEntryActive(item)" :label="t(`label.${item}`)"
-          :link-name="item" :warning="item === 'settings' && externalConnectionStore.hasUnhealthyConnections" />
+        <nav-bar-item
+          v-for="item in navItems"
+          :key="item"
+          :active="isNavEntryActive(item)"
+          :label="item === 'dashboard' ? t('label.calendar') : t(`label.${item}`)"
+          :link-name="item"
+          :warning="item === 'settings' && externalConnectionStore.hasUnhealthyConnections"
+        />
       </nav>
 
       <div class="nav-items-right-container">
@@ -119,8 +125,8 @@ const copyLink = async () => {
     width: 100%;
     height: 68px;
     padding-inline: 1rem;
-    background-color: #F7F7F8;
-    box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.10);
+    background-color: #f7f7f8;
+    box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(12px);
     overflow: visible;
     z-index: 50;
@@ -151,7 +157,7 @@ const copyLink = async () => {
     display: flex;
     align-items: center;
     position: relative;
-    color: #18181B;
+    color: #18181b;
 
     &:active {
       color: var(--colour-accent-teal);

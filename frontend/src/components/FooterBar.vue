@@ -18,7 +18,7 @@ const { authenticated: isAuthenticated } = storeToRefs(userStore);
 const appointmentNotLoggedInNavItems = [{ route: tbProUrl, i18nKey: 'exploreThundermail', external: true }];
 
 const appointmentLoggedInNavItems = [
-  { route: 'dashboard', i18nKey: 'dashboard' },
+  { route: 'dashboard', i18nKey: 'calendar' },
   { route: 'bookings', i18nKey: 'bookings' },
   { route: 'availability', i18nKey: 'availability' },
   { route: 'settings', i18nKey: 'settings' },
