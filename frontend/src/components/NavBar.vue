@@ -6,15 +6,17 @@ import { useUserStore } from '@/stores/user-store';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import { TooltipPosition } from '@/definitions';
 import { PhLinkSimple, PhSun, PhMoon, PhGear, PhWarningCircle } from '@phosphor-icons/vue';
-import { ToolTip, BaseButton } from '@thunderbirdops/services-ui';
+import { ToolTip, BaseButton, SendIcon, MailIcon, AppointmentIcon, AppDrawer, type AppDrawerApp } from '@thunderbirdops/services-ui';
 import UserMenu from '@/components/UserMenu.vue';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
-import { tbProUrlKey } from '@/keys';
+import { mailUrlKey, sendUrlKey, tbProUrlKey } from '@/keys';
 import { isDark, toggleColourScheme } from '@/composables/useColourScheme';
 import AppointmentLogo from '@/components/AppointmentLogo.vue';
 
 // component constants
 const tbProUrl = inject(tbProUrlKey);
+const mailUrl = inject(mailUrlKey);
+const sendUrl = inject(sendUrlKey);
 const user = useUserStore();
 const externalConnectionStore = useExternalConnectionsStore();
 const route = useRoute();
@@ -27,6 +29,12 @@ interface Props {
 defineProps<Props>();
 
 const myLinkTooltip = ref(t('label.copyLink'));
+
+const apps: AppDrawerApp[] = [
+  { id: 'appointment', name: 'Appointment', icon: AppointmentIcon, current: true },
+  { id: 'mail', name: 'Mail', icon: MailIcon, href: mailUrl },
+  { id: 'send', name: 'Send', icon: SendIcon, href: sendUrl },
+];
 
 /**
  * Is this nav entry active?
@@ -97,6 +105,8 @@ const copyLink = async () => {
           <ph-sun v-if="isDark" :size="24" />
           <ph-moon v-else :size="24" />
         </button>
+
+        <app-drawer :apps="apps" />
 
         <user-menu :username="user.data.username" :avatar-url="user.data.avatarUrl" />
       </div>
@@ -186,13 +196,17 @@ const copyLink = async () => {
   .nav-colour-scheme-toggle-button {
     display: flex;
     align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
     color: #18181b;
   }
 
   .nav-settings-button {
     display: flex;
     align-items: center;
+    justify-content: center;
     position: relative;
+    padding: 0.5rem;
     color: #18181b;
 
     .warning-icon {
@@ -209,12 +223,19 @@ const copyLink = async () => {
     font-weight: 600;
     display: flex;
     align-items: center;
+    justify-content: center;
     position: relative;
+    padding: 0.5rem;
     color: #18181b;
 
     &:active {
       color: var(--colour-accent-teal);
     }
+  }
+
+  :deep(.app-drawer__button svg) {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
   .nav-copy-link-tooltip {

@@ -9,7 +9,9 @@ import FooterBar from '@/components/FooterBar.vue';
 import SiteNotification from '@/elements/SiteNotification.vue';
 import RouteNotFoundView from '@/views/errors/RouteNotFoundView.vue';
 import NotAuthenticatedView from '@/views/errors/NotAuthenticatedView.vue';
-import { accountsTbProfileUrlKey, apiUrlKey, callKey, refreshKey, supportUrlKey, tbProUrlKey } from '@/keys';
+import {
+  accountsTbProfileUrlKey, apiUrlKey, callKey, mailUrlKey, refreshKey, sendUrlKey, supportUrlKey, tbProUrlKey,
+} from '@/keys';
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { config } from '@/config';
@@ -41,6 +43,8 @@ const {
 provide(accountsTbProfileUrlKey, config.tbAccountDashboardUrl);
 provide(tbProUrlKey, config.tbProUrl);
 provide(supportUrlKey, config.supportUrl);
+provide(mailUrlKey, config.mailUrl);
+provide(sendUrlKey, config.sendUrl);
 
 const { isSame: isSameNotification, show: showNotification, lock: lockNotification } = siteNotificationStore;
 
