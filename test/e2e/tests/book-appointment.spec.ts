@@ -72,13 +72,33 @@ test.describe('book an appointment', () => {
       // and must provide the booker's name and email address.
       await page.goto(`${APPT_URL}logout`);
 
-      // Appointment's OIDC logout redirects to Keycloak, which requires the
-      // user to confirm the logout before following post_logout_redirect_uri
-      // back to Appointment. Waiting for the button also ensures that the
-      // redirect to Keycloak has completed before the test tries to continue.
+      // Depending on the current Keycloak session, logout either stops on a
+      // confirmation page or completes immediately and returns to Sign In.
+      // Wait for either valid outcome instead of requiring the optional
+      // confirmation button, which makes this branch intermittent.
       const keycloakLogoutButton = page.getByRole('button', { name: 'Logout', exact: true });
-      await expect(keycloakLogoutButton).toBeVisible({ timeout: TIMEOUT_60_SECONDS });
-      await keycloakLogoutButton.click();
+      await expect
+        .poll(async () => {
+          if (await tbAcctsPage.signInButton.isVisible()) {
+            return 'signed-out';
+          }
+
+          if (await keycloakLogoutButton.isVisible()) {
+            return 'confirmation-required';
+          }
+
+          return 'logging-out';
+        }, {
+          timeout: TIMEOUT_60_SECONDS,
+          message: 'Waiting for Keycloak logout confirmation or the Sign In page',
+        })
+        .not.toBe('logging-out');
+
+      // The confirmation can be skipped by Keycloak when logout has already
+      // completed. Click it only when it is still present.
+      if (await keycloakLogoutButton.isVisible()) {
+        await keycloakLogoutButton.click();
+      }
 
       // Do not wait only for APPT_URL here. It is a transient stop in the
       // post-logout flow: Appointment immediately redirects from `/` to
