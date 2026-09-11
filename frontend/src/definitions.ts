@@ -86,15 +86,6 @@ export enum SettingsSections {
 }
 
 /**
- * Available color schemes for theme
- */
-export enum ColourSchemes {
-  System = 'system',
-  Dark = 'dark',
-  Light = 'light',
-}
-
-/**
  * Supported calendar providers
  */
 export enum CalendarProviders {
@@ -222,7 +213,6 @@ export default {
   BookingCalendarView,
   BookingStatus,
   CalendarProviders,
-  ColourSchemes,
   DateFormatStrings,
   DEFAULT_SLOT_DURATION,
   EventLocationType,

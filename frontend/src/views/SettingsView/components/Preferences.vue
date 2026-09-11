@@ -2,7 +2,6 @@
 import { computed, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { dayjsKey } from '@/keys';
-import { ColourSchemes } from '@/definitions';
 import { BubbleSelect, SelectInput } from '@thunderbirdops/services-ui';
 import { useSettingsStore } from '@/stores/settings-store';
 import { useUserStore } from '@/stores/user-store';
@@ -14,21 +13,6 @@ const userStore = useUserStore();
 
 const settingsStore = useSettingsStore();
 const { currentState } = storeToRefs(settingsStore);
-
-// Theme / Colour Scheme
-const colourSchemeOptions = computed(() =>
-  Object.values(ColourSchemes).map((c) => ({
-    label: t(`label.${c}`),
-    value: c,
-  }))
-);
-
-const colourScheme = computed({
-  get: () => currentState.value.colourScheme,
-  set: (value) => {
-    settingsStore.$patch({ currentState: { colourScheme: value } });
-  },
-});
 
 // Language / Locale
 const localeOptions = computed(() =>
@@ -106,15 +90,6 @@ export default {
   </header>
 
   <div class="form-field-container">
-    <select-input
-      name="theme"
-      :options="colourSchemeOptions"
-      v-model="colourScheme"
-      data-testid="settings-preferences-theme-select"
-    >
-      {{ t('label.theme') }}
-    </select-input>
-
     <select-input
       name="language"
       :options="localeOptions"

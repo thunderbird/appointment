@@ -5,11 +5,13 @@ import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import { TooltipPosition } from '@/definitions';
-import { PhLinkSimple } from '@phosphor-icons/vue';
+import { PhLinkSimple, PhSun, PhMoon } from '@phosphor-icons/vue';
 import { ToolTip, BaseButton } from '@thunderbirdops/services-ui';
 import UserMenu from '@/components/UserMenu.vue';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { tbProUrlKey } from '@/keys';
+import { isDark, toggleColourScheme } from '@/composables/useColourScheme';
+import AppointmentLogo from '@/components/AppointmentLogo.vue';
 
 // component constants
 const tbProUrl = inject(tbProUrlKey);
@@ -51,9 +53,9 @@ const copyLink = async () => {
 </script>
 
 <template>
-  <header class="header-desktop">
+  <header class="header-desktop" :class="{ dark: isDark }">
     <router-link class="appointment-logo" :to="{ name: user?.authenticated ? 'dashboard' : 'home' }">
-      <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
+      <appointment-logo />
     </router-link>
 
     <template v-if="user?.authenticated">
@@ -69,6 +71,15 @@ const copyLink = async () => {
       </nav>
 
       <div class="nav-items-right-container">
+        <button
+          class="nav-colour-scheme-toggle-button"
+          @click="toggleColourScheme"
+          :aria-label="isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme')"
+        >
+          <ph-sun v-if="isDark" :size="24" />
+          <ph-moon v-else :size="24" />
+        </button>
+
         <div v-if="user.myLink" class="nav-copy-link-button-container">
           <button class="nav-copy-link-button" @click="copyLink" aria-labelledby="copy-meeting-link-button">
             <ph-link-simple id="copy-meeting-link-button" :size="24" />
@@ -83,9 +94,20 @@ const copyLink = async () => {
     </template>
 
     <template v-else>
-      <a :href="tbProUrl">
-        <base-button type="brand" variant="outline" class="learn-more-button">{{ t('label.learnMore') }}</base-button>
-      </a>
+      <div class="nav-items-right-container">
+        <button
+          class="nav-colour-scheme-toggle-button"
+          @click="toggleColourScheme"
+          :aria-label="isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme')"
+        >
+          <ph-sun v-if="isDark" :size="24" />
+          <ph-moon v-else :size="24" />
+        </button>
+
+        <a :href="tbProUrl">
+          <base-button type="brand" variant="outline" class="learn-more-button">{{ t('label.learnMore') }}</base-button>
+        </a>
+      </div>
     </template>
   </header>
 </template>
@@ -152,6 +174,16 @@ const copyLink = async () => {
     gap: 1.5rem;
   }
 
+  .nav-colour-scheme-toggle-button {
+    display: flex;
+    align-items: center;
+    color: #18181b;
+
+    &:active {
+      color: var(--colour-accent-teal);
+    }
+  }
+
   .nav-copy-link-button {
     font-weight: 600;
     display: flex;
@@ -183,8 +215,9 @@ const copyLink = async () => {
   }
 
   .appointment-logo {
-    img {
+    svg {
       height: 3rem;
+      width: auto;
     }
   }
 }
@@ -201,14 +234,13 @@ const copyLink = async () => {
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .header-desktop {
-    background-color: #111113;
-  }
+.header-desktop.dark {
+  background-color: #111113;
+}
 
-  .nav-copy-link-button {
-    /* TODO: This colour should be --colour-ti-secondary but it's not updated in services-ui yet */
-    color: #d4d4d8;
-  }
+.header-desktop.dark .nav-copy-link-button,
+.header-desktop.dark .nav-colour-scheme-toggle-button {
+  /* TODO: This colour should be --colour-ti-secondary but it's not updated in services-ui yet */
+  color: #d4d4d8;
 }
 </style>

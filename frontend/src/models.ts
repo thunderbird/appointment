@@ -239,7 +239,6 @@ export type User = {
 };
 
 export type SettingsForm = {
-  colourScheme?: string;
   defaultTimeZone?: string;
   defaultCalendarId?: number;
   displayName?: string;
@@ -255,7 +254,6 @@ export type SettingsForm = {
  */
 export type UserConfig = {
   language: string;
-  colourScheme: string;
   timezone: string;
   startOfWeek: number;
 };
@@ -269,7 +267,6 @@ export type Subscriber = {
   level?: number;
   language?: string;
   timezone?: string;
-  colour_scheme?: string;
   start_of_week?: number;
   avatar_url?: string;
   is_setup?: boolean;
