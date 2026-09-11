@@ -86,15 +86,6 @@ export enum SettingsSections {
 }
 
 /**
- * Available color schemes for theme
- */
-export enum ColourSchemes {
-  System = 'system',
-  Dark = 'dark',
-  Light = 'light',
-}
-
-/**
  * Supported calendar providers
  */
 export enum CalendarProviders {
@@ -210,13 +201,18 @@ export const ProviderDisplayName: Record<string, string> = {
   zoom: 'Zoom',
 };
 
+/**
+ * External informational pages linked from the footer
+ */
+export const STATUS_PAGE_URL = 'https://status.tb.pro/';
+export const IDEAS_PAGE_URL = 'https://ideas.tb.pro/';
+
 export default {
   AlertSchemes,
   AuthSchemes,
   BookingCalendarView,
   BookingStatus,
   CalendarProviders,
-  ColourSchemes,
   DateFormatStrings,
   DEFAULT_SLOT_DURATION,
   EventLocationType,

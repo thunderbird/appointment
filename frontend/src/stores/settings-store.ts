@@ -52,7 +52,6 @@ export const useSettingsStore = defineStore('settings', () => {
     initialState.value.displayName = userStore.data.name;
 
     // Preferences section
-    initialState.value.colourScheme = userStore.data.settings.colourScheme;
     initialState.value.language = userStore.data.settings.language;
     initialState.value.startOfWeek = userStore.data.settings.startOfWeek;
     initialState.value.defaultTimeZone = userStore.data.settings.timezone;

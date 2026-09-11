@@ -7,9 +7,10 @@ import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
 import { initialEventPopupData, showEventPopup, timeFormat } from '@/utils';
 import { Appointment, EventPopup as EventPopupType, GridElement, GridTimeSlot, RemoteEvent, Slot } from '@/models';
-import { BookingStatus, ColourSchemes, DateFormatStrings } from '@/definitions';
+import { BookingStatus, DateFormatStrings } from '@/definitions';
 import { Dayjs } from 'dayjs';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
+import { isDark as isDarkMode } from '@/composables/useColourScheme';
 
 // Constants for grid calculations
 const ROW_HEIGHT_PX = 60; // Matches minmax(60px, min-content) in grid-template-rows
@@ -89,8 +90,6 @@ function syncScroll(source: 'header' | 'body') {
     lastScrollSource = null;
   });
 }
-
-const isDarkMode = computed(() => userStore.myColourScheme === ColourSchemes.Dark);
 
 function onRemoteEventMouseEnter(event: MouseEvent, remoteEvent) {
   const popupEvent = {

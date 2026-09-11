@@ -5,14 +5,18 @@ import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import { TooltipPosition } from '@/definitions';
-import { PhLinkSimple } from '@phosphor-icons/vue';
-import { ToolTip, BaseButton } from '@thunderbirdops/services-ui';
+import { PhLinkSimple, PhSun, PhMoon, PhGear, PhWarningCircle } from '@phosphor-icons/vue';
+import { ToolTip, BaseButton, SendIcon, MailIcon, AppointmentIcon, AppDrawer, type AppDrawerApp } from '@thunderbirdops/services-ui';
 import UserMenu from '@/components/UserMenu.vue';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
-import { tbProUrlKey } from '@/keys';
+import { mailUrlKey, sendUrlKey, tbProUrlKey } from '@/keys';
+import { isDark, toggleColourScheme } from '@/composables/useColourScheme';
+import AppointmentLogo from '@/components/AppointmentLogo.vue';
 
 // component constants
 const tbProUrl = inject(tbProUrlKey);
+const mailUrl = inject(mailUrlKey);
+const sendUrl = inject(sendUrlKey);
 const user = useUserStore();
 const externalConnectionStore = useExternalConnectionsStore();
 const route = useRoute();
@@ -25,6 +29,12 @@ interface Props {
 defineProps<Props>();
 
 const myLinkTooltip = ref(t('label.copyLink'));
+
+const apps: AppDrawerApp[] = [
+  { id: 'appointment', name: 'Appointment', icon: AppointmentIcon, current: true },
+  { id: 'mail', name: 'Mail', icon: MailIcon, href: mailUrl },
+  { id: 'send', name: 'Send', icon: SendIcon, href: sendUrl },
+];
 
 /**
  * Is this nav entry active?
@@ -51,9 +61,9 @@ const copyLink = async () => {
 </script>
 
 <template>
-  <header class="header-desktop">
+  <header class="header-desktop" :class="{ dark: isDark }">
     <router-link class="appointment-logo" :to="{ name: user?.authenticated ? 'dashboard' : 'home' }">
-      <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
+      <appointment-logo />
     </router-link>
 
     <template v-if="user?.authenticated">
@@ -62,9 +72,8 @@ const copyLink = async () => {
           v-for="item in navItems"
           :key="item"
           :active="isNavEntryActive(item)"
-          :label="t(`label.${item}`)"
+          :label="item === 'dashboard' ? t('label.calendar') : t(`label.${item}`)"
           :link-name="item"
-          :warning="item === 'settings' && externalConnectionStore.hasUnhealthyConnections"
         />
       </nav>
 
@@ -72,10 +81,42 @@ const copyLink = async () => {
         <div v-if="user.myLink" class="nav-copy-link-button-container">
           <button class="nav-copy-link-button" @click="copyLink" aria-labelledby="copy-meeting-link-button">
             <ph-link-simple id="copy-meeting-link-button" :size="24" />
-            <tool-tip :position="TooltipPosition.Top" class="nav-copy-link-tooltip">
+            <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
               {{ myLinkTooltip }}
             </tool-tip>
           </button>
+        </div>
+
+        <router-link
+          :to="{ name: 'settings' }"
+          class="nav-settings-button"
+          :class="{ active: isNavEntryActive('settings') }"
+          :aria-label="t('label.settings')"
+        >
+          <ph-gear :size="24" />
+          <ph-warning-circle v-if="externalConnectionStore.hasUnhealthyConnections" class="warning-icon" weight="fill" />
+          <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
+            {{ t('label.settings') }}
+          </tool-tip>
+        </router-link>
+
+        <button
+          class="nav-colour-scheme-toggle-button"
+          @click="toggleColourScheme"
+          :aria-label="isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme')"
+        >
+          <ph-sun v-if="isDark" :size="24" />
+          <ph-moon v-else :size="24" />
+          <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
+            {{ isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme') }}
+          </tool-tip>
+        </button>
+
+        <div class="nav-app-drawer-container">
+          <app-drawer :apps="apps" />
+          <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
+            {{ t('label.switchApps') }}
+          </tool-tip>
         </div>
 
         <user-menu :username="user.data.username" :avatar-url="user.data.avatarUrl" />
@@ -83,9 +124,23 @@ const copyLink = async () => {
     </template>
 
     <template v-else>
-      <a :href="tbProUrl">
-        <base-button type="brand" variant="outline" class="learn-more-button">{{ t('label.learnMore') }}</base-button>
-      </a>
+      <div class="nav-items-right-container">
+        <button
+          class="nav-colour-scheme-toggle-button"
+          @click="toggleColourScheme"
+          :aria-label="isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme')"
+        >
+          <ph-sun v-if="isDark" :size="24" />
+          <ph-moon v-else :size="24" />
+          <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
+            {{ isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme') }}
+          </tool-tip>
+        </button>
+
+        <a :href="tbProUrl">
+          <base-button type="brand" variant="outline" class="learn-more-button">{{ t('label.learnMore') }}</base-button>
+        </a>
+      </div>
     </template>
   </header>
 </template>
@@ -125,11 +180,10 @@ const copyLink = async () => {
     width: 100%;
     height: 68px;
     padding-inline: 1rem;
-    box-shadow:
-      0 10px 15px -3px rgb(0 0 0 / 0.1),
-      0 4px 6px -4px rgb(0 0 0 / 0.1);
+    background-color: #f7f7f8;
+    box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(12px);
     overflow: visible;
-    background-image: linear-gradient(to top, #1a202c, #1c3f47); /* one-off colours to approximate Zeplin gradient */
     z-index: 50;
   }
 
@@ -150,22 +204,64 @@ const copyLink = async () => {
   .nav-items-right-container {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 0.5rem;
+  }
+
+  .nav-colour-scheme-toggle-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0.5rem;
+    color: #18181b;
+  }
+
+  .nav-settings-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 0.5rem;
+    color: #18181b;
+
+    &.active {
+      color: var(--colour-ti-highlight);
+    }
+
+    .warning-icon {
+      position: absolute;
+      top: -0.25rem;
+      right: -0.25rem;
+      color: var(--colour-danger-default);
+      width: 1rem;
+      height: 1rem;
+    }
   }
 
   .nav-copy-link-button {
     font-weight: 600;
     display: flex;
     align-items: center;
+    justify-content: center;
     position: relative;
-    color: #f3f4f6; /* TODO: hard-coded as we don't have light mode for NavBar yet */
+    padding: 0.5rem;
+    color: #18181b;
 
     &:active {
-      color: var(--colour-accent-teal);
+      color: var(--colour-ti-highlight);
     }
   }
 
-  .nav-copy-link-tooltip {
+  :deep(.app-drawer__button svg) {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .nav-app-drawer-container {
+    position: relative;
+  }
+
+  .nav-tooltip {
     position: absolute;
     top: 100%;
     left: 50%;
@@ -178,14 +274,22 @@ const copyLink = async () => {
     pointer-events: none;
   }
 
-  .nav-copy-link-button:hover .nav-copy-link-tooltip {
+  .nav-copy-link-button:hover .nav-tooltip,
+  .nav-settings-button:hover .nav-tooltip,
+  .nav-colour-scheme-toggle-button:hover .nav-tooltip {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .nav-app-drawer-container:hover:not(:has(.app-drawer[open])) .nav-tooltip {
     opacity: 1;
     pointer-events: auto;
   }
 
   .appointment-logo {
-    img {
-      height: 2.25rem;
+    svg {
+      height: 3rem;
+      width: auto;
     }
   }
 }
@@ -197,8 +301,23 @@ const copyLink = async () => {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .nav-copy-link-tooltip {
+  .nav-tooltip {
     transition: opacity 250ms ease-out;
+  }
+}
+
+.header-desktop.dark {
+  background-color: #111113;
+
+  .nav-copy-link-button,
+  .nav-colour-scheme-toggle-button,
+  .nav-settings-button {
+    color: var(--colour-ti-secondary);
+  }
+
+  .nav-settings-button.active,
+  .nav-copy-link-button:active {
+    color: var(--colour-ti-highlight);
   }
 }
 </style>

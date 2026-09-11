@@ -31,12 +31,15 @@ config_json="$(jq -n \
   --arg tbAccountDashboardUrl "${APP_TB_ACCOUNT_DASHBOARD_URL:-}" \
   --arg tbProUrl "${APP_TB_PRO_URL:-}" \
   --arg supportUrl "${APP_SUPPORT_URL:-}" \
+  --arg mailUrl "${APP_MAIL_URL:-}" \
+  --arg sendUrl "${APP_SEND_URL:-}" \
   --arg defaultHourFormat "${APP_DEFAULT_HOUR_FORMAT:-}" \
   '{apiUrl:$apiUrl, apiPort:$apiPort, apiSecure:$apiSecure, shortBaseUrl:$shortBaseUrl,
     authScheme:$authScheme, oidcRootUrl:$oidcRootUrl, oidcClientId:$oidcClientId,
     sentryDsn:$sentryDsn, posthogProjectKey:$posthogProjectKey, posthogHost:$posthogHost,
     posthogUiHost:$posthogUiHost, tbAccountDashboardUrl:$tbAccountDashboardUrl,
-    tbProUrl:$tbProUrl, supportUrl:$supportUrl, defaultHourFormat:$defaultHourFormat}')"
+    tbProUrl:$tbProUrl, supportUrl:$supportUrl, mailUrl:$mailUrl, sendUrl:$sendUrl,
+    defaultHourFormat:$defaultHourFormat}')"
 printf 'window.__APP_CONFIG__ = %s;\n' "$config_json" > "$CONFIG_PATH"
 echo "appointment: wrote runtime config to $CONFIG_PATH"
 

@@ -16,13 +16,11 @@ import {
 } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { dayjsKey } from '@/keys';
-import { ColourSchemes } from '@/definitions';
 import { userManager } from '@/composables/oidcUserManager';
 import { isOidcAuth, isPasswordAuth } from '@/composables/authSchemes';
 
 const initialUserConfigObject = {
   language: null,
-  colourScheme: null,
   timezone: null,
   startOfWeek: null,
 } as UserConfig;
@@ -62,7 +60,6 @@ export const useUserStore = defineStore('user', () => {
   const dj = inject(dayjsKey);
   const defaultSettings = {
     language: i18n.locale.value,
-    colourScheme: ColourSchemes.System,
     timezone: dj.tz.guess(),
     startOfWeek: 7,
   };
@@ -115,21 +112,6 @@ export const useUserStore = defineStore('user', () => {
   });
 
   /**
-   * Return the user color scheme
-   */
-  const myColourScheme = computed((): ColourSchemes => {
-    switch (data.value.settings.colourScheme) {
-      case 'dark':
-        return ColourSchemes.Dark;
-      case 'light':
-        return ColourSchemes.Light;
-      case 'system':
-      default:
-        return window.matchMedia('(prefers-color-scheme: dark)').matches ? ColourSchemes.Dark : ColourSchemes.Light;
-    }
-  });
-
-  /**
    * True if user has a valid access token
    */
   const authenticated = computed((): boolean => !!data.value.accessToken);
@@ -154,7 +136,6 @@ export const useUserStore = defineStore('user', () => {
       level: subscriber.level,
       settings: {
         language: subscriber.language,
-        colourScheme: subscriber.colour_scheme,
         timezone: subscriber.timezone,
         startOfWeek: subscriber.start_of_week,
       },
@@ -323,7 +304,6 @@ export const useUserStore = defineStore('user', () => {
     myBaseLink,
     myLink,
     mySlug,
-    myColourScheme,
     updateUser,
     finishFTUE,
   };

@@ -61,10 +61,11 @@ onBeforeUnmount(() => {
   background: none;
   border: none;
   cursor: pointer;
+  margin-inline-start: 0.325rem;
 
   .avatar {
     & :first-child {
-      color: var(--colour-ti-base-dark);
+      color: var(--colour-ti-base);
     }
   }
 
