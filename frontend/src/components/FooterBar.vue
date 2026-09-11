@@ -125,7 +125,7 @@ const appointmentLoggedInNavItems = [
     font-weight: 400;
     font-size: 0.6875rem;
     text-transform: none;
-    color: var(--colour-ti-secondary);
+    color: var(--colour-ti-secondary-dark);
 
     a {
       text-decoration: underline;
