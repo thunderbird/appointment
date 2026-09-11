@@ -1,6 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
-import { BookingPage } from '../../pages/booking-page';
-import { DashboardPage } from '../../pages/dashboard-page';
+import { BookingPage } from '../pages/booking-page';
+import { DashboardPage } from '../pages/dashboard-page';
 
 import {
   APPT_DISPLAY_NAME,
@@ -8,7 +8,7 @@ import {
   TIMEOUT_60_SECONDS,
   APPT_TARGET_ENV,
   TIMEOUT_1_SECOND,
-} from '../../const/constants';
+} from '../const/constants';
 
 var bookingPage: BookingPage;
 var dashboardPage: DashboardPage;

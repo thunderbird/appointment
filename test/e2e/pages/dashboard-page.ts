@@ -58,8 +58,13 @@ export class DashboardPage {
       // now our selected slot is in the same format we can seach for it on the pending bookings list
       console.log(`searching bookings list for event: ${selectedSlotFormattedDate}`);
       const apptLocator = this.page.getByRole('button', { name: selectedSlotFormattedDate });
-      await this.scrollIntoView(apptLocator);
+
+      // Wait for asynchronous booking propagation to put the event in the DOM
+      // before attempting to scroll it. On BrowserStack Android, scrolling a
+      // locator that does not exist yet consumes the full action timeout on
+      // every poll and can exhaust the enclosing test timeout prematurely.
       await expect(apptLocator).toBeVisible();
+      await this.scrollIntoView(apptLocator);
     }).toPass({
       // Probe, wait 1s, probe, wait 2s, probe, wait 10s, probe, wait 10s, probe
       // ... Defaults to [100, 250, 500, 1000].
