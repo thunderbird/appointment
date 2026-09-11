@@ -46,7 +46,7 @@ onMounted(async () => {
 h3 {
   font-size: 1.25rem;
   font-weight: 600;
-  color: black;
+  color: var(--colour-ti-base);
   margin-block-end: 1rem;
 }
 

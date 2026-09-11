@@ -55,7 +55,7 @@ const onContinueButtonClick = async () => {
 
     ftueStore.clearMessages();
     await ftueStore.moveToStep(FtueStep.SetupComplete);
-  } catch (error) {
+  } catch (error: any) {
     errorMessage.value = error ? error.message : t('error.somethingWentWrong');
   } finally {
     isLoading.value = false;
@@ -127,7 +127,7 @@ h3 {
   font-size: 1.25rem;
   font-weight: 600;
   margin-block-end: 1rem;
-  color: black;
+  color: var(--colour-ti-base);
 }
 
 p {
