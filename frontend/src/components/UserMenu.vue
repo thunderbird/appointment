@@ -64,7 +64,7 @@ onBeforeUnmount(() => {
 
   .avatar {
     & :first-child {
-      color: var(--colour-ti-base-dark);
+      color: var(--colour-ti-base);
     }
   }
 

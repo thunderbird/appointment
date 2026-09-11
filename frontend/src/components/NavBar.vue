@@ -86,7 +86,7 @@ const copyLink = async () => {
           :aria-label="t('label.settings')"
         >
           <ph-gear :size="24" />
-          <ph-warning-circle v-if="true || externalConnectionStore.hasUnhealthyConnections" class="warning-icon" weight="fill" />
+          <ph-warning-circle v-if="externalConnectionStore.hasUnhealthyConnections" class="warning-icon" weight="fill" />
         </router-link>
 
         <button
