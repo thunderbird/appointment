@@ -81,7 +81,7 @@ const copyLink = async () => {
         <div v-if="user.myLink" class="nav-copy-link-button-container">
           <button class="nav-copy-link-button" @click="copyLink" aria-labelledby="copy-meeting-link-button">
             <ph-link-simple id="copy-meeting-link-button" :size="24" />
-            <tool-tip :position="TooltipPosition.Top" class="nav-copy-link-tooltip">
+            <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
               {{ myLinkTooltip }}
             </tool-tip>
           </button>
@@ -95,6 +95,9 @@ const copyLink = async () => {
         >
           <ph-gear :size="24" />
           <ph-warning-circle v-if="externalConnectionStore.hasUnhealthyConnections" class="warning-icon" weight="fill" />
+          <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
+            {{ t('label.settings') }}
+          </tool-tip>
         </router-link>
 
         <button
@@ -104,9 +107,17 @@ const copyLink = async () => {
         >
           <ph-sun v-if="isDark" :size="24" />
           <ph-moon v-else :size="24" />
+          <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
+            {{ isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme') }}
+          </tool-tip>
         </button>
 
-        <app-drawer :apps="apps" />
+        <div class="nav-app-drawer-container">
+          <app-drawer :apps="apps" />
+          <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
+            {{ t('label.switchApps') }}
+          </tool-tip>
+        </div>
 
         <user-menu :username="user.data.username" :avatar-url="user.data.avatarUrl" />
       </div>
@@ -121,6 +132,9 @@ const copyLink = async () => {
         >
           <ph-sun v-if="isDark" :size="24" />
           <ph-moon v-else :size="24" />
+          <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
+            {{ isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme') }}
+          </tool-tip>
         </button>
 
         <a :href="tbProUrl">
@@ -190,13 +204,14 @@ const copyLink = async () => {
   .nav-items-right-container {
     display: flex;
     align-items: center;
-    gap: 1.5rem;
+    gap: 0.5rem;
   }
 
   .nav-colour-scheme-toggle-button {
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
     padding: 0.5rem;
     color: #18181b;
   }
@@ -208,6 +223,10 @@ const copyLink = async () => {
     position: relative;
     padding: 0.5rem;
     color: #18181b;
+
+    &.active {
+      color: var(--colour-ti-highlight);
+    }
 
     .warning-icon {
       position: absolute;
@@ -229,7 +248,7 @@ const copyLink = async () => {
     color: #18181b;
 
     &:active {
-      color: var(--colour-accent-teal);
+      color: var(--colour-ti-highlight);
     }
   }
 
@@ -238,7 +257,11 @@ const copyLink = async () => {
     height: 1.5rem;
   }
 
-  .nav-copy-link-tooltip {
+  .nav-app-drawer-container {
+    position: relative;
+  }
+
+  .nav-tooltip {
     position: absolute;
     top: 100%;
     left: 50%;
@@ -251,7 +274,14 @@ const copyLink = async () => {
     pointer-events: none;
   }
 
-  .nav-copy-link-button:hover .nav-copy-link-tooltip {
+  .nav-copy-link-button:hover .nav-tooltip,
+  .nav-settings-button:hover .nav-tooltip,
+  .nav-colour-scheme-toggle-button:hover .nav-tooltip {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .nav-app-drawer-container:hover:not(:has(.app-drawer[open])) .nav-tooltip {
     opacity: 1;
     pointer-events: auto;
   }
@@ -271,18 +301,23 @@ const copyLink = async () => {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .nav-copy-link-tooltip {
+  .nav-tooltip {
     transition: opacity 250ms ease-out;
   }
 }
 
 .header-desktop.dark {
   background-color: #111113;
-}
 
-.header-desktop.dark .nav-copy-link-button,
-.header-desktop.dark .nav-colour-scheme-toggle-button,
-.header-desktop.dark .nav-settings-button {
-  color: var(--colour-ti-secondary);
+  .nav-copy-link-button,
+  .nav-colour-scheme-toggle-button,
+  .nav-settings-button {
+    color: var(--colour-ti-secondary);
+  }
+
+  .nav-settings-button.active,
+  .nav-copy-link-button:active {
+    color: var(--colour-ti-highlight);
+  }
 }
 </style>
