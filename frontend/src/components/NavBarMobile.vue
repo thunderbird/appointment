@@ -155,7 +155,7 @@ async function copyLink() {
     right: 0;
 
     svg {
-      height: 2rem;
+      height: 3rem;
       width: auto;
       margin: 0 auto;
     }
