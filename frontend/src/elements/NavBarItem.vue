@@ -26,12 +26,12 @@ defineProps<Props>();
   font-size: 0.8125rem;
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--colour-ti-base-dark);
+  color: var(--colour-ti-secondary);
   height: 2.25rem;
   border-radius: 8px;
 
   &.active {
-    background-color: var(--colour-neutral-lower-dark);
+    color: var(--colour-ti-brand);
   }
 
   a {
