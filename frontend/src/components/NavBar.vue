@@ -149,7 +149,6 @@ const copyLink = async () => {
   font-size: 0.8125rem;
   padding: 0.875rem 1rem;
   letter-spacing: 0.65px;
-  color: var(--colour-ti-base-dark);
 }
 
 @media (--md) {
