@@ -7,7 +7,13 @@ minimumReleaseAgeExclude:
   - '@posthog/browser-common@0.5.0'
   - '@posthog/types@1.402.3'
   - posthog-js@1.415.5
+  - '@thunderbirdops/services-ui@1.7.0'
 overrides:
+  # Force a single Vue instance app-wide. @thunderbirdops/services-ui declares
+  # vue as a regular dependency (not a peerDependency), so without this pnpm
+  # installs a second copy; components with slots then break at runtime when
+  # a vnode created by one Vue instance is rendered by the other.
+  vue: 3.5.41
   brace-expansion@<1.1.17: ^1.1.17
   brace-expansion@<1.1.18: ^1.1.18
   brace-expansion@>=2.0.0 <2.1.3: ^2.1.3

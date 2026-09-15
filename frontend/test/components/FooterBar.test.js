@@ -8,6 +8,7 @@ import { useUserStore } from '@/stores/user-store';
 import { RouterLink } from 'vue-router';
 import FooterBar from '@/components/FooterBar.vue';
 import { supportUrlKey, tbProUrlKey } from '@/keys';
+import { STATUS_PAGE_URL, IDEAS_PAGE_URL } from '@/definitions';
 
 describe('FooterBar', () => {
   var app;
@@ -46,11 +47,15 @@ describe('FooterBar', () => {
       expect(foundLinks, 'expected link component to be rendered').toContain(expLink);
     }
 
-    // verify we show the external Thundermail link and no support link
+    // verify we show only the external Thundermail link for unauthenticated users
     const proLink = wrapper.find(`a[href="${import.meta.env.VITE_TB_PRO_URL}"]`);
     expect(proLink.exists()).toBe(true);
     expect(proLink.text()).toBe(i18ninstance.global.t('label.exploreThundermail'));
-    expect(wrapper.find('.contact-support-link').exists()).toBe(false);
+
+    // the status, support and ideas links are only shown to authenticated users
+    expect(wrapper.find('.default-links').exists()).toBe(false);
+    expect(wrapper.find(`a[href="${STATUS_PAGE_URL}"]`).exists()).toBe(false);
+    expect(wrapper.find(`a[href="${IDEAS_PAGE_URL}"]`).exists()).toBe(false);
   });
 
   it('renders correctly when logged in', () => {
@@ -81,10 +86,17 @@ describe('FooterBar', () => {
       expect(foundLinks, 'expected link component to be rendered').toContain(expLink);
     }
 
-    // verify the support link is rendered for authenticated users
-    const supportLink = wrapper.find('.contact-support-link');
+    // verify the status, support and ideas links are rendered for authenticated users
+    const statusLink = wrapper.find(`a[href="${STATUS_PAGE_URL}"]`);
+    expect(statusLink.exists()).toBe(true);
+    expect(statusLink.text()).toBe(i18ninstance.global.t('label.status'));
+
+    const supportLink = wrapper.find(`a[href="${import.meta.env.VITE_SUPPORT_URL}"]`);
     expect(supportLink.exists()).toBe(true);
-    expect(supportLink.attributes('href')).toBe(import.meta.env.VITE_SUPPORT_URL);
     expect(supportLink.text()).toBe(i18ninstance.global.t('label.needHelpVisitSupport'));
+
+    const ideasLink = wrapper.find(`a[href="${IDEAS_PAGE_URL}"]`);
+    expect(ideasLink.exists()).toBe(true);
+    expect(ideasLink.text()).toBe(i18ninstance.global.t('label.ideas'));
   });
 });

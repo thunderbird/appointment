@@ -16,13 +16,14 @@ import {
 } from '@phosphor-icons/vue';
 import { PrimaryButton, UserAvatar } from '@thunderbirdops/services-ui';
 import { accountsTbProfileUrlKey, supportUrlKey } from '@/keys';
+import AppointmentLogo from '@/components/AppointmentLogo.vue';
 
 // component constants
 const userStore = useUserStore();
 const { t } = useI18n();
 
 const navItems = [
-  { route: 'dashboard', i18nKey: 'dashboard', icon: PhHouse },
+  { route: 'dashboard', i18nKey: 'calendar', icon: PhHouse },
   { route: 'bookings', i18nKey: 'bookings', icon: PhCalendarCheck },
   { route: 'availability', i18nKey: 'availability', icon: PhCalendarDot },
   { route: 'settings', i18nKey: 'settings', icon: PhGear },
@@ -64,7 +65,7 @@ async function copyLink() {
     </button>
 
     <router-link :to="{ name: userStore.authenticated ? 'dashboard' : 'home' }">
-      <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
+      <appointment-logo force-dark />
     </router-link>
   </header>
 
@@ -79,7 +80,7 @@ async function copyLink() {
           <ph-x size="24" />
         </button>
 
-        <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
+        <appointment-logo force-dark />
       </header>
 
       <primary-button @click="copyLink" class="share-link-button">
@@ -153,8 +154,9 @@ async function copyLink() {
     left: 0;
     right: 0;
 
-    img {
-      height: 2rem;
+    svg {
+      height: 3rem;
+      width: auto;
       margin: 0 auto;
     }
   }

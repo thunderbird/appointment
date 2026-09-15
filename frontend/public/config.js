@@ -27,5 +27,7 @@ window.__APP_CONFIG__ = {
   tbAccountDashboardUrl: '',
   tbProUrl: '',
   supportUrl: '',
+  mailUrl: '',
+  sendUrl: '',
   defaultHourFormat: '',
 };

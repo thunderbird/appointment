@@ -34,6 +34,8 @@ export type AppConfig = {
   tbAccountDashboardUrl?: string;
   tbProUrl?: string;
   supportUrl?: string;
+  mailUrl?: string;
+  sendUrl?: string;
   defaultHourFormat?: string;
 };
 
@@ -99,6 +101,12 @@ export const config = {
   },
   get supportUrl() {
     return pick(runtime().supportUrl, env.VITE_SUPPORT_URL);
+  },
+  get mailUrl() {
+    return pick(runtime().mailUrl, env.VITE_MAIL_URL);
+  },
+  get sendUrl() {
+    return pick(runtime().sendUrl, env.VITE_SEND_URL);
   },
   get defaultHourFormat() {
     return pick(runtime().defaultHourFormat, env.VITE_DEFAULT_HOUR_FORMAT);

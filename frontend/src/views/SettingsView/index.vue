@@ -6,7 +6,7 @@ import { storeToRefs } from 'pinia';
 import { PrimaryButton, LinkButton, NoticeBar, NoticeBarTypes, IconButton } from '@thunderbirdops/services-ui';
 import { enumToObject } from '@/utils';
 import { callKey, dayjsKey } from '@/keys';
-import { SettingsSections, ColourSchemes } from '@/definitions';
+import { SettingsSections } from '@/definitions';
 import { Alert, SubscriberResponse } from '@/models';
 import { useUserStore } from '@/stores/user-store';
 import { useCalendarStore } from '@/stores/calendar-store';
@@ -63,7 +63,6 @@ async function updatePreferences() {
     name: currentState.value.displayName,
     timezone: currentState.value.defaultTimeZone,
     language: currentState.value.language,
-    colour_scheme: currentState.value.colourScheme,
     start_of_week: currentState.value.startOfWeek,
   };
 
@@ -72,7 +71,6 @@ async function updatePreferences() {
     name: userStore.data.name,
     timezone: userStore.data.settings.timezone,
     language: userStore.data.settings.language,
-    colour_scheme: userStore.data.settings.colourScheme,
     start_of_week: userStore.data.settings.startOfWeek,
   };
 
@@ -88,26 +86,6 @@ async function updatePreferences() {
     savingInProgress.value = false;
     window.scrollTo(0, 0);
     return;
-  }
-
-  // Color scheme needs to be applied manually so that
-  // the user doesn't have to refresh the page to see the changes
-  switch (currentState.value.colourScheme) {
-    case ColourSchemes.Dark:
-      document.documentElement.classList.add('dark');
-      break;
-    case ColourSchemes.Light:
-      document.documentElement.classList.remove('dark');
-      break;
-    case ColourSchemes.System:
-      if (!window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        document.documentElement.classList.remove('dark');
-      } else {
-        document.documentElement.classList.add('dark');
-      }
-      break;
-    default:
-      break;
   }
 
   // Update i18n locale to change language on the page without page refresh

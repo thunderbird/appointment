@@ -171,7 +171,7 @@ onMounted(async () => {
   margin-block-end: 1.5rem;
 
   strong {
-    color: black;
+    color: var(--colour-ti-base);
     font-weight: 600;
     margin-block-end: 0.5rem;
   }

@@ -151,12 +151,12 @@ export class SettingsPage {
     await this.preferencesBtn.click();
     await this.page.waitForTimeout(TIMEOUT_1_SECOND);
     // settings seems to take awhile to populate on prod, especially BrowserStack, so let's
-    // ensure that the settings are loaded i.e. the 'Theme' field is not blank
-    await expect(this.themeSelect).toBeEnabled({ timeout: TIMEOUT_10_SECONDS });
+    // ensure that the settings are loaded i.e. the 'Default timezone' field is not blank
+    await expect(this.defaultTimeZoneSelect).toBeEnabled({ timeout: TIMEOUT_10_SECONDS });
     await expect
-      .poll(async () => (await this.themeSelect.inputValue()).trim(), {
+      .poll(async () => (await this.defaultTimeZoneSelect.inputValue()).trim(), {
         timeout: TIMEOUT_30_SECONDS,
-        message: 'Waiting for theme field to be populated',
+        message: 'Waiting for default timezone field to be populated',
       })
       .not.toBe('');
   }
@@ -194,30 +194,6 @@ export class SettingsPage {
       await expect(this.savedSuccessfullyTextEN).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
     }
     await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
-  }
-
-  /**
-   * Change the theme setting
-   */
-  async changeThemeSetting(theme: string) {
-    await this.themeSelect.waitFor({ timeout: TIMEOUT_30_SECONDS });
-    await this.scrollIntoView(this.themeSelect);
-    await this.themeSelect.selectOption(theme);
-    await this.page.waitForTimeout(TIMEOUT_2_SECONDS);
-    await this.saveBtnEN.click();
-    await this.page.waitForTimeout(TIMEOUT_2_SECONDS);
-    await expect(this.savedSuccessfullyTextEN).toBeVisible({ timeout: TIMEOUT_30_SECONDS });
-    // wait for theme to take affect, can take time especially on browserstack
-    await this.page.waitForTimeout(TIMEOUT_5_SECONDS);
-  }
-
-  /**
-   * Check if dark mode is enabled
-   */
-  async isDarkModeEnabled(page: Page): Promise<boolean> {
-    const htmlTag = page.locator("html");
-    const htmlClass = await htmlTag.getAttribute("class");
-    return htmlClass === APPT_HTML_DARK_MODE_CLASS;
   }
 
   /**

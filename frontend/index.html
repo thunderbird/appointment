@@ -25,19 +25,13 @@
     <meta property="og:image:alt" content="Thunderbird Appointment" />
 
     <script>
-      // Load initial theme color scheme from user settings
-      const user = JSON.parse(localStorage?.getItem('tba/user') ?? '{}');
+      // Load initial theme from the user's stored override (if any) or their
+      // device colour scheme preference. Keep in sync with useColourScheme.ts.
+      const storedColourScheme = localStorage?.getItem('tba/colour-scheme');
       const browserPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const isDark = storedColourScheme === 'dark' || (storedColourScheme !== 'light' && browserPrefersDark);
 
-      if (
-        user.settings?.colourScheme === 'dark' ||
-        (user.settings?.colourScheme === 'system' && browserPrefersDark) ||
-        (!user.settings?.colourScheme && browserPrefersDark)
-      ) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
-      }
+      document.documentElement.classList.toggle('dark', isDark);
     </script>
   </head>
   <body>

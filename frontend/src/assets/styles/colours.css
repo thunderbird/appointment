@@ -79,13 +79,14 @@ html {
   --colour-ti-base: #1a202c;
   --colour-ti-base-dark: #eeeef0; /* Forced dark mode colour */
   --colour-ti-base-light: #1a202c;
-  --colour-ti-secondary: #4c4d58;
-  --colour-ti-secondary-light: #4c4d58;
+  --colour-ti-secondary: #52525b;
+  --colour-ti-secondary-dark: #d4d4d8;
   --colour-ti-muted: #737584;
   --colour-ti-highlight: #1373d9;
   --colour-ti-warning: #713f12;
   --colour-ti-critical: #dc2626;
   --colour-ti-success: #1d783b;
+  --colour-ti-brand: #19518f;
 
   /*
    * Shadow colours (for surfaces / buttons)
@@ -197,12 +198,13 @@ html {
      */
     --colour-ti-black: #ffffff;
     --colour-ti-base: #eeeef0;
-    --colour-ti-secondary: #d9d9de;
+    --colour-ti-secondary: #d4d4d8;
     --colour-ti-muted: #7f94ac;
     --colour-ti-highlight: #58c9ff;
     --colour-ti-warning: #fee78a;
     --colour-ti-critical: #ef4444;
     --colour-ti-success: #55d37e;
+    --colour-ti-brand: #5fa6e8;
 
     /*
      * Shadow colours (dark mode: no visible shadows)

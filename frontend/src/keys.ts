@@ -29,6 +29,10 @@ export const accountsTbProfileUrlKey = Symbol('accountsTbProfileUrl') as Injecti
 export const tbProUrlKey = Symbol('tbProUrl') as InjectionKey<string>;
 export const supportUrlKey = Symbol('supportUrl') as InjectionKey<string>;
 
+// Provide URLs for sibling Thunderbird Pro apps, used by the app drawer
+export const mailUrlKey = Symbol('mailUrl') as InjectionKey<string>;
+export const sendUrlKey = Symbol('sendUrl') as InjectionKey<string>;
+
 // Provide configured fetch call to our backend API
 export const callKey = Symbol('call') as InjectionKey<Fetch>;
 
