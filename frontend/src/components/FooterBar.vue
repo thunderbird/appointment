@@ -54,17 +54,21 @@ const appointmentLoggedInNavItems = [
         </div>
 
         <ul v-if="isAuthenticated" class="default-links">
-          <a :href="STATUS_PAGE_URL" target="_blank" rel="noopener noreferrer">
-            {{ t('label.status') }}
-          </a>
-          <span>|</span>
-          <a :href="supportUrl" target="_blank" rel="noopener noreferrer">
-            {{ t('label.needHelpVisitSupport') }}
-          </a>
-          <span>|</span>
-          <a :href="IDEAS_PAGE_URL" target="_blank" rel="noopener noreferrer">
-            {{ t('label.ideas') }}
-          </a>
+          <li>
+            <a :href="STATUS_PAGE_URL" target="_blank" rel="noopener noreferrer">
+              {{ t('label.status') }}
+            </a>
+          </li>
+          <li>
+            <a :href="supportUrl" target="_blank" rel="noopener noreferrer">
+              {{ t('label.needHelpVisitSupport') }}
+            </a>
+          </li>
+          <li>
+            <a :href="IDEAS_PAGE_URL" target="_blank" rel="noopener noreferrer">
+              {{ t('label.ideas') }}
+            </a>
+          </li>
         </ul>
       </nav>
     </template>
@@ -126,6 +130,16 @@ const appointmentLoggedInNavItems = [
     font-size: 0.6875rem;
     text-transform: none;
     color: var(--colour-ti-secondary-dark);
+
+    li {
+      display: flex;
+      align-items: center;
+
+      &:not(:last-child)::after {
+        content: '|';
+        margin-inline-start: 0.5rem;
+      }
+    }
 
     a {
       text-decoration: underline;
