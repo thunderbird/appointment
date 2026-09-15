@@ -5,13 +5,14 @@ import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import { TooltipPosition } from '@/definitions';
-import { PhLinkSimple, PhSun, PhMoon, PhGear, PhWarningCircle } from '@phosphor-icons/vue';
+import { PhLinkSimple, PhGear, PhWarningCircle } from '@phosphor-icons/vue';
 import { ToolTip, BaseButton, SendIcon, MailIcon, AppointmentIcon, AppDrawer, type AppDrawerApp } from '@thunderbirdops/services-ui';
 import UserMenu from '@/components/UserMenu.vue';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { mailUrlKey, sendUrlKey, tbProUrlKey } from '@/keys';
-import { isDark, toggleColourScheme } from '@/composables/useColourScheme';
+import { isDark } from '@/composables/useColourScheme';
 import AppointmentLogo from '@/components/AppointmentLogo.vue';
+import ColourSchemeToggleButton from '@/components/ColourSchemeToggleButton.vue';
 
 // component constants
 const tbProUrl = inject(tbProUrlKey);
@@ -100,17 +101,7 @@ const copyLink = async () => {
           </tool-tip>
         </router-link>
 
-        <button
-          class="nav-colour-scheme-toggle-button"
-          @click="toggleColourScheme"
-          :aria-label="isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme')"
-        >
-          <ph-sun v-if="isDark" :size="24" />
-          <ph-moon v-else :size="24" />
-          <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
-            {{ isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme') }}
-          </tool-tip>
-        </button>
+        <colour-scheme-toggle-button />
 
         <div class="nav-app-drawer-container">
           <app-drawer :apps="apps" />
@@ -125,17 +116,7 @@ const copyLink = async () => {
 
     <template v-else>
       <div class="nav-items-right-container">
-        <button
-          class="nav-colour-scheme-toggle-button"
-          @click="toggleColourScheme"
-          :aria-label="isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme')"
-        >
-          <ph-sun v-if="isDark" :size="24" />
-          <ph-moon v-else :size="24" />
-          <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
-            {{ isDark ? t('label.switchToLightTheme') : t('label.switchToDarkTheme') }}
-          </tool-tip>
-        </button>
+        <colour-scheme-toggle-button />
 
         <a :href="tbProUrl">
           <base-button type="brand" variant="outline" class="learn-more-button">{{ t('label.learnMore') }}</base-button>
@@ -207,15 +188,6 @@ const copyLink = async () => {
     gap: 0.5rem;
   }
 
-  .nav-colour-scheme-toggle-button {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 0.5rem;
-    color: #18181b;
-  }
-
   .nav-settings-button {
     display: flex;
     align-items: center;
@@ -275,8 +247,7 @@ const copyLink = async () => {
   }
 
   .nav-copy-link-button:hover .nav-tooltip,
-  .nav-settings-button:hover .nav-tooltip,
-  .nav-colour-scheme-toggle-button:hover .nav-tooltip {
+  .nav-settings-button:hover .nav-tooltip {
     opacity: 1;
     pointer-events: auto;
   }
@@ -310,7 +281,6 @@ const copyLink = async () => {
   background-color: #111113;
 
   .nav-copy-link-button,
-  .nav-colour-scheme-toggle-button,
   .nav-settings-button {
     color: var(--colour-ti-secondary);
   }
