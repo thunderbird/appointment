@@ -19,8 +19,8 @@ const appointmentNotLoggedInNavItems = [{ route: tbProUrl, i18nKey: 'exploreThun
 
 const appointmentLoggedInNavItems = [
   { route: 'dashboard', i18nKey: 'calendar' },
-  { route: 'bookings', i18nKey: 'bookings' },
   { route: 'availability', i18nKey: 'availability' },
+  { route: 'bookings', i18nKey: 'bookings' },
   { route: 'settings', i18nKey: 'settings' },
 ];
 </script>
