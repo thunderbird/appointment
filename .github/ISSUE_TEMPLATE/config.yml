@@ -13,6 +13,6 @@ contact_links:
   - name: Bug Report (Mailstrom)
     url: https://github.com/thunderbird/mailstrom/issues/new
     about: A bug report for the mail server deployment of Thundermail
-  - name: Bug Report (Thunderbird Send / Pro Add-on)
+  - name: Bug Report (Thunderbird Send / Thundermail Add-on)
     url: https://github.com/thunderbird/tbpro-add-on/issues/new
     about: A bug report for Thunderbird Send and the Thundermail add-on (send.tb.pro)
