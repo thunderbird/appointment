@@ -6,7 +6,15 @@ import { useUserStore } from '@/stores/user-store';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import { TooltipPosition } from '@/definitions';
 import { PhLinkSimple, PhGear, PhWarningCircle } from '@phosphor-icons/vue';
-import { ToolTip, BaseButton, SendIcon, MailIcon, AppointmentIcon, AppDrawer, type AppDrawerApp } from '@thunderbirdops/services-ui';
+import {
+  ToolTip,
+  BaseButton,
+  SendIcon,
+  MailIcon,
+  AppointmentIcon,
+  AppDrawer,
+  type AppDrawerApp,
+} from '@thunderbirdops/services-ui';
 import UserMenu from '@/components/UserMenu.vue';
 import { useExternalConnectionsStore } from '@/stores/external-connections-store';
 import { mailUrlKey, sendUrlKey, tbProUrlKey } from '@/keys';
@@ -69,8 +77,13 @@ const copyLink = async () => {
 
     <template v-if="user?.authenticated">
       <nav class="nav-items-container">
-        <nav-bar-item v-for="item in navItems" :key="item" :active="isNavEntryActive(item)"
-          :label="item === 'dashboard' ? t('label.calendar') : t(`label.${item}`)" :link-name="item" />
+        <nav-bar-item
+          v-for="item in navItems"
+          :key="item"
+          :active="isNavEntryActive(item)"
+          :label="item === 'dashboard' ? t('label.calendar') : t(`label.${item}`)"
+          :link-name="item"
+        />
       </nav>
 
       <div class="nav-items-right-container">
@@ -83,11 +96,18 @@ const copyLink = async () => {
           </button>
         </div>
 
-        <router-link :to="{ name: 'settings' }" class="nav-settings-button"
-          :class="{ active: isNavEntryActive('settings') }" :aria-label="t('label.settings')">
+        <router-link
+          :to="{ name: 'settings' }"
+          class="nav-settings-button"
+          :class="{ active: isNavEntryActive('settings') }"
+          :aria-label="t('label.settings')"
+        >
           <ph-gear :size="24" />
-          <ph-warning-circle v-if="externalConnectionStore.hasUnhealthyConnections" class="warning-icon"
-            weight="fill" />
+          <ph-warning-circle
+            v-if="externalConnectionStore.hasUnhealthyConnections"
+            class="warning-icon"
+            weight="fill"
+          />
           <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
             {{ t('label.settings') }}
           </tool-tip>

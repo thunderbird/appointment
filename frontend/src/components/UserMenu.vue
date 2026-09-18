@@ -61,6 +61,7 @@ onBeforeUnmount(() => {
   background: none;
   border: none;
   cursor: pointer;
+  padding: 0.25rem;
   margin-inline-start: 0.325rem;
 
   .avatar {
