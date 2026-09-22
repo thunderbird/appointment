@@ -16,9 +16,21 @@ After the first login you'll want to fill the `APP_ADMIN_ALLOW_LIST` env variabl
 
 The backend project uses dotenv files to inject environment variables into the application. A starting template can be found as [.env.example](.env.example). Copy that as your `.env` to get started.
 
-On first run (via [dev-entry.sh](scripts/dev-entry.sh)) a setup command will run filling in some secret environment variables, and the database will initialize.
+On first run (via [entry.sh](scripts/entry.sh) with `IS_LOCAL_DEV=yes`) a setup command will run filling in some secret environment variables, and the database will initialize.
 
 After that Appointment should be fully usable, however you may want to setup some third-party integrations like Google Calendar connections, or the creation of Zoom meetings. These are clearly labelled in the `.env` file, simply setup accounts for them with the vendor, and enter your values in the `.env` file.
+
+### Container roles
+
+The Docker image starts [entry.sh](scripts/entry.sh). It reads two environment variables:
+
+| Variable | Values | Effect |
+| --- | --- | --- |
+| `CONTAINER_ROLE` | `api` (default) | Runs `update-db`, then the uvicorn API server on port 5000. |
+| | `worker` | Runs a Celery worker on the `appointment` queue. No beat. |
+| | `beat` | Runs the Celery beat scheduler. Run exactly one instance. |
+| | `flower` | Runs the Celery Flower monitoring UI on port 5555. |
+| `SKIP_DB_MIGRATIONS` | `true` | The `api` role skips `update-db` on boot. Use this when a separate job owns migrations. Any other value or unset runs `update-db`. |
 
 ### Linting
 
@@ -138,5 +150,5 @@ run-command main --help
 ```
 
 - `download-legal` is an internal command to process privacy policy and terms of service files that will be served by the frontend.
-- `update-db` runs on docker container entry, and ensures the latest db migration has run, or if it's a new db then to kickstart that.
+- `update-db` runs on docker container entry (unless `SKIP_DB_MIGRATIONS=true`), and ensures the latest db migration has run, or if it's a new db then to kickstart that.
 - `setup` a first run setup that fills in some missing environment variables.
