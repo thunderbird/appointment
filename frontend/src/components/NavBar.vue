@@ -5,13 +5,14 @@ import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import NavBarItem from '@/elements/NavBarItem.vue';
 import { TooltipPosition } from '@/definitions';
-import { PhLinkSimple, PhGear, PhWarningCircle } from '@phosphor-icons/vue';
+import { PhLinkSimple, PhWarningCircle } from '@phosphor-icons/vue';
 import {
   ToolTip,
   BaseButton,
   SendIcon,
   MailIcon,
   AppointmentIcon,
+  SettingsIcon,
   AppDrawer,
   type AppDrawerApp,
 } from '@thunderbirdops/services-ui';
@@ -40,9 +41,9 @@ defineProps<Props>();
 const myLinkTooltip = ref(t('label.copyLink'));
 
 const apps: AppDrawerApp[] = [
-  { id: 'appointment', name: 'Appointment', icon: AppointmentIcon, current: true },
   { id: 'mail', name: 'Mail', icon: MailIcon, href: mailUrl },
   { id: 'send', name: 'Send', icon: SendIcon, href: sendUrl },
+  { id: 'appointment', name: 'Appointment', icon: AppointmentIcon, current: true },
 ];
 
 /**
@@ -102,7 +103,7 @@ const copyLink = async () => {
           :class="{ active: isNavEntryActive('settings') }"
           :aria-label="t('label.settings')"
         >
-          <ph-gear :size="24" />
+          <settings-icon />
           <ph-warning-circle
             v-if="externalConnectionStore.hasUnhealthyConnections"
             class="warning-icon"
