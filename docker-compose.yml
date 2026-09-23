@@ -24,6 +24,7 @@ services:
     ports: []
     environment:
       - CONTAINER_ROLE=worker
+      - CELERY_EMBED_BEAT=false
     depends_on:
       - backend
       - redis

@@ -22,15 +22,17 @@ After that Appointment should be fully usable, however you may want to setup som
 
 ### Container roles
 
-The Docker image starts [entry.sh](scripts/entry.sh). It reads two environment variables:
+The Docker image starts [entry.sh](scripts/entry.sh). It reads three environment variables:
 
 | Variable | Values | Effect |
 | --- | --- | --- |
 | `CONTAINER_ROLE` | `api` (default) | Runs `update-db`, then the uvicorn API server on port 5000. |
-| | `worker` | Runs a Celery worker on the `appointment` queue. No beat. |
-| | `beat` | Runs the Celery beat scheduler. Run exactly one instance. |
+| | `worker` | Runs a Celery worker on the `appointment` queue, with embedded beat unless `CELERY_EMBED_BEAT=false`. |
+| | `beat` | Runs the Celery beat scheduler on its own. Run one instance; the RedBeat lock keeps a second instance idle. |
 | | `flower` | Runs the Celery Flower monitoring UI on port 5555. |
-| `SKIP_DB_MIGRATIONS` | `true` | The `api` role skips `update-db` on boot. Use this when a separate job owns migrations. Any other value or unset runs `update-db`. |
+| | anything else | Exits 1. |
+| `SKIP_DB_MIGRATIONS` | `true` (case-insensitive) | The `api` role skips `update-db` on boot. Use this when a separate job owns migrations. Any other value or unset runs `update-db`. |
+| `CELERY_EMBED_BEAT` | `false` (case-insensitive) | The `worker` role runs without embedded beat. Pair it with a `beat` container. Any other value or unset keeps embedded beat. |
 
 ### Linting
 
