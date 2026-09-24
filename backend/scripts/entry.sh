@@ -42,9 +42,7 @@ case "$CONTAINER_ROLE" in
     worker)
         echo "Starting Celery worker..."
         WORKER_ARGS=(-A "$CELERY_APP" worker -l INFO)
-        # Embedded beat stays on by default so legacy ECS, which has no beat
-        # task, keeps running the schedule. Kubernetes sets this false and runs
-        # the dedicated beat role instead.
+        # Default keeps beat embedded; legacy ECS has no separate beat task.
         if [[ "${CELERY_EMBED_BEAT,,}" != "false" ]]; then
             WORKER_ARGS+=(--beat)
         fi
