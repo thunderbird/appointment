@@ -51,7 +51,7 @@ const { t } = useI18n();
     align-items: center;
     justify-content: center;
     position: relative;
-    padding: 0.5rem;
+    padding: 0.75rem;
     color: #18181b;
 
     &.dark {
