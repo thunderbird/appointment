@@ -1,40 +1,64 @@
 #!/bin/bash
 
 # Usage:
-#   Set CONTAINER_ROLE to control which process this container runs:
-#     worker  — Celery worker
-#     beat    — Celery beat scheduler
-#     (unset) — Backend API server (default)
+#   CONTAINER_ROLE selects the process this container runs: api (default), worker, beat, flower.
+#   SKIP_DB_MIGRATIONS=true makes the api role skip `update-db` on boot.
+#   CELERY_EMBED_BEAT=false makes the worker role run without embedded beat.
 
 echo "Entry script starting..."
 
-if [[ "$CONTAINER_ROLE" == "worker" ]]; then
-    echo "Starting Celery..."
-    celery -A appointment.celery_app:celery worker -l INFO --beat -Q appointment
-elif [[ "$CONTAINER_ROLE" == "flower" ]]; then
-    celery -A appointment.celery_app:celery flower -l INFO
-elif [[ "$CONTAINER_ROLE" == "api" ]]; then
-    if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
-        echo "Running setup"
-        run-command main setup
-    fi
-    echo "Running update-db"
-    run-command main update-db
+CONTAINER_ROLE="${CONTAINER_ROLE:-api}"
+echo "CONTAINER_ROLE=$CONTAINER_ROLE"
+CELERY_APP="appointment.celery_app:celery"
 
-    if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
-        echo "Starting cron service"
-        service cron start
-    fi
+case "$CONTAINER_ROLE" in
+    api)
+        if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
+            echo "Running setup"
+            run-command main setup
+        fi
 
-    ARGS="--factory appointment.main:server --host 0.0.0.0 --port 5000 --log-config scripts/uvicorn_log_config.json"
+        if [[ "${SKIP_DB_MIGRATIONS,,}" == "true" ]]; then
+            echo "Skipping update-db (SKIP_DB_MIGRATIONS=$SKIP_DB_MIGRATIONS)"
+        else
+            echo "Running update-db"
+            run-command main update-db || { echo "update-db failed" >&2; exit 1; }
+        fi
 
-    if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
-        ARGS="$ARGS --reload --log-level info"
-    fi
+        if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
+            echo "Starting cron service"
+            service cron start
+        fi
 
-    echo "Running uvicorn with these arguments: '$ARGS'"
-    uvicorn $ARGS
-else
-    echo "Unrecognized CONTAINER_ROLE: $CONTAINER_ROLE"
-    exit 1
-fi
+        ARGS=(--factory appointment.main:server --host 0.0.0.0 --port 5000 --log-config scripts/uvicorn_log_config.json)
+
+        if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
+            ARGS+=(--reload --log-level info)
+        fi
+
+        echo "Running uvicorn with these arguments: '${ARGS[*]}'"
+        exec uvicorn "${ARGS[@]}"
+        ;;
+    worker)
+        echo "Starting Celery worker..."
+        WORKER_ARGS=(-A "$CELERY_APP" worker -l INFO)
+        # Default keeps beat embedded; legacy ECS has no separate beat task.
+        if [[ "${CELERY_EMBED_BEAT,,}" != "false" ]]; then
+            WORKER_ARGS+=(--beat)
+        fi
+        WORKER_ARGS+=(-Q appointment)
+        exec celery "${WORKER_ARGS[@]}"
+        ;;
+    beat)
+        echo "Starting Celery beat..."
+        exec celery -A "$CELERY_APP" beat -l INFO
+        ;;
+    flower)
+        echo "Starting Celery Flower..."
+        exec celery -A "$CELERY_APP" flower -l INFO
+        ;;
+    *)
+        echo "Unrecognized CONTAINER_ROLE: $CONTAINER_ROLE" >&2
+        exit 1
+        ;;
+esac
