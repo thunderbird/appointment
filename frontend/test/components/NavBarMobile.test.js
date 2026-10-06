@@ -6,6 +6,8 @@ import router from '@/router';
 import withSetup from '../utils/with-setup';
 import { useUserStore } from '@/stores/user-store';
 import { RouterLink } from 'vue-router';
+import { isDark } from '@/composables/useColourScheme';
+import UserMenu from '@/components/UserMenu.vue';
 import NavBarMobile from '@/components/NavBarMobile.vue';
 
 describe('NavBarMobile', () => {
@@ -38,6 +40,9 @@ describe('NavBarMobile', () => {
     }
     expect(foundLinks.length).toBe(1);
     expect(foundLinks[0]['name'], 'expected link component to be rendered').toBe('home');
+
+    // the user menu is only available when signed in
+    expect(wrapper.findComponent(UserMenu).exists()).toBe(false);
   });
 
   it('renders correctly when logged in and menu is closed', () => {
@@ -77,7 +82,6 @@ describe('NavBarMobile', () => {
       'bookings',
       'availability',
       'settings',
-      'logout',
     ];
 
     const allRouterLinks = wrapper.findAllComponents(RouterLink);
@@ -93,12 +97,37 @@ describe('NavBarMobile', () => {
     for (let expLink of expectedLinks) {
       expect(foundLinks, 'expected link component to be rendered').toContain(expLink);
     }
+  });
 
-    // verify the footer accordion contains anchor tags for account and support (logout is outside the accordion)
-    const footerAccordion = wrapper.find('.footer-accordion');
-    expect(footerAccordion.exists(), 'expected footer accordion to be rendered').toBe(true);
-    const footerAnchors = footerAccordion.findAll('a');
-    expect(footerAnchors.length, 'expected footer accordion to contain anchor tags').toBe(2);
+  it('renders the user menu in the closed header when logged in', () => {
+    const user = useUserStore();
+    user.data.accessToken = 'abc';
+
+    wrapper = mount(NavBarMobile, getMountOptions());
+
+    expect(wrapper.findComponent(UserMenu).exists(), 'expected user menu to be rendered').toBe(true);
+  });
+
+  it('renders the switch theme item between availability and settings and toggles the theme', async () => {
+    const user = useUserStore();
+    user.data.accessToken = 'abc';
+
+    wrapper = mount(NavBarMobile, getMountOptions());
+    await wrapper.find('button[aria-label="Open menu"]').trigger('click');
+
+    const labels = wrapper.findAll('.menu-content-container ul li').map((li) => li.text());
+    const themeIdx = labels.indexOf('Switch theme');
+    expect(themeIdx, 'expected switch theme item to be rendered').toBeGreaterThan(-1);
+    expect(labels[themeIdx - 1]).toBe('Availability');
+    expect(labels[themeIdx + 1]).toBe('Settings');
+
+    const before = isDark.value;
+    await wrapper.find('.theme-toggle').trigger('click');
+    expect(isDark.value).toBe(!before);
+    expect(wrapper.find('.menu-content-container').exists(), 'expected menu to stay open').toBe(true);
+
+    // restore so the persisted preference doesn't leak between tests
+    isDark.value = before;
   });
 
   it('able to click the copy link button', async () => {

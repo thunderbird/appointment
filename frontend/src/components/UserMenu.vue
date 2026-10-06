@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, inject } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount, inject } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { UserAvatar } from '@thunderbirdops/services-ui';
 import { accountsTbProfileUrlKey, supportUrlKey } from '@/keys';
@@ -11,6 +11,17 @@ defineProps<{
 
 const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 const supportUrl = inject(supportUrlKey);
+
+// Accounts redirects to a freshly created Paddle customer portal session, so this is a plain link
+// technically, this should always have value but adding here a check just in case.
+const manageSubscriptionUrl = computed(() => {
+  if (!accountsTbProfileUrl) return null;
+  try {
+    return new URL('/api/v1/subscription/paddle/portal/', accountsTbProfileUrl).toString();
+  } catch {
+    return null;
+  }
+});
 
 const { t } = useI18n();
 
@@ -38,17 +49,20 @@ onBeforeUnmount(() => {
 
 <template>
   <button class="user-menu" ref="menuRef">
-    <user-avatar :username="username" class="avatar" @click="toggleMenu" />
+    <user-avatar :username="username" class="avatar" @click="toggleMenu" :avatar-url="avatarUrl" />
 
     <div v-if="showMenu" class="dropdown">
       <a :href="accountsTbProfileUrl">
         {{ t('label.account') }}
       </a>
+      <a v-if="manageSubscriptionUrl" :href="manageSubscriptionUrl" target="_blank" rel="noopener">
+        {{ t('label.manageSubscription') }}
+      </a>
       <a :href="supportUrl">
         {{ t('label.support') }}
       </a>
       <router-link :to="{ name: 'logout' }">
-        {{ t('label.logOut') }}
+        {{ t('label.signOut') }}
       </router-link>
     </div>
   </button>
@@ -60,10 +74,14 @@ onBeforeUnmount(() => {
   display: inline-block;
   background: none;
   border: none;
-  cursor: pointer;
+  font: inherit;
+  padding: 0;
   margin-inline-start: 0.325rem;
 
   .avatar {
+    cursor: pointer;
+    font-size: 0.8125rem;
+
     & :first-child {
       color: var(--colour-ti-base);
     }
@@ -77,8 +95,8 @@ onBeforeUnmount(() => {
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 0.5rem;
     box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.2);
-    padding: 0.5rem 0.25rem;
-    min-width: 150px;
+    padding: 0.5rem 0;
+    min-width: max-content;
 
     a {
       display: flex;
@@ -86,12 +104,9 @@ onBeforeUnmount(() => {
       justify-content: space-between;
       color: white;
       text-decoration: none;
-      padding: 0.75rem 0.375rem;
+      padding: 1rem 1.5rem;
       font-family: metropolis;
-      font-size: 0.6875rem;
-      text-transform: uppercase;
-      font-weight: 500;
-      border-radius: 0.25rem;
+      font-size: 0.875rem;
 
       &:hover {
         background: rgba(255, 255, 255, 0.06);
