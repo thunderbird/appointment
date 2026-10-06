@@ -66,7 +66,7 @@ wheels = [
 
 [[package]]
 name = "appointment"
-version = "1.8.1"
+version = "1.9.0"
 source = { editable = "." }
 dependencies = [
     { name = "alembic" },
@@ -177,7 +177,7 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'test'", specifier = "==0.9.3" },
     { name = "sentry-sdk", specifier = "==2.*" },
     { name = "slowapi", specifier = "==0.*" },
-    { name = "sqlalchemy", specifier = "==2.*" },
+    { name = "sqlalchemy", specifier = "==2.0.*" },
     { name = "sqlalchemy-utils", specifier = "==0.*" },
     { name = "starlette", specifier = "==1.3.1" },
     { name = "starlette-context", specifier = "==0.*" },
