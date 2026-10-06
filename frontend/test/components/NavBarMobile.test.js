@@ -6,15 +6,17 @@ import router from '@/router';
 import withSetup from '../utils/with-setup';
 import { useUserStore } from '@/stores/user-store';
 import { RouterLink } from 'vue-router';
+import { accountsTbProfileUrlKey } from '@/keys';
 import NavBarMobile from '@/components/NavBarMobile.vue';
 
 describe('NavBarMobile', () => {
   var app;
   var wrapper;
 
-  const getMountOptions = () => ({
+  const getMountOptions = (provide = {}) => ({
     global: {
       plugins: [i18ninstance, router],
+      provide,
     },
   });
 
@@ -99,6 +101,38 @@ describe('NavBarMobile', () => {
     expect(footerAccordion.exists(), 'expected footer accordion to be rendered').toBe(true);
     const footerAnchors = footerAccordion.findAll('a');
     expect(footerAnchors.length, 'expected footer accordion to contain anchor tags').toBe(2);
+  });
+
+  it('renders the manage subscription link pointing at the accounts origin', async () => {
+    const user = useUserStore();
+    user.data.accessToken = 'abc';
+
+    wrapper = mount(
+      NavBarMobile,
+      getMountOptions({ [accountsTbProfileUrlKey]: 'https://accounts-stage.tb.pro/dashboard' }),
+    );
+
+    await wrapper.find('button[aria-label="Open menu"]').trigger('click');
+
+    const footerAnchors = wrapper.find('.footer-accordion').findAll('a');
+    expect(footerAnchors.length, 'expected account, manage subscription and support anchors').toBe(3);
+
+    const link = footerAnchors.find((a) => a.text() === 'Manage subscription');
+    expect(link, 'expected manage subscription link to be rendered').toBeDefined();
+    expect(link.attributes('href')).toBe('https://accounts-stage.tb.pro/api/v1/subscription/paddle/portal/');
+    expect(link.attributes('target')).toBe('_blank');
+    expect(link.attributes('rel')).toBe('noopener');
+  });
+
+  it('labels the logout link "Sign out"', async () => {
+    const user = useUserStore();
+    user.data.accessToken = 'abc';
+
+    wrapper = mount(NavBarMobile, getMountOptions());
+    await wrapper.find('button[aria-label="Open menu"]').trigger('click');
+
+    expect(wrapper.text()).toContain('Sign out');
+    expect(wrapper.text()).not.toContain('Logout');
   });
 
   it('able to click the copy link button', async () => {

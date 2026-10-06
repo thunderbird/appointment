@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import {
@@ -12,6 +12,7 @@ import {
   PhGear,
   PhSignOut,
   PhCaretDown,
+  PhCreditCard,
   PhUserSquare,
 } from '@phosphor-icons/vue';
 import { PrimaryButton, UserAvatar } from '@thunderbirdops/services-ui';
@@ -31,6 +32,17 @@ const navItems = [
 
 const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
 const supportUrl = inject(supportUrlKey);
+
+// Accounts redirects to a freshly created Paddle customer portal session, so this is a plain link
+// technically, this should always have value but adding here a check just in case.
+const manageSubscriptionUrl = computed(() => {
+  if (!accountsTbProfileUrl) return null;
+  try {
+    return new URL('/api/v1/subscription/paddle/portal/', accountsTbProfileUrl).toString();
+  } catch {
+    return null;
+  }
+});
 
 const menuOpen = ref(false);
 const myLinkTooltip = ref(t('navBar.shareMyLink'));
@@ -113,6 +125,12 @@ async function copyLink() {
                 {{ t('label.account') }}
               </li>
             </a>
+            <a v-if="manageSubscriptionUrl" :href="manageSubscriptionUrl" target="_blank" rel="noopener">
+              <li>
+                <ph-credit-card size="24" />
+                {{ t('label.manageSubscription') }}
+              </li>
+            </a>
             <a :href="supportUrl">
               <li>
                 <ph-arrow-square-out size="24" />
@@ -123,7 +141,7 @@ async function copyLink() {
         </details>
         <router-link to="logout">
           <ph-sign-out size="24" />
-          {{ t('label.logOut') }}
+          {{ t('label.signOut') }}
         </router-link>
       </div>
     </div>
