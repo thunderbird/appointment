@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useUserStore } from '@/stores/user-store';
 import {
@@ -8,15 +8,12 @@ import {
   PhHouse,
   PhCalendarDot,
   PhCalendarCheck,
-  PhArrowSquareOut,
-  PhGear,
-  PhSignOut,
-  PhCaretDown,
-  PhCreditCard,
-  PhUserSquare,
+  PhSun,
+  PhMoon,
 } from '@phosphor-icons/vue';
-import { PrimaryButton, UserAvatar } from '@thunderbirdops/services-ui';
-import { accountsTbProfileUrlKey, supportUrlKey } from '@/keys';
+import { PrimaryButton, SettingsIcon } from '@thunderbirdops/services-ui';
+import UserMenu from '@/components/UserMenu.vue';
+import { isDark, toggleColourScheme } from '@/composables/useColourScheme';
 import AppointmentLogo from '@/components/AppointmentLogo.vue';
 
 // component constants
@@ -27,22 +24,8 @@ const navItems = [
   { route: 'dashboard', i18nKey: 'calendar', icon: PhHouse },
   { route: 'bookings', i18nKey: 'bookings', icon: PhCalendarCheck },
   { route: 'availability', i18nKey: 'availability', icon: PhCalendarDot },
-  { route: 'settings', i18nKey: 'settings', icon: PhGear },
+  { route: 'settings', i18nKey: 'settings', icon: SettingsIcon },
 ];
-
-const accountsTbProfileUrl = inject(accountsTbProfileUrlKey);
-const supportUrl = inject(supportUrlKey);
-
-// Accounts redirects to a freshly created Paddle customer portal session, so this is a plain link
-// technically, this should always have value but adding here a check just in case.
-const manageSubscriptionUrl = computed(() => {
-  if (!accountsTbProfileUrl) return null;
-  try {
-    return new URL('/api/v1/subscription/paddle/portal/', accountsTbProfileUrl).toString();
-  } catch {
-    return null;
-  }
-});
 
 const menuOpen = ref(false);
 const myLinkTooltip = ref(t('navBar.shareMyLink'));
@@ -71,14 +54,18 @@ async function copyLink() {
 
 <template>
   <!-- Mobile NavBar (closed) -->
-  <header class="header-mobile">
-    <button @click="onMenuOpen" :aria-label="t('label.openMenu')" :aria-expanded="menuOpen" aria-controls="primaryNav">
-      <ph-list size="24" />
-    </button>
-
-    <router-link :to="{ name: userStore.authenticated ? 'dashboard' : 'home' }">
-      <appointment-logo force-dark />
+  <header class="header-mobile" :class="{ dark: isDark }">
+    <router-link class="appointment-logo" :to="{ name: userStore.authenticated ? 'dashboard' : 'home' }">
+      <appointment-logo />
     </router-link>
+
+    <div class="header-mobile-right">
+      <button class="menu-button" @click="onMenuOpen" :aria-label="t('label.openMenu')" :aria-expanded="menuOpen" aria-controls="primaryNav">
+        <ph-list size="24" />
+      </button>
+
+      <user-menu v-if="userStore.authenticated" :username="userStore.data.username" :avatar-url="userStore.data.avatarUrl" />
+    </div>
   </header>
 
   <!-- Navigation Panel (open) -->
@@ -86,13 +73,11 @@ async function copyLink() {
     <!-- Scrim/Overlay -->
     <div class="menu-scrim" @click="onMenuClose"></div>
 
-    <div class="menu-content-container">
+    <div class="menu-content-container" :class="{ dark: isDark }">
       <header>
-        <button @click="onMenuClose">
+        <button @click="onMenuClose" :aria-label="t('label.closeMenu')">
           <ph-x size="24" />
         </button>
-
-        <appointment-logo force-dark />
       </header>
 
       <primary-button @click="copyLink" class="share-link-button">
@@ -100,50 +85,24 @@ async function copyLink() {
       </primary-button>
 
       <ul @click="onMenuClose">
-        <router-link v-for="navItem in navItems" :key="navItem.route" :to="navItem.route">
-          <li>
-            <component :is="navItem.icon" size="24" />
-            <span>{{ t(`label.${navItem.i18nKey}`) }}</span>
+        <template v-for="navItem in navItems" :key="navItem.route">
+
+          <li v-if="navItem.route === 'settings'">
+            <button class="theme-toggle" @click.stop="toggleColourScheme">
+              <ph-sun v-if="isDark" size="24" />
+              <ph-moon v-else size="24" />
+              <span>{{ t('label.switchTheme') }}</span>
+            </button>
           </li>
-        </router-link>
+
+          <router-link :to="navItem.route">
+            <li>
+              <component :is="navItem.icon" size="24" />
+              <span>{{ t(`label.${navItem.i18nKey}`) }}</span>
+            </li>
+          </router-link>
+        </template>
       </ul>
-
-      <div class="menu-footer-container">
-        <details class="footer-accordion">
-          <summary class="footer-header">
-            <div class="user-info">
-              <user-avatar :username="userStore.data.username" :avatar-url="userStore.data.avatarUrl" />
-              <span class="user-email">{{ userStore.data.email }}</span>
-            </div>
-            <ph-caret-down size="20" class="chevron-icon" />
-          </summary>
-
-          <ul @click="onMenuClose">
-            <a :href="accountsTbProfileUrl">
-              <li>
-                <ph-user-square size="24" />
-                {{ t('label.account') }}
-              </li>
-            </a>
-            <a v-if="manageSubscriptionUrl" :href="manageSubscriptionUrl" target="_blank" rel="noopener">
-              <li>
-                <ph-credit-card size="24" />
-                {{ t('label.manageSubscription') }}
-              </li>
-            </a>
-            <a :href="supportUrl">
-              <li>
-                <ph-arrow-square-out size="24" />
-                {{ t('label.support') }}
-              </li>
-            </a>
-          </ul>
-        </details>
-        <router-link to="logout">
-          <ph-sign-out size="24" />
-          {{ t('label.signOut') }}
-        </router-link>
-      </div>
     </div>
   </nav>
 </template>
@@ -156,27 +115,33 @@ async function copyLink() {
   top: 0;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   min-height: 64px;
-  background-color: #1a202c; /* Forced dark mode as we don't have light mode for logo yet */
-  color: #eeeef0; /* Forced dark mode as we don't have light mode for logo yet */
-  padding: 0.5rem;
+  background-color: #f7f7f8;
+  color: #18181b;
+  box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.1);
+  padding: 0.5rem 1rem;
   z-index: 9999;
 
-  button {
-    padding: 0.5rem;
-    z-index: 9999;
+  &.dark {
+    background-color: #111113;
+    color: #eeeef0;
   }
 
-  a {
-    position: absolute;
-    left: 0;
-    right: 0;
+  .appointment-logo svg {
+    height: 3rem;
+    width: auto;
+  }
 
-    svg {
-      height: 3rem;
-      width: auto;
-      margin: 0 auto;
-    }
+  .header-mobile-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .menu-button {
+    padding: 0.75rem; /* 48px touch target */
+    color: inherit;
   }
 }
 
@@ -206,26 +171,27 @@ nav {
     flex-direction: column;
     width: 75%;
     height: 100%;
+    margin-inline-start: auto; /* Open from the right */
     box-shadow:
       0 10px 15px -3px rgb(0 0 0 / 0.1),
       0 4px 6px -4px rgb(0 0 0 / 0.1);
-    background-color: #262d3b; /* Forced dark mode as we don't have light mode for logo yet */
-    color: #d9d9de; /* Forced dark mode as we don't have light mode for logo yet */
+    background-color: #f7f7f8;
+    color: #18181b;
     z-index: 2;
     padding: 1rem;
+
+    &.dark {
+      background-color: #111113;
+      color: #eeeef0;
+    }
 
     header {
       display: flex;
       align-items: center;
+      justify-content: flex-end;
       height: 32px;
       gap: 1rem;
       margin-block-end: 2rem;
-
-      & > svg {
-        height: 48px;
-        width: min-content;
-        margin: 0 auto;
-      }
     }
 
     .share-link-button {
@@ -243,74 +209,14 @@ nav {
         gap: 0.75rem;
         padding-block: 0.5rem;
       }
-    }
 
-    .menu-footer-container {
-      margin-top: auto;
-      margin-left: -1rem;
-      margin-right: -1rem;
-      margin-bottom: -1rem;
-      padding: 1rem;
-      background-color: #1a202c; /* Forced dark mode as we don't have light mode for logo yet */
-      color: #eeeef0; /* Forced dark mode as we don't have light mode for logo yet */
-
-      .footer-accordion {
-        .footer-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          cursor: pointer;
-          padding: 0.5rem 0;
-
-          .user-info {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            min-width: 0;
-            flex: 1;
-
-            :deep(.avatar.regular) {
-              flex-shrink: 0;
-            }
-
-            :deep(.initials) {
-              color: #eeeef0; /* Forced dark mode as we don't have light mode for logo yet */
-            }
-
-            .user-email {
-              font-size: 0.875rem;
-              font-weight: 500;
-              white-space: nowrap;
-              overflow: hidden;
-              text-overflow: ellipsis;
-            }
-          }
-        }
-
-        &[open] .footer-header .chevron-icon {
-          transform: rotate(180deg);
-        }
-
-        ul {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          padding-block-start: 0.75rem;
-
-          li {
-            display: flex;
-            gap: 0.75rem;
-          }
-        }
-      }
-
-      > a {
+      .theme-toggle {
         display: flex;
         gap: 0.75rem;
-        padding: 0.5rem 0;
-        margin-top: 0.625rem;
-        text-decoration: none;
+        padding: 0;
+        font: inherit;
         color: inherit;
+        cursor: pointer;
       }
     }
   }
