@@ -49,7 +49,7 @@ onBeforeUnmount(() => {
 
 <template>
   <button class="user-menu" ref="menuRef">
-    <user-avatar :username="username" class="avatar" @click="toggleMenu" />
+    <user-avatar :username="username" class="avatar" @click="toggleMenu" :avatar-url="avatarUrl" />
 
     <div v-if="showMenu" class="dropdown">
       <a :href="accountsTbProfileUrl">
