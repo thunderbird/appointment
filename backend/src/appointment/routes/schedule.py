@@ -193,10 +193,14 @@ def update_schedule(
     """endpoint to update an existing schedule for authenticated subscriber"""
     if not repo.schedule.exists(db, schedule_id=id):
         raise validation.ScheduleNotFoundException()
-    if not repo.calendar.is_connected(db, calendar_id=schedule.calendar_id):
-        raise validation.CalendarNotConnectedException()
     if not repo.schedule.is_owned(db, schedule_id=id, subscriber_id=subscriber.id):
         raise validation.ScheduleNotAuthorizedException()
+    if not repo.calendar.exists(db, calendar_id=schedule.calendar_id):
+        raise validation.CalendarNotFoundException()
+    if not repo.calendar.is_owned(db, calendar_id=schedule.calendar_id, subscriber_id=subscriber.id):
+        raise validation.CalendarNotAuthorizedException()
+    if not repo.calendar.is_connected(db, calendar_id=schedule.calendar_id):
+        raise validation.CalendarNotConnectedException()
     if (
         schedule.meeting_link_provider == MeetingLinkProviderType.zoom
         and subscriber.get_external_connection(ExternalConnectionType.zoom) is None
