@@ -605,6 +605,21 @@ class TestSchedule:
         )
         assert response.status_code == 403, response.text
 
+    def test_update_schedule_onto_foreign_calendar(
+        self, with_client, make_pro_subscriber, make_caldav_calendar, make_schedule, schedule_input
+    ):
+        own_schedule = make_schedule()
+        the_other_guy = make_pro_subscriber()
+        foreign_calendar = make_caldav_calendar(the_other_guy.id, connected=True)
+
+        response = with_client.put(
+            f'/schedule/{own_schedule.id}',
+            json={**schedule_input, 'calendar_id': foreign_calendar.id},
+            headers=auth_headers,
+        )
+        assert response.status_code == 403, response.text
+        assert response.json()['detail']['id'] == 'CALENDAR_NOT_AUTH'
+
     def test_update_schedule_unconnected_calendar(
         self, with_client, make_caldav_calendar, make_schedule, schedule_input
     ):
