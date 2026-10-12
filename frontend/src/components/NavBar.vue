@@ -4,7 +4,6 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 import NavBarItem from '@/elements/NavBarItem.vue';
-import { TooltipPosition } from '@/definitions';
 import { PhLinkSimple, PhWarningCircle } from '@phosphor-icons/vue';
 import {
   ToolTip,
@@ -89,37 +88,37 @@ const copyLink = async () => {
 
       <div class="nav-items-right-container">
         <div v-if="user.myLink" class="nav-copy-link-button-container">
-          <button class="nav-copy-link-button" @click="copyLink" aria-labelledby="copy-meeting-link-button">
-            <ph-link-simple id="copy-meeting-link-button" :size="24" />
-            <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
-              {{ myLinkTooltip }}
-            </tool-tip>
-          </button>
+          <tool-tip>
+            <button class="nav-copy-link-button" @click="copyLink" aria-labelledby="copy-meeting-link-button">
+              <ph-link-simple id="copy-meeting-link-button" :size="24" />
+            </button>
+            <template #content>{{ myLinkTooltip }}</template>
+          </tool-tip>
         </div>
 
-        <router-link
-          :to="{ name: 'settings' }"
-          class="nav-settings-button"
-          :class="{ active: isNavEntryActive('settings') }"
-          :aria-label="t('label.settings')"
-        >
-          <settings-icon />
-          <ph-warning-circle
-            v-if="externalConnectionStore.hasUnhealthyConnections"
-            class="warning-icon"
-            weight="fill"
-          />
-          <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
-            {{ t('label.settings') }}
-          </tool-tip>
-        </router-link>
+        <tool-tip>
+          <router-link
+            :to="{ name: 'settings' }"
+            class="nav-settings-button"
+            :class="{ active: isNavEntryActive('settings') }"
+            :aria-label="t('label.settings')"
+          >
+            <settings-icon />
+            <ph-warning-circle
+              v-if="externalConnectionStore.hasUnhealthyConnections"
+              class="warning-icon"
+              weight="fill"
+            />
+          </router-link>
+          <template #content>{{ t('label.settings') }}</template>
+        </tool-tip>
 
         <colour-scheme-toggle-button />
 
         <div class="nav-app-drawer-container">
-          <app-drawer :apps="apps" />
-          <tool-tip :position="TooltipPosition.Top" class="nav-tooltip">
-            {{ t('label.switchApps') }}
+          <tool-tip>
+            <app-drawer :apps="apps" />
+            <template #content>{{ t('label.switchApps') }}</template>
           </tool-tip>
         </div>
 
@@ -250,28 +249,9 @@ const copyLink = async () => {
     position: relative;
   }
 
-  .nav-tooltip {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    margin-top: 0.5rem;
-    opacity: 0;
-    white-space: nowrap;
-    font-size: 0.75rem;
-    min-width: max-content;
-    pointer-events: none;
-  }
-
-  .nav-copy-link-button:hover .nav-tooltip,
-  .nav-settings-button:hover .nav-tooltip {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .nav-app-drawer-container:hover:not(:has(.app-drawer[open])) .nav-tooltip {
-    opacity: 1;
-    pointer-events: auto;
+  /* Hide the tooltip while the app drawer is open */
+  .nav-app-drawer-container:has(.app-drawer[open]) :deep(.tooltip) {
+    display: none;
   }
 
   .appointment-logo {
@@ -285,12 +265,6 @@ const copyLink = async () => {
 @media (--lg) {
   .header-desktop {
     padding-inline: 3.5rem;
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .nav-tooltip {
-    transition: opacity 250ms ease-out;
   }
 }
 

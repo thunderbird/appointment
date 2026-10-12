@@ -3,7 +3,7 @@ import { computed, inject, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { callKey } from '@/keys';
-import { TextInput, IconButton } from '@thunderbirdops/services-ui';
+import { TextInput, IconButton, ToolTip } from '@thunderbirdops/services-ui';
 import { PhCopySimple, PhArrowRight, PhDownloadSimple } from '@phosphor-icons/vue';
 import { createUserStore } from '@/stores/user-store';
 import { useSettingsStore } from '@/stores/settings-store';
@@ -77,15 +77,17 @@ const actuallyDownloadData = async () => {
       {{ t('label.bookingPageLinkLabel') }}
     </text-input>
 
-    <icon-button
-      aria-labelledby="copy-booking-page-url-button"
-      @click="copyLink"
-      :tooltip="copyLinkTooltip"
-      class="copy-url-button"
-      size="medium"
-    >
-      <ph-copy-simple id="copy-booking-page-url-button" :aria-label="t('label.copy')" />
-    </icon-button>
+    <tool-tip class="copy-url-tooltip">
+      <icon-button
+        aria-labelledby="copy-booking-page-url-button"
+        @click="copyLink"
+        class="copy-url-button"
+        size="medium"
+      >
+        <ph-copy-simple id="copy-booking-page-url-button" :aria-label="t('label.copy')" />
+      </icon-button>
+      <template #content>{{ copyLinkTooltip }}</template>
+    </tool-tip>
 
     <router-link to="availability" class="manage-booking-page-link">
       <span>{{ t('label.manageBookingLink') }}</span>
@@ -144,15 +146,14 @@ h2 {
     margin-block-end: 0.5rem;
   }
 
-  .copy-url-button {
+  .copy-url-tooltip {
     position: absolute;
     right: 0.5rem;
     top: 1.75rem;
-    color: var(--colour-ti-secondary);
+  }
 
-    :deep(.tooltip) {
-      width: max-content;
-    }
+  .copy-url-button {
+    color: var(--colour-ti-secondary);
   }
 
   .manage-booking-page-link {
