@@ -35,8 +35,8 @@ importers:
         specifier: 10.38.0
         version: 10.38.0(pinia@3.0.4(typescript@5.5.3)(vue@3.5.41(typescript@5.5.3)))(vue@3.5.41(typescript@5.5.3))
       '@thunderbirdops/services-ui':
-        specifier: 1.7.0
-        version: 1.7.0(@vue/compiler-dom@3.5.41)(@vue/server-renderer@3.5.41)(typescript@5.5.3)
+        specifier: 2.0.0
+        version: 2.0.0(@vue/compiler-dom@3.5.41)(@vue/server-renderer@3.5.41)(typescript@5.5.3)
       '@types/ua-parser-js':
         specifier: 0.7.39
         version: 0.7.39
@@ -745,8 +745,8 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@thunderbirdops/services-ui@1.7.0':
-    resolution: {integrity: sha512-SNlqO/9ZmFQoN9kp9w2wugxdDk9/IW0YmAIHhPwgb1Xv3fhVPdNrvER8V/n/2lsc5d/hYesC3mJg5hEN9XzyWA==}
+  '@thunderbirdops/services-ui@2.0.0':
+    resolution: {integrity: sha512-2N+dTlOLNc7oS/dLel+5lhLbqd0/YAq54fk4/nR2ojJcDPOO1uwIKr2y4kC3W8t3MCgtO0rROHhCz66ck/9IIQ==}
 
   '@tybys/wasm-util@0.10.2':
     resolution: {integrity: sha512-RoBvJ2X0wuKlWFIjrwffGw1IqZHKQqzIchKaadZZfnNpsAYp2mM0h36JtPCjNDAHGgYez/15uMBpfGwchhiMgg==}
@@ -3692,7 +3692,7 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  '@thunderbirdops/services-ui@1.7.0(@vue/compiler-dom@3.5.41)(@vue/server-renderer@3.5.41)(typescript@5.5.3)':
+  '@thunderbirdops/services-ui@2.0.0(@vue/compiler-dom@3.5.41)(@vue/server-renderer@3.5.41)(typescript@5.5.3)':
     dependencies:
       '@intlify/core-base': 11.4.9
       '@vue/test-utils': 2.4.11(@vue/compiler-dom@3.5.41)(@vue/server-renderer@3.5.41)(vue@3.5.41(typescript@5.5.3))
