@@ -2,7 +2,7 @@
 name = "appointment-pulumi"
 version = "0.0.1"
 description = "Pulumi-based infrastructure code for Appointment"
-requires-python = ">3.12"
+requires-python = ">=3.13"
 dynamic = ["dependencies"]
 
 [project.scripts]

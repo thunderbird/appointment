@@ -54,17 +54,27 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
+          version: '0.13.0'
           python-version: '3.13'
-          cache: 'pip'
+          enable-cache: true
+          cache-dependency-glob: 'backend/uv.lock'
 
+      # Install exactly what backend/uv.lock pins (hash-verified). `uv lock
+      # --check` fails if the lock is stale; third-party deps install as wheels
+      # only. Explicit build exceptions: hiredis 2.x and MarkupSafe 2.x publish
+      # no CPython 3.13 wheels, so they build from their locked sdists (the
+      # 3.12 Docker image gets wheels for both).
       - name: Install dependencies
+        working-directory: ./backend
         run: |
-          cd ./backend
-          python -m pip install --upgrade pip
-          python -m pip install -e .'[test]'
+          uv lock --check
+          uv sync --frozen --extra test --no-install-project --no-build \
+            --no-install-package hiredis --no-install-package markupsafe
+          uv sync --frozen --extra test
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Test with pytest
         working-directory: ./backend
@@ -146,17 +156,23 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - name: Set up Python
-        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
         with:
+          version: '0.13.0'
           python-version: '3.13'
-          cache: 'pip'
+          enable-cache: true
+          cache-dependency-glob: 'pulumi/uv.lock'
 
+      # Same lockfile install as the backend. tb-pulumi is a git dependency
+      # (no wheel), pinned to a commit in uv.lock and built in the second step.
       - name: Install dependencies
+        working-directory: ./pulumi
         run: |
-          cd ./pulumi
-          python -m pip install --upgrade pip
-          python -m pip install -e .'[dev]'
+          uv lock --check
+          uv sync --frozen --extra dev --no-install-project --no-install-package tb-pulumi --no-build
+          uv sync --frozen --extra dev
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       
       - name: "Ruff: Format checks"
         run: |
