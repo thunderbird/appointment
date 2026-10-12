@@ -116,7 +116,7 @@ h2 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #a0c7f0; /* TODO: pending final colour / not yet in colours.css */
+  background-color: #a0c7f0; /* TODO: pending final colour */
   color: #1a202c;
   border-radius: 9999px;
   width: 1.5rem;

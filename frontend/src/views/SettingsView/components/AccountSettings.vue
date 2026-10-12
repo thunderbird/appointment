@@ -98,7 +98,6 @@ const actuallyDownloadData = async () => {
   <div class="account-settings-buttons-container">
     <button
       :title="t('label.download')"
-      variant="outline"
       @click="actuallyDownloadData"
       data-testid="settings-account-download-data-btn"
       class="download-appointment-data-button"
