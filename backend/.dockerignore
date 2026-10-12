@@ -1,0 +1,12 @@
+# The Dockerfile copies explicit paths only; this keeps local state out of the
+# build context regardless.
+.env
+.env.*
+!.env.example
+.venv
+venv
+**/__pycache__
+.pytest_cache
+.ruff_cache
+.coverage
+test
