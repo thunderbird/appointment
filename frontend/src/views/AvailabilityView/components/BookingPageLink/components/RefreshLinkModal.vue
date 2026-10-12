@@ -55,7 +55,7 @@ defineExpose({ show, hide });
     <template #actions>
       <primary-button
         name="cancel"
-        variant="outline"
+        outline
         :disabled="loading"
         @click="modal?.hide()"
         class="cancel-button"

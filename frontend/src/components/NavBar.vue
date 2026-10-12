@@ -131,7 +131,7 @@ const copyLink = async () => {
         <colour-scheme-toggle-button />
 
         <a :href="tbProUrl">
-          <base-button type="brand" variant="outline" class="learn-more-button">{{ t('label.learnMore') }}</base-button>
+          <base-button variant="brand" outline class="learn-more-button">{{ t('label.learnMore') }}</base-button>
         </a>
       </div>
     </template>

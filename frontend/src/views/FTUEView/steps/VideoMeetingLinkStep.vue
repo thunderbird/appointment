@@ -113,7 +113,7 @@ onMounted(async () => {
     <link-button :title="t('ftue.skipThisStep')" class="btn-skip" @click="onSkipButtonClick()" :disabled="isLoading">
       {{ t('ftue.skipThisStep') }}
     </link-button>
-    <primary-button variant="outline" :title="t('label.back')" :disabled="isLoading" @click="onBackButtonClick">
+    <primary-button outline :title="t('label.back')" :disabled="isLoading" @click="onBackButtonClick">
       {{ t('label.back') }}
     </primary-button>
     <primary-button :title="t('label.continue')" @click="onContinueButtonClick()" :disabled="isContinueButtonDisabled">

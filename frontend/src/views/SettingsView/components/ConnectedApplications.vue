@@ -390,10 +390,10 @@ onMounted(async () => {
   </div>
 
   <div class="footer-buttons-container">
-    <primary-button variant="outline" size="small" @click="connectGoogleCalendar">
+    <primary-button outline size="small" @click="connectGoogleCalendar">
       {{ t('label.addGoogleCalendar') }}
     </primary-button>
-    <primary-button variant="outline" size="small" @click="connectCaldavModal.show()">
+    <primary-button outline size="small" @click="connectCaldavModal.show()">
       {{ t('label.addCalDavCalendar') }}
     </primary-button>
   </div>
