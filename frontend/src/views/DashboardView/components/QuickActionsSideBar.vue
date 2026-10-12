@@ -99,7 +99,7 @@ h2 {
   font-size: 1rem;
   font-weight: 600;
   margin-block-end: 1.5rem;
-  color: var(--colour-ti-black);
+  color: var(--colour-ti-base);
 
   &.has-pending-requests {
     margin-block-start: 3rem;

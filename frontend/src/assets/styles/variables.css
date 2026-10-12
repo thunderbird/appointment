@@ -7,4 +7,16 @@ html {
   --transition: all 250ms ease-out;
   --transition-transform: 0.15s transform ease-in-out;
   --transition-opacity: 0.15s opacity ease-in-out;
+
+  /* Shadow colours for surfaces and buttons */
+  --shadow-surface-default: rgba(0, 0, 0, 0.04);
+  --shadow-surface-interactive-outer: rgba(255, 255, 255, 0.6);
+  --shadow-surface-interactive-inset: rgba(0, 0, 0, 0.05);
+
+  &.dark {
+    /* No visible shadows in dark mode */
+    --shadow-surface-default: transparent;
+    --shadow-surface-interactive-outer: transparent;
+    --shadow-surface-interactive-inset: transparent;
+  }
 }

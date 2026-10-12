@@ -590,9 +590,9 @@ onMounted(() => {
 .calendar-wrapper {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--colour-neutral-border);
+  border: 1px solid var(--colour-surface-border);
   border-radius: 1.5rem;
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   width: 100%;
   max-width: 100%;
   min-height: 505px;
@@ -621,7 +621,7 @@ onMounted(() => {
   display: grid;
   grid-template-columns: 4rem repeat(7, 200px);
   justify-items: center;
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   flex-shrink: 0;
   overflow-x: auto;
 
@@ -639,10 +639,10 @@ onMounted(() => {
   text-align: center;
   font-weight: bold;
   width: 100%;
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   color: var(--colour-ti-secondary);
   min-width: 200px;
-  border-block-end: 1px solid var(--colour-neutral-border);
+  border-block-end: 1px solid var(--colour-surface-border);
 
   /* Weekday */
   p:first-child {
@@ -675,7 +675,7 @@ onMounted(() => {
 }
 
 .corner-cell-block {
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   grid-column: 1;
   width: 100%;
   height: 100%;
@@ -693,7 +693,7 @@ onMounted(() => {
   height: 100%;
   position: sticky;
   left: 0;
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   color: var(--colour-ti-secondary);
   font-size: 0.68rem;
   z-index: 9;
@@ -728,7 +728,7 @@ onMounted(() => {
   box-sizing: border-box;
 
   &.dark {
-    background-color: var(--colour-neutral-raised);
+    background-color: var(--colour-surface-raised);
   }
 }
 
@@ -767,7 +767,7 @@ onMounted(() => {
   margin: 0;
   width: 100%;
 
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   background-image: none;
   border: none;
   border-radius: 0;
@@ -777,7 +777,7 @@ onMounted(() => {
     background-color: var(--colour-accent-blue);
     border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 80%, transparent);
     border-radius: 0.1875rem; /* 3px */
-    color: var(--colour-neutral-base);
+    color: var(--colour-surface-base);
 
     z-index: 4;
   }
@@ -786,7 +786,7 @@ onMounted(() => {
   cursor: default;
 }
 .calendar-wrapper:not(.disabled) .selectable-slot:not(.selected):hover {
-  background-color: color-mix(in srgb, var(--colour-ti-highlight) 10%, var(--colour-neutral-base));
+  background-color: color-mix(in srgb, var(--colour-ti-highlight) 10%, var(--colour-surface-base));
   border: 1px dashed color-mix(in srgb, var(--colour-primary-default) 66%, transparent);
   border-radius: 0.1875rem; /* 3px */
 
@@ -794,14 +794,14 @@ onMounted(() => {
 }
 
 .blocker-slot {
-  --stripe: color-mix(in srgb, var(--colour-neutral-border) 50%, transparent);
+  --stripe: color-mix(in srgb, var(--colour-surface-border) 50%, transparent);
 
   border: none;
   margin: 0;
   width: calc(100% - 1px);
   margin-inline-start: 1px;
   border-radius: 0;
-  background-color: var(--colour-neutral-lower);
+  background-color: var(--colour-surface-lower);
   background-image: repeating-linear-gradient(
     135deg,
     transparent 0px,
@@ -814,21 +814,21 @@ onMounted(() => {
   cursor: default;
 
   &.dark {
-    --stripe: var(--colour-neutral-base);
-    background-color: color-mix(in srgb, var(--colour-neutral-lower) 66%, transparent);
+    --stripe: var(--colour-surface-base);
+    background-color: color-mix(in srgb, var(--colour-surface-lower) 66%, transparent);
   }
 }
 
 .vertical-line {
   justify-self: flex-start;
-  border-left: 1px solid var(--colour-neutral-border);
+  border-left: 1px solid var(--colour-surface-border);
   position: relative;
   z-index: 2;
 }
 
 .horizontal-line {
   height: 1px;
-  background-color: var(--colour-neutral-border);
+  background-color: var(--colour-surface-border);
   width: 100%;
   position: relative;
   z-index: 2;
@@ -840,7 +840,7 @@ onMounted(() => {
 
   .calendar-container-bottom-border {
     border: none;
-    border-block-end: 1px solid var(--colour-neutral-border);
+    border-block-end: 1px solid var(--colour-surface-border);
     grid-column: 2 / -1;
   }
 }

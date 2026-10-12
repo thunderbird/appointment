@@ -371,7 +371,7 @@ main {
 
     .dark & {
       /* TODO: No design token yet for that color */
-      background: linear-gradient(to top, var(--colour-neutral-base), #24a39d 300%);
+      background: linear-gradient(to top, var(--colour-surface-base), #24a39d 300%);
     }
   }
 }

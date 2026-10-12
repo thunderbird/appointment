@@ -270,7 +270,7 @@ section {
   border-radius: 8px;
   padding: 2rem 1.5rem;
   align-self: flex-start;
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   box-shadow: 4px 4px 16px 0 rgba(0, 0, 0, 0.04);
   border-radius: 1.5rem;
 }

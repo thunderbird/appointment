@@ -285,10 +285,10 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
     overflow-x: auto;
     border-radius: 0.75rem;
     width: 100%;
-    border: 1px solid var(--colour-neutral-border);
+    border: 1px solid var(--colour-surface-border);
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
-    background-color: var(--colour-neutral-lower);
+    background-color: var(--colour-surface-lower);
     margin: 0 0 1rem auto;
 
     table {
@@ -321,11 +321,11 @@ const onColumnFilter = (evt: Event, eventFilter: TableFilter, filters: TableFilt
       border-top-width: 1px;
       border-bottom-width: 1px;
       border-style: solid;
-      border-color: var(--colour-neutral-border);
+      border-color: var(--colour-surface-border);
       padding: 1rem;
     }
     tbody td {
-      background-color: var(--colour-neutral-base);
+      background-color: var(--colour-surface-base);
     }
 
     .multi-select-header {

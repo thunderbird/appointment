@@ -71,7 +71,7 @@ menu {
 /* Reset and default horizontal line */
 hr {
   height: 0;
-  border-top: 1px solid var(--colour-neutral-border);
+  border-top: 1px solid var(--colour-surface-border);
 }
 
 /* Reset display for media elements */
@@ -173,7 +173,7 @@ body {
 body {
   display: flex;
   flex-direction: column;
-  background-color: var(--colour-neutral-lower);
+  background-color: var(--colour-surface-lower);
   color: var(--colour-ti-secondary);
 
   font-family:

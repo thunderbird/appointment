@@ -216,7 +216,7 @@ const copyLink = async () => {
       position: absolute;
       top: -0.25rem;
       right: -0.25rem;
-      color: var(--colour-danger-default);
+      color: var(--colour-critical-default);
       width: 1rem;
       height: 1rem;
     }

@@ -223,7 +223,7 @@ h2 {
 
     .account-settings-divider {
       border: 0;
-      border-inline-start: 1px solid var(--colour-neutral-border);
+      border-inline-start: 1px solid var(--colour-surface-border);
       min-height: 53px;
     }
   }

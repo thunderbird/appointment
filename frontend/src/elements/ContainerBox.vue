@@ -9,7 +9,7 @@
   position: relative;
   text-wrap: wrap;
   border-radius: 0.5rem;
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   font-family: 'Inter', sans-serif;
   color: var(--colour-ti-base);
   padding: 0.75rem 0.75rem;

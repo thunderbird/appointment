@@ -430,7 +430,7 @@ h2 {
 }
 
 .divider {
-  color: var(--colour-neutral-border);
+  color: var(--colour-surface-border);
   height: 1px;
   margin-block: 0.5rem;
 }
@@ -515,7 +515,7 @@ h2 {
     svg {
       margin-top: 0.125rem;
       flex-shrink: 0;
-      color: var(--colour-danger-default);
+      color: var(--colour-critical-default);
     }
 
     &.zoom-error-message {
@@ -534,7 +534,7 @@ h2 {
       gap: 0.5rem;
       padding: 0.5rem;
       min-width: max-content;
-      background-color: var(--colour-neutral-base);
+      background-color: var(--colour-surface-base);
       box-shadow:
         0 10px 15px -3px rgba(0, 0, 0, 0.1),
         0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -546,7 +546,7 @@ h2 {
         text-align: start;
 
         &:hover {
-          background-color: var(--colour-neutral-lower);
+          background-color: var(--colour-surface-lower);
         }
       }
     }

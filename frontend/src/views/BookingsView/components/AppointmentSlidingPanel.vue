@@ -317,7 +317,7 @@ defineExpose({
   justify-content: space-between;
 
   .cancel-btn {
-    color: var(--colour-danger-default);
+    color: var(--colour-critical-default);
   }
 }
 </style>
