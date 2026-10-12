@@ -145,10 +145,10 @@ class Mailer:
         SMTP_PASS = os.getenv('SMTP_PASS')
 
         # check config
-        url = f'http://{SMTP_URL}:{SMTP_PORT}'
-        if not validators.url(url):
-            # url is not valid
-            logging.error('[mailer.send] No valid SMTP url configured: ' + url)
+        smtp_host = f'{SMTP_URL}:{SMTP_PORT}'
+        if not validators.hostname(smtp_host):
+            # host or port is not valid
+            logging.error('[mailer.send] No valid SMTP host configured: ' + smtp_host)
 
         message = self.build()
         server = None

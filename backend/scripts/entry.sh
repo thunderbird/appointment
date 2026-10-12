@@ -25,11 +25,6 @@ case "$CONTAINER_ROLE" in
             run-command main update-db || { echo "update-db failed" >&2; exit 1; }
         fi
 
-        if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
-            echo "Starting cron service"
-            service cron start
-        fi
-
         ARGS=(--factory appointment.main:server --host 0.0.0.0 --port 5000 --log-config scripts/uvicorn_log_config.json)
 
         if [[ "$IS_LOCAL_DEV" == "yes" ]]; then
