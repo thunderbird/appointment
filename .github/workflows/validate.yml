@@ -30,9 +30,9 @@ jobs:
       validate-frontend: ${{ steps.check.outputs.validate-frontend }}
       validate-pulumi: ${{ steps.check.outputs.validate-pulumi }}
     steps:
-    - uses: actions/checkout@v7
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-    - uses: dorny/paths-filter@v3
+    - uses: dorny/paths-filter@0e4a8c6effa4802afeda77dc8d303f8176d7dfad # v3.0.4
       id: check
       with:
         filters: |
@@ -52,10 +52,10 @@ jobs:
     if: needs.detect-changes.outputs.validate-backend == 'true'
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: '3.13'
           cache: 'pip'
@@ -91,13 +91,13 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.detect-changes.outputs.validate-frontend == 'true'
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           version: 11.15.1
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: 'pnpm'
@@ -134,7 +134,7 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.detect-changes.outputs.validate-frontend == 'true'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Test nginx config behaviour
         run: ./frontend/docker/test-nginx-config.sh
@@ -144,10 +144,10 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.detect-changes.outputs.validate-pulumi == 'true'
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: '3.13'
           cache: 'pip'

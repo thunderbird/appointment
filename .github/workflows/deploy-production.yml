@@ -9,7 +9,6 @@ on:
     types: [published]
 
 permissions:
-  id-token: write # required for OIDC connecting to AWS
   contents: read
 
 jobs:
@@ -17,9 +16,12 @@ jobs:
     if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
     environment: production
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # required for OIDC connecting to AWS
+      contents: read
     steps:
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
         with:
           aws-region: eu-central-1
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
@@ -28,7 +30,7 @@ jobs:
         run: rm -rf dist
 
       - name: Get Artifact from Release
-        uses: dsaltares/fetch-gh-release-asset@master
+        uses: dsaltares/fetch-gh-release-asset@aa2ab1243d6e0d5b405b973c89fa4d06a2d0fff7 # master
         with:
           version: ${{ github.event.release.id }}
           file: frontend.zip
@@ -37,23 +39,29 @@ jobs:
         run: unzip frontend.zip
 
       - name: Deploy frontend to S3
+        env:
+          FRONTEND_BUCKET: ${{ secrets.FRONTEND_BUCKET }}
+          FRONTEND_CF_DISTRO_ID: ${{ secrets.FRONTEND_CF_DISTRO_ID }}
         run: |
-          aws s3 sync ./dist "s3://${{ secrets.FRONTEND_BUCKET }}"
-          aws cloudfront create-invalidation --distribution-id ${{ secrets.FRONTEND_CF_DISTRO_ID }} --paths "/*"
+          aws s3 sync ./dist "s3://$FRONTEND_BUCKET"
+          aws cloudfront create-invalidation --distribution-id "$FRONTEND_CF_DISTRO_ID" --paths "/*"
 
   deploy-prod-backend:
     if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
     environment: production
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # required for OIDC connecting to AWS
+      contents: read
     steps:
       - name: Download ECR tag artifact
-        uses: dsaltares/fetch-gh-release-asset@master
+        uses: dsaltares/fetch-gh-release-asset@aa2ab1243d6e0d5b405b973c89fa4d06a2d0fff7 # master
         with:
           version: ${{ github.event.release.id }}
           file: new_ecr_tag.txt
       
       - name: Download Pulumi IaC artifact
-        uses: dsaltares/fetch-gh-release-asset@master
+        uses: dsaltares/fetch-gh-release-asset@aa2ab1243d6e0d5b405b973c89fa4d06a2d0fff7 # master
         with:
           version: ${{ github.event.release.id }}
           file: pulumi.tbz
@@ -64,46 +72,44 @@ jobs:
           echo "pulumi_tag=$(cat new_ecr_tag.txt)" >> $GITHUB_OUTPUT
 
       - name: Configure AWS credentials (Pulumi)
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
         with:
           aws-region: eu-central-1
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd # v2.1.7
         with:
           mask-password: "true"
 
       - name: Set up Python 3.13
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: 3.13
 
       - name: Set up Pulumi environment
         id: pulumi-env
         shell: bash
+        # Uses the Pulumi CLI preinstalled on the runner image (as deploy-staging.yml
+        # already does) instead of piping the get.pulumi.com installer into sh.
         run: |
           tar -xvf pulumi.tbz
-          curl -fsSL https://get.pulumi.com | sh
+          pulumi version
 
       - name: Deploy to prod
         shell: bash
         env:
           PULUMI_ACCESS_TOKEN: "${{ secrets.PULUMI_ACCESS_TOKEN }}"
+          PULUMI_CONFIG_PASSPHRASE: "${{ secrets.PULUMI_PASSPHRASE }}"
+          PULUMI_TAG: "${{ steps.pulumi-tag-extract.outputs.pulumi_tag }}"
         run: |
-          # Update the PATH to include the right version of Pulumi; this is non-trivial or impossible
-          # to do with the GHA workflow "env" settings.
-          export PATH="/home/runner/.pulumi/bin:$PATH"
-
-
           # Create a YAML config stump containing only the new image tag as a YAML variable
           cd pulumi
-          echo ".apmt_image: &APMT_IMAGE ${{ steps.pulumi-tag-extract.outputs.pulumi_tag }}" > newimage.yaml
+          echo ".apmt_image: &APMT_IMAGE $PULUMI_TAG" > newimage.yaml
 
           # Use yq to merge the stump into the main config
           yq -i '. *= load("newimage.yaml")' config.prod.yaml
-          export PULUMI_CONFIG_PASSPHRASE='${{ secrets.PULUMI_PASSPHRASE }}'
 
           # Set up the Pulumi environment and update the service
           pulumi login
@@ -127,13 +133,13 @@ jobs:
       APPT_BOOKEE_NAME: ${{ secrets.E2E_APPT_PROD_BOOKEE_NAME }}
       APPT_BOOKEE_EMAIL: ${{ secrets.E2E_APPT_PROD_BOOKEE_EMAIL }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
         with:
           version: 11.15.1
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: 'pnpm'
@@ -145,7 +151,7 @@ jobs:
           pnpm install --frozen-lockfile
 
       - name: BrowserStack Env Setup
-        uses: browserstack/github-actions/setup-env@master
+        uses: browserstack/github-actions/setup-env@1fad39ae4755588f7fc6854da6c3efba2bf5d08f # master
         with:
           username:  ${{ secrets.BROWSERSTACK_USERNAME }}
           access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
