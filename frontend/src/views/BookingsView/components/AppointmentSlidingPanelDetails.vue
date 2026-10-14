@@ -160,7 +160,7 @@ const downloadICSUrl = computed(
   padding: 1rem;
   border-radius: 8px;
   font-size: 0.875rem;
-  background-color: var(--colour-neutral-lower);
+  background-color: var(--colour-surface-lower);
 }
 
 .time-slot {
@@ -233,7 +233,7 @@ const downloadICSUrl = computed(
   text-underline-offset: 2px;
 
   &:hover {
-    color: var(--colour-apmt-primary);
+    color: var(--colour-primary-default);
   }
 }
 
@@ -296,12 +296,12 @@ const downloadICSUrl = computed(
 
 .notes-content {
   border-radius: 0.5rem;
-  border: 1px solid var(--colour-neutral-border);
+  border: 1px solid var(--colour-surface-border);
   padding: 1rem;
 }
 
 .dark .notes-content {
-  border-color: var(--colour-neutral-border);
+  border-color: var(--colour-surface-border);
 }
 
 @media (--md) {

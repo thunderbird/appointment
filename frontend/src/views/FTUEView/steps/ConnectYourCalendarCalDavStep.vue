@@ -164,7 +164,7 @@ const onContinueButtonClick = async () => {
     </div>
 
     <div class="buttons-container">
-      <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick" :disabled="isLoading">
+      <primary-button outline :title="t('label.back')" @click="onBackButtonClick" :disabled="isLoading">
         {{ t('label.back') }}
       </primary-button>
       <primary-button :title="t('label.continue')" @click="onContinueButtonClick" :disabled="isLoading">

@@ -160,7 +160,7 @@ defineExpose({
   justify-content: space-between;
   gap: 1rem;
   padding: 2rem 1.5rem 2.25rem 1.5rem;
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   flex-shrink: 0;
 
   &.header--right-side {
@@ -195,7 +195,7 @@ defineExpose({
   flex-shrink: 0;
 
   &:hover {
-    background-color: var(--colour-neutral-subtle);
+    background-color: var(--colour-surface-subtle);
     color: var(--colour-ti-secondary);
   }
 
@@ -209,6 +209,6 @@ defineExpose({
   flex: 1;
   overflow-y: auto;
   padding-inline: 1.5rem;
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
 }
 </style>

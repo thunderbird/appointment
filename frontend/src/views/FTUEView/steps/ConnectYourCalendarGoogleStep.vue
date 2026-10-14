@@ -146,7 +146,7 @@ onMounted(async () => {
   </i18n-t>
 
   <div class="buttons-container">
-    <primary-button variant="outline" :title="t('label.back')" @click="onBackButtonClick">
+    <primary-button outline :title="t('label.back')" @click="onBackButtonClick">
       {{ t('label.back') }}
     </primary-button>
     <primary-button :title="t('label.continue')" @click="onContinueButtonClick">

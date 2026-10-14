@@ -69,7 +69,7 @@ defineExpose({ show, hide });
     <template #actions>
       <primary-button
         name="cancel"
-        variant="outline"
+        outline
         @click="modal?.hide()"
         class="cancel-button"
         data-testid="google-disconnect-cancel-btn"

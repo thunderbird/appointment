@@ -43,7 +43,7 @@ defineProps<Props>();
 
   line-height: 1;
   color: var(--colour-ti-base-dark);
-  background-color: var(--colour-danger-hover);
+  background-color: var(--colour-critical-hover);
   box-shadow:
     0 10px 15px -3px rgba(0, 0, 0, 0.1),
     0 4px 6px -2px rgba(0, 0, 0, 0.05);

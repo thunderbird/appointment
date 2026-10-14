@@ -203,7 +203,7 @@ h1 {
   box-shadow: 4px 4px 16px 0 rgba(0, 0, 0, 0.04);
   padding: 1rem 0.75rem;
   border-radius: 1.5rem;
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
 }
 
 .loading-container {

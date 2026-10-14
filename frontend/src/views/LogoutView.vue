@@ -29,7 +29,7 @@ onMounted(() => {
 <style scoped>
 @import '@/assets/styles/mixins.pcss';
 .full-page {
-  @mixin faded-background var(--colour-neutral-border);
+  @mixin faded-background var(--colour-surface-border);
 
   position: fixed;
   display: flex;
