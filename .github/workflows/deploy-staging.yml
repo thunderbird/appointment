@@ -225,6 +225,8 @@ jobs:
             ## How to Promote?
             In order to promote this to prod, edit the draft and press **"Publish release"**.
           draft: true
+          # Pin the tag to the commit that was built
+          target_commitish: ${{ github.sha }}
           files: |
             new_ecr_tag.txt
             frontend.zip
