@@ -7,7 +7,7 @@ minimumReleaseAgeExclude:
   - '@posthog/browser-common@0.5.0'
   - '@posthog/types@1.402.3'
   - posthog-js@1.415.5
-  - '@thunderbirdops/services-ui@1.7.0'
+  - '@thunderbirdops/services-ui@2.0.1'
 overrides:
   # Force a single Vue instance app-wide. @thunderbirdops/services-ui declares
   # vue as a regular dependency (not a peerDependency), so without this pnpm
