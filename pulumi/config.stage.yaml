@@ -21,7 +21,7 @@
 .log_use_stream: &VAR_LOG_USE_STREAM {name: "LOG_USE_STREAM", value: "True"}
 .oidc_exp_grace_period: &VAR_OIDC_EXP_GRACE_PERIOD {name: "OIDC_EXP_GRACE_PERIOD", value: "60"}
 .oidc_fallback_match_by_email: &VAR_OIDC_FALLBACK_MATCH_BY_EMAIL {name: "OIDC_FALLBACK_MATCH_BY_EMAIL", value: "True"}
-.oidc_token_introspection_url: &VAR_OIDC_TOKEN_INTROSPECTION_URL {name: "OIDC_TOKEN_INTROSPECTION_URL", value: "https://auth-stage.tb.pro/realms/tbpro/protocol/openid-connect/token/introspect"}
+.oidc_token_introspection_url: &VAR_OIDC_TOKEN_INTROSPECTION_URL {name: "OIDC_TOKEN_INTROSPECTION_URL", value: "https://auth.stage-thundermail.com/realms/tbpro/protocol/openid-connect/token/introspect"}
 .posthog_host: &VAR_POSTHOG_HOST {name: "POSTHOG_HOST", value: "https://us.i.posthog.com"}
 .redis_db: &VAR_REDIS_DB {name: "REDIS_DB", value: "0"}
 .redis_port: &VAR_REDIS_PORT {name: "REDIS_PORT", value: "6379"}
@@ -34,7 +34,7 @@
 .smtp_port: &VAR_SMTP_PORT {name: "SMTP_PORT", value: "587"}
 .smtp_security: &VAR_SMTP_SECURITY {name: "SMTP_SECURITY", value: "STARTTLS"}
 .tb_accounts_caldav_url: &VAR_TB_ACCOUNTS_CALDAV_URL {name: "TB_ACCOUNTS_CALDAV_URL", value: "https://stage-thundermail.com"}
-.tb_accounts_host: &VAR_TB_ACCOUNTS_HOST {name: "TB_ACCOUNTS_HOST", value: "https://accounts-stage.tb.pro"}
+.tb_accounts_host: &VAR_TB_ACCOUNTS_HOST {name: "TB_ACCOUNTS_HOST", value: "https://accounts.stage-thundermail.com"}
 .tier_basic_calendar_limit: &VAR_TIER_BASIC_CALENDAR_LIMIT {name: "TIER_BASIC_CALENDAR_LIMIT", value: "3"}
 .tier_plus_calendar_limit: &VAR_TIER_PLUS_CALENDAR_LIMIT {name: "TIER_PLUS_CALENDAR_LIMIT", value: "5"}
 .tier_pro_calendar_limit: &VAR_TIER_PRO_CALENDAR_LIMIT {name: "TIER_PRO_CALENDAR_LIMIT", value: "10"}
