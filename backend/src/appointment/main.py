@@ -127,6 +127,27 @@ def _common_setup():
         )
 
 
+LOCAL_HOSTNAMES = ('localhost', '127.0.0.1', '::1', '0.0.0.0')
+
+
+def _warn_about_local_frontend_url():
+    """FRONTEND_URL is used to build booking links and email links. The .env.example default points at
+    localhost, which silently produces unusable links on a self-hosted instance."""
+    if os.getenv('APP_ENV') == APP_ENV_TEST:
+        return
+
+    frontend_url = os.getenv('FRONTEND_URL')
+    hostname = urlparse(frontend_url).hostname if frontend_url else None
+
+    if not hostname:
+        logging.warning('FRONTEND_URL is not set. Booking links and email links will be broken.')
+    elif hostname in LOCAL_HOSTNAMES:
+        logging.warning(
+            f'FRONTEND_URL is set to {frontend_url}. Booking links and email links will only work on this machine. '
+            'Set it to your public frontend URL if you are self-hosting.'
+        )
+
+
 def server():
     """
     Main function for the fast api server
@@ -134,6 +155,8 @@ def server():
 
     # Run common setup first
     _common_setup()
+
+    _warn_about_local_frontend_url()
 
     # extra routes
     from .routes import api

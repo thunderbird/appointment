@@ -12,6 +12,22 @@ In order to create a user with password authentication mode, you will need to se
 
 After the first login you'll want to fill the `APP_ADMIN_ALLOW_LIST` env variable with your account's email to access the basic admin panel located at `/admin/subscribers`.
 
+#### Public URLs
+
+The `.env.example` values point at `localhost`, which only works on the machine running Appointment. On a self-hosted instance, set these to the addresses your users will open:
+
+| Variable | Used for | Example |
+| --- | --- | --- |
+| `FRONTEND_URL` | Booking links, links in emails, OAuth redirects, CORS | `https://appointment.example.org` |
+| `BACKEND_URL` | Google Calendar push notifications | `https://api.appointment.example.org` |
+| `SHORT_BASE_URL` | Optional shorter booking links. Leave blank to use `FRONTEND_URL/user` | `https://apt.example.org` |
+
+Restart the backend after changing them. Booking links you already shared keep their old address, so share the new one.
+
+The frontend container reads its own settings from `APP_*` variables at startup (see [40-appointment-config.sh](../frontend/docker/docker-entrypoint.d/40-appointment-config.sh)). `APP_API_URL` and `APP_SHORT_BASE_URL` take a host without the scheme; `APP_API_SECURE=true` selects https.
+
+The backend logs a warning at startup when `FRONTEND_URL` is unset or points at `localhost`. It is only visible with `LOG_LEVEL=WARNING` or lower.
+
 ### Configuration
 
 The backend project uses dotenv files to inject environment variables into the application. A starting template can be found as [.env.example](.env.example). Copy that as your `.env` to get started.
