@@ -1,38 +1,46 @@
-FROM nginx:stable
+# Build stage: Node 24 (matches the CI Node; pnpm 11 and vite 8 both require
+# Node >=22.13). Only the built dist/ leaves this stage.
+FROM node:24-bookworm-slim AS build
 
-# Copy over files
-COPY . /build/frontend
+WORKDIR /build/frontend
+
+# .dockerignore keeps node_modules, dist, .git and real .env files out of this copy.
+COPY . .
+
+# Build site (env-agnostic; runtime config supplies environment values). pnpm
+# install --frozen-lockfile for a reproducible, lockfile-pinned install across
+# both arch builds.
+RUN corepack enable \
+    && pnpm install --frozen-lockfile \
+    && pnpm run build
+
+# Runtime stage: nginx as an unprivileged user (uid 101) listening on 8080.
+FROM nginxinc/nginx-unprivileged:stable
 
 # NOTE: no per-env .env is baked. The SPA is configured at RUNTIME via /config.js
 # (see public/config.js + docker-entrypoint.d/40-appointment-config.sh), so one
 # built bundle runs unchanged in every environment.
 
-# Add Node 24 (matches the CI Node; pnpm 11 and vite 8 both require Node >=22.13)
-# and jq (used by the runtime-config entrypoint to emit JSON-safe config.js).
-RUN apt-get update
-RUN apt-get install -y ca-certificates curl gnupg jq
-RUN mkdir -p /etc/apt/keyrings
-RUN curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
-RUN echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_24.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list
-RUN apt-get update
-RUN apt-get install -y nodejs
+# jq is used by the runtime-config entrypoint to emit JSON-safe config.js.
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends jq \
+    && rm -rf /var/lib/apt/lists/*
 
-# Build site (env-agnostic; runtime config supplies environment values). pnpm
-# install --frozen-lockfile for a reproducible, lockfile-pinned install across
-# both arch builds.
-RUN corepack enable
-RUN cd /build/frontend && pnpm install --frozen-lockfile
-RUN cd /build/frontend && pnpm run build
+# Use our custom nginx config. Group-writable by nginx so the entrypoint can
+# rewrite the API upstream at startup.
+COPY --chown=101:0 --chmod=0664 docker/etc/nginx/conf.d/appointments.conf /etc/nginx/conf.d/default.conf
 
-# Use our custom nginx config
-RUN rm /etc/nginx/conf.d/default.conf
-COPY docker/etc/nginx/conf.d/appointments.conf /etc/nginx/conf.d/default.conf
-
-# Runtime config generator: nginx:stable runs /docker-entrypoint.d/*.sh at startup,
+# Runtime config generator: the nginx image runs /docker-entrypoint.d/*.sh at startup,
 # writing an env-specific /usr/share/nginx/html/config.js from APP_* env vars.
-COPY docker/docker-entrypoint.d/40-appointment-config.sh /docker-entrypoint.d/40-appointment-config.sh
-RUN chmod +x /docker-entrypoint.d/40-appointment-config.sh
+COPY --chmod=0755 docker/docker-entrypoint.d/40-appointment-config.sh /docker-entrypoint.d/40-appointment-config.sh
 
-RUN cp -r /build/frontend/dist/. /usr/share/nginx/html
+# The site is read-only to nginx except for config.js, which the entrypoint
+# regenerates at startup.
+RUN rm -rf /usr/share/nginx/html/*
+COPY --from=build /build/frontend/dist/ /usr/share/nginx/html/
+RUN chown 101:0 /usr/share/nginx/html/config.js
 
-EXPOSE 80
+USER 101
+
+EXPOSE 8080

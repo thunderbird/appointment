@@ -2,6 +2,7 @@ import json
 import os
 import time
 import pytest
+import tempfile
 
 from contextlib import contextmanager
 from datetime import datetime, timedelta, timezone
@@ -16,7 +17,7 @@ from appointment.tasks.zoom import refresh_zoom_tokens as refresh_zoom_tokens_ta
 def test_cron_lock():
     """Test our cron lock function, this does use disk io but should clean itself up after."""
     test_lock_name = 'test_cron_lock_run'
-    test_lock_file_name = f'/tmp/{test_lock_name}.lock'
+    test_lock_file_name = os.path.join(tempfile.gettempdir(), f'{test_lock_name}.lock')
 
     # Clean up in case the lock file previously exists
     if os.path.isfile(test_lock_file_name):

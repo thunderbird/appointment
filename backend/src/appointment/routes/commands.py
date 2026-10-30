@@ -2,6 +2,7 @@
 
 from contextlib import contextmanager
 import os
+import tempfile
 
 import typer
 from ..commands import (
@@ -19,17 +20,15 @@ router = typer.Typer()
 @contextmanager
 def cron_lock(lock_name):
     """Context manager helper to create a cron lockfile or error out with FileExistsError."""
-    lock_file_name = f'/tmp/{lock_name}.lock'
+    lock_file_name = os.path.join(tempfile.gettempdir(), f'{lock_name}.lock')
 
-    # Lock file exists? Don't run
-    if os.path.isfile(lock_file_name):
-        raise FileExistsError
-
-    fh = open(lock_file_name, 'w+')
+    # O_EXCL makes the existence check and creation atomic, and refuses to follow
+    # a pre-planted symlink. Raises FileExistsError if the lock is already held.
+    fd = os.open(lock_file_name, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
     try:
         yield
     finally:
-        fh.close()
+        os.close(fd)
         os.remove(lock_file_name)
 
 
