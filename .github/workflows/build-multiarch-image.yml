@@ -55,7 +55,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   # One job per architecture, each on its matching native runner. Each pushes an
@@ -72,6 +71,9 @@ jobs:
             arch: arm64
             runner: ubuntu-24.04-arm
     runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write # push to GHCR
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
@@ -133,6 +135,9 @@ jobs:
   merge:
     needs: build
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # push to GHCR
     outputs:
       image: ${{ steps.merge.outputs.image }}
     steps:

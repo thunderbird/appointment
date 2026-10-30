@@ -25,7 +25,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   # Read the repo version once. NOTE: both images are versioned from
@@ -52,6 +51,9 @@ jobs:
   # Moving tags (:latest, :v<version>) are published only from the main branch.
   backend:
     needs: version
+    permissions:
+      contents: read
+      packages: write # push to GHCR
     uses: ./.github/workflows/build-multiarch-image.yml
     with:
       image: ghcr.io/thunderbird/thunderbird-appointment
@@ -63,6 +65,9 @@ jobs:
 
   frontend:
     needs: version
+    permissions:
+      contents: read
+      packages: write # push to GHCR
     uses: ./.github/workflows/build-multiarch-image.yml
     with:
       image: ghcr.io/thunderbird/thunderbird-appointment-frontend
