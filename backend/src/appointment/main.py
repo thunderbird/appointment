@@ -14,7 +14,7 @@ from starlette_context.middleware import RawContextMiddleware
 from fastapi import Request
 from starlette_csrf import CSRFMiddleware
 
-from .defines import APP_ENV_DEV, APP_ENV_TEST, APP_ENV_STAGE, APP_ENV_PROD, AuthScheme
+from .defines import APP_ENV_DEV, APP_ENV_TEST, APP_ENV_STAGE, APP_ENV_PROD, DEV_ONLY_HOSTNAMES, AuthScheme
 from .exceptions.validation import APIRateLimitExceeded
 from .dependencies.database import boot_redis_cluster, close_redis_cluster
 from .middleware.l10n import L10n
@@ -127,9 +127,6 @@ def _common_setup():
         )
 
 
-LOCAL_HOSTNAMES = ('localhost', '127.0.0.1', '::1', '0.0.0.0')
-
-
 def _warn_about_local_frontend_url():
     """FRONTEND_URL is used to build booking links and email links. The .env.example default points at
     localhost, which silently produces unusable links on a self-hosted instance."""
@@ -141,7 +138,7 @@ def _warn_about_local_frontend_url():
 
     if not hostname:
         logging.warning('FRONTEND_URL is not set. Booking links and email links will be broken.')
-    elif hostname in LOCAL_HOSTNAMES:
+    elif hostname in DEV_ONLY_HOSTNAMES:
         logging.warning(
             f'FRONTEND_URL is set to {frontend_url}. Booking links and email links will only work on this machine. '
             'Set it to your public frontend URL if you are self-hosting.'
