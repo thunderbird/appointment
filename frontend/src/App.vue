@@ -15,6 +15,7 @@ import {
 import { StringResponse } from '@/models';
 import { usePosthog, posthog } from '@/composables/posthog';
 import { config } from '@/config';
+import { LOGIN_REDIRECT_KEY } from '@/definitions';
 
 // stores
 import { useSiteNotificationStore } from '@/stores/alert-store';
@@ -93,6 +94,9 @@ const call = createFetch({
         );
       } else if (response && response.status === 401 && data?.detail?.id === 'INVALID_TOKEN') {
         // Clear current user data, and ship them to the login screen!
+        if (user.authenticated) {
+          window.sessionStorage?.setItem(LOGIN_REDIRECT_KEY, route.fullPath);
+        }
         user.$reset();
         await router.push('/login');
         return context;
