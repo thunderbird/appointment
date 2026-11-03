@@ -93,7 +93,7 @@ const call = createFetch({
           url
         );
       } else if (response && response.status === 401 && data?.detail?.id === 'INVALID_TOKEN') {
-        // Clear current user data, and ship them to the login screen!
+        // Remember current path, clear current user data, and ship them to the login screen!
         if (user.authenticated) {
           window.sessionStorage?.setItem(LOGIN_REDIRECT_KEY, route.fullPath);
         }
