@@ -36,16 +36,12 @@ The Docker image starts [entry.sh](scripts/entry.sh). It reads three environment
 
 ### Linting
 
-Backend is formatted using Ruff.
-
-```bash
-pip install ruff
-```
+Backend is formatted using Ruff, which is installed with the `test` extra (see Testing).
 
 Commands
 
 ```bash
-ruff check
+cd backend && uv run ruff check
 ```
 
 ### Authentication
@@ -54,17 +50,19 @@ This project uses our own OIDC provider [Thunderbird Accounts](https://github.co
 
 ### Testing
 
-To run tests in the backend, simply install the package in editing mode:
+Dependencies are locked in `uv.lock` (CI and the Docker image install exactly those versions). Install [uv](https://docs.astral.sh/uv/), then sync the test environment:
 
 ```bash
-cd backend && pip install -e .'[test]'
+cd backend && uv sync --extra test
 ```
 
 After this you can run all of the tests with:
 
 ```bash
-cd backend && python -m pytest
+cd backend && uv run pytest
 ```
+
+When you change `requirements.txt` or `pyproject.toml`, run `uv lock` and commit the updated `uv.lock`; CI fails on a stale lock.
 
 To run a subset of the test only, provide the test path, for example:
 

@@ -1,0 +1,27 @@
+# Keeps the SHA-pinned actions and the uv lockfiles current. The cooldown
+# delays adopting brand-new releases, which is when compromised packages are
+# most likely to still be live.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  - package-ecosystem: uv
+    directories:
+      - /backend
+      - /pulumi
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    groups:
+      python-minor-and-patch:
+        update-types: ["minor", "patch"]

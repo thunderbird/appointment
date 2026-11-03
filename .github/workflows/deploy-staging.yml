@@ -133,6 +133,13 @@ jobs:
         with:
           python-version: 3.13
 
+      # Pulumi.yaml uses the uv toolchain: the program's dependencies install from
+      # pulumi/uv.lock. UV_LOCKED (below) fails the deploy if the lock is stale.
+      - name: Set up uv
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          version: '0.13.0'
+
       - name: Unpack ECR tag
         id: get_ecr_tag
         run: |
@@ -146,6 +153,7 @@ jobs:
           ECR_TAG: "${{ steps.get_ecr_tag.outputs.new_ecr_tag }}"
           PULUMI_ACCESS_TOKEN: "${{ secrets.PULUMI_ACCESS_TOKEN }}"
           PULUMI_CONFIG_PASSPHRASE: "${{ secrets.PULUMI_PASSPHRASE }}"
+          UV_LOCKED: "1"
         run: |
           # Update the PATH to include the right version of Pulumi; this is non-trivial or impossible
           # to do with the GHA workflow "env" settings above.
