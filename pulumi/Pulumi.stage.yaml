@@ -53,9 +53,9 @@ config:
   appointment:google-auth-project-id:
     secure: AAABAK2nIGUSF8PQmSwqgn6WZcdjYjP5qVMyEbD3UxKIYz4MuO+JRcvepWGdaHIi+vOFxK1Nxw==
   appointment:zoom-client-id:
-    secure: AAABAJYEh9/f+XhfWKtYuksFpNdYZK+OWIvA5kfLUyriEesFm93T8z+XkSL+zFdrvHmr4WIC
+    secure: AAABABzZClotAB/POfVSv8THjsGyTbay6uMHLYY8YJmbmPOseyqt4dx80OWziZNdM06o1fU=
   appointment:zoom-auth-secret:
-    secure: AAABAJ4+G4jTJiLuETGZb/Oz7OLJftGqZh59OswhSCftIw5oZxB0VpbejAh1EpNOSvt1kXRCPzIQGCWdJJ7JBQ==
+    secure: AAABAEviNEjYZLhlHq32EbNwiBYVzTplbGwLx7ukNe2aJxnV4CihNsa/OQeku72aP16qogxM+zjksMO6DeF6gA==
   appointment:zoom-api-secret:
     secure: AAABAHN4fEjjvghxDZB09Oy38wF2/8AVfCe0+X0ncjBDYoR5Q1I5Nr0SxKHv+2b1tnr1xr+2
   appointment:fxa-client-id:
