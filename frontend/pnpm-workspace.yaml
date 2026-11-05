@@ -27,3 +27,7 @@ overrides:
   undici@>=8.0.0 <8.12.2: ^8.12.2
   source-map-js@<1.2.2: ^1.2.2
   postcss-selector-parser@<7.1.6: ^7.1.6
+  glob@>=9.0.0 <14.0.2: ^14.0.2
+  vue-i18n@<11.4.14: ^11.4.14
+  "@intlify/core-base@<11.4.14": ^11.4.14
+  "@intlify/shared@<11.4.14": ^11.4.14
