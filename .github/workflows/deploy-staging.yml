@@ -17,7 +17,7 @@ permissions:
 jobs:
   build-and-deploy-stage-frontend:
     environment: staging
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
 
@@ -54,7 +54,7 @@ jobs:
 
   build-backend-image:
     environment: staging
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
 
@@ -95,7 +95,7 @@ jobs:
       - build-backend-image
     if: needs.build-backend-image.result == 'success'
     environment: staging
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
 
@@ -171,7 +171,7 @@ jobs:
       contains(join(needs.*.result, ','), 'success') &&
       ! contains(join(needs.*.result, ','), 'failure')
     environment: production
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v7
@@ -241,7 +241,7 @@ jobs:
     name: e2e-tests-browserstack-stage
     needs: create-release
     if: ${{ success() && !cancelled() }} # only proceed if last steps passed and job hasn't been cancelled
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: staging
     env:
       TB_ACCTS_EMAIL: ${{ secrets.E2E_APPT_STAGE_TB_ACCTS_EMAIL }}
