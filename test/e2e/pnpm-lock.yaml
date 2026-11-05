@@ -14,9 +14,9 @@ overrides:
   fast-uri@<3.1.9: ^3.1.9
   brace-expansion@>=2.0.0 <2.1.7: ^2.1.7
   protobufjs@>=7.0.0 <7.6.5: ^7.6.5
-  qs@<6.16.0: ^6.16.0
+  qs@<6.16.1: ^6.16.1
   basic-ftp@<6.2.1: ^6.2.1
-  follow-redirects@<1.16.1: ^1.16.1
+  follow-redirects@<1.16.2: ^1.16.2
 
 importers:
 
@@ -696,8 +696,8 @@ packages:
   fn.name@1.1.0:
     resolution: {integrity: sha512-GRnmB5gPyJpAhTQdSZTSp9uaPSvl09KoYcMQtsB9rQoOmzs9dH6ffeccH+Z+cv6P68Hu5bC6JjRh4Ah/mHSNRw==}
 
-  follow-redirects@1.16.1:
-    resolution: {integrity: sha512-FNvFGzoMLWmE6Yj9spb/zjd7yiNCHiAW9/Tg9CXrQ8wuu32HtlJOwWO11OJafl5FfY3DxTdQ0vj42zU1kvv5jg==}
+  follow-redirects@1.16.2:
+    resolution: {integrity: sha512-/kVP2U8z596Ia0gwFrwyIeo74ta5aVmSeU1FfAUMAmcEP5EP7zydmag3SLiN64NaRKef3lxsq7i/g7ltJQDGow==}
     engines: {node: '>=4.0'}
     peerDependencies:
       debug: '*'
@@ -1290,8 +1290,8 @@ packages:
     resolution: {integrity: sha512-FLpr4flz5xZTSJxSeaheeMKN/EDzMdK7b8PTOC6a5PYFKTucWbdqjgqaEyH0shFiSJrVB1+Qqi4Tk19ccU6Aug==}
     engines: {node: '>=12.20'}
 
-  qs@6.16.0:
-    resolution: {integrity: sha512-h6fhOIaRrID2CbEY2fqs+7t+UXZo+MLAnU5gRIq85uFtdiUPCdsApMlHhXogKVM4HM2DVbIjGNTTYH2OcmP1vA==}
+  qs@6.17.1:
+    resolution: {integrity: sha512-jd3COkaKVgGUW+ZHyEHCG9bH7RoaaiWuMgzsIBjUMVjLAaWGWpoUAVwljVvBHxRu/2qEHnadLGZrkutYUBPQJA==}
     engines: {node: '>=0.6'}
 
   querystring@0.2.0:
@@ -2077,7 +2077,7 @@ snapshots:
       cheerio: 1.0.0-rc.11
       dotenv: 16.6.1
       emittery: 0.11.0
-      follow-redirects: 1.16.1(debug@4.4.1(supports-color@8.1.1))
+      follow-redirects: 1.16.2(debug@4.4.1(supports-color@8.1.1))
       form-data: 4.0.6
       getos: 3.2.1
       git-last-commit: 1.0.1
@@ -2456,7 +2456,7 @@ snapshots:
 
   fn.name@1.1.0: {}
 
-  follow-redirects@1.16.1(debug@4.4.1(supports-color@8.1.1)):
+  follow-redirects@1.16.2(debug@4.4.1(supports-color@8.1.1)):
     optionalDependencies:
       debug: 4.4.1(supports-color@8.1.1)
 
@@ -2623,7 +2623,7 @@ snapshots:
       extend: 3.0.2
       gaxios: 6.7.1(supports-color@8.1.1)
       google-auth-library: 9.15.1(supports-color@8.1.1)
-      qs: 6.16.0
+      qs: 6.17.1
       url-template: 2.0.8
       uuid: 11.1.1
     transitivePeerDependencies:
@@ -3105,7 +3105,7 @@ snapshots:
     dependencies:
       escape-goat: 4.0.0
 
-  qs@6.16.0:
+  qs@6.17.1:
     dependencies:
       es-define-property: 1.0.1
       side-channel: 1.1.1
