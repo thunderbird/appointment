@@ -35,8 +35,8 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: "pnpm"
-          cache-dependency-path: "frontend/pnpm-lock.yaml"
+          cache: 'pnpm'
+          cache-dependency-path: 'frontend/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: cd frontend && pnpm install --frozen-lockfile
@@ -68,12 +68,12 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
         with:
-          mask-password: "true"
+          mask-password: 'true'
 
       - name: Build, tag, and push backend image to Amazon ECR
         id: build-backend
         env:
-          ECR_TAG: "${{ steps.login-ecr.outputs.registry }}/thunderbird/appointment:${{ github.sha }}"
+          ECR_TAG: '${{ steps.login-ecr.outputs.registry }}/thunderbird/appointment:${{ github.sha }}'
           RELEASE_VERSION: ${{ github.sha }}
         run: |
           # Build a docker container and
@@ -102,7 +102,8 @@ jobs:
       - name: Download ecr tag
         uses: actions/download-artifact@v4
         with:
-          name: new_ecr_tag
+            name: 
+              new_ecr_tag
 
       - name: Configure AWS credentials for Pulumi
         uses: aws-actions/configure-aws-credentials@v4
@@ -127,8 +128,8 @@ jobs:
           output=$(cat new_ecr_tag.txt)
           echo new_ecr_tag=$output >> $GITHUB_OUTPUT
 
-      # The runner image (ubuntu-latest) no longer ships Pulumi
-      # This installs to ~/.pulumi/bin, which the deploy step adds to PATH
+      # The runner image (ubuntu-latest) no longer ships Pulumi, so install it explicitly.
+      # This installs to ~/.pulumi/bin, which the deploy step adds to PATH.
       - name: Install Pulumi
         run: curl -fsSL https://get.pulumi.com | sh -s -- --version 3.272.0
 
@@ -183,8 +184,8 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: "pnpm"
-          cache-dependency-path: "frontend/pnpm-lock.yaml"
+          cache: 'pnpm'
+          cache-dependency-path: 'frontend/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: cd frontend && pnpm install --frozen-lockfile
@@ -198,8 +199,9 @@ jobs:
       - name: Download ECR tag
         uses: actions/download-artifact@v4
         with:
-          name: new_ecr_tag
-
+            name: 
+              new_ecr_tag
+      
       - name: Zip Pulumi
         run: |
           # Remove any lingering build pieces that may exist
@@ -258,8 +260,8 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: 24
-          cache: "pnpm"
-          cache-dependency-path: "test/e2e/pnpm-lock.yaml"
+          cache: 'pnpm'
+          cache-dependency-path: 'test/e2e/pnpm-lock.yaml'
 
       - name: Install dependencies
         run: |
@@ -269,10 +271,10 @@ jobs:
       - name: BrowserStack Env Setup
         uses: browserstack/github-actions/setup-env@master
         with:
-          username: ${{ secrets.BROWSERSTACK_USERNAME }}
+          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
           access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
-          project-name: "Thunderbird Appointment"
-          build-name: "E2E Tests: BUILD_INFO"
+          project-name: 'Thunderbird Appointment'
+          build-name: 'E2E Tests: BUILD_INFO'
 
       - name: Stage Sanity E2E Tests on Desktop Firefox
         run: |
