@@ -131,7 +131,17 @@ jobs:
       # The runner image (ubuntu-latest) no longer ships Pulumi, so install it explicitly.
       # This installs to ~/.pulumi/bin, which the deploy step adds to PATH.
       - name: Install Pulumi
-        run: curl -fsSL https://get.pulumi.com | sh -s -- --version 3.272.0
+        run: |
+          # Download a pinned Pulumi release and verify its checksum before installing it
+          # (SHA-256 from pulumi-3.272.0-checksums.txt on the GitHub release).
+          PULUMI_VERSION=3.272.0
+          PULUMI_SHA256=58d545f2b98761051922008ebd381ecef95484d7f7a5ff7faa15d7a780ea84f6
+          PULUMI_TARBALL="$RUNNER_TEMP/pulumi.tar.gz"
+          curl --proto "=https" --proto-redir "=https" --tlsv1.2 -fsSL -o "$PULUMI_TARBALL" "https://github.com/pulumi/pulumi/releases/download/v${PULUMI_VERSION}/pulumi-v${PULUMI_VERSION}-linux-x64.tar.gz"
+          echo "${PULUMI_SHA256}  ${PULUMI_TARBALL}" | sha256sum --check --strict -
+          mkdir -p "$HOME/.pulumi/bin"
+          tar -xzf "$PULUMI_TARBALL" --strip-components=1 -C "$HOME/.pulumi/bin"
+          rm -f "$PULUMI_TARBALL"
 
       # Deploy to stage
       - name: Deploy new image to stage
