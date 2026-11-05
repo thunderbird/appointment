@@ -14,7 +14,7 @@ permissions:
 jobs:
   pr-merged:
     if: github.event.pull_request.merged
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
       - name: Thank you
         # Only show this for first time contributors. Repo members and past contributors are

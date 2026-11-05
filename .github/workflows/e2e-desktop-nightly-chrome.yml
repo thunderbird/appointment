@@ -17,7 +17,7 @@ permissions:
 jobs:
   desktop-nightly-chrome:
     name: prod-desktop-nightly-chrome
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     environment:
       name: production
       deployment: false
