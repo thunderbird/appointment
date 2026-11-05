@@ -5,6 +5,7 @@ Babel==2.*
 caldav==1.6.0
 celery[redis]==5.*
 celery-redbeat>=2.3.0
+kombu<5.7
 cryptography==50.0.0
 dnspython==2.*
 fastapi[standard]==0.136.*
