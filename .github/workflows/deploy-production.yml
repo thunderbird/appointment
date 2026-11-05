@@ -85,7 +85,7 @@ jobs:
         shell: bash
         run: |
           tar -xvf pulumi.tbz
-          curl -fsSL https://get.pulumi.com | sh
+          curl -fsSL https://get.pulumi.com | sh -s -- --version 3.272.0
 
       - name: Deploy to prod
         shell: bash
