@@ -365,9 +365,12 @@ export const isUnconfirmed = (a: Appointment): boolean => {
 
 /**
  * Assign side-by-side lanes to events (start/end as timestamps), so that overlapping events don't cover each other.
- * Returns the lane index and the number of lanes of the overlap cluster for each event, in input order.
+ * Events shorter than minDuration (ms) count as lasting minDuration. Returns the lane index and lane count per event.
  */
-export const assignEventLanes = (events: Time<number>[]): { currentLane: number; totalLanes: number }[] => {
+export const assignEventLanes = (
+  events: Time<number>[],
+  minDuration = 0
+): { currentLane: number; totalLanes: number }[] => {
   const result = new Map(events.map((event) => [event, { currentLane: 0, totalLanes: 1 }]));
   const sortedEvents = [...events].sort((a, b) => a.start - b.start || a.end - b.end);
 
@@ -379,7 +382,8 @@ export const assignEventLanes = (events: Time<number>[]): { currentLane: number;
   const closeCluster = () => cluster.forEach((event) => (result.get(event).totalLanes = laneEnds.length));
 
   sortedEvents.forEach((event) => {
-    const { start, end } = event;
+    const { start } = event;
+    const end = Math.max(event.end, start + minDuration);
 
     // Start a new cluster if this event doesn't overlap with any event of the current one
     if (start >= clusterEnd) {

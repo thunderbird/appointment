@@ -73,4 +73,19 @@ describe('assignEventLanes', () => {
       { currentLane: 1, totalLanes: 3 },
     ]);
   });
+
+  it('treats short events as lasting the minimum duration', () => {
+    // 09:00-09:05, 09:02-09:30 and 09:06-09:10 with a 20 minute minimum
+    const events = [ev(9, 9 + 5 / 60), ev(9 + 2 / 60, 9.5), ev(9 + 6 / 60, 9 + 10 / 60)];
+    expect(assignEventLanes(events)).toEqual([
+      { currentLane: 0, totalLanes: 2 },
+      { currentLane: 1, totalLanes: 2 },
+      { currentLane: 0, totalLanes: 2 },
+    ]);
+    expect(assignEventLanes(events, 20 * 60000)).toEqual([
+      { currentLane: 0, totalLanes: 3 },
+      { currentLane: 1, totalLanes: 3 },
+      { currentLane: 2, totalLanes: 3 },
+    ]);
+  });
 });
