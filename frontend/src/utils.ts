@@ -372,7 +372,8 @@ export const assignEventLanes = (
   minDuration = 0
 ): { currentLane: number; totalLanes: number }[] => {
   const result = new Map(events.map((event) => [event, { currentLane: 0, totalLanes: 1 }]));
-  const sortedEvents = [...events].sort((a, b) => a.start - b.start || a.end - b.end);
+  // Sort by start time, and longer events first for equal start times
+  const sortedEvents = [...events].sort((a, b) => a.start - b.start || b.end - a.end);
 
   let laneEnds: number[] = [];
   let cluster: Time<number>[] = [];

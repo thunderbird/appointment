@@ -88,4 +88,12 @@ describe('assignEventLanes', () => {
       { currentLane: 2, totalLanes: 3 },
     ]);
   });
+
+  it('places longer events first when they start at the same time', () => {
+    expect(assignEventLanes([ev(12, 12.5), ev(12, 14), ev(12, 13)])).toEqual([
+      { currentLane: 2, totalLanes: 3 },
+      { currentLane: 0, totalLanes: 3 },
+      { currentLane: 1, totalLanes: 3 },
+    ]);
+  });
 });
