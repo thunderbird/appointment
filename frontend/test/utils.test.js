@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { timeFormat } from '@/utils';
+import { assignEventLanes, timeFormat } from '@/utils';
 
 // Mock the browser locale with setting window.navigator.language directly.
 const setLocale = (locale) => {
@@ -36,5 +36,41 @@ describe('timeFormat', () => {
   it('falls back to 12-hour format when the locale is invalid and no default is configured', () => {
     setLocale('not-a-real-locale!!');
     expect(timeFormat()).toBe('hh:mma');
+  });
+});
+
+describe('assignEventLanes', () => {
+  // Build an event from hours, e.g. ev(11.5, 13) is 11:30 - 13:00
+  const ev = (start, end) => ({ start: start * 3600000, end: end * 3600000 });
+
+  it('keeps non-overlapping events at full width', () => {
+    expect(assignEventLanes([ev(9, 10), ev(11, 12)])).toEqual([
+      { currentLane: 0, totalLanes: 1 },
+      { currentLane: 0, totalLanes: 1 },
+    ]);
+  });
+
+  it('does not treat back-to-back events as overlapping', () => {
+    expect(assignEventLanes([ev(9, 9.5), ev(9.5, 10)])).toEqual([
+      { currentLane: 0, totalLanes: 1 },
+      { currentLane: 0, totalLanes: 1 },
+    ]);
+  });
+
+  it('reuses a free lane within an overlap cluster', () => {
+    expect(assignEventLanes([ev(11.5, 13), ev(12, 14), ev(13, 14.5)])).toEqual([
+      { currentLane: 0, totalLanes: 2 },
+      { currentLane: 1, totalLanes: 2 },
+      { currentLane: 0, totalLanes: 2 },
+    ]);
+  });
+
+  it('opens a lane per concurrent event and starts a new cluster afterwards', () => {
+    expect(assignEventLanes([ev(13.5, 14), ev(12, 13), ev(11, 12.5), ev(11.5, 13)])).toEqual([
+      { currentLane: 0, totalLanes: 1 },
+      { currentLane: 2, totalLanes: 3 },
+      { currentLane: 0, totalLanes: 3 },
+      { currentLane: 1, totalLanes: 3 },
+    ]);
   });
 });
