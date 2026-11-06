@@ -5,7 +5,7 @@ import { dayjsKey } from '@/keys';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
-import { initialEventPopupData, showEventPopup, timeFormat } from '@/utils';
+import { assignEventLanes, initialEventPopupData, showEventPopup, timeFormat } from '@/utils';
 import { Appointment, EventPopup as EventPopupType, GridElement, GridTimeSlot, RemoteEvent, Slot } from '@/models';
 import { BookingStatus, DateFormatStrings } from '@/definitions';
 import { Dayjs } from 'dayjs';
@@ -312,6 +312,16 @@ const filteredRemoteEventsForGrid = computed(() => {
 });
 
 /**
+ * Maps remote events and pending appointments to a lane and total lane count, to handle time overlapping
+ */
+const eventLanes = computed(() => {
+  const events = [...filteredRemoteEventsForGrid.value, ...filteredPendingAppointmentsForGrid.value];
+  const lanes = assignEventLanes(events.map((e) => ({ start: dj(e.start).valueOf(), end: dj(e.end).valueOf() })));
+
+  return new Map(events.map((e, i) => [e, lanes[i]]));
+});
+
+/**
  * Generates an array of all-day remote events per weekday that fall within the active week.
  */
 const filteredRemoteAllDayEvents = computed(() => {
@@ -500,6 +510,8 @@ onMounted(() => {
           gridRowStart: remoteEvent?.gridRowStart,
           marginTop: remoteEvent?.topOffset,
           height: remoteEvent?.height,
+          '--current-lane': eventLanes.get(remoteEvent)?.currentLane,
+          '--total-lanes': eventLanes.get(remoteEvent)?.totalLanes,
         }"
         @mouseenter="(event) => onRemoteEventMouseEnter(event, remoteEvent)"
         @mouseleave="onRemoteEventMouseLeave"
@@ -519,6 +531,8 @@ onMounted(() => {
           gridRowStart: pendingAppointment?.gridRowStart,
           marginTop: pendingAppointment?.topOffset,
           height: pendingAppointment?.height,
+          '--current-lane': eventLanes.get(pendingAppointment)?.currentLane,
+          '--total-lanes': eventLanes.get(pendingAppointment)?.totalLanes,
         }"
         @mouseenter="(event) => onRemoteEventMouseEnter(event, pendingAppointment)"
         @mouseleave="onRemoteEventMouseLeave"
@@ -761,6 +775,14 @@ onMounted(() => {
 
 .remote-event {
   z-index: 4;
+}
+
+/* Place overlapping events side by side in lanes with a 2px gap, single events keep the full 95% width */
+.remote-event,
+.pending-appointment {
+  width: calc((95% + 2px) / var(--total-lanes, 1) - 2px);
+  min-width: 0;
+  margin-inline-start: calc((95% + 2px) / var(--total-lanes, 1) * var(--current-lane, 0));
 }
 
 .selectable-slot {

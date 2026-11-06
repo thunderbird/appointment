@@ -13,6 +13,7 @@ import {
   ListResponse,
   Availability,
   Appointment,
+  Time,
 } from '@/models';
 import { BookingStatus } from './definitions';
 
@@ -362,6 +363,46 @@ export const isUnconfirmed = (a: Appointment): boolean => {
   return a.slots[0].booking_status === BookingStatus.Requested;
 };
 
+/**
+ * Assign side-by-side lanes to events (start/end as timestamps), so that overlapping events don't cover each other.
+ * Returns the lane index and the number of lanes of the overlap cluster for each event, in input order.
+ */
+export const assignEventLanes = (events: Time<number>[]): { currentLane: number; totalLanes: number }[] => {
+  const result = new Map(events.map((event) => [event, { currentLane: 0, totalLanes: 1 }]));
+  const sortedEvents = [...events].sort((a, b) => a.start - b.start || a.end - b.end);
+
+  let laneEnds: number[] = [];
+  let cluster: Time<number>[] = [];
+  let clusterEnd = -Infinity;
+
+  // All events of a cluster share the number of lanes the cluster needed
+  const closeCluster = () => cluster.forEach((event) => (result.get(event).totalLanes = laneEnds.length));
+
+  sortedEvents.forEach((event) => {
+    const { start, end } = event;
+
+    // Start a new cluster if this event doesn't overlap with any event of the current one
+    if (start >= clusterEnd) {
+      closeCluster();
+      laneEnds = [];
+      cluster = [];
+      clusterEnd = -Infinity;
+    }
+
+    // Use the first lane that is free again, or open a new one
+    let lane = laneEnds.findIndex((laneEnd) => laneEnd <= start);
+    if (lane === -1) lane = laneEnds.length;
+
+    laneEnds[lane] = end;
+    result.get(event).currentLane = lane;
+    cluster.push(event);
+    clusterEnd = Math.max(clusterEnd, end);
+  });
+  closeCluster();
+
+  return events.map((event) => result.get(event));
+};
+
 export default {
   arrayRotate,
   timeFormat,
@@ -377,4 +418,5 @@ export default {
   isoWeekdayToDayjs,
   getStartOfWeek,
   getEndOfWeek,
+  assignEventLanes,
 };
