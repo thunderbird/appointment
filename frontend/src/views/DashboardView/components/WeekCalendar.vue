@@ -14,7 +14,7 @@ import { isDark as isDarkMode } from '@/composables/useColourScheme';
 
 // Constants for grid calculations
 const ROW_HEIGHT_PX = 60; // Matches minmax(60px, min-content) in grid-template-rows
-const MIN_EVENT_HEIGHT_PX = 24; // Enough for one line of text including padding
+const MIN_EVENT_HEIGHT_REM = 1.5; // Enough for one line of text including padding, scales with font size
 
 interface Props {
   activeDateRange: {
@@ -158,7 +158,7 @@ function calculateEventGridPosition(
 
   // Height based on duration with a minimum height
   const calculatedHeight = (durationMinutes / 60) * ROW_HEIGHT_PX;
-  const height = `${Math.max(MIN_EVENT_HEIGHT_PX, calculatedHeight - gap)}px`;
+  const height = `max(${MIN_EVENT_HEIGHT_REM}rem, ${calculatedHeight - gap}px)`;
 
   // Return the positioning data if the event falls within calendar hours
   if (gridRowStart >= 1 && gridRowStart <= 24) {
@@ -318,7 +318,8 @@ const filteredRemoteEventsForGrid = computed(() => {
 const eventLanes = computed(() => {
   const events = [...filteredRemoteEventsForGrid.value, ...filteredPendingAppointmentsForGrid.value];
   // Duration matching the minimum event height, so short events whose blocks overlap are placed side by side too
-  const minDuration = (MIN_EVENT_HEIGHT_PX / ROW_HEIGHT_PX) * 60 * 60 * 1000;
+  const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const minDuration = ((MIN_EVENT_HEIGHT_REM * remPx) / ROW_HEIGHT_PX) * 60 * 60 * 1000;
   const lanes = assignEventLanes(
     events.map((e) => ({ start: dj(e.start).valueOf(), end: dj(e.end).valueOf() })),
     minDuration
