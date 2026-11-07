@@ -14,7 +14,8 @@ ENV PATH="/app/node_modules/.bin:${PATH}"
 # Run as the image's unprivileged `node` user (uid 1000).
 USER node
 
-COPY --chown=node:node . .
+# Only the install manifests: docker-compose bind-mounts the source over /app.
+COPY --chown=node:node package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 CMD ["vite", "dev", "--port", "8080"]

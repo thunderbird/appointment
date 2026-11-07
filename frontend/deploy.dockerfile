@@ -4,8 +4,11 @@ FROM node:24-bookworm-slim AS build
 
 WORKDIR /build/frontend
 
-# .dockerignore keeps node_modules, dist, .git and real .env files out of this copy.
-COPY . .
+# Copy only what the build reads, so nothing else in the context (local .env
+# files, node_modules, dist) can end up in the image.
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml index.html tsconfig.json vite.config.ts ./
+COPY public public
+COPY src src
 
 # Build site (env-agnostic; runtime config supplies environment values). pnpm
 # install --frozen-lockfile for a reproducible, lockfile-pinned install across
