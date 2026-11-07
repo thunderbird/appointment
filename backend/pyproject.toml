@@ -28,6 +28,13 @@ test = [
 ]
 deploy = ['appointment[cli]', 'appointment[db]']
 
+[dependency-groups]
+# Locked in uv.lock so the Docker image can install the app without fetching an
+# unpinned setuptools. Keep in step with build-system.requires.
+build = [
+    "setuptools>=61.0",
+]
+
 [build-system]
 requires = ["setuptools >= 61.0"]
 build-backend = "setuptools.build_meta"

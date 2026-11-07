@@ -60,6 +60,16 @@ jobs:
           python-version: '3.13'
           cache: 'pip'
 
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: '0.11.21'
+
+      # uv.lock must match requirements.txt/pyproject.toml (the Docker image installs from it).
+      - name: Check uv.lock is up to date
+        working-directory: ./backend
+        run: uv lock --check
+
       - name: Install dependencies
         run: |
           cd ./backend
@@ -151,6 +161,16 @@ jobs:
         with:
           python-version: '3.13'
           cache: 'pip'
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          version: '0.11.21'
+
+      # uv.lock must match requirements.txt/pyproject.toml.
+      - name: Check uv.lock is up to date
+        working-directory: ./pulumi
+        run: uv lock --check
 
       - name: Install dependencies
         run: |
