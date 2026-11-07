@@ -9,7 +9,7 @@
   border-radius: 50%;
   border-width: 4px;
   border-style: solid;
-  border-color: var(--colour-neutral-border);
+  border-color: var(--colour-surface-border);
   border-top-color: var(--colour-primary-default);
   animation: spin 1s linear infinite;
 }

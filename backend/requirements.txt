@@ -5,6 +5,7 @@ Babel==2.*
 caldav==1.6.0
 celery[redis]==5.*
 celery-redbeat>=2.3.0
+kombu<5.7
 cryptography==50.0.0
 dnspython==2.*
 fastapi[standard]==0.136.*
@@ -26,7 +27,7 @@ posthog==3.23.0
 psycopg[binary]==3.2.12
 python-dotenv==1.2.2
 python-multipart==0.0.31
-PyJWT==2.15.0
+PyJWT==2.15.1
 pydantic[email]==2.*
 requests-oauthlib==2.*
 redis==5.*
@@ -41,4 +42,4 @@ typer==0.*
 tzdata==2025.*
 uvicorn==0.*
 validators==0.*
-Authlib==1.7.1
+Authlib==1.9.1

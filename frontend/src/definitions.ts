@@ -162,14 +162,6 @@ export enum FtueStep {
   SetupComplete = 100,
 }
 
-export enum TooltipPosition {
-  None = 'pos-none',
-  Top = 'pos-top',
-  Bottom = 'pos-bottom',
-  Left = 'pos-left',
-  Right = 'pos-right',
-}
-
 export enum MetricEvents {
   PageLoaded = 'apmt.page.loaded',
   FTUEStep = 'apmt.ftue.step',
@@ -226,5 +218,4 @@ export default {
   SLOT_DURATION_OPTIONS,
   TableDataButtonType,
   TableDataType,
-  TooltipPosition,
 };

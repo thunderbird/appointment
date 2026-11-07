@@ -51,7 +51,7 @@ async function cancelAppointment() {
       </div>
       <div class="confirmation-button-container">
         <primary-button
-          variant="outline"
+          outline
           data-testid="appointment-modal-confirm-cancel-back-btn"
           @click="emit('click:backButton')"
           :title="t('label.back')"

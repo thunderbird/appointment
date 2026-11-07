@@ -107,10 +107,10 @@ const onSubmit = async () => {
       </text-input>
     </form>
     <div class="buttons">
-      <primary-button variant="outline" class="btn-switch" @click="emits('switch')" v-if="showSwitch">
+      <primary-button outline class="btn-switch" @click="emits('switch')" v-if="showSwitch">
         {{ t('calDAVForm.switchToGoogleCalendar') }}
       </primary-button>
-      <primary-button variant="outline" @click="emits('previous')" v-if="showPrevious">
+      <primary-button outline @click="emits('previous')" v-if="showPrevious">
         {{ t('label.back') }}
       </primary-button>
       <primary-button :label="t('label.connect')" :disabled="isLoading" @click="onSubmit">{{

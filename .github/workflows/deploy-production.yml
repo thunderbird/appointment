@@ -16,7 +16,7 @@ jobs:
   deploy-prod-frontend:
     if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
     environment: production
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -44,7 +44,7 @@ jobs:
   deploy-prod-backend:
     if: startsWith(github.ref_name, 'r-') # the prefix we have added to the tag
     environment: production
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Download ECR tag artifact
         uses: dsaltares/fetch-gh-release-asset@master
@@ -85,7 +85,16 @@ jobs:
         shell: bash
         run: |
           tar -xvf pulumi.tbz
-          curl -fsSL https://get.pulumi.com | sh
+          # Download a pinned Pulumi release and verify its checksum before installing it
+          # (SHA-256 from pulumi-3.272.0-checksums.txt on the GitHub release).
+          PULUMI_VERSION=3.272.0
+          PULUMI_SHA256=58d545f2b98761051922008ebd381ecef95484d7f7a5ff7faa15d7a780ea84f6
+          PULUMI_TARBALL="$RUNNER_TEMP/pulumi.tar.gz"
+          curl --proto "=https" --proto-redir "=https" --tlsv1.2 -fsSL -o "$PULUMI_TARBALL" "https://github.com/pulumi/pulumi/releases/download/v${PULUMI_VERSION}/pulumi-v${PULUMI_VERSION}-linux-x64.tar.gz"
+          echo "${PULUMI_SHA256}  ${PULUMI_TARBALL}" | sha256sum --check --strict -
+          mkdir -p "$HOME/.pulumi/bin"
+          tar -xzf "$PULUMI_TARBALL" --strip-components=1 -C "$HOME/.pulumi/bin"
+          rm -f "$PULUMI_TARBALL"
 
       - name: Deploy to prod
         shell: bash
@@ -117,7 +126,7 @@ jobs:
   prod-sanity-browserstack:
     name: prod-sanity-browserstack
     needs: [deploy-prod-backend, deploy-prod-frontend]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     environment: production
     env:
       TB_ACCTS_EMAIL: ${{ secrets.E2E_APPT_PROD_TB_ACCTS_EMAIL }}

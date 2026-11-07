@@ -311,7 +311,7 @@ section {
   border-radius: 24px;
   padding: 2rem 1.5rem;
   align-self: flex-start;
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   box-shadow: 4px 4px 16px 0 rgba(0, 0, 0, 0.04);
   margin-block-end: 2rem;
 }

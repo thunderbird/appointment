@@ -20,6 +20,10 @@ APP_ENV_TEST = 'test'
 APP_ENV_STAGE = 'stage'
 APP_ENV_PROD = 'prod'
 
+# Hostnames that mean FRONTEND_URL is only reachable from this machine. Used for a startup
+# warning only - do not use for trust/allowlist checks.
+DEV_ONLY_HOSTNAMES = ('localhost', '127.0.0.1', '::1', '0.0.0.0')
+
 APP_NAME = 'Appointment'
 APP_NAME_SHORT = 'apmt'
 

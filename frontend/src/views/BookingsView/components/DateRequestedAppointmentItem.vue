@@ -62,7 +62,7 @@ const emit = defineEmits(['select-appointment']);
   grid-template-columns: 1fr;
   gap: 1rem;
   align-items: center;
-  background-color: var(--colour-neutral-lower);
+  background-color: var(--colour-surface-lower);
   border-radius: 0.5rem;
   padding: 0.75rem 1rem;
   font-size: 0.875rem;

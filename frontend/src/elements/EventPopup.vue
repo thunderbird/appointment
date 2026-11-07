@@ -79,7 +79,7 @@ const eventDateTime = computed(() => {
   z-index: 30;
   transform: translateY(-50%);
   border-radius: 0.375rem;
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   padding: 0.75rem;
   box-shadow:
     0 10px 15px -3px rgb(0 0 0 / 0.1),
@@ -100,7 +100,7 @@ const eventDateTime = computed(() => {
   width: 0.75rem;
   height: 0.75rem;
   transform: rotate(45deg);
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
 
   &.arrow-right {
     left: -0.375rem;

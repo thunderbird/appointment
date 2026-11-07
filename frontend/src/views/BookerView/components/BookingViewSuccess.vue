@@ -97,7 +97,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
   flex-direction: column;
   gap: 1.5rem;
 
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   font-family: Inter, sans-serif;
 
   .heading {
@@ -123,7 +123,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
     flex-direction: column;
     gap: 1.5rem;
     font-size: 1.25rem;
-    color: var(--colour-ti-black);
+    color: var(--colour-ti-base);
 
     .logo {
       padding: 0.5rem;
@@ -168,7 +168,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
   max-width: 23rem;
 
   background-image: radial-gradient(circle at bottom right, #336d71, #1b222e 85%);
-  color: var(--colour-neutral-lower-light);
+  color: #f7f7f8;
   font-family: Inter, sans-serif;
   text-align: center;
 
@@ -180,7 +180,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
 
   .description {
     font-size: 0.875rem;
-    color: var(--colour-neutral-lower-light);
+    color: #f7f7f8;
   }
 
   :deep(.base.primary.filled) {

@@ -343,7 +343,7 @@ watch(
   border: 0.0625rem solid rgba(0, 0, 0, 0.1);
   border-radius: 6.25rem;
   box-shadow: 2px 2px 4px 0 rgba(0, 0, 0, 0.05) inset;
-  background-color: var(--colour-neutral-lower);
+  background-color: var(--colour-surface-lower);
   font-weight: 600;
   font-size: 0.8125rem;
   line-height: 150%;
@@ -357,7 +357,7 @@ watch(
 }
 .selected {
   background-color: var(--colour-ti-secondary);
-  color: var(--colour-neutral-base);
+  color: var(--colour-surface-base);
 }
 .required {
   color: var(--colour-ti-critical);
@@ -366,7 +366,7 @@ watch(
   cursor: default;
 }
 .selected.disabled {
-  background-color: var(--colour-neutral-border);
+  background-color: var(--colour-surface-border);
   border-color: var(--colour-ti-muted);
   color: var(--colour-ti-muted);
 }

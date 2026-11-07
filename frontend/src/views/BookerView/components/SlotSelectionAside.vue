@@ -189,9 +189,9 @@ aside {
   display: flex;
   flex-direction: column;
   padding: 1.5rem 1rem;
-  border: 1px solid var(--colour-neutral-border);
+  border: 1px solid var(--colour-surface-border);
   border-radius: 24px;
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   font-family: Inter, sans-serif;
 
   h3 {
@@ -206,9 +206,9 @@ aside {
     justify-content: center;
     gap: 1rem;
     padding: 1rem 1.5rem;
-    border: 1px solid var(--colour-neutral-border);
+    border: 1px solid var(--colour-surface-border);
     border-radius: 4px;
-    background-color: var(--colour-neutral-lower);
+    background-color: var(--colour-surface-lower);
     margin-block-end: 1.5rem;
 
     &.empty {
@@ -292,8 +292,8 @@ aside {
     margin-block: 1rem;
     border-radius: 0.25rem;
     padding: 0.5rem;
-    background-color: var(--colour-danger-soft);
-    color: var(--colour-danger-default);
+    background-color: var(--colour-critical-soft);
+    color: var(--colour-critical-default);
   }
 
   .booking-request-error {

@@ -154,7 +154,7 @@ function onKeyDown(event: KeyboardEvent) {
   color: var(--colour-ti-secondary);
 
   &:focus-visible {
-    outline: 2px solid var(--colour-primary);
+    outline: 2px solid var(--colour-primary-default);
     outline-offset: 2px;
     border-radius: 8px;
   }
@@ -171,7 +171,7 @@ function onKeyDown(event: KeyboardEvent) {
     }
 
     &:focus-visible {
-      outline: 2px solid var(--colour-primary);
+      outline: 2px solid var(--colour-primary-default);
       outline-offset: 2px;
     }
   }

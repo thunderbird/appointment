@@ -1,6 +1,6 @@
 {
   "name": "thunderbird-appointment",
-  "version": "1.9.1",
+  "version": "1.9.3",
   "private": true,
   "license": "MPL-2.0",
   "scripts": {
@@ -17,7 +17,7 @@
     "@rushstack/eslint-patch": "1.11.0",
     "@sentry/vite-plugin": "4.9.1",
     "@sentry/vue": "10.38.0",
-    "@thunderbirdops/services-ui": "1.7.0",
+    "@thunderbirdops/services-ui": "2.0.1",
     "@types/ua-parser-js": "0.7.39",
     "@vitejs/plugin-vue": "6.0.7",
     "@vueuse/components": "14.2.0",
@@ -28,9 +28,9 @@
     "pinia": "3.0.4",
     "posthog-js": "1.415.5",
     "ua-parser-js": "2.0.10",
-    "vite": "8.0.16",
+    "vite": "8.1.6",
     "vue": "3.5.41",
-    "vue-i18n": "11.1.10",
+    "vue-i18n": "11.4.14",
     "vue-router": "5.0.2"
   },
   "devDependencies": {
@@ -58,7 +58,7 @@
     "typescript": "5.5.3",
     "typescript-eslint": "8.66.0",
     "vite-plugin-eslint": "1.8.1",
-    "vitest": "4.1.11"
+    "vitest": "4.1.12"
   },
   "postcss": {
     "plugins": {

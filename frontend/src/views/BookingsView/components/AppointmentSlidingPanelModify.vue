@@ -185,7 +185,7 @@ defineExpose({
       </div>
       <div class="confirmation-button-container">
         <primary-button
-          variant="outline"
+          outline
           data-testid="appointment-modal-modify-close-btn"
           @click="emit('close')"
           :title="t('label.close')"
@@ -211,7 +211,7 @@ defineExpose({
         <p class="confirmation-text">{{ t('info.bookingModifiedSuccess') }}</p>
       </div>
       <primary-button
-        variant="outline"
+        outline
         data-testid="appointment-modal-modify-close-btn"
         @click="emit('close')"
         :title="t('label.close')"

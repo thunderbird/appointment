@@ -134,7 +134,7 @@ section {
       justify-content: center;
       min-height: 100vh;
       flex: 1;
-      background-color: var(--colour-neutral-base);
+      background-color: var(--colour-surface-base);
     }
 
     .panel {
@@ -195,7 +195,7 @@ section {
       min-height: 720px;
       border-radius: 2rem;
       align-items: initial;
-      border: 0.0625rem solid var(--colour-neutral-border-intense);
+      border: 0.0625rem solid var(--colour-surface-border-intense);
 
       .left-side {
         background-color: unset;

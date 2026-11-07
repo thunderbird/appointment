@@ -14,7 +14,7 @@ import { PLAYWRIGHT_TAG_DEPLOYMENT_ANALYSIS } from '../const/constants';
  * settings mutation (it does not use auth.desktop.setup or @stage-sanity).
  *
  * Env consumed (via ../const/constants -> process.env, i.e. test/e2e .env):
- *   APPT_URL          public edge, e.g. https://appointment.tb-dev.thunderbird.dev/ (trailing slash).
+ *   APPT_URL          public edge, e.g. https://appointment.main.dev-thundermail.com/ (trailing slash).
  *   APPT_TARGET_ENV   any value other than the literal `dev` (drives the OIDC path).
  *   TB_ACCTS_EMAIL / TB_ACCTS_PWORD   tbpro test-user creds (TBAcctsPage.signIn).
  */

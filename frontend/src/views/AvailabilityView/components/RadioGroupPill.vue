@@ -44,7 +44,7 @@ legend {
 .pill-container {
   display: inline-flex;
   overflow: hidden;
-  border: 1px solid var(--colour-apmt-primary);
+  border: 1px solid var(--colour-primary-default);
   border-radius: 999px;
 
   &:has(input[type='radio']:disabled) {
@@ -61,7 +61,7 @@ legend {
 
   input[type='radio'] {
     transition: none;
-    color: var(--colour-apmt-soft);
+    color: var(--colour-primary-soft);
     width: 0.5rem;
     height: 0.5rem;
   }
@@ -73,7 +73,7 @@ legend {
   }
 
   &:not(:last-child) {
-    border-inline-end: 1px solid var(--colour-apmt-primary);
+    border-inline-end: 1px solid var(--colour-primary-default);
 
     &:has(input[type='radio']:disabled) {
       border-inline-end: 1px solid var(--colour-ti-muted);
@@ -81,13 +81,13 @@ legend {
   }
 
   &:has(input[type='radio']:checked) {
-    background-color: var(--colour-apmt-primary);
-    color: var(--colour-neutral-base);
+    background-color: var(--colour-primary-default);
+    color: var(--colour-surface-base);
   }
 
   &:has(input[type='radio']:checked)&:has(input[type='radio']:disabled) {
     background-color: var(--colour-ti-muted);
-    color: var(--colour-neutral-base);
+    color: var(--colour-surface-base);
   }
 }
 </style>

@@ -50,7 +50,7 @@ export default {
   gap: 0.5rem;
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
-  background-color: var(--colour-neutral-base);
+  background-color: var(--colour-surface-base);
   border: 1px solid transparent;
   box-shadow: 0.1875rem 0.1875rem 1rem 0 var(--shadow-surface-default);
   height: 3rem;
@@ -65,7 +65,7 @@ export default {
 
   &:hover {
     background-color: var(--colour-primary-soft);
-    border-color: var(--colour-neutral-border);
+    border-color: var(--colour-surface-border);
     box-shadow:
       0.0625rem 0.0625rem 0 0 var(--shadow-surface-interactive-outer),
       inset 0.125rem 0.125rem 0.25rem 0 var(--shadow-surface-interactive-inset);
@@ -77,13 +77,13 @@ export default {
     }
 
     .warning-icon {
-      color: var(--colour-danger-default);
+      color: var(--colour-critical-default);
     }
   }
 
   &:focus-visible {
     background-color: var(--colour-primary-soft);
-    border-color: var(--colour-neutral-border);
+    border-color: var(--colour-surface-border);
     box-shadow:
       0.0625rem 0.0625rem 0 0 var(--shadow-surface-interactive-outer),
       inset 0.125rem 0.125rem 0.25rem 0 var(--shadow-surface-interactive-inset);
@@ -92,20 +92,20 @@ export default {
     outline-offset: 0.125rem;
 
     .warning-icon {
-      color: var(--colour-danger-default);
+      color: var(--colour-critical-default);
     }
   }
 
   &:active {
     background-color: color-mix(in srgb, var(--colour-primary-default) 20%, transparent);
-    border-color: var(--colour-neutral-border);
+    border-color: var(--colour-surface-border);
     box-shadow:
       0.0625rem 0.0625rem 0 0 var(--shadow-surface-interactive-outer),
       inset 0.125rem 0.125rem 0.25rem 0 var(--shadow-surface-interactive-inset);
     color: var(--colour-ti-base);
 
     .warning-icon {
-      color: var(--colour-danger-default);
+      color: var(--colour-critical-default);
     }
   }
 
@@ -120,7 +120,7 @@ export default {
   }
 
   .warning-icon {
-    color: var(--colour-danger-default);
+    color: var(--colour-critical-default);
     width: 1.5rem;
     height: 1.5rem;
     flex-shrink: 0;
