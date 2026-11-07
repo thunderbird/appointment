@@ -5,18 +5,7 @@ settings:
   excludeLinksFromLockfile: false
 
 overrides:
-  uuid: 11.1.1
-  js-yaml@3: 3.15.2
-  js-yaml@4: 4.3.2
-  http-cache-semantics@<4.3.0: ^4.3.0
-  '@grpc/grpc-js@<1.13.6': ^1.13.6
-  ip-address@<10.7.1: ^10.7.1
-  fast-uri@<3.1.9: ^3.1.9
-  brace-expansion@>=2.0.0 <2.1.7: ^2.1.7
-  protobufjs@>=7.0.0 <7.6.5: ^7.6.5
-  qs@<6.16.1: ^6.16.1
   basic-ftp@<6.2.1: ^6.2.1
-  follow-redirects@<1.16.2: ^1.16.2
 
 importers:
 
@@ -148,7 +137,7 @@ packages:
   '@grpc/reflection@1.0.4':
     resolution: {integrity: sha512-znA8v4AviOD3OPOxy11pxrtP8k8DanpefeTymS8iGW1fVr1U2cHuzfhYqDPHnVNDf4qvF9E25KtSihPy2DBWfQ==}
     peerDependencies:
-      '@grpc/grpc-js': ^1.13.6
+      '@grpc/grpc-js': ^1.8.21
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -1013,8 +1002,8 @@ packages:
     resolution: {integrity: sha512-7PnF4oN3CvZF23ADhA5wRaYEQpJ8qygSkbtTXWBeXWXmEVRXK+1ITciHWwHhsjv1TmW0MgacIv6hEi5pX5NQdA==}
     engines: {node: '>=10'}
 
-  ip-address@10.7.3:
-    resolution: {integrity: sha512-A1kdq/tSb5QjvKvAMgIoEvDBIgL7qaqVP/jkvSwYYRZ9iEzvPpopxp2wQfu3SuZRHtpHNxMn8Fs0bS+gf5Xmwg==}
+  ip-address@10.7.5:
+    resolution: {integrity: sha512-t2v0rkILYv9WXmSL7TpAaU3HXgaFYOPUcH3QHgwQ++gpJuH3bqyMy4Fvt/DJCTKwzH3Cf+bAp5W/mFL39KPLzA==}
     engines: {node: '>= 12'}
 
   is-ci@3.0.1:
@@ -1079,7 +1068,7 @@ packages:
   js-yaml-js-types@1.0.1:
     resolution: {integrity: sha512-5tpfyORs8OQ43alNERbWfYRCtWgykvzYgY46fUhrQi2+kS7N0NuuFYLZ/IrfmVm5muLTndeMublgraXiFRjEPw==}
     peerDependencies:
-      js-yaml: 4.3.2
+      js-yaml: 4.x
 
   js-yaml@4.3.2:
     resolution: {integrity: sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==}
@@ -2993,7 +2982,7 @@ snapshots:
 
   ini@2.0.0: {}
 
-  ip-address@10.7.3: {}
+  ip-address@10.7.5: {}
 
   is-ci@3.0.1:
     dependencies:
@@ -3491,7 +3480,7 @@ snapshots:
 
   socks@2.8.9:
     dependencies:
-      ip-address: 10.7.3
+      ip-address: 10.7.5
       smart-buffer: 4.2.0
 
   source-map@0.6.1:
