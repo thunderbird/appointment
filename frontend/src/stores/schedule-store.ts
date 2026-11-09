@@ -274,6 +274,7 @@ export const useScheduleStore = defineStore('schedules', () => {
     // Handle custom start of week setting
     const user = useUserStore();
     const startOfWeek = user.data.settings.startOfWeek ?? 7;
+    const userTz = user.data.settings.timezone ?? dj.tz.guess();
 
     const d = date.minute(0).second(0).millisecond(0);
 
@@ -295,7 +296,8 @@ export const useScheduleStore = defineStore('schedules', () => {
         while (pointer.isBefore(end)) {
           slots.push({
             id: null,
-            start: pointer,
+            // Hours are already in the user's timezone, so keep the local time and only set the timezone
+            start: pointer.tz(userTz, true),
             duration: s.slot_duration,
             attendee_id: null,
           });
