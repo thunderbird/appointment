@@ -109,6 +109,15 @@ describe('Schedule Store', () => {
     expect(slots[0].start.toISOString()).toBe('2026-11-09T09:00:00.000Z');
   });
 
+  test('time to frontend time during DST change', () => {
+    const user = useUserStore();
+    user.data.settings.timezone = 'Europe/London';
+    const store = createScheduleStore(createFetch({ baseUrl: API_URL }));
+
+    // 02:30 doesn't exist in America/Vancouver (system timezone in tests) on this day due to the DST change
+    expect(store.timeToFrontendTime('02:30', '2026-03-08T00:00:00')).toBe('02:30');
+  });
+
   test('reset', async () => {
     const store = createScheduleStore(createFetch({ baseUrl: API_URL }));
     await store.fetch();

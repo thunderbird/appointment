@@ -117,7 +117,7 @@ describe('Appointment Store', () => {
     user.data.settings.timezone = 'America/Vancouver';
     const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
     await apmt.fetch();
-    expect(apmt.appointments[0].slots[0].start.toISOString()).toBe('2024-02-01T01:00:00.000Z');
+    expect(apmt.appointments[0].slots[0].start.toISOString()).toBe('2024-02-01T09:00:00.000Z');
   });
 
   test('reset', async () => {

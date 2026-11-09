@@ -142,7 +142,7 @@ export const useScheduleStore = defineStore('schedules', () => {
         } else if (err.type === 'end_time_before_start_time') {
           // TODO: Re-work how we do custom pydantic errors...
           // This is extremely specific because of locale and timezone concerns...
-          const timeZoned = dj(err.ctx['err_value'], 'HH:mm:ss').utc(true).tz(dj.tz.guess());
+          const timeZoned = dj.utc(err.ctx['err_value'], 'HH:mm:ss').tz(dj.tz.guess());
           message = err.msg.replace('{field}', i18n.t('label.endTime'));
           message = message.replace('{value}', timeZoned.format(timeFormat()));
         } else if (err.type === 'string_too_long') {
@@ -333,8 +333,8 @@ export const useScheduleStore = defineStore('schedules', () => {
     const dateFormat = DateFormatStrings.QalendarFullDay;
     const user = useUserStore();
 
-    return dj(`${dj(baseTime).format(dateFormat)}T${time}:00`)
-      .utc(true)
+    return dj
+      .utc(`${dj.utc(baseTime).format(dateFormat)}T${time}:00`)
       .tz(user.data.settings.timezone ?? dj.tz.guess())
       .format('HH:mm');
   };
