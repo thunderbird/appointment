@@ -5,6 +5,7 @@ import { dayjsKey } from '@/keys';
 import { BaseBadge, BaseBadgeTypes } from '@thunderbirdops/services-ui';
 import type { Appointment } from '@/models';
 import { isUnconfirmed } from '@/utils';
+import { useUserStore } from '@/stores/user-store';
 
 const props = defineProps<{
   appointment: Appointment;
@@ -12,6 +13,7 @@ const props = defineProps<{
 
 const dj = inject(dayjsKey);
 const { t } = useI18n();
+const userStore = useUserStore();
 
 const appointmentItem = computed(() => {
   return {
@@ -23,7 +25,13 @@ const appointmentItem = computed(() => {
   };
 });
 
-const formattedRequestDate = computed(() => dj(appointmentItem.value.requestDate).format('L, LT'));
+// Request date is a UTC timestamp, so convert it to the user's timezone
+const formattedRequestDate = computed(() =>
+  dj(appointmentItem.value.requestDate)
+    .utc(true)
+    .tz(userStore.data.settings.timezone ?? dj.tz.guess())
+    .format('L, LT')
+);
 const formattedMeetingDate = computed(() => dj(appointmentItem.value.meetingDate).format('L, LT'));
 
 const emit = defineEmits(['select-appointment']);
