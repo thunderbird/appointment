@@ -27,8 +27,8 @@ const appointmentItem = computed(() => {
 
 // Request date is a UTC timestamp, so convert it to the user's timezone
 const formattedRequestDate = computed(() =>
-  dj(appointmentItem.value.requestDate)
-    .utc(true)
+  dj
+    .utc(appointmentItem.value.requestDate)
     .tz(userStore.data.settings.timezone ?? dj.tz.guess())
     .format('L, LT')
 );
