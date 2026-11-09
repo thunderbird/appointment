@@ -26,6 +26,7 @@ interface Props {
   selectableSlots?: Slot[];
   isLoading?: boolean;
   disabled?: boolean;
+  timezone?: string; // Timezone to display events in, defaults to the browser timezone
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -49,6 +50,11 @@ const calendarHeaderRef = ref<HTMLElement | null>(null);
 const popup = ref<EventPopupType>({ ...initialEventPopupData });
 
 const hourFormat = computed(() => timeFormat());
+
+// Displayed week boundaries in the display timezone
+const tz = computed(() => props.timezone ?? dj.tz.guess());
+const rangeStart = computed(() => dj.tz(props.activeDateRange.start, tz.value));
+const rangeEnd = computed(() => dj.tz(props.activeDateRange.end, tz.value));
 
 // Scroll sync state
 let pendingScrollSync: number | null = null;
@@ -96,8 +102,8 @@ function onRemoteEventMouseEnter(event: MouseEvent, remoteEvent) {
   const popupEvent = {
     ...remoteEvent,
     time: {
-      start: remoteEvent.start,
-      end: remoteEvent.end,
+      start: remoteEvent.all_day ? remoteEvent.start : dj(remoteEvent.start).tz(tz.value),
+      end: remoteEvent.all_day ? remoteEvent.end : dj(remoteEvent.end).tz(tz.value),
     },
     customData: {
       calendar_title: remoteEvent.calendar_title,
@@ -126,12 +132,8 @@ function calculateEventGridPosition(
   if (!slots.length) return null;
 
   // 1. Calculate grid column based on the event's position within the week
-  // Get the weekdays array to determine the correct column position
-  const { start } = props.activeDateRange;
-  const startDate = dj(start);
-
   // Find the day of the week for this event (0-6, where 0 is the first day of the week)
-  const eventDayOfWeek = eventStart.diff(startDate, 'day');
+  const eventDayOfWeek = eventStart.diff(rangeStart.value, 'day');
 
   // Safety check: ensure the event is within the displayed week range
   if (eventDayOfWeek < 0 || eventDayOfWeek > 6) {
@@ -177,21 +179,15 @@ function calculateEventGridPosition(
  * Weekdays is an array of date objects representing the current week
  */
 const weekdays = computed(() => {
-  const { start, end } = props.activeDateRange;
-
   // Access language setting to trigger recomputation when locale changes
   // The actual locale is set globally on dayjs, but we need this reactive dependency
   void userStore.data.settings.language;
 
-  // Parse the start and end dates using dayjs's automatic parsing
-  const startDate = dj(start);
-  const endDate = dj(end);
-
   const days = [] as Dayjs[];
-  let currentDate = startDate;
+  let currentDate = rangeStart.value;
 
   // Loop from the start date until it's the same as the end date, inclusive
-  while (!currentDate.isAfter(endDate, 'day')) {
+  while (!currentDate.isAfter(rangeEnd.value, 'day')) {
     days.push(currentDate);
 
     // Move to the next day
@@ -246,10 +242,9 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   const slots = timeSlotsForGrid.value;
   if (!slots.length) return [];
 
-  const { start, end } = props.activeDateRange;
   const pendingAppointmentsWithinActiveWeek = props.pendingAppointments.filter((appointment) => {
     const appointmentStart = dj(appointment.slots[0].start);
-    return appointmentStart.isBetween(start, end, 'day', '[]');
+    return appointmentStart.isBetween(rangeStart.value, rangeEnd.value, 'day', '[]');
   });
 
   return pendingAppointmentsWithinActiveWeek
@@ -285,15 +280,16 @@ const filteredRemoteEventsForGrid = computed(() => {
   const slots = timeSlotsForGrid.value;
   if (!slots.length) return [];
 
-  const { start, end } = props.activeDateRange;
   const remoteEventsWithinActiveWeek = props.events.filter(
-    (remoteEvent) => dj(remoteEvent.start).isBetween(start, end, 'day', '[]') && !remoteEvent.all_day
+    (remoteEvent) =>
+      !remoteEvent.all_day &&
+      dj(remoteEvent.start).tz(tz.value).isBetween(rangeStart.value, rangeEnd.value, 'day', '[]')
   );
 
   return remoteEventsWithinActiveWeek
     .map((remoteEvent) => {
-      const eventStart = dj(remoteEvent.start);
-      const eventEnd = dj(remoteEvent.end);
+      const eventStart = dj(remoteEvent.start).tz(tz.value);
+      const eventEnd = dj(remoteEvent.end).tz(tz.value);
 
       const gridPosition = calculateEventGridPosition(eventStart, eventEnd, slots, 2, 0);
       const hasPendingPlaceholder = filteredPendingAppointmentsForGrid.value.find(
@@ -341,7 +337,10 @@ const filteredRemoteAllDayEvents = computed(() => {
   );
 
   return weekdays.value.map((day) => {
-    return remoteAllDayEventsWithinActiveWeek.filter((remoteEvent) => dj(remoteEvent.start).isSame(day, 'day'));
+    // All-day events are timezone independent dates, so compare dates only
+    return remoteAllDayEventsWithinActiveWeek.filter(
+      (remoteEvent) => dj(remoteEvent.start).format('YYYY-MM-DD') === day.format('YYYY-MM-DD')
+    );
   });
 });
 
@@ -352,11 +351,10 @@ const filteredSelectableSlotsForGrid = computed(() => {
   const slots = timeSlotsForGrid.value;
   if (!slots.length) return [];
 
-  const { start, end } = props.activeDateRange;
   const selectableSlotsWithinActiveWeek = props.selectableSlots
     .filter((slot) => {
       const slotStart = dj(slot.start);
-      return slotStart.isBetween(start, end, 'day', '[]');
+      return slotStart.isBetween(rangeStart.value, rangeEnd.value, 'day', '[]');
     })
     .filter((slot) => slot.booking_status !== BookingStatus.Booked);
 
@@ -414,7 +412,7 @@ const blockerPlaceholderForGrid = computed(() => {
 function scrollToCurrentTime() {
   if (!calendarContainerRef.value) return;
 
-  const now = dj();
+  const now = dj().tz(tz.value);
   const currentHour = now.hour();
 
   // Find the slot that corresponds to the current hour
