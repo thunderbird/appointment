@@ -5,7 +5,7 @@ import { dayjsKey } from '@/keys';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
-import { initialEventPopupData, showEventPopup, timeFormat } from '@/utils';
+import { assignEventLanes, initialEventPopupData, showEventPopup, timeFormat } from '@/utils';
 import { Appointment, EventPopup as EventPopupType, GridElement, GridTimeSlot, RemoteEvent, Slot } from '@/models';
 import { BookingStatus, DateFormatStrings } from '@/definitions';
 import { Dayjs } from 'dayjs';
@@ -14,6 +14,7 @@ import { isDark as isDarkMode } from '@/composables/useColourScheme';
 
 // Constants for grid calculations
 const ROW_HEIGHT_PX = 60; // Matches minmax(60px, min-content) in grid-template-rows
+const MIN_EVENT_HEIGHT_REM = 1.5; // Enough for one line of text including padding, scales with font size
 
 interface Props {
   activeDateRange: {
@@ -155,9 +156,9 @@ function calculateEventGridPosition(
     durationMinutes = 24 * 60 - (startHour * 60 + startMinutes);
   }
 
-  // Height based on duration with minimum of 1.25rem (approximately 20px, 1rem for text and 0.25rem for padding)
+  // Height based on duration with a minimum height
   const calculatedHeight = (durationMinutes / 60) * ROW_HEIGHT_PX;
-  const height = `max(1.25rem, ${calculatedHeight - gap}px)`;
+  const height = `max(${MIN_EVENT_HEIGHT_REM}rem, ${calculatedHeight - gap}px)`;
 
   // Return the positioning data if the event falls within calendar hours
   if (gridRowStart >= 1 && gridRowStart <= 24) {
@@ -309,6 +310,22 @@ const filteredRemoteEventsForGrid = computed(() => {
       }
     })
     .filter(Boolean);
+});
+
+/**
+ * Maps remote events and pending appointments to a lane and total lane count, to handle time overlapping
+ */
+const eventLanes = computed(() => {
+  const events = [...filteredRemoteEventsForGrid.value, ...filteredPendingAppointmentsForGrid.value];
+  // Duration matching the minimum event height, so short events whose blocks overlap are placed side by side too
+  const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const minDuration = ((MIN_EVENT_HEIGHT_REM * remPx) / ROW_HEIGHT_PX) * 60 * 60 * 1000;
+  const lanes = assignEventLanes(
+    events.map((e) => ({ start: dj(e.start).valueOf(), end: dj(e.end).valueOf() })),
+    minDuration
+  );
+
+  return new Map(events.map((e, i) => [e, lanes[i]]));
 });
 
 /**
@@ -500,6 +517,8 @@ onMounted(() => {
           gridRowStart: remoteEvent?.gridRowStart,
           marginTop: remoteEvent?.topOffset,
           height: remoteEvent?.height,
+          '--current-lane': eventLanes.get(remoteEvent)?.currentLane,
+          '--total-lanes': eventLanes.get(remoteEvent)?.totalLanes,
         }"
         @mouseenter="(event) => onRemoteEventMouseEnter(event, remoteEvent)"
         @mouseleave="onRemoteEventMouseLeave"
@@ -519,6 +538,8 @@ onMounted(() => {
           gridRowStart: pendingAppointment?.gridRowStart,
           marginTop: pendingAppointment?.topOffset,
           height: pendingAppointment?.height,
+          '--current-lane': eventLanes.get(pendingAppointment)?.currentLane,
+          '--total-lanes': eventLanes.get(pendingAppointment)?.totalLanes,
         }"
         @mouseenter="(event) => onRemoteEventMouseEnter(event, pendingAppointment)"
         @mouseleave="onRemoteEventMouseLeave"
@@ -761,6 +782,14 @@ onMounted(() => {
 
 .remote-event {
   z-index: 4;
+}
+
+/* Place overlapping events side by side in lanes with a 2px gap, single events keep the full 95% width */
+.remote-event,
+.pending-appointment {
+  width: calc((95% + 2px) / var(--total-lanes, 1) - 2px);
+  min-width: 0;
+  margin-inline-start: calc((95% + 2px) / var(--total-lanes, 1) * var(--current-lane, 0));
 }
 
 .selectable-slot {
