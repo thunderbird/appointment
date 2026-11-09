@@ -23,7 +23,7 @@
     "@vueuse/components": "14.2.0",
     "@vueuse/core": "14.2.0",
     "core-js": "3.8.3",
-    "dayjs": "1.11.5",
+    "dayjs": "1.11.23",
     "oidc-client-ts": "3.3.0",
     "pinia": "3.0.4",
     "posthog-js": "1.415.5",
