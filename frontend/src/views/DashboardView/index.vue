@@ -94,6 +94,7 @@ export default {
           :selectable-slots="selectableSlots"
           :is-loading="isLoading"
           :disabled="true"
+          :timezone="userStore.data.settings.timezone ?? dj.tz.guess()"
         />
       </div>
     </div>
