@@ -1,10 +1,12 @@
 import { expect, test, beforeEach, describe, beforeAll, afterAll, afterEach } from 'vitest';
 import { useScheduleStore, createScheduleStore } from '@/stores/schedule-store';
 import { createPinia } from 'pinia';
+import dayjs from 'dayjs';
 import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
 import { createFetch } from '@vueuse/core';
 import { EventLocationType, DEFAULT_SLOT_DURATION, MeetingLinkProviderType } from '@/definitions';
+import { useUserStore } from '@/stores/user-store';
 import withSetup from '../utils/with-setup';
 
 const API_URL = 'http://localhost';
@@ -93,6 +95,27 @@ describe('Schedule Store', () => {
     const store = createScheduleStore(createFetch({ baseUrl: API_URL }));
     await store.fetch();
     expect(store.activeSchedules.length).toBe(0);
+  });
+
+  test('available time slots timezone', async () => {
+    const user = useUserStore();
+    user.data.settings.timezone = 'America/Sao_Paulo';
+    const store = createScheduleStore(createFetch({ baseUrl: API_URL }));
+    await store.fetch();
+
+    // Schedule starts at 09:00 UTC, which is 06:00 in São Paulo (no DST) on the first weekday of the week
+    const slots = store.availableTimeSlots(dayjs('2026-11-10T12:00:00Z'));
+    expect(slots[0].start.hour()).toBe(6);
+    expect(slots[0].start.toISOString()).toBe('2026-11-09T09:00:00.000Z');
+  });
+
+  test('time to frontend time during DST change', () => {
+    const user = useUserStore();
+    user.data.settings.timezone = 'Europe/London';
+    const store = createScheduleStore(createFetch({ baseUrl: API_URL }));
+
+    // 02:30 doesn't exist in America/Vancouver (system timezone in tests) on this day due to the DST change
+    expect(store.timeToFrontendTime('02:30', '2026-03-08T00:00:00')).toBe('02:30');
   });
 
   test('reset', async () => {

@@ -79,9 +79,7 @@ export const useAppointmentStore = defineStore('appointments', () => {
       a.active = a.status !== BookingStatus.Booked;
       // convert start dates from UTC back to users timezone
       a.slots.forEach((s: Slot) => {
-        s.start = dj(s.start)
-          .utc(true)
-          .tz(userStore.data.settings.timezone ?? tzGuess);
+        s.start = dj.utc(s.start).tz(userStore.data.settings.timezone ?? tzGuess);
       });
     });
   };
