@@ -1,3 +1,5 @@
+import threading
+import time
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -37,6 +39,36 @@ class TestGetPosthog:
         assert first is second
         assert second is third
         posthog_class.assert_called_once_with('test-key', host='https://posthog.example.org')
+
+    def test_concurrent_first_calls_create_a_single_client(self, monkeypatch):
+        """Routes run in a threadpool, so overlapping first requests must not each create a client."""
+        monkeypatch.setenv('POSTHOG_PROJECT_KEY', 'test-key')
+        monkeypatch.setenv('POSTHOG_HOST', 'https://posthog.example.org')
+
+        thread_count = 8
+        start_together = threading.Barrier(thread_count)
+        clients = []
+
+        def slow_constructor(*args, **kwargs):
+            # Hold the constructor open long enough for every other thread to reach get_posthog()
+            time.sleep(0.1)
+            return MagicMock()
+
+        def call_get_posthog():
+            start_together.wait(timeout=5)
+            clients.append(metrics.get_posthog())
+
+        with patch.object(metrics, 'Posthog', side_effect=slow_constructor) as posthog_class:
+            threads = [threading.Thread(target=call_get_posthog) for _ in range(thread_count)]
+            for thread in threads:
+                thread.start()
+            for thread in threads:
+                thread.join(timeout=5)
+
+        assert len(clients) == thread_count
+        assert clients[0] is not None
+        assert all(client is clients[0] for client in clients)
+        posthog_class.assert_called_once()
 
     def test_client_is_disabled_in_test_env(self, monkeypatch):
         monkeypatch.setenv('POSTHOG_PROJECT_KEY', 'test-key')
