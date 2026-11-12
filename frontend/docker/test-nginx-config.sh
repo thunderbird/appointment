@@ -18,16 +18,17 @@
 # WRONG OR LEAKED `Cache-Control` value on a path that still returns 200. Those
 # promote green -- that is what this script exists to catch.
 #
-# Runs the shipped conf in a stock nginx image over a SYNTHETIC dist tree (no
+# Runs the shipped conf in the unprivileged nginx image (the deploy.dockerfile
+# runtime base) over a SYNTHETIC dist tree (no
 # npm build, no registry auth, no AWS creds -- ~20s). It tests location matching
 # and headers, not the real bundle.
 #
 # Usage: frontend/docker/test-nginx-config.sh
-# Env:   NGINX_IMAGE (default docker.io/library/nginx:stable), PORT (default 18150)
+# Env:   NGINX_IMAGE (default docker.io/nginxinc/nginx-unprivileged:stable), PORT (default 18150)
 
 set -euo pipefail
 
-NGINX_IMAGE="${NGINX_IMAGE:-docker.io/library/nginx:stable}"
+NGINX_IMAGE="${NGINX_IMAGE:-docker.io/nginxinc/nginx-unprivileged:stable}"
 PORT="${PORT:-18150}"
 NAME="appt-nginx-conftest-$$"
 
@@ -77,10 +78,14 @@ printf '<svg xmlns="http://www.w3.org/2000/svg"></svg>\n' > "$TMP/html/favicon.s
 printf '{"name":"appt"}\n' > "$TMP/html/site.webmanifest"
 printf 'https://example.invalid/\n' > "$TMP/html/sitemap.txt"
 
+# The image runs as uid 101, so the fixture tree must be world-readable (mktemp
+# -d creates it 0700).
+chmod -R a+rX "$TMP"
+
 # conf.d mounted rw: the stock entrypoint's 10-listen-on-ipv6 script edits it.
 # Mounting the whole dir also removes the stock default.conf, avoiding a
-# duplicate :80 default_server.
-"$ENGINE" run -d --name "$NAME" -p "127.0.0.1:${PORT}:80" \
+# duplicate :8080 default_server.
+"$ENGINE" run -d --name "$NAME" -p "127.0.0.1:${PORT}:8080" \
   -v "$TMP/conf:/etc/nginx/conf.d:z" \
   -v "$TMP/html:/usr/share/nginx/html:ro,z" \
   "$NGINX_IMAGE" >/dev/null
