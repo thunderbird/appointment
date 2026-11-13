@@ -42,7 +42,13 @@ platforms:
     deviceName: iPhone 17
     playwrightConfigOptions:
       name: ios-safari
-  
+
+  - browserName: chrome
+    osVersion: 17.0
+    deviceName: Samsung Galaxy Tab S12 Plus
+    playwrightConfigOptions:
+      name: android-galaxy-tab
+
 # =======================
 # Parallels per Platform
 # =======================

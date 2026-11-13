@@ -9,3 +9,4 @@ node_modules/
 
 # BrowserStack logging
 /log
+browserstackSetupConfig.json
