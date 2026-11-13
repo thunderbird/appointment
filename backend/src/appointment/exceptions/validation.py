@@ -181,6 +181,16 @@ class ScheduleSlugTakenException(APIException):
         return l10n('schedule-slug-taken')
 
 
+class ScheduleAlreadyExistsException(APIException):
+    """Raise when a subscriber tries to create a schedule but already has one."""
+
+    id_code = 'SCHEDULE_ALREADY_EXISTS'
+    status_code = 400
+
+    def get_msg(self):
+        return l10n('schedule-already-exists')
+
+
 class InvalidAvailabilityException(APIException):
     """Raise when any custom availability is invalid, e.g. start time after end time."""
 

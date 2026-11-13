@@ -36,6 +36,7 @@ account-delete-fail = There was a problem deleting your data. This incident has 
 protected-route-fail = No valid authentication credentials provided.
 username-not-available = This username has already been taken.
 schedule-slug-taken = This link slug is already in use. Please choose a different one.
+schedule-already-exists = You already have a booking page. Multiple booking pages are currently not supported.
 invalid-link = This link is no longer valid.
 calendar-sync-fail = An error occurred while syncing calendars. Please try again later.
 calendar-not-active = The calendar connection is not active.
