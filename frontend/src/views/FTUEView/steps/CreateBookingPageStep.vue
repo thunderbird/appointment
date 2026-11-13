@@ -34,7 +34,8 @@ const errorMessage = ref(null);
 const formRef = useTemplateRef('formRef');
 
 const isContinueButtonDisabled = computed(
-  () => !bookingPageTitle.value?.trim() || !calendarForNewAppointments.value || isLoading.value
+  () =>
+    !bookingPageTitle.value?.trim() || !calendarForNewAppointments.value || isLoading.value || !scheduleStore.isLoaded
 );
 
 const calendarOptions = computed<SelectOption[]>(() =>
@@ -49,7 +50,7 @@ const onBackButtonClick = () => {
 };
 
 const onContinueButtonClick = async () => {
-  if (!formRef.value.checkValidity()) {
+  if (!formRef.value.checkValidity() || isContinueButtonDisabled.value) {
     return;
   }
 
@@ -75,7 +76,15 @@ const onContinueButtonClick = async () => {
       timezone: user.data.settings.timezone,
     };
 
-    const data = await scheduleStore.createSchedule(payload);
+    // Update the existing schedule if the user returns to this step. Only one schedule is supported for now.
+    const { firstSchedule } = scheduleStore;
+    const data = firstSchedule
+      ? await scheduleStore.updateSchedule(firstSchedule.id, {
+          ...firstSchedule,
+          name: bookingPageTitle.value,
+          calendar_id: calendarForNewAppointments.value,
+        })
+      : await scheduleStore.createSchedule(payload);
 
     if (Object.prototype.hasOwnProperty.call(data, 'error')) {
       errorMessage.value = (data as unknown as Error)?.message ?? t('error.somethingWentWrong');
@@ -99,6 +108,17 @@ watch(calendars, (newCalendars) => {
     calendarForNewAppointments.value = newCalendars[0].id;
   }
 });
+
+watch(
+  () => scheduleStore.firstSchedule,
+  (schedule) => {
+    // Fill the form from the existing schedule, which might load after first render (e.g. on page reload)
+    if (schedule) {
+      bookingPageTitle.value = schedule.name;
+      calendarForNewAppointments.value = schedule.calendar_id;
+    }
+  }
+);
 
 onMounted(async () => {
   // Force re-fetch calendars to ensure we have the latest data

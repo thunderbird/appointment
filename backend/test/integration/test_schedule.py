@@ -221,21 +221,24 @@ class TestSchedule:
         data = response.json()
         assert data['detail']['id'] == 'SCHEDULE_SLUG_TAKEN'
 
-    def test_create_schedule_rejects_duplicate_slug(
-        self, with_client, make_caldav_calendar, make_schedule, schedule_input
+    def test_create_schedule_rejects_second_schedule(
+        self, with_client, with_db, make_caldav_calendar, make_schedule, schedule_input
     ):
         calendar = make_caldav_calendar(connected=True)
-        make_schedule(slug='my-booking', calendar_id=calendar.id)
+        make_schedule(calendar_id=calendar.id)
 
         response = with_client.post(
             '/schedule',
-            json={'calendar_id': calendar.id, 'slug': 'my-booking', **schedule_input},
+            json={'calendar_id': calendar.id, **schedule_input},
             headers=auth_headers,
         )
 
         assert response.status_code == 400, response.text
         data = response.json()
-        assert data['detail']['id'] == 'SCHEDULE_SLUG_TAKEN'
+        assert data['detail']['id'] == 'SCHEDULE_ALREADY_EXISTS'
+
+        with with_db() as db:
+            assert len(repo.schedule.get_by_subscriber(db, TEST_USER_ID)) == 1
 
     def test_update_schedule_allows_slug_used_by_other_owner(
         self,
