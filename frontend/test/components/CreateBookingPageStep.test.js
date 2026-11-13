@@ -38,7 +38,10 @@ describe('CreateBookingPageStep', () => {
     });
 
   const clickContinue = async () => {
-    await wrapper.findAll('button').find((b) => b.text() === 'Continue').trigger('click');
+    await wrapper
+      .findAll('button')
+      .find((b) => b.text() === 'Continue')
+      .trigger('click');
     await flushPromises();
   };
 
@@ -51,7 +54,10 @@ describe('CreateBookingPageStep', () => {
     user.data.settings.timezone = 'UTC';
 
     const calendarStore = useCalendarStore();
-    calendarStore.calendars = [{ id: 1, title: 'Cal', connected: true }, { id: 2, title: 'Other', connected: true }];
+    calendarStore.calendars = [
+      { id: 1, title: 'Cal', connected: true },
+      { id: 2, title: 'Other', connected: true },
+    ];
     vi.spyOn(calendarStore, 'fetch').mockResolvedValue();
     vi.spyOn(calendarStore, 'connectCalendar').mockResolvedValue();
 
@@ -61,6 +67,7 @@ describe('CreateBookingPageStep', () => {
     scheduleStore = useScheduleStore();
     vi.spyOn(scheduleStore, 'createSchedule').mockResolvedValue({});
     vi.spyOn(scheduleStore, 'updateSchedule').mockResolvedValue({});
+    scheduleStore.isLoaded = true;
   });
 
   afterEach(() => {
@@ -91,5 +98,24 @@ describe('CreateBookingPageStep', () => {
       name: 'New booking page',
     });
     expect(ftueStore.moveToStep).toHaveBeenCalledWith(FtueStep.SetAvailability);
+  });
+
+  it('waits for the schedule to load and keeps its values, e.g. after a page reload', async () => {
+    const scheduleOnSecondCalendar = { ...existingSchedule, calendar_id: 2 };
+    scheduleStore.isLoaded = false;
+
+    wrapper = mountStep();
+    await clickContinue();
+    expect(scheduleStore.createSchedule).not.toHaveBeenCalled();
+    expect(scheduleStore.updateSchedule).not.toHaveBeenCalled();
+
+    // Schedules finish loading after the first render
+    scheduleStore.schedules = [scheduleOnSecondCalendar];
+    scheduleStore.isLoaded = true;
+    await flushPromises();
+    await clickContinue();
+
+    expect(scheduleStore.createSchedule).not.toHaveBeenCalled();
+    expect(scheduleStore.updateSchedule).toHaveBeenCalledWith(scheduleOnSecondCalendar.id, scheduleOnSecondCalendar);
   });
 });
