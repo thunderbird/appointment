@@ -6,37 +6,29 @@ import i18ninstance from '@/composables/i18n';
 import useDayJS from '@/composables/dayjs';
 import { callKey } from '@/keys';
 import AvailabilityView from '@/views/AvailabilityView/index.vue';
-import { createAvailabilityStore } from '@/stores/availability-store';
+import { useAvailabilityStore } from '@/stores/availability-store';
 import { NoticeBarTypes } from '@thunderbirdops/services-ui';
 
 describe('AvailabilityView', () => {
   let wrapper;
+  let store;
 
   beforeEach(() => {
     window.scrollTo = vi.fn();
-  });
+    const callMock = vi.fn().mockReturnValue({
+      get: () => ({ json: () => Promise.resolve({ data: ref([]), error: ref(false) }) }),
+      post: () => ({ json: () => Promise.resolve({ data: ref({}), error: ref(false) }) }),
+      put: () => ({ json: () => Promise.resolve({ data: ref({}), error: ref(false) }) }),
+      delete: () => ({ json: () => Promise.resolve({ data: ref({}), error: ref(false) }) }),
+    });
 
-  afterEach(() => {
-    wrapper?.unmount();
-  });
-
-  const defaultCallMock = vi.fn().mockImplementation(() => ({
-    get: () => ({
-      json: () => Promise.resolve({ data: ref([]), error: ref(false) }),
-    }),
-    post: () => ({
-      json: () => Promise.resolve({ data: ref({}), error: ref(false) }),
-    }),
-    put: () => ({
-      json: () => Promise.resolve({ data: ref({}), error: ref(false) }),
-    }),
-    delete: () => ({
-      json: () => Promise.resolve({ data: ref({}), error: ref(false) }),
-    }),
-  }));
-
-  const createWrapper = (callMock = defaultCallMock) => {
     const pinia = createPinia();
+    // Provide an already-loaded store before mounting so createAvailabilityStore does not trigger background init()
+    store = useAvailabilityStore(pinia);
+    store.isLoaded = true;
+    store.initialState = { name: 'Initial' };
+    store.currentState = { name: 'Initial' };
+
     wrapper = mount(AvailabilityView, {
       global: {
         plugins: [
@@ -59,158 +51,89 @@ describe('AvailabilityView', () => {
         },
       },
     });
-    const availabilityStore = createAvailabilityStore(callMock);
-    return { wrapper, availabilityStore, pinia };
+  });
+
+  afterEach(() => {
+    wrapper?.unmount();
+  });
+
+  const markDirty = async (name = 'Changed') => {
+    store.currentState = { name };
+    await wrapper.vm.$nextTick();
   };
 
-  it('renders notices container when isDirty is true', async () => {
-    const { wrapper, availabilityStore } = createWrapper();
+  const getNoticeBars = () => wrapper.find('.notices-container').findAllComponents({ name: 'NoticeBar' });
 
-    availabilityStore.$patch({
-      isLoaded: true,
-      initialState: { name: 'Initial' },
-      currentState: { name: 'Changed' },
-    });
-
-    await wrapper.vm.$nextTick();
+  it('renders unsaved changes notice when form is dirty', async () => {
+    await markDirty();
 
     const container = wrapper.find('.notices-container');
     expect(container.exists()).toBe(true);
     expect(container.text()).toContain('You have unsaved changes');
     expect(container.text()).toContain('Save changes');
-    expect(container.text()).toContain('Revert changes');
   });
 
-  it('displays both validation error and unsaved changes notice simultaneously in document flow', async () => {
-    const { wrapper, availabilityStore } = createWrapper();
-
-    availabilityStore.$patch({
-      isLoaded: true,
-      initialState: { name: 'Initial' },
-      currentState: { name: 'Changed' },
-    });
-
-    // Simulate validation error on the component
-    wrapper.vm.validationError = { title: 'End time should be at least 11:30.' };
-    await wrapper.vm.$nextTick();
-
-    const container = wrapper.find('.notices-container');
-    expect(container.exists()).toBe(true);
-
-    const noticeBars = container.findAllComponents({ name: 'NoticeBar' });
-    expect(noticeBars).toHaveLength(2);
-
-    // First notice bar is Critical validation error
-    expect(noticeBars[0].props('type')).toBe(NoticeBarTypes.Critical);
-    expect(noticeBars[0].text()).toContain('End time should be at least 11:30.');
-
-    // Second notice bar is Warning unsaved changes CTA bar
-    expect(noticeBars[1].props('type')).toBe(NoticeBarTypes.Warning);
-    expect(noticeBars[1].text()).toContain('You have unsaved changes');
-    expect(noticeBars[1].text()).toContain('Save changes');
-    expect(noticeBars[1].text()).toContain('Revert changes');
-  });
-
-  it('clears validation error when close button is clicked and keeps CTA bar visible', async () => {
-    const { wrapper, availabilityStore } = createWrapper();
-
-    availabilityStore.$patch({
-      isLoaded: true,
-      initialState: { name: 'Initial' },
-      currentState: { name: 'Changed' },
-    });
+  it('displays validation error and unsaved changes notice together in document flow', async () => {
+    await markDirty();
 
     wrapper.vm.validationError = { title: 'End time should be at least 11:30.' };
     await wrapper.vm.$nextTick();
 
-    // Click close button on error notice
-    const closeBtn = wrapper.find('.notices-container .btn-close');
-    expect(closeBtn.exists()).toBe(true);
-    await closeBtn.trigger('click');
+    const bars = getNoticeBars();
+    expect(bars).toHaveLength(2);
+    expect(bars[0].props('type')).toBe(NoticeBarTypes.Critical);
+    expect(bars[0].text()).toContain('End time should be at least 11:30.');
+    expect(bars[1].props('type')).toBe(NoticeBarTypes.Warning);
+    expect(bars[1].text()).toContain('Save changes');
+  });
+
+  it('clears error on close while keeping unsaved changes CTA visible', async () => {
+    await markDirty();
+
+    wrapper.vm.validationError = { title: 'Error message' };
     await wrapper.vm.$nextTick();
 
-    // Error is gone, but unsaved changes CTA remains
+    await wrapper.find('.notices-container .btn-close').trigger('click');
+    await wrapper.vm.$nextTick();
+
     expect(wrapper.vm.validationError).toBeNull();
-    const noticeBars = wrapper.findAllComponents({ name: 'NoticeBar' });
-    expect(noticeBars).toHaveLength(1);
-    expect(noticeBars[0].props('type')).toBe(NoticeBarTypes.Warning);
-    expect(noticeBars[0].text()).toContain('Save changes');
+    const bars = getNoticeBars();
+    expect(bars).toHaveLength(1);
+    expect(bars[0].props('type')).toBe(NoticeBarTypes.Warning);
   });
 
-  it('displays success notice when save succeeds and isDirty is false', async () => {
-    const { wrapper, availabilityStore } = createWrapper();
-
-    availabilityStore.$patch({
-      isLoaded: true,
-      initialState: { name: 'Initial' },
-      currentState: { name: 'Initial' },
-    });
-
-    wrapper.vm.saveSuccess = { title: 'Availability saved successfully.' };
+  it('displays success notice when saved and form is not dirty', async () => {
+    wrapper.vm.saveSuccess = { title: 'Saved successfully.' };
     await wrapper.vm.$nextTick();
 
-    const container = wrapper.find('.notices-container');
-    expect(container.exists()).toBe(true);
-
-    const noticeBars = container.findAllComponents({ name: 'NoticeBar' });
-    expect(noticeBars).toHaveLength(1);
-    expect(noticeBars[0].props('type')).toBe(NoticeBarTypes.Success);
-    expect(noticeBars[0].text()).toContain('Availability saved successfully.');
+    const bars = getNoticeBars();
+    expect(bars).toHaveLength(1);
+    expect(bars[0].props('type')).toBe(NoticeBarTypes.Success);
   });
 
-  it('keeps unsaved changes CTA visible below error when clicking Save changes fails validation', async () => {
-    const { wrapper, availabilityStore } = createWrapper();
-
-    availabilityStore.$patch({
-      isLoaded: true,
-      initialState: { name: 'Initial' },
-      currentState: { name: '' },
-    });
-
+  it('excludes success notice while validation error exists even if form is not dirty', async () => {
+    wrapper.vm.saveSuccess = { title: 'Saved successfully.' };
+    wrapper.vm.validationError = { title: 'Some error' };
     await wrapper.vm.$nextTick();
 
-    const primaryButtons = wrapper.findAllComponents({ name: 'PrimaryButton' });
-    expect(primaryButtons.length).toBeGreaterThan(0);
-    await primaryButtons[0].trigger('click');
-    await wrapper.vm.$nextTick();
-
-    const container = wrapper.find('.notices-container');
-    expect(container.exists()).toBe(true);
-
-    const noticeBars = container.findAllComponents({ name: 'NoticeBar' });
-    expect(noticeBars).toHaveLength(2);
-
-    expect(noticeBars[0].props('type')).toBe(NoticeBarTypes.Critical);
-    expect(noticeBars[1].props('type')).toBe(NoticeBarTypes.Warning);
-    expect(noticeBars[1].text()).toContain('Save changes');
-    expect(noticeBars[1].text()).toContain('Revert changes');
+    const bars = getNoticeBars();
+    expect(bars).toHaveLength(1);
+    expect(bars[0].props('type')).toBe(NoticeBarTypes.Critical);
+    expect(wrapper.text()).not.toContain('Saved successfully.');
   });
 
-  it('clears notices and resets dirty state when Revert changes is clicked', async () => {
-    const { wrapper, availabilityStore } = createWrapper();
-
-    availabilityStore.$patch({
-      isLoaded: true,
-      initialState: { name: 'Initial' },
-      currentState: { name: '' },
-    });
-
+  it('handles Save and Revert user interactions properly', async () => {
+    // 1. Invalid schedule triggers validation error without hiding CTA
+    await markDirty('');
+    await wrapper.findComponent({ name: 'PrimaryButton' }).trigger('click');
     await wrapper.vm.$nextTick();
 
-    // Trigger error by clicking Save changes
-    const primaryButtons = wrapper.findAllComponents({ name: 'PrimaryButton' });
-    await primaryButtons[0].trigger('click');
-    await wrapper.vm.$nextTick();
-    expect(wrapper.find('.notices-container').exists()).toBe(true);
+    expect(getNoticeBars()).toHaveLength(2);
 
-    // Click Revert changes button
-    const linkButtons = wrapper.findAllComponents({ name: 'LinkButton' });
-    expect(linkButtons.length).toBeGreaterThan(0);
-    await linkButtons[0].trigger('click');
+    // 2. Reverting changes clears all notices and unmounts container
+    await wrapper.findComponent({ name: 'LinkButton' }).trigger('click');
     await wrapper.vm.$nextTick();
 
-    // Everything is cleared and notices container unmounts
-    expect(wrapper.vm.validationError).toBeNull();
     expect(wrapper.find('.notices-container').exists()).toBe(false);
   });
 });

@@ -66,6 +66,7 @@ async function onSaveChanges() {
   const validationErrorMessage = validateSchedule(obj);
   if (validationErrorMessage) {
     validationError.value = { title: validationErrorMessage };
+    saveSuccess.value = null;
     savingInProgress.value = false;
     window.scrollTo(0, 0);
     return;
@@ -85,6 +86,7 @@ async function onSaveChanges() {
   if (Object.prototype.hasOwnProperty.call(response, 'error')) {
     // error message is in data
     validationError.value = { title: (response as unknown as Error).message };
+    saveSuccess.value = null;
 
     // go back to the start
     savingInProgress.value = false;
@@ -136,7 +138,7 @@ export default {
       {{ t('label.availability') }}
     </h1>
 
-    <div v-if="validationError || isDirty || saveSuccess" class="notices-container">
+    <div v-if="validationError || isDirty || (saveSuccess && !validationError)" class="notices-container">
       <notice-bar v-if="validationError" :type="NoticeBarTypes.Critical" class="notice-bar">
         {{ validationError.title }}
 
@@ -160,7 +162,7 @@ export default {
         </template>
       </notice-bar>
 
-      <notice-bar v-else-if="saveSuccess" :type="NoticeBarTypes.Success" class="notice-bar">
+      <notice-bar v-else-if="saveSuccess && !validationError" :type="NoticeBarTypes.Success" class="notice-bar">
         {{ saveSuccess.title }}
 
         <template #cta>
