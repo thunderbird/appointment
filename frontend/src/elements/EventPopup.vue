@@ -45,6 +45,7 @@ const eventDateTime = computed(() => {
     :class="{
       'position-left': position === 'left',
       'position-top': position === 'top',
+      'remote-event-popup': event?.customData?.is_remote,
     }"
   >
     <div
@@ -65,7 +66,7 @@ const eventDateTime = computed(() => {
         <ph-calendar-blank class="detail-icon" />
         {{ event?.customData?.calendar_title }}
       </div>
-      <div v-if="event?.customData?.attendee" class="event-detail">
+      <div v-if="!event?.customData?.is_remote && event?.customData?.attendee" class="event-detail">
         <ph-users class="detail-icon" />
         {{ t('label.guest', { count: 1 }) }}
       </div>
@@ -92,6 +93,16 @@ const eventDateTime = computed(() => {
 
   &.position-top {
     transform: translateX(-50%) translateY(-100%);
+  }
+
+  &.remote-event-popup {
+    .event-title {
+      color: var(--colour-ti-base);
+    }
+
+    .detail-icon {
+      color: var(--colour-ti-secondary);
+    }
   }
 }
 

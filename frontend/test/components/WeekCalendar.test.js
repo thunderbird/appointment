@@ -72,4 +72,50 @@ describe('WeekCalendar', () => {
 
     expect(gridPosition(wrapper.get('.remote-event'))).toEqual({ column: '7', row: '3' });
   });
+
+  it('displays "Busy" for remote events and all-day remote events, but retains title for pending appointments', () => {
+    wrapper = mount(
+      WeekCalendar,
+      getMountOptions({
+        events: [
+          { title: 'Personal Dentist', start: '2026-11-10T09:00:00+00:00', end: '2026-11-10T10:00:00+00:00' },
+          { title: 'Holiday', start: '2026-11-10', end: '2026-11-10', all_day: true },
+        ],
+        pendingAppointments: [
+          {
+            id: 1,
+            title: 'Consultation Call',
+            duration: 30,
+            slots: [{ start: dayjs('2026-11-10T14:00:00Z').tz('Europe/London'), duration: 30 }],
+          },
+        ],
+      })
+    );
+
+    expect(wrapper.get('.remote-event').text()).toBe('Busy');
+    expect(wrapper.get('.all-day-event-item').text()).toBe('Busy');
+    expect(wrapper.get('.pending-appointment').text()).toBe('Consultation Call');
+  });
+
+  it('limits popup information and applies remote-event-popup class when hovering remote events', async () => {
+    wrapper = mount(
+      WeekCalendar,
+      getMountOptions({
+        events: [
+          {
+            title: 'Private Lunch',
+            calendar_title: 'Personal Cal',
+            start: '2026-11-10T09:00:00+00:00',
+            end: '2026-11-10T10:00:00+00:00',
+          },
+        ],
+      })
+    );
+
+    await wrapper.get('.remote-event').trigger('mouseenter');
+    const popup = wrapper.find('.event-popup');
+    expect(popup.exists()).toBe(true);
+    expect(popup.classes()).toContain('remote-event-popup');
+    expect(popup.find('.event-title').text()).toBe('Busy');
+  });
 });

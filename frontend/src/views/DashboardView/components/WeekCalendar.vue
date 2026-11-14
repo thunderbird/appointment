@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, nextTick, onMounted, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { storeToRefs } from 'pinia';
 import { dayjsKey } from '@/keys';
 import { useBookingViewStore } from '@/stores/booking-view-store';
@@ -39,6 +40,7 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits(['event-selected']);
 
+const { t } = useI18n();
 const dj = inject(dayjsKey);
 
 const userStore = useUserStore();
@@ -98,9 +100,10 @@ function syncScroll(source: 'header' | 'body') {
   });
 }
 
-function onRemoteEventMouseEnter(event: MouseEvent, remoteEvent) {
+function onRemoteEventMouseEnter(event: MouseEvent, remoteEvent, isRemote = false) {
   const popupEvent = {
     ...remoteEvent,
+    title: isRemote ? t('label.busy') : remoteEvent.title,
     time: {
       start: remoteEvent.all_day ? remoteEvent.start : dj(remoteEvent.start).tz(tz.value),
       end: remoteEvent.all_day ? remoteEvent.end : dj(remoteEvent.end).tz(tz.value),
@@ -108,6 +111,7 @@ function onRemoteEventMouseEnter(event: MouseEvent, remoteEvent) {
     customData: {
       calendar_title: remoteEvent.calendar_title,
       all_day: remoteEvent.all_day,
+      is_remote: isRemote,
     },
   };
 
@@ -459,10 +463,10 @@ onMounted(() => {
             v-for="(allDayEvent, j) in filteredRemoteAllDayEvents[index]"
             :key="j"
             class="all-day-event-item"
-            @mouseenter="(event) => onRemoteEventMouseEnter(event, allDayEvent)"
+            @mouseenter="(event) => onRemoteEventMouseEnter(event, allDayEvent, true)"
             @mouseleave="onRemoteEventMouseLeave"
           >
-            {{ allDayEvent.title }}
+            {{ t('label.busy') }}
           </div>
         </div>
       </div>
@@ -518,11 +522,11 @@ onMounted(() => {
           '--current-lane': eventLanes.get(remoteEvent)?.currentLane,
           '--total-lanes': eventLanes.get(remoteEvent)?.totalLanes,
         }"
-        @mouseenter="(event) => onRemoteEventMouseEnter(event, remoteEvent)"
+        @mouseenter="(event) => onRemoteEventMouseEnter(event, remoteEvent, true)"
         @mouseleave="onRemoteEventMouseLeave"
         :data-testid="`remote-event-${dj(remoteEvent.start).format(DateFormatStrings.Qalendar)}`"
       >
-        {{ remoteEvent?.title }}
+        {{ t('label.busy') }}
       </div>
 
       <!-- Pending appointments -->
@@ -539,7 +543,7 @@ onMounted(() => {
           '--current-lane': eventLanes.get(pendingAppointment)?.currentLane,
           '--total-lanes': eventLanes.get(pendingAppointment)?.totalLanes,
         }"
-        @mouseenter="(event) => onRemoteEventMouseEnter(event, pendingAppointment)"
+        @mouseenter="(event) => onRemoteEventMouseEnter(event, pendingAppointment, false)"
         @mouseleave="onRemoteEventMouseLeave"
         :data-testid="`pending-appointment-${dj(pendingAppointment.start).format(DateFormatStrings.Qalendar)}`"
       >
@@ -756,14 +760,16 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  background: var(--colour-primary-default);
-  color: var(--colour-ti-base-dark);
+  background-color: var(--colour-surface-subtle);
+  border-left: solid 3px var(--colour-surface-border-intense);
+  color: var(--colour-ti-secondary);
   border-radius: 0.1875rem; /* 3px */
   box-sizing: border-box;
   padding-inline-start: 0.25rem;
   font-weight: normal;
   font-size: 0.68rem;
   margin-block-end: 0.125rem;
+  cursor: default;
 }
 
 .pending-appointment {
@@ -779,7 +785,17 @@ onMounted(() => {
 }
 
 .remote-event {
+  border-left-color: var(--colour-surface-border-intense);
+  background-color: var(--colour-surface-subtle);
+  background-image: none;
+  color: var(--colour-ti-secondary);
+  cursor: default;
   z-index: 4;
+
+  &.dark {
+    border-left-color: var(--colour-surface-border-intense);
+    background-color: var(--colour-surface-subtle);
+  }
 }
 
 /* Place overlapping events side by side in lanes with a 2px gap, single events keep the full 95% width */
