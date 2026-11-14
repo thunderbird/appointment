@@ -2,6 +2,7 @@
 import { inject, onMounted } from 'vue';
 import { callKey } from '@/keys';
 import { createUserStore } from '@/stores/user-store';
+import { useAppointmentStore } from '@/stores/appointment-store';
 
 import { useRouter } from 'vue-router';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
@@ -10,9 +11,11 @@ import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 const call = inject(callKey);
 const router = useRouter();
 const user = createUserStore(call);
+const appointmentStore = useAppointmentStore();
 
 // do log out
 const logout = async () => {
+  appointmentStore.$reset();
   await user.logout();
   await router.push('/');
 };

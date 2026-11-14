@@ -18,7 +18,7 @@ const route = useRoute();
 const router = useRouter();
 
 const appointmentStore = useAppointmentStore();
-const { appointments, selectedAppointment, isLoading } = storeToRefs(appointmentStore);
+const { appointments, selectedAppointment, isLoading, selectedFilter, selectedSort } = storeToRefs(appointmentStore);
 
 /* Appointment Sliding Panel */
 const appointmentSlidingPanelRef = ref<InstanceType<typeof AppointmentSlidingPanel>>();
@@ -55,8 +55,6 @@ const filterOptions = [
   },
 ];
 
-const selectedFilter = ref<BookingsFilterOptions>(BookingsFilterOptions.All);
-
 /* Sort Option */
 const sortOptions = [
   {
@@ -68,8 +66,6 @@ const sortOptions = [
     value: BookingsSortOptions.MeetingDate,
   },
 ];
-
-const selectedSort = ref<BookingsSortOptions>(BookingsSortOptions.DateRequested);
 
 const showNoUnconfirmedBookings = computed(() => {
   return (

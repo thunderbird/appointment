@@ -3,6 +3,7 @@ import { inject, ref, useTemplateRef } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { callKey, supportUrlKey } from '@/keys';
 import { createUserStore } from '@/stores/user-store';
+import { useAppointmentStore } from '@/stores/appointment-store';
 import { useRouter } from 'vue-router';
 import {
   TextInput,
@@ -23,6 +24,7 @@ const { t } = useI18n();
 const call = inject(callKey);
 const supportUrl = inject(supportUrlKey);
 const userStore = createUserStore(call);
+const appointmentStore = useAppointmentStore();
 const router = useRouter();
 
 const deleteModal = useTemplateRef('deleteModal');
@@ -68,6 +70,7 @@ const actuallyDeleteAccount = async () => {
   }
 
   // We can't logout since we've deleted the user by now, so just delete local storage data.
+  appointmentStore.$reset();
   userStore.$reset();
   await router.push('/');
 };
