@@ -66,6 +66,7 @@ async function onSaveChanges() {
   const validationErrorMessage = validateSchedule(obj);
   if (validationErrorMessage) {
     validationError.value = { title: validationErrorMessage };
+    saveSuccess.value = null;
     savingInProgress.value = false;
     window.scrollTo(0, 0);
     return;
@@ -85,6 +86,7 @@ async function onSaveChanges() {
   if (Object.prototype.hasOwnProperty.call(response, 'error')) {
     // error message is in data
     validationError.value = { title: (response as unknown as Error).message };
+    saveSuccess.value = null;
 
     // go back to the start
     savingInProgress.value = false;
@@ -136,38 +138,40 @@ export default {
       {{ t('label.availability') }}
     </h1>
 
-    <notice-bar v-if="validationError" :type="NoticeBarTypes.Critical" class="notice-bar">
-      {{ validationError.title }}
+    <div v-if="validationError || isDirty || (saveSuccess && !validationError)" class="notices-container">
+      <notice-bar v-if="validationError" :type="NoticeBarTypes.Critical" class="notice-bar">
+        {{ validationError.title }}
 
-      <template #cta>
-        <icon-button @click="clearNotices" :title="t('label.close')" class="btn-close">
-          <ph-x />
-        </icon-button>
-      </template>
-    </notice-bar>
+        <template #cta>
+          <icon-button @click="clearNotices" :title="t('label.close')" class="btn-close">
+            <ph-x />
+          </icon-button>
+        </template>
+      </notice-bar>
 
-    <notice-bar v-else-if="isDirty" :type="NoticeBarTypes.Warning" class="notice-bar">
-      {{ t('label.youHaveUnsavedChanges') }}
+      <notice-bar v-if="isDirty" :type="NoticeBarTypes.Warning" class="notice-bar">
+        {{ t('label.youHaveUnsavedChanges') }}
 
-      <template #cta>
-        <link-button @click="onRevertChanges" :disabled="savingInProgress">
-          {{ t('label.revertChanges') }}
-        </link-button>
-        <primary-button @click="onSaveChanges" :disabled="savingInProgress" size="small">
-          {{ t('label.saveChanges') }}
-        </primary-button>
-      </template>
-    </notice-bar>
+        <template #cta>
+          <link-button @click="onRevertChanges" :disabled="savingInProgress">
+            {{ t('label.revertChanges') }}
+          </link-button>
+          <primary-button @click="onSaveChanges" :disabled="savingInProgress" size="small">
+            {{ t('label.saveChanges') }}
+          </primary-button>
+        </template>
+      </notice-bar>
 
-    <notice-bar v-else-if="saveSuccess" :type="NoticeBarTypes.Success" class="notice-bar">
-      {{ saveSuccess.title }}
+      <notice-bar v-else-if="saveSuccess && !validationError" :type="NoticeBarTypes.Success" class="notice-bar">
+        {{ saveSuccess.title }}
 
-      <template #cta>
-        <icon-button @click="clearNotices" :title="t('label.close')" class="btn-close">
-          <ph-x />
-        </icon-button>
-      </template>
-    </notice-bar>
+        <template #cta>
+          <icon-button @click="clearNotices" :title="t('label.close')" class="btn-close">
+            <ph-x />
+          </icon-button>
+        </template>
+      </notice-bar>
+    </div>
 
     <form ref="availability-form" @submit.prevent>
       <div class="page-content">
@@ -233,12 +237,17 @@ export default {
   }
 }
 
-.notice-bar {
+.notices-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
   margin-block-end: 2rem;
   position: sticky;
   top: 5rem;
   z-index: 50;
+}
 
+.notice-bar {
   .btn-close {
     height: 2.375rem;
     width: 2.375rem;
