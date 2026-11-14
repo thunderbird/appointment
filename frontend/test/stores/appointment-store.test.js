@@ -7,6 +7,7 @@ import { createFetch } from '@vueuse/core';
 import { BookingStatus, BookingsFilterOptions, BookingsSortOptions } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import withSetup from '../utils/with-setup';
+import { nextTick } from 'vue';
 
 const API_URL = 'http://localhost';
 
@@ -78,6 +79,8 @@ describe('Appointment Store', () => {
 
   // Create a pinia instance before each test
   beforeEach(() => {
+    localStorage.removeItem('tba/bookings-filter');
+    localStorage.removeItem('tba/bookings-sort');
     app = withSetup();
     app.use(createPinia());
   });
@@ -91,6 +94,8 @@ describe('Appointment Store', () => {
   afterEach(() => {
     server.resetHandlers();
     app?.unmount();
+    localStorage.removeItem('tba/bookings-filter');
+    localStorage.removeItem('tba/bookings-sort');
   });
 
   test('init', () => {
@@ -209,7 +214,7 @@ describe('Appointment Store', () => {
     expect(apmt.selectedAppointment).toBe(apmt.appointments[0]);
   });
 
-  test('selectedFilter and selectedSort maintain state and reset properly', () => {
+  test('selectedFilter and selectedSort maintain state, persist in localStorage, and reset properly', async () => {
     const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
 
     expect(apmt.selectedFilter).toBe(BookingsFilterOptions.All);
@@ -217,13 +222,25 @@ describe('Appointment Store', () => {
 
     apmt.selectedFilter = BookingsFilterOptions.Unconfirmed;
     apmt.selectedSort = BookingsSortOptions.MeetingDate;
+    await nextTick();
 
     expect(apmt.selectedFilter).toBe(BookingsFilterOptions.Unconfirmed);
     expect(apmt.selectedSort).toBe(BookingsSortOptions.MeetingDate);
 
-    apmt.$reset();
+    // Create a fresh store with a new Pinia instance to assert persistence
+    const freshApp = withSetup();
+    freshApp.use(createPinia());
+    const freshApmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
 
-    expect(apmt.selectedFilter).toBe(BookingsFilterOptions.All);
-    expect(apmt.selectedSort).toBe(BookingsSortOptions.DateRequested);
+    expect(freshApmt.selectedFilter).toBe(BookingsFilterOptions.Unconfirmed);
+    expect(freshApmt.selectedSort).toBe(BookingsSortOptions.MeetingDate);
+
+    freshApmt.$reset();
+    await nextTick();
+
+    expect(freshApmt.selectedFilter).toBe(BookingsFilterOptions.All);
+    expect(freshApmt.selectedSort).toBe(BookingsSortOptions.DateRequested);
+
+    freshApp.unmount();
   });
 });
