@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed, inject } from 'vue';
-import { BookingStatus, MetricEvents } from '@/definitions';
+import { useLocalStorage } from '@vueuse/core';
+import { BookingStatus, MetricEvents, BookingsFilterOptions, BookingsSortOptions } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import {
   Appointment,
@@ -31,6 +32,8 @@ export const useAppointmentStore = defineStore('appointments', () => {
   // Data
   const appointments = ref<Appointment[]>([]);
   const selectedAppointment = ref<Appointment | null>(null);
+  const selectedFilter = useLocalStorage<BookingsFilterOptions>('tba/bookings-filter', BookingsFilterOptions.All);
+  const selectedSort = useLocalStorage<BookingsSortOptions>('tba/bookings-sort', BookingsSortOptions.DateRequested);
 
   const pendingAppointments = computed((): Appointment[] =>
     appointments.value.filter((a) => a?.slots[0]?.booking_status === BookingStatus.Requested)
@@ -173,6 +176,8 @@ export const useAppointmentStore = defineStore('appointments', () => {
     hasMorePages.value = true;
     currentPage.value = 1;
     pageMeta.value = null;
+    selectedFilter.value = BookingsFilterOptions.All;
+    selectedSort.value = BookingsSortOptions.DateRequested;
   };
 
   /**
@@ -256,6 +261,8 @@ export const useAppointmentStore = defineStore('appointments', () => {
     pageMeta,
     appointments,
     selectedAppointment,
+    selectedFilter,
+    selectedSort,
     pendingAppointments,
     appointmentsSortedByDateRequested,
     init,

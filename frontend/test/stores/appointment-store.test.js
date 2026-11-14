@@ -4,7 +4,7 @@ import { createPinia } from 'pinia';
 import { setupServer } from 'msw/node';
 import { HttpResponse, http } from 'msw';
 import { createFetch } from '@vueuse/core';
-import { BookingStatus } from '@/definitions';
+import { BookingStatus, BookingsFilterOptions, BookingsSortOptions } from '@/definitions';
 import { useUserStore } from '@/stores/user-store';
 import withSetup from '../utils/with-setup';
 
@@ -207,5 +207,23 @@ describe('Appointment Store', () => {
 
     // Should be the same object as in appointments array
     expect(apmt.selectedAppointment).toBe(apmt.appointments[0]);
+  });
+
+  test('selectedFilter and selectedSort maintain state and reset properly', () => {
+    const apmt = createAppointmentStore(createFetch({ baseUrl: API_URL }));
+
+    expect(apmt.selectedFilter).toBe(BookingsFilterOptions.All);
+    expect(apmt.selectedSort).toBe(BookingsSortOptions.DateRequested);
+
+    apmt.selectedFilter = BookingsFilterOptions.Unconfirmed;
+    apmt.selectedSort = BookingsSortOptions.MeetingDate;
+
+    expect(apmt.selectedFilter).toBe(BookingsFilterOptions.Unconfirmed);
+    expect(apmt.selectedSort).toBe(BookingsSortOptions.MeetingDate);
+
+    apmt.$reset();
+
+    expect(apmt.selectedFilter).toBe(BookingsFilterOptions.All);
+    expect(apmt.selectedSort).toBe(BookingsSortOptions.DateRequested);
   });
 });
