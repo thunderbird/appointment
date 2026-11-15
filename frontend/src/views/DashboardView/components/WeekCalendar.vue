@@ -111,7 +111,7 @@ function onRemoteEventMouseEnter(event: MouseEvent, remoteEvent, isRemote = fals
     customData: {
       calendar_title: remoteEvent.calendar_title,
       all_day: remoteEvent.all_day,
-      is_remote: isRemote,
+      remote: isRemote,
     },
   };
 
