@@ -117,7 +117,9 @@ watch(
       bookingPageTitle.value = schedule.name;
       calendarForNewAppointments.value = schedule.calendar_id;
     }
-  }
+  },
+  // Only once, so a later re-fetch doesn't overwrite the user's edits
+  { once: true }
 );
 
 onMounted(async () => {
