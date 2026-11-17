@@ -162,7 +162,7 @@ export default {
         </template>
       </notice-bar>
 
-      <notice-bar v-else-if="saveSuccess && !validationError" :type="NoticeBarTypes.Success" class="notice-bar">
+      <notice-bar v-else-if="saveSuccess" :type="NoticeBarTypes.Success" class="notice-bar">
         {{ saveSuccess.title }}
 
         <template #cta>
