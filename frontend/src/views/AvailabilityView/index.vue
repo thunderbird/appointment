@@ -138,7 +138,7 @@ export default {
       {{ t('label.availability') }}
     </h1>
 
-    <div v-if="validationError || isDirty || (saveSuccess && !validationError)" class="notices-container">
+    <div v-if="validationError || isDirty || saveSuccess" class="notices-container">
       <notice-bar v-if="validationError" :type="NoticeBarTypes.Critical" class="notice-bar">
         {{ validationError.title }}
 
