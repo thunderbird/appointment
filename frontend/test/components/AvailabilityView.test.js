@@ -7,6 +7,7 @@ import useDayJS from '@/composables/dayjs';
 import { callKey } from '@/keys';
 import AvailabilityView from '@/views/AvailabilityView/index.vue';
 import { useAvailabilityStore } from '@/stores/availability-store';
+import { useScheduleStore } from '@/stores/schedule-store';
 import { NoticeBarTypes } from '@thunderbirdops/services-ui';
 
 describe('AvailabilityView', () => {
@@ -111,14 +112,18 @@ describe('AvailabilityView', () => {
     expect(bars[0].props('type')).toBe(NoticeBarTypes.Success);
   });
 
-  it('excludes success notice while validation error exists even if form is not dirty', async () => {
+  it('clears previous success notice when a subsequent save encounters an error', async () => {
     wrapper.vm.saveSuccess = { title: 'Saved successfully.' };
-    wrapper.vm.validationError = { title: 'Some error' };
+    await markDirty('');
+
+    await wrapper.findComponent({ name: 'PrimaryButton' }).trigger('click');
     await wrapper.vm.$nextTick();
 
+    expect(wrapper.vm.saveSuccess).toBeNull();
     const bars = getNoticeBars();
-    expect(bars).toHaveLength(1);
+    expect(bars).toHaveLength(2);
     expect(bars[0].props('type')).toBe(NoticeBarTypes.Critical);
+    expect(bars[1].props('type')).toBe(NoticeBarTypes.Warning);
     expect(wrapper.text()).not.toContain('Saved successfully.');
   });
 
@@ -135,5 +140,26 @@ describe('AvailabilityView', () => {
     await wrapper.vm.$nextTick();
 
     expect(wrapper.find('.notices-container').exists()).toBe(false);
+  });
+
+  it('keeps unsaved changes CTA visible when backend update fails with an error', async () => {
+    const scheduleStore = useScheduleStore();
+    scheduleStore.updateSchedule = vi.fn().mockResolvedValue({
+      error: true,
+      message: 'End time should be at least 11:30.',
+    });
+
+    await markDirty('Valid Name');
+    store.currentState.id = 1;
+
+    await wrapper.findComponent({ name: 'PrimaryButton' }).trigger('click');
+    await wrapper.vm.$nextTick();
+
+    const bars = getNoticeBars();
+    expect(bars).toHaveLength(2);
+    expect(bars[0].props('type')).toBe(NoticeBarTypes.Critical);
+    expect(bars[0].text()).toContain('End time should be at least 11:30.');
+    expect(bars[1].props('type')).toBe(NoticeBarTypes.Warning);
+    expect(bars[1].text()).toContain('Save changes');
   });
 });
