@@ -36,6 +36,7 @@
     "refreshLinkError": "Dein Link konnte nicht aktualisiert werden. Bitte nochmal versuchen.",
     "refreshLinkReloadError": "Dein Link wurde aktualisiert, konnte aber nicht neu geladen werden. Bitte lade die Seite neu.",
     "routeNotFound": "Entschuldigung, diese Seite wurde nicht gefunden.",
+    "scheduleLoadError": "Die Buchungsseite konnte nicht geladen werden. Bitte die Seite neuladen.",
     "scheduleRemoteCalendarConnectionDetails": "Bitte kontaktiere den Eigentümer der Buchungsseite direkt, um dieses Problem zu beheben.",
     "scheduleRemoteCalendarConnectionError": "Es konnte keine Verbindung zum Kalender hergestellt werden.",
     "selectOneDay": "Es muss mindestens ein Tag ausgewählt werden, um fortzufahren.",

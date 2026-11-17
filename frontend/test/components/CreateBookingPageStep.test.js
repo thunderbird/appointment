@@ -67,6 +67,7 @@ describe('CreateBookingPageStep', () => {
     scheduleStore = useScheduleStore();
     vi.spyOn(scheduleStore, 'createSchedule').mockResolvedValue({});
     vi.spyOn(scheduleStore, 'updateSchedule').mockResolvedValue({});
+    vi.spyOn(scheduleStore, 'fetch').mockResolvedValue();
     scheduleStore.isLoaded = true;
   });
 
@@ -117,5 +118,25 @@ describe('CreateBookingPageStep', () => {
 
     expect(scheduleStore.createSchedule).not.toHaveBeenCalled();
     expect(scheduleStore.updateSchedule).toHaveBeenCalledWith(scheduleOnSecondCalendar.id, scheduleOnSecondCalendar);
+  });
+
+  it('retries loading schedules and asks to reload the page if that fails', async () => {
+    scheduleStore.isLoaded = false;
+
+    wrapper = mountStep();
+    await flushPromises();
+    await clickContinue();
+
+    expect(scheduleStore.fetch).toHaveBeenCalledOnce();
+    expect(wrapper.text()).toContain("We couldn't load your booking page. Please refresh the page.");
+    expect(scheduleStore.createSchedule).not.toHaveBeenCalled();
+    expect(scheduleStore.updateSchedule).not.toHaveBeenCalled();
+  });
+
+  it('shows no load error if schedules are available', async () => {
+    wrapper = mountStep();
+    await flushPromises();
+
+    expect(wrapper.text()).not.toContain("We couldn't load your booking page.");
   });
 });

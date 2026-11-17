@@ -123,7 +123,12 @@ watch(
 onMounted(async () => {
   // Force re-fetch calendars to ensure we have the latest data
   // since we just connected an account on the previous step and data will be outdated
-  await calendarStore.fetch(true);
+  await Promise.all([calendarStore.fetch(true), scheduleStore.fetch()]);
+
+  // Without schedules we can't tell whether to create or update, so ask the user to reload
+  if (!scheduleStore.isLoaded) {
+    errorMessage.value = t('error.scheduleLoadError');
+  }
 });
 </script>
 
