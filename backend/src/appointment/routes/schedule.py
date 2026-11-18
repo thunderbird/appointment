@@ -140,23 +140,13 @@ def create_calendar_schedule(
         raise validation.CalendarNotAuthorizedException()
     if not repo.calendar.is_connected(db, calendar_id=schedule.calendar_id):
         raise validation.CalendarNotConnectedException()
-    has_existing_schedule = len(repo.schedule.get_by_subscriber(db, subscriber.id)) > 0
     # Only one schedule per subscriber is supported for now
-    if has_existing_schedule:
+    if repo.schedule.get_by_subscriber(db, subscriber.id):
         raise validation.ScheduleAlreadyExistsException()
     if schedule.slug and repo.schedule.slug_taken(db, schedule.slug, subscriber.id):
         raise validation.ScheduleSlugTakenException()
 
     db_schedule = repo.schedule.create(db=db, schedule=schedule)
-
-    # The first schedule currently is initialized without a slug to provide a username only availability link.
-    # If we already have at least one schedule and slug isn't provided, give them the last 8 characters from a uuid4.
-    if has_existing_schedule and not schedule.slug:
-        slug = repo.schedule.generate_slug(db, db_schedule.id)
-        if not slug:
-            # A little extra, but things are a little out of place right now..
-            repo.schedule.hard_delete(db, db_schedule.id)
-            raise validation.ScheduleCreationException()
 
     if os.getenv('GOOGLE_INVITE_ENABLED') == 'True':
         _sync_watch_channels(db, google_client, subscriber, schedule.calendar_id)
