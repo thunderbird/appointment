@@ -72,4 +72,66 @@ describe('WeekCalendar', () => {
 
     expect(gridPosition(wrapper.get('.remote-event'))).toEqual({ column: '7', row: '3' });
   });
+
+  it('splits multi-day events across calendar day columns and clamps height to day boundaries', () => {
+    wrapper = mount(
+      WeekCalendar,
+      getMountOptions({
+        events: [
+          {
+            title: 'Multi-Day Workshop',
+            start: '2026-11-10T09:00:00+00:00', // Tuesday 09:00
+            end: '2026-11-12T15:00:00+00:00', // Thursday 15:00
+          },
+        ],
+      })
+    );
+
+    const remoteEvents = wrapper.findAll('.remote-event');
+    expect(remoteEvents).toHaveLength(3);
+
+    // Tuesday: Column 4 (Tue), starts at 09:00 (row 10), duration 15h = 900px (- 2px gap = 898px)
+    expect(gridPosition(remoteEvents[0])).toEqual({ column: '4', row: '10' });
+    expect(remoteEvents[0].element.style.height).toBe('max(1.5rem, 898px)');
+
+    // Wednesday: Column 5 (Wed), starts at 00:00 (row 1), duration 24h = 1440px (- 2px gap = 1438px)
+    expect(gridPosition(remoteEvents[1])).toEqual({ column: '5', row: '1' });
+    expect(remoteEvents[1].element.style.height).toBe('max(1.5rem, 1438px)');
+
+    // Thursday: Column 6 (Thu), starts at 00:00 (row 1), duration 15h = 900px (- 2px gap = 898px)
+    expect(gridPosition(remoteEvents[2])).toEqual({ column: '6', row: '1' });
+    expect(remoteEvents[2].element.style.height).toBe('max(1.5rem, 898px)');
+  });
+
+  it('isolates lane calculations per day column for multi-day events', () => {
+    wrapper = mount(
+      WeekCalendar,
+      getMountOptions({
+        events: [
+          {
+            title: 'Workshop',
+            start: '2026-11-10T09:00:00+00:00', // Tuesday 09:00
+            end: '2026-11-11T12:00:00+00:00', // Wednesday 12:00
+          },
+          {
+            title: 'Thursday Standup',
+            start: '2026-11-12T10:00:00+00:00', // Thursday 10:00 - 11:00
+            end: '2026-11-12T11:00:00+00:00',
+          },
+        ],
+      })
+    );
+
+    const remoteEvents = wrapper.findAll('.remote-event');
+    // Expect 2 slices for Workshop (Tue, Wed) and 1 slice for Standup (Thu)
+    expect(remoteEvents).toHaveLength(3);
+
+    const thursdayEvent = remoteEvents.find((el) => gridPosition(el).column === '6');
+    expect(thursdayEvent).toBeDefined();
+
+    // Thursday event should have full lane width (1 total lane, current lane 0)
+    // because Tuesday-Wednesday's event does NOT bleed into Thursday's lane calculations
+    expect(thursdayEvent.element.style.getPropertyValue('--total-lanes')).toBe('1');
+    expect(thursdayEvent.element.style.getPropertyValue('--current-lane')).toBe('0');
+  });
 });

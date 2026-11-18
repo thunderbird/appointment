@@ -1,6 +1,6 @@
 // get the first key of given object that points to given value
 import { Ref } from 'vue';
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import { i18nType } from '@/composables/i18n';
 import { config } from '@/config';
 import {
@@ -408,6 +408,60 @@ export const assignEventLanes = (
   return events.map((event) => result.get(event));
 };
 
+/**
+ * Splits a calendar event across individual days in the active week.
+ * Events spanning multiple days or crossing midnight are broken into one segment per day,
+ * clamped to each day's [00:00, 24:00] boundary.
+ */
+export const splitEventIntoDaySegments = <T extends { start: string | Dayjs; end: string | Dayjs }>(
+  event: T,
+  weekdays: Dayjs[],
+  djOrTz?: any,
+  tz?: string
+): Array<T & { start: string; end: string; originalStart: string; originalEnd: string }> => {
+  let dj = dayjs;
+  let timezone = tz;
+
+  if (typeof djOrTz === 'function') {
+    dj = djOrTz;
+  } else if (typeof djOrTz === 'string') {
+    timezone = djOrTz;
+  }
+
+  const eventStart = timezone && dj.tz ? dj(event.start).tz(timezone) : dj(event.start);
+  const eventEnd = timezone && dj.tz ? dj(event.end).tz(timezone) : dj(event.end);
+
+  if (!eventStart.isValid() || !eventEnd.isValid() || !eventStart.isBefore(eventEnd)) {
+    return [];
+  }
+
+  const originalStart = typeof event.start === 'string' ? event.start : event.start.format();
+  const originalEnd = typeof event.end === 'string' ? event.end : event.end.format();
+  const segments: Array<T & { start: string; end: string; originalStart: string; originalEnd: string }> = [];
+
+  for (const day of weekdays) {
+    const dayStart = day.startOf('day');
+    const dayEnd = day.add(1, 'day').startOf('day');
+
+    if (eventStart.isBefore(dayEnd) && eventEnd.isAfter(dayStart)) {
+      const segStart = eventStart.isAfter(dayStart) ? eventStart : dayStart;
+      const segEnd = eventEnd.isBefore(dayEnd) ? eventEnd : dayEnd;
+
+      if (segStart.isBefore(segEnd)) {
+        segments.push({
+          ...event,
+          start: segStart.format(),
+          end: segEnd.format(),
+          originalStart,
+          originalEnd,
+        });
+      }
+    }
+  }
+
+  return segments;
+};
+
 export default {
   arrayRotate,
   timeFormat,
@@ -424,4 +478,5 @@ export default {
   getStartOfWeek,
   getEndOfWeek,
   assignEventLanes,
+  splitEventIntoDaySegments,
 };

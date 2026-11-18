@@ -1,5 +1,11 @@
 import { describe, it, expect, afterEach } from 'vitest';
-import { assignEventLanes, timeFormat } from '@/utils';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import { assignEventLanes, splitEventIntoDaySegments, timeFormat } from '@/utils';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // Mock the browser locale with setting window.navigator.language directly.
 const setLocale = (locale) => {
@@ -95,5 +101,115 @@ describe('assignEventLanes', () => {
       { currentLane: 0, totalLanes: 3 },
       { currentLane: 1, totalLanes: 3 },
     ]);
+  });
+});
+
+describe('splitEventIntoDaySegments', () => {
+  const tz = 'UTC';
+  const weekdays = [
+    dayjs.tz('2026-11-15', tz), // Sun
+    dayjs.tz('2026-11-16', tz), // Mon
+    dayjs.tz('2026-11-17', tz), // Tue
+    dayjs.tz('2026-11-18', tz), // Wed
+    dayjs.tz('2026-11-19', tz), // Thu
+    dayjs.tz('2026-11-20', tz), // Fri
+    dayjs.tz('2026-11-21', tz), // Sat
+  ];
+
+  it('keeps single-day event as a single segment', () => {
+    const event = {
+      title: 'Meeting',
+      start: '2026-11-17T10:00:00Z',
+      end: '2026-11-17T11:30:00Z',
+    };
+
+    const segments = splitEventIntoDaySegments(event, weekdays, dayjs, tz);
+    expect(segments).toHaveLength(1);
+    expect(segments[0].title).toBe('Meeting');
+    expect(segments[0].start).toBe(dayjs.tz('2026-11-17T10:00:00Z', tz).format());
+    expect(segments[0].end).toBe(dayjs.tz('2026-11-17T11:30:00Z', tz).format());
+    expect(segments[0].originalStart).toBe(event.start);
+    expect(segments[0].originalEnd).toBe(event.end);
+  });
+
+  it('splits multi-day event into daily segments bounded by day boundaries', () => {
+    const event = {
+      title: 'Conference',
+      start: '2026-11-17T09:00:00Z',
+      end: '2026-11-19T15:00:00Z',
+    };
+
+    const segments = splitEventIntoDaySegments(event, weekdays, dayjs, tz);
+    expect(segments).toHaveLength(3);
+
+    // Day 1 (Tuesday): 09:00 -> 24:00 (Wednesday 00:00)
+    expect(segments[0].start).toBe(dayjs.tz('2026-11-17T09:00:00Z', tz).format());
+    expect(segments[0].end).toBe(dayjs.tz('2026-11-18T00:00:00Z', tz).format());
+    expect(segments[0].originalStart).toBe(event.start);
+    expect(segments[0].originalEnd).toBe(event.end);
+
+    // Day 2 (Wednesday): 00:00 -> 24:00 (Thursday 00:00)
+    expect(segments[1].start).toBe(dayjs.tz('2026-11-18T00:00:00Z', tz).format());
+    expect(segments[1].end).toBe(dayjs.tz('2026-11-19T00:00:00Z', tz).format());
+
+    // Day 3 (Thursday): 00:00 -> 15:00
+    expect(segments[2].start).toBe(dayjs.tz('2026-11-19T00:00:00Z', tz).format());
+    expect(segments[2].end).toBe(dayjs.tz('2026-11-19T15:00:00Z', tz).format());
+  });
+
+  it('splits overnight event crossing midnight into two segments', () => {
+    const event = {
+      title: 'Night Shift',
+      start: '2026-11-17T22:00:00Z',
+      end: '2026-11-18T04:00:00Z',
+    };
+
+    const segments = splitEventIntoDaySegments(event, weekdays, dayjs, tz);
+    expect(segments).toHaveLength(2);
+
+    expect(segments[0].start).toBe(dayjs.tz('2026-11-17T22:00:00Z', tz).format());
+    expect(segments[0].end).toBe(dayjs.tz('2026-11-18T00:00:00Z', tz).format());
+
+    expect(segments[1].start).toBe(dayjs.tz('2026-11-18T00:00:00Z', tz).format());
+    expect(segments[1].end).toBe(dayjs.tz('2026-11-18T04:00:00Z', tz).format());
+  });
+
+  it('does not create an empty segment if an event ends exactly at midnight', () => {
+    const event = {
+      title: 'Late Evening',
+      start: '2026-11-17T20:00:00Z',
+      end: '2026-11-18T00:00:00Z',
+    };
+
+    const segments = splitEventIntoDaySegments(event, weekdays, dayjs, tz);
+    expect(segments).toHaveLength(1);
+    expect(segments[0].start).toBe(dayjs.tz('2026-11-17T20:00:00Z', tz).format());
+    expect(segments[0].end).toBe(dayjs.tz('2026-11-18T00:00:00Z', tz).format());
+  });
+
+  it('includes segments within the active week for events starting before the week', () => {
+    const event = {
+      title: 'Ongoing Event',
+      start: '2026-11-14T10:00:00Z', // Saturday before week
+      end: '2026-11-16T12:00:00Z', // Monday
+    };
+
+    const segments = splitEventIntoDaySegments(event, weekdays, dayjs, tz);
+    expect(segments).toHaveLength(2); // Sunday (full) and Monday (till 12:00)
+    expect(segments[0].start).toBe(dayjs.tz('2026-11-15T00:00:00Z', tz).format());
+    expect(segments[0].end).toBe(dayjs.tz('2026-11-16T00:00:00Z', tz).format());
+    expect(segments[1].start).toBe(dayjs.tz('2026-11-16T00:00:00Z', tz).format());
+    expect(segments[1].end).toBe(dayjs.tz('2026-11-16T12:00:00Z', tz).format());
+  });
+
+  it('returns empty array for invalid or non-chronological events', () => {
+    expect(splitEventIntoDaySegments({ start: 'invalid', end: 'invalid' }, weekdays, dayjs)).toEqual([]);
+    expect(
+      splitEventIntoDaySegments(
+        { start: '2026-11-17T12:00:00Z', end: '2026-11-17T10:00:00Z' },
+        weekdays,
+        dayjs
+      )
+    ).toEqual([]);
   });
 });
