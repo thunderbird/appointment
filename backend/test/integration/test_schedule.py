@@ -64,6 +64,19 @@ class TestSchedule:
         assert len(weekdays) == 5
         assert weekdays == [1, 2, 3, 4, 5]
         assert data['slot_duration'] == 30
+        assert data['slug'] is None
+
+    def test_create_schedule_with_custom_slug(self, with_client, make_caldav_calendar, schedule_input):
+        generated_calendar = make_caldav_calendar(connected=True)
+
+        response = with_client.post(
+            '/schedule',
+            json={'calendar_id': generated_calendar.id, 'slug': 'my-custom-slug', **schedule_input},
+            headers=auth_headers,
+        )
+        assert response.status_code == 200, response.text
+        data = response.json()
+        assert data['slug'] == 'my-custom-slug'
 
     def test_create_schedule_with_end_time_before_start_time(
         self, with_client, make_caldav_calendar, make_schedule, schedule_input
