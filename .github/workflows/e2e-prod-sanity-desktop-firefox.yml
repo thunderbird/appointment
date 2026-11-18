@@ -1,0 +1,58 @@
+name: e2e-prod-sanity-desktop-firefox
+
+concurrency:
+  group: e2e-prod-sanity-desktop-firefox
+  cancel-in-progress: true
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read    # This is required for actions/checkout
+
+jobs:
+  prod-sanity-desktop-firefox:
+    name: prod-sanity-desktop-firefox
+    runs-on: ubuntu-26.04
+    environment:
+      name: production
+      deployment: false
+    env:
+      TB_ACCTS_EMAIL: ${{ secrets.E2E_APPT_PROD_TB_ACCTS_EMAIL }}
+      TB_ACCTS_PWORD: ${{ secrets.E2E_APPT_PROD_TB_ACCTS_PWORD }}
+      APPT_DISPLAY_NAME: ${{ secrets.E2E_APPT_PROD_DISPLAY_NAME }}
+      APPT_MY_SHARE_LINK: ${{ secrets.E2E_APPT_PROD_MY_SHARE_LINK }}
+      APPT_BOOKEE_NAME: ${{ secrets.E2E_APPT_PROD_BOOKEE_NAME }}
+      APPT_BOOKEE_EMAIL: ${{ secrets.E2E_APPT_PROD_BOOKEE_EMAIL }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
+        with:
+          version: 11.15.1
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: 'pnpm'
+          cache-dependency-path: 'test/e2e/pnpm-lock.yaml'
+
+      - name: Install dependencies
+        run: |
+          cd ./test/e2e
+          pnpm install --frozen-lockfile
+
+      - name: BrowserStack Env Setup
+        uses: browserstack/github-actions/setup-env@e1ceb209003b8bf050dac07c9038347259fed39c # master
+        with:
+          username:  ${{ secrets.BROWSERSTACK_USERNAME }}
+          access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
+          project-name: 'Thunderbird Appointment'
+          build-name: 'TB Appointment Prod Sanity Test (Desktop Firefox): BUILD_INFO'
+
+      - name: Prod Sanity E2E Tests on Desktop Firefox
+        run: |
+          cd ./test/e2e
+          cp .env.prod.example .env
+          pnpm run prod-sanity-test-browserstack-firefox
