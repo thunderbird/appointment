@@ -49,11 +49,9 @@ jobs:
           username:  ${{ secrets.BROWSERSTACK_USERNAME }}
           access-key: ${{ secrets.BROWSERSTACK_ACCESS_KEY }}
           project-name: 'Thunderbird Appointment'
-          build-name: 'TB Appointment Nightly Tests (Desktop Firefox): BUILD_INFO'
+          build-name: 'TB Appointment Prod Sanity Test (Desktop Firefox): BUILD_INFO'
 
       - name: Prod Sanity E2E Tests on Desktop Firefox
-        # don't send GHA failure email if any of the E2E tests fail, can be annoying (I check the jobs each day in BrowserStack)
-        continue-on-error: true
         run: |
           cd ./test/e2e
           cp .env.prod.example .env
