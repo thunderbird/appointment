@@ -75,7 +75,11 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
         return False
 
     # Is the time requested within our booking times?
+    # The schedule's times are stored in UTC, so a local working day can span two UTC dates
+    # (9:00-17:00 in Sydney or Los Angeles), and a DST change since the schedule was saved can
+    # move it by a day. Check the windows starting the day before, on, and after the slot's UTC date.
     today = booking_slot.start.date()
+    days = (today - timedelta(days=1), today, today + timedelta(days=1))
     booking_slot_end = booking_slot_start + timedelta(minutes=schedule.slot_duration)
 
     if schedule.use_custom_availabilities:
@@ -89,18 +93,19 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
             # If our end time is below start time, then it's the next day.
             add_day = 1 if availability.end_time <= availability.start_time else 0
 
-            start_datetime = (
-                datetime.combine(today, availability.start_time, tzinfo=schedule_tzinfo) + schedule.timezone_offset
-            )
-            end_datetime = (
-                datetime.combine(today, availability.end_time, tzinfo=schedule_tzinfo)
-                + timedelta(days=add_day)
-                + schedule.timezone_offset
-            )
+            for day in days:
+                start_datetime = (
+                    datetime.combine(day, availability.start_time, tzinfo=schedule_tzinfo) + schedule.timezone_offset
+                )
+                end_datetime = (
+                    datetime.combine(day, availability.end_time, tzinfo=schedule_tzinfo)
+                    + timedelta(days=add_day)
+                    + schedule.timezone_offset
+                )
 
-            # Check if the booking slot fits within this availability window
-            if booking_slot_start >= start_datetime and booking_slot_end <= end_datetime:
-                return True
+                # Check if the booking slot fits within this availability window
+                if booking_slot_start >= start_datetime and booking_slot_end <= end_datetime:
+                    return True
 
         # Booking slot didn't fit within any custom availability
         return False
@@ -110,20 +115,18 @@ def is_this_a_valid_booking_time(schedule: models.Schedule, booking_slot: schema
     add_day = 1 if schedule.end_time <= schedule.start_time else 0
 
     # We need to compare in local time
-    start_datetime = datetime.combine(today, schedule.start_time, tzinfo=schedule_tzinfo) + schedule.timezone_offset
-    end_datetime = (
-        datetime.combine(today, schedule.end_time, tzinfo=schedule_tzinfo)
-        + timedelta(days=add_day)
-        + schedule.timezone_offset
-    )
+    for day in days:
+        start_datetime = datetime.combine(day, schedule.start_time, tzinfo=schedule_tzinfo) + schedule.timezone_offset
+        end_datetime = (
+            datetime.combine(day, schedule.end_time, tzinfo=schedule_tzinfo)
+            + timedelta(days=add_day)
+            + schedule.timezone_offset
+        )
 
-    too_early = booking_slot_start < start_datetime
-    too_late = booking_slot_end > end_datetime
+        if start_datetime <= booking_slot_start and booking_slot_end <= end_datetime:
+            return True
 
-    if too_early or too_late:
-        return False
-
-    return True
+    return False
 
 
 @router.post('/', response_model=schemas.Schedule)
