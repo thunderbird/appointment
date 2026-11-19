@@ -103,35 +103,84 @@ describe('WeekCalendar', () => {
     expect(remoteEvents[2].element.style.height).toBe('max(1.5rem, 898px)');
   });
 
-  it('isolates lane calculations per day column for multi-day events', () => {
+  it('isolates lane calculations across midnight boundary', () => {
     wrapper = mount(
       WeekCalendar,
       getMountOptions({
         events: [
           {
-            title: 'Workshop',
-            start: '2026-11-10T09:00:00+00:00', // Tuesday 09:00
-            end: '2026-11-11T12:00:00+00:00', // Wednesday 12:00
+            title: 'Late Night Event',
+            start: '2026-11-10T23:45:00+00:00', // Tuesday 23:45 - 23:55
+            end: '2026-11-10T23:55:00+00:00',
           },
           {
-            title: 'Thursday Standup',
-            start: '2026-11-12T10:00:00+00:00', // Thursday 10:00 - 11:00
-            end: '2026-11-12T11:00:00+00:00',
+            title: 'Early Morning Event',
+            start: '2026-11-11T00:05:00+00:00', // Wednesday 00:05 - 00:15 (only 10 mins apart across midnight)
+            end: '2026-11-11T00:15:00+00:00',
           },
         ],
       })
     );
 
     const remoteEvents = wrapper.findAll('.remote-event');
-    // Expect 2 slices for Workshop (Tue, Wed) and 1 slice for Standup (Thu)
-    expect(remoteEvents).toHaveLength(3);
+    expect(remoteEvents).toHaveLength(2);
 
-    const thursdayEvent = remoteEvents.find((el) => gridPosition(el).column === '6');
-    expect(thursdayEvent).toBeDefined();
+    const tuesdayEvent = remoteEvents.find((el) => gridPosition(el).column === '4');
+    const wednesdayEvent = remoteEvents.find((el) => gridPosition(el).column === '5');
 
-    // Thursday event should have full lane width (1 total lane, current lane 0)
-    // because Tuesday-Wednesday's event does NOT bleed into Thursday's lane calculations
-    expect(thursdayEvent.element.style.getPropertyValue('--total-lanes')).toBe('1');
-    expect(thursdayEvent.element.style.getPropertyValue('--current-lane')).toBe('0');
+    // Both events must retain full width (1 total lane) because the midnight boundary isolates lanes per day
+    expect(tuesdayEvent.element.style.getPropertyValue('--total-lanes')).toBe('1');
+    expect(tuesdayEvent.element.style.getPropertyValue('--current-lane')).toBe('0');
+    expect(wednesdayEvent.element.style.getPropertyValue('--total-lanes')).toBe('1');
+    expect(wednesdayEvent.element.style.getPropertyValue('--current-lane')).toBe('0');
+  });
+
+  it('spans all 24 visual grid rows on Daylight Saving Time transition days', () => {
+    // March 29, 2026 is the spring-forward DST transition day in Europe/London (only 23 elapsed hours)
+    wrapper = mount(
+      WeekCalendar,
+      getMountOptions({
+        activeDateRange: { start: '2026-03-29', end: '2026-04-04' },
+        timezone: 'Europe/London',
+        events: [
+          {
+            title: 'Full Day Event on DST day',
+            start: '2026-03-29T00:00:00+00:00',
+            end: '2026-03-30T00:00:00+01:00',
+          },
+        ],
+      })
+    );
+
+    const remoteEvents = wrapper.findAll('.remote-event');
+    expect(remoteEvents).toHaveLength(1);
+    // Even though elapsed time is 23h, visual grid height must cover all 24 visual rows (1440px - 2px gap = 1438px)
+    expect(remoteEvents[0].element.style.height).toBe('max(1.5rem, 1438px)');
+  });
+
+  it('keeps all-day events on the correct calendar date regardless of display timezone', () => {
+    wrapper = mount(
+      WeekCalendar,
+      getMountOptions({
+        activeDateRange: { start: '2026-11-08', end: '2026-11-14' },
+        timezone: 'America/Vancouver', // Vancouver is 8 hours behind London/UTC
+        events: [
+          {
+            title: 'All-Day Holiday',
+            start: '2026-11-10',
+            end: '2026-11-11',
+            all_day: true,
+          },
+        ],
+      })
+    );
+
+    const allDayItems = wrapper.findAll('.all-day-event-item');
+    expect(allDayItems).toHaveLength(1);
+
+    // Tuesday Nov 10 is the 3rd day column (index 2 in weekdays, Sun=0, Mon=1, Tue=2)
+    // The parent weekday header for Tuesday is at gridColumn: 4
+    const parentHeader = allDayItems[0].element.closest('.calendar-weekday-header');
+    expect(parentHeader.style.gridColumn).toBe('4');
   });
 });

@@ -431,7 +431,7 @@ export const splitEventIntoDaySegments = <T extends { start: string | Dayjs; end
   const eventStart = timezone && dj.tz ? dj(event.start).tz(timezone) : dj(event.start);
   const eventEnd = timezone && dj.tz ? dj(event.end).tz(timezone) : dj(event.end);
 
-  if (!eventStart.isValid() || !eventEnd.isValid() || !eventStart.isBefore(eventEnd)) {
+  if (!eventStart.isValid() || !eventEnd.isValid() || eventEnd.isBefore(eventStart)) {
     return [];
   }
 
@@ -440,14 +440,21 @@ export const splitEventIntoDaySegments = <T extends { start: string | Dayjs; end
   const segments: Array<T & { start: string; end: string; originalStart: string; originalEnd: string }> = [];
 
   for (const day of weekdays) {
-    const dayStart = day.startOf('day');
-    const dayEnd = day.add(1, 'day').startOf('day');
+    const dayDateStr = day.format('YYYY-MM-DD');
+    const dayStart = timezone && dj.tz ? dj.tz(dayDateStr, timezone) : day.startOf('day');
+    const nextDateStr = day.add(1, 'day').format('YYYY-MM-DD');
+    const dayEnd = timezone && dj.tz ? dj.tz(nextDateStr, timezone) : day.add(1, 'day').startOf('day');
 
-    if (eventStart.isBefore(dayEnd) && eventEnd.isAfter(dayStart)) {
+    const overlapsDay =
+      eventStart.isBefore(dayEnd) &&
+      (eventEnd.isAfter(dayStart) ||
+        (eventStart.isSame(eventEnd) && (eventStart.isSame(dayStart) || eventStart.isAfter(dayStart))));
+
+    if (overlapsDay) {
       const segStart = eventStart.isAfter(dayStart) ? eventStart : dayStart;
       const segEnd = eventEnd.isBefore(dayEnd) ? eventEnd : dayEnd;
 
-      if (segStart.isBefore(segEnd)) {
+      if (!segStart.isAfter(segEnd)) {
         segments.push({
           ...event,
           start: segStart.format(),

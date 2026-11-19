@@ -152,11 +152,19 @@ function calculateEventGridPosition(
   const startMinutes = eventStart.minute();
   const calculatedTopOffset = (startMinutes / 60) * ROW_HEIGHT_PX + topOffset;
 
-  // 4. Calculate event duration and height
-  // Bounded to remaining minutes in day so an event segment never overflows past the 24-hour grid
-  const maxRemainingMinutesInDay = 24 * 60 - (startHour * 60 + startMinutes);
-  let durationMinutes = eventEnd.diff(eventStart, 'minute');
-  if (durationMinutes <= 0 || durationMinutes > maxRemainingMinutesInDay) {
+  // 4. Calculate event duration and height using wall-clock minutes for the visual grid.
+  // This ensures multi-day slices and full-day events span all 24 visual grid rows even on DST transition days.
+  const startMinutesTotal = startHour * 60 + startMinutes;
+  const endMinutesTotal = eventStart.isSame(eventEnd, 'day')
+    ? eventEnd.hour() * 60 + eventEnd.minute()
+    : 24 * 60;
+
+  let durationMinutes = endMinutesTotal - startMinutesTotal;
+  const maxRemainingMinutesInDay = 24 * 60 - startMinutesTotal;
+
+  if (durationMinutes < 0) {
+    durationMinutes = 0;
+  } else if (durationMinutes > maxRemainingMinutesInDay) {
     durationMinutes = maxRemainingMinutesInDay;
   }
 
@@ -379,37 +387,45 @@ const eventLanes = computed(() => {
 
 /**
  * Generates an array of all-day remote events per weekday that fall within the active week.
+ * All-day events are timezone-independent calendar dates, so comparisons are done on the date portions directly.
  */
 const filteredRemoteAllDayEvents = computed(() => {
   const slots = timeSlotsForGrid.value;
   if (!slots.length) return [];
 
   const { start, end } = props.activeDateRange;
-  const rangeStartDay = dj(start).startOf('day');
-  const rangeEndDay = dj(end).endOf('day');
+  const rangeStartStr = start.slice(0, 10);
+  const rangeEndStr = end.slice(0, 10);
 
   const remoteAllDayEventsWithinActiveWeek = props.events.filter((remoteEvent) => {
     if (!remoteEvent.all_day) return false;
-    const evStart = dj(remoteEvent.start).startOf('day');
-    const evEnd = remoteEvent.end ? dj(remoteEvent.end) : evStart;
-    return !evEnd.isBefore(rangeStartDay, 'day') && !evStart.isAfter(rangeEndDay, 'day');
+    const startDateStr = remoteEvent.start.slice(0, 10);
+    const rawEndStr = remoteEvent.end ? remoteEvent.end.slice(0, 10) : startDateStr;
+    const isExclusive =
+      remoteEvent.end &&
+      rawEndStr > startDateStr &&
+      (!remoteEvent.end.includes('T') || remoteEvent.end.includes('T00:00:00'));
+    const endDateStr = isExclusive
+      ? dj(rawEndStr).subtract(1, 'day').format('YYYY-MM-DD')
+      : rawEndStr;
+
+    return startDateStr <= rangeEndStr && endDateStr >= rangeStartStr;
   });
 
   return weekdays.value.map((day) => {
-    // All-day events are timezone independent dates, so compare dates only
+    const dayStr = day.format('YYYY-MM-DD');
     return remoteAllDayEventsWithinActiveWeek.filter((remoteEvent) => {
-      const evStart = dj(remoteEvent.start).startOf('day');
-      const evEnd = remoteEvent.end ? dj(remoteEvent.end) : evStart;
-      const isExclusiveEnd =
-        evEnd.isAfter(evStart) && evEnd.hour() === 0 && evEnd.minute() === 0 && evEnd.second() === 0;
+      const startDateStr = remoteEvent.start.slice(0, 10);
+      const rawEndStr = remoteEvent.end ? remoteEvent.end.slice(0, 10) : startDateStr;
+      const isExclusive =
+        remoteEvent.end &&
+        rawEndStr > startDateStr &&
+        (!remoteEvent.end.includes('T') || remoteEvent.end.includes('T00:00:00'));
+      const endDateStr = isExclusive
+        ? dj(rawEndStr).subtract(1, 'day').format('YYYY-MM-DD')
+        : rawEndStr;
 
-      if (isExclusiveEnd) {
-        return (day.isSame(evStart, 'day') || day.isAfter(evStart, 'day')) && day.isBefore(evEnd, 'day');
-      }
-      return (
-        (day.isSame(evStart, 'day') || day.isAfter(evStart, 'day')) &&
-        (day.isSame(evEnd, 'day') || day.isBefore(evEnd, 'day'))
-      );
+      return dayStr >= startDateStr && dayStr <= endDateStr;
     });
   });
 });
