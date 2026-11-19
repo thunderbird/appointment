@@ -2,6 +2,7 @@ import datetime
 from datetime import time
 from unittest.mock import MagicMock
 
+import pytest
 from freezegun import freeze_time
 
 from appointment.database import schemas
@@ -124,6 +125,59 @@ class TestIsAValidBookingTime:
         is_valid = is_this_a_valid_booking_time(schedule, s_a.slot)
 
         assert is_valid is True
+
+    @pytest.mark.parametrize(
+        'timezone,start_time,end_time,slot_start,expected',
+        [
+            # 9:00-17:00 AEDT is 22:00-06:00 UTC: 11:00 and 16:00 AEDT fall on the next UTC date
+            ('Australia/Sydney', '22:00', '06:00', '2024-11-19T00:00:00Z', True),
+            ('Australia/Sydney', '22:00', '06:00', '2024-11-19T05:00:00Z', True),
+            ('Australia/Sydney', '22:00', '06:00', '2024-11-19T06:00:00Z', False),
+            ('Australia/Sydney', '22:00', '06:00', '2024-11-18T21:00:00Z', False),
+            # 9:00-17:00 PST is 17:00-01:00 UTC: 16:00 PST is 00:00 UTC the next day
+            ('America/Los_Angeles', '17:00', '01:00', '2024-11-20T00:00:00Z', True),
+            ('America/Los_Angeles', '17:00', '01:00', '2024-11-20T01:00:00Z', False),
+        ],
+    )
+    def test_slot_on_next_utc_date(self, make_schedule, timezone, start_time, end_time, slot_start, expected):
+        schedule = make_schedule(
+            active=True,
+            start_date=datetime.date(2024, 11, 1),
+            end_date=None,
+            earliest_booking=0,
+            farthest_booking=20160,
+            weekdays=[1, 2, 3, 4, 5],
+            slot_duration=60,
+            start_time=start_time,
+            end_time=end_time,
+            timezone=timezone,
+            time_updated=datetime.datetime(2024, 11, 15, 12, 0, 0, tzinfo=datetime.UTC),
+        )
+        slot = schemas.AvailabilitySlotAttendee(
+            slot={'start': slot_start, 'duration': 60},
+            attendee={'name': 'a', 'email': 'a@example.org', 'timezone': timezone},
+        ).slot
+
+        assert is_this_a_valid_booking_time(schedule, slot) is expected
+
+    def test_window_saved_before_dst_starts(self, make_schedule):
+        # 16:00-20:00 PST was saved as 00:00-04:00 UTC in January; in July 16:00 PDT is 23:00 UTC
+        schedule = make_schedule(
+            active=True,
+            start_date=datetime.date(2025, 1, 1),
+            end_date=None,
+            earliest_booking=0,
+            farthest_booking=525600,
+            weekdays=[1, 2, 3, 4, 5],
+            slot_duration=60,
+            start_time='00:00',
+            end_time='04:00',
+            timezone='America/Los_Angeles',
+            time_updated=datetime.datetime(2025, 1, 15, 12, 0, 0, tzinfo=datetime.UTC),
+        )
+        slot = schemas.SlotBase(start=datetime.datetime(2025, 7, 15, 23, 0, tzinfo=datetime.UTC), duration=60)
+
+        assert is_this_a_valid_booking_time(schedule, slot) is True
 
     def test_pst_to_pdt_change(self, make_schedule):
         request_data = {
