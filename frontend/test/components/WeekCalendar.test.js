@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, test } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia } from 'pinia';
 import dayjs from 'dayjs';
@@ -71,5 +71,129 @@ describe('WeekCalendar', () => {
     );
 
     expect(gridPosition(wrapper.get('.remote-event'))).toEqual({ column: '7', row: '3' });
+  });
+
+  it('splits multi-day events across calendar day columns and clamps height to day boundaries', () => {
+    wrapper = mount(
+      WeekCalendar,
+      getMountOptions({
+        events: [
+          {
+            title: 'Multi-Day Workshop',
+            start: '2026-11-10T09:00:00+00:00', // Tuesday 09:00
+            end: '2026-11-12T15:00:00+00:00', // Thursday 15:00
+          },
+        ],
+      })
+    );
+
+    const remoteEvents = wrapper.findAll('.remote-event');
+    expect(remoteEvents).toHaveLength(3);
+
+    // Tuesday: Column 4 (Tue), starts at 09:00 (row 10), duration 15h = 900px (- 2px gap = 898px)
+    expect(gridPosition(remoteEvents[0])).toEqual({ column: '4', row: '10' });
+    expect(remoteEvents[0].element.style.height).toBe('max(1.5rem, 898px)');
+
+    // Wednesday: Column 5 (Wed), starts at 00:00 (row 1), duration 24h = 1440px (- 2px gap = 1438px)
+    expect(gridPosition(remoteEvents[1])).toEqual({ column: '5', row: '1' });
+    expect(remoteEvents[1].element.style.height).toBe('max(1.5rem, 1438px)');
+
+    // Thursday: Column 6 (Thu), starts at 00:00 (row 1), duration 15h = 900px (- 2px gap = 898px)
+    expect(gridPosition(remoteEvents[2])).toEqual({ column: '6', row: '1' });
+    expect(remoteEvents[2].element.style.height).toBe('max(1.5rem, 898px)');
+  });
+
+  it('isolates lane calculations across midnight boundary', () => {
+    wrapper = mount(
+      WeekCalendar,
+      getMountOptions({
+        events: [
+          {
+            title: 'Late Night Event',
+            start: '2026-11-10T23:45:00+00:00', // Tuesday 23:45 - 23:55
+            end: '2026-11-10T23:55:00+00:00',
+          },
+          {
+            title: 'Early Morning Event',
+            start: '2026-11-11T00:05:00+00:00', // Wednesday 00:05 - 00:15 (only 10 mins apart across midnight)
+            end: '2026-11-11T00:15:00+00:00',
+          },
+        ],
+      })
+    );
+
+    const remoteEvents = wrapper.findAll('.remote-event');
+    expect(remoteEvents).toHaveLength(2);
+
+    const tuesdayEvent = remoteEvents.find((el) => gridPosition(el).column === '4');
+    const wednesdayEvent = remoteEvents.find((el) => gridPosition(el).column === '5');
+
+    // Both events must retain full width (1 total lane) because the midnight boundary isolates lanes per day
+    expect(tuesdayEvent.element.style.getPropertyValue('--total-lanes')).toBe('1');
+    expect(tuesdayEvent.element.style.getPropertyValue('--current-lane')).toBe('0');
+    expect(wednesdayEvent.element.style.getPropertyValue('--total-lanes')).toBe('1');
+    expect(wednesdayEvent.element.style.getPropertyValue('--current-lane')).toBe('0');
+  });
+
+  test.each([
+    {
+      description: 'spans all 24 visual grid rows on Daylight Saving Time transition days',
+      activeDateRange: { start: '2026-03-29', end: '2026-04-04' },
+      event: {
+        title: 'Full Day Event on DST day',
+        start: '2026-03-29T00:00:00+00:00',
+        end: '2026-03-30T00:00:00+01:00',
+      },
+      expectedHeight: 'max(1.5rem, 1438px)',
+    },
+    {
+      description: 'preserves positive duration for bookings crossing the repeated fall-back DST hour',
+      activeDateRange: { start: '2026-10-25', end: '2026-10-31' },
+      event: {
+        title: 'Repeated Hour Booking',
+        start: '2026-10-25T01:30:00+01:00',
+        end: '2026-10-25T01:15:00+00:00',
+      },
+      expectedHeight: 'max(1.5rem, 43px)',
+    },
+  ])('$description', ({ activeDateRange, event, expectedHeight }) => {
+    wrapper = mount(
+      WeekCalendar,
+      getMountOptions({
+        activeDateRange,
+        timezone: 'Europe/London',
+        events: [event],
+      })
+    );
+
+    const remoteEvents = wrapper.findAll('.remote-event');
+    expect(remoteEvents).toHaveLength(1);
+    expect(remoteEvents[0].element.style.height).toBe(expectedHeight);
+  });
+
+  it('keeps all-day events on the correct calendar date regardless of display timezone', () => {
+    wrapper = mount(
+      WeekCalendar,
+      getMountOptions({
+        activeDateRange: { start: '2026-11-08', end: '2026-11-14' },
+        timezone: 'America/Vancouver', // Vancouver is 8 hours behind London/UTC
+        events: [
+          {
+            title: 'All-Day Holiday',
+            start: '2026-11-10',
+            end: '2026-11-11',
+            all_day: true,
+          },
+        ],
+      })
+    );
+
+    const allDayItems = wrapper.findAll('.all-day-event-item');
+    expect(allDayItems).toHaveLength(1);
+
+    // Tuesday Nov 10 is the 3rd day column (index 2 in weekdays, Sun=0, Mon=1, Tue=2)
+    // The parent weekday header for Tuesday is at gridColumn: 4
+    const parentHeader = allDayItems[0].element.closest('.calendar-weekday-header');
+    expect(parentHeader.style.gridColumn).toBe('4');
   });
 });

@@ -1,5 +1,11 @@
-import { describe, it, expect, afterEach } from 'vitest';
-import { assignEventLanes, timeFormat } from '@/utils';
+import { describe, it, test, expect, afterEach } from 'vitest';
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+import timezone from 'dayjs/plugin/timezone';
+import { assignEventLanes, splitEventIntoDaySegments, timeFormat } from '@/utils';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 // Mock the browser locale with setting window.navigator.language directly.
 const setLocale = (locale) => {
@@ -95,5 +101,89 @@ describe('assignEventLanes', () => {
       { currentLane: 0, totalLanes: 3 },
       { currentLane: 1, totalLanes: 3 },
     ]);
+  });
+});
+
+describe('splitEventIntoDaySegments', () => {
+  const tz = 'UTC';
+  const weekdays = [
+    dayjs.tz('2026-11-15', tz), // Sun
+    dayjs.tz('2026-11-16', tz), // Mon
+    dayjs.tz('2026-11-17', tz), // Tue
+    dayjs.tz('2026-11-18', tz), // Wed
+    dayjs.tz('2026-11-19', tz), // Thu
+    dayjs.tz('2026-11-20', tz), // Fri
+    dayjs.tz('2026-11-21', tz), // Sat
+  ];
+
+  it('keeps single-day event as a single segment', () => {
+    const event = {
+      title: 'Meeting',
+      start: '2026-11-17T10:00:00Z',
+      end: '2026-11-17T11:30:00Z',
+    };
+
+    const segments = splitEventIntoDaySegments(event, weekdays, dayjs, tz);
+    expect(segments).toHaveLength(1);
+    expect(segments[0].title).toBe('Meeting');
+    expect(segments[0].start).toBe(dayjs.tz('2026-11-17T10:00:00Z', tz).format());
+    expect(segments[0].end).toBe(dayjs.tz('2026-11-17T11:30:00Z', tz).format());
+    expect(segments[0].originalStart).toBe(event.start);
+    expect(segments[0].originalEnd).toBe(event.end);
+  });
+
+  test.each([
+    {
+      description: 'splits multi-day event into daily segments bounded by day boundaries',
+      event: { title: 'Conference', start: '2026-11-17T09:00:00Z', end: '2026-11-19T15:00:00Z' },
+      expected: [
+        ['2026-11-17T09:00:00Z', '2026-11-18T00:00:00Z'],
+        ['2026-11-18T00:00:00Z', '2026-11-19T00:00:00Z'],
+        ['2026-11-19T00:00:00Z', '2026-11-19T15:00:00Z'],
+      ],
+    },
+    {
+      description: 'splits overnight event crossing midnight into two segments',
+      event: { title: 'Night Shift', start: '2026-11-17T22:00:00Z', end: '2026-11-18T04:00:00Z' },
+      expected: [
+        ['2026-11-17T22:00:00Z', '2026-11-18T00:00:00Z'],
+        ['2026-11-18T00:00:00Z', '2026-11-18T04:00:00Z'],
+      ],
+    },
+    {
+      description: 'does not create an empty segment if an event ends exactly at midnight',
+      event: { title: 'Late Evening', start: '2026-11-17T20:00:00Z', end: '2026-11-18T00:00:00Z' },
+      expected: [['2026-11-17T20:00:00Z', '2026-11-18T00:00:00Z']],
+    },
+    {
+      description: 'includes segments within the active week for events starting before the week',
+      event: { title: 'Ongoing Event', start: '2026-11-14T10:00:00Z', end: '2026-11-16T12:00:00Z' },
+      expected: [
+        ['2026-11-15T00:00:00Z', '2026-11-16T00:00:00Z'],
+        ['2026-11-16T00:00:00Z', '2026-11-16T12:00:00Z'],
+      ],
+    },
+    {
+      description: 'retains zero-length events with equal endpoints as a single visible segment',
+      event: { title: 'Reminder', start: '2026-11-17T10:00:00Z', end: '2026-11-17T10:00:00Z' },
+      expected: [['2026-11-17T10:00:00Z', '2026-11-17T10:00:00Z']],
+    },
+  ])('$description', ({ event, expected }) => {
+    const segments = splitEventIntoDaySegments(event, weekdays, dayjs, tz);
+    expect(segments.map((s) => [s.start, s.end])).toEqual(
+      expected.map(([start, end]) => [dayjs.tz(start, tz).format(), dayjs.tz(end, tz).format()])
+    );
+    expect(segments.every((s) => s.originalStart === event.start && s.originalEnd === event.end)).toBe(true);
+  });
+
+  it('returns empty array for invalid or non-chronological events', () => {
+    expect(splitEventIntoDaySegments({ start: 'invalid', end: 'invalid' }, weekdays, dayjs)).toEqual([]);
+    expect(
+      splitEventIntoDaySegments(
+        { start: '2026-11-17T12:00:00Z', end: '2026-11-17T10:00:00Z' },
+        weekdays,
+        dayjs
+      )
+    ).toEqual([]);
   });
 });

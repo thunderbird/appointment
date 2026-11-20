@@ -5,7 +5,7 @@ import { dayjsKey } from '@/keys';
 import { useBookingViewStore } from '@/stores/booking-view-store';
 import { useUserStore } from '@/stores/user-store';
 import EventPopup from '@/elements/EventPopup.vue';
-import { assignEventLanes, initialEventPopupData, showEventPopup, timeFormat } from '@/utils';
+import { assignEventLanes, initialEventPopupData, showEventPopup, splitEventIntoDaySegments, timeFormat } from '@/utils';
 import { Appointment, EventPopup as EventPopupType, GridElement, GridTimeSlot, RemoteEvent, Slot } from '@/models';
 import { BookingStatus, DateFormatStrings } from '@/definitions';
 import { Dayjs } from 'dayjs';
@@ -99,11 +99,13 @@ function syncScroll(source: 'header' | 'body') {
 }
 
 function onRemoteEventMouseEnter(event: MouseEvent, remoteEvent) {
+  const origStart = remoteEvent.originalStart || remoteEvent.start;
+  const origEnd = remoteEvent.originalEnd || remoteEvent.end;
   const popupEvent = {
     ...remoteEvent,
     time: {
-      start: remoteEvent.all_day ? remoteEvent.start : dj(remoteEvent.start).tz(tz.value),
-      end: remoteEvent.all_day ? remoteEvent.end : dj(remoteEvent.end).tz(tz.value),
+      start: remoteEvent.all_day ? origStart : dj(origStart).tz(tz.value),
+      end: remoteEvent.all_day ? origEnd : dj(origEnd).tz(tz.value),
     },
     customData: {
       calendar_title: remoteEvent.calendar_title,
@@ -133,7 +135,7 @@ function calculateEventGridPosition(
 
   // 1. Calculate grid column based on the event's position within the week
   // Find the day of the week for this event (0-6, where 0 is the first day of the week)
-  const eventDayOfWeek = eventStart.diff(rangeStart.value, 'day');
+  const eventDayOfWeek = eventStart.startOf('day').diff(rangeStart.value.startOf('day'), 'day');
 
   // Safety check: ensure the event is within the displayed week range
   if (eventDayOfWeek < 0 || eventDayOfWeek > 6) {
@@ -150,12 +152,28 @@ function calculateEventGridPosition(
   const startMinutes = eventStart.minute();
   const calculatedTopOffset = (startMinutes / 60) * ROW_HEIGHT_PX + topOffset;
 
-  // 4. Calculate event duration and height
-  // Handle events that cross midnight
-  let durationMinutes = eventEnd.diff(eventStart, 'minute');
-  if (durationMinutes <= 0) {
-    // Event crosses midnight, calculate duration to end of day
-    durationMinutes = 24 * 60 - (startHour * 60 + startMinutes);
+  // 4. Calculate event duration and height using wall-clock minutes for the visual grid.
+  // This ensures multi-day slices and full-day events span all 24 visual grid rows even on DST transition days.
+  const startMinutesTotal = startHour * 60 + startMinutes;
+  const endMinutesTotal = eventStart.isSame(eventEnd, 'day')
+    ? eventEnd.hour() * 60 + eventEnd.minute()
+    : 24 * 60;
+
+  let durationMinutes = endMinutesTotal - startMinutesTotal;
+
+  // On autumn DST "fall-back" transition days, a booking crossing the repeated hour
+  // can have a positive physical duration even though wall-clock difference is <= 0.
+  // Fall back to elapsed physical minutes if the event has a positive duration.
+  if (durationMinutes <= 0 && eventEnd.valueOf() > eventStart.valueOf()) {
+    durationMinutes = eventEnd.diff(eventStart, 'minute');
+  }
+
+  const maxRemainingMinutesInDay = 24 * 60 - startMinutesTotal;
+
+  if (durationMinutes < 0) {
+    durationMinutes = 0;
+  } else if (durationMinutes > maxRemainingMinutesInDay) {
+    durationMinutes = maxRemainingMinutesInDay;
   }
 
   // Height based on duration with a minimum height
@@ -242,105 +260,181 @@ const filteredPendingAppointmentsForGrid = computed(() => {
   const slots = timeSlotsForGrid.value;
   if (!slots.length) return [];
 
+  const weekStart = rangeStart.value.startOf('day');
+  const weekEnd = rangeEnd.value.endOf('day');
+
   const pendingAppointmentsWithinActiveWeek = props.pendingAppointments.filter((appointment) => {
-    const appointmentStart = dj(appointment.slots[0].start);
-    return appointmentStart.isBetween(rangeStart.value, rangeEnd.value, 'day', '[]');
+    const appointmentStart = dj(appointment.slots[0].start).tz(tz.value);
+    const appointmentEnd = appointmentStart.add(appointment.duration, 'minute');
+    return appointmentStart.isBefore(weekEnd) && appointmentEnd.isAfter(weekStart);
   });
 
-  return pendingAppointmentsWithinActiveWeek
-    .map((appointment) => {
-      const appointmentStart = dj(appointment.slots[0].start);
-      const appointmentEnd = appointmentStart.add(appointment.duration, 'minute');
+  const segments: any[] = [];
+  for (const appointment of pendingAppointmentsWithinActiveWeek) {
+    const appointmentStart = dj(appointment.slots[0].start).tz(tz.value);
+    const appointmentEnd = appointmentStart.add(appointment.duration, 'minute');
+    const daySegments = splitEventIntoDaySegments(
+      {
+        start: appointmentStart,
+        end: appointmentEnd,
+      },
+      weekdays.value,
+      dj,
+      tz.value
+    );
 
-      const gridPosition = calculateEventGridPosition(appointmentStart, appointmentEnd, slots, 2, 0);
+    for (const segment of daySegments) {
+      const segStart = dj(segment.start).tz(tz.value);
+      const segEnd = dj(segment.end).tz(tz.value);
+      const gridPosition = calculateEventGridPosition(segStart, segEnd, slots, 2, 0);
 
       if (gridPosition) {
-        return {
+        segments.push({
           ...appointment,
           ...gridPosition,
-
-          // Add properties to match the remote event structure for consistent rendering
           title: appointment.title,
-          start: appointment.slots[0].start,
-          end: appointmentEnd.format(),
+          start: segment.start,
+          end: segment.end,
+          originalStart: segment.originalStart,
+          originalEnd: segment.originalEnd,
           calendar_title: appointment.calendar_title,
           calendar_color: appointment.calendar_color,
-        };
+        });
       }
-    })
-    .filter(Boolean);
+    }
+  }
+
+  return segments;
 });
 
 /**
  * Generates an array of remote events that fall within the active week with grid positioning info.
  * This intentionally excludes all-day events since those are not rendered inside the grid.
- * Note we are still fetching monthly events to reduce the roundtrips
+ * Events spanning multiple days or crossing midnight are split across individual days.
  */
 const filteredRemoteEventsForGrid = computed(() => {
   const slots = timeSlotsForGrid.value;
   if (!slots.length) return [];
 
-  const remoteEventsWithinActiveWeek = props.events.filter(
-    (remoteEvent) =>
-      !remoteEvent.all_day &&
-      dj(remoteEvent.start).tz(tz.value).isBetween(rangeStart.value, rangeEnd.value, 'day', '[]')
-  );
+  const weekStart = rangeStart.value.startOf('day');
+  const weekEnd = rangeEnd.value.endOf('day');
 
-  return remoteEventsWithinActiveWeek
-    .map((remoteEvent) => {
-      const eventStart = dj(remoteEvent.start).tz(tz.value);
-      const eventEnd = dj(remoteEvent.end).tz(tz.value);
+  const remoteEventsWithinActiveWeek = props.events.filter((remoteEvent) => {
+    if (remoteEvent.all_day) return false;
+    const eventStart = dj(remoteEvent.start).tz(tz.value);
+    const eventEnd = dj(remoteEvent.end).tz(tz.value);
+    return eventStart.isBefore(weekEnd) && eventEnd.isAfter(weekStart);
+  });
 
-      const gridPosition = calculateEventGridPosition(eventStart, eventEnd, slots, 2, 0);
+  const segments: any[] = [];
+  for (const remoteEvent of remoteEventsWithinActiveWeek) {
+    const daySegments = splitEventIntoDaySegments(
+      remoteEvent,
+      weekdays.value,
+      dj,
+      tz.value
+    );
+
+    for (const segment of daySegments) {
+      const segStart = dj(segment.start).tz(tz.value);
+      const segEnd = dj(segment.end).tz(tz.value);
+      const gridPosition = calculateEventGridPosition(segStart, segEnd, slots, 2, 0);
+
       const hasPendingPlaceholder = filteredPendingAppointmentsForGrid.value.find(
-        (a) => a.title === remoteEvent.title && eventStart.isSame(a.start)
+        (a) => a.title === remoteEvent.title && segStart.isSame(dj(a.start))
       );
 
       // Only show remote event, if we have a valid grid position and if we don't already have calculated
       // a placeholder for a pending (HOLD) event
       if (gridPosition && !hasPendingPlaceholder) {
-        return {
+        segments.push({
           ...remoteEvent,
           ...gridPosition,
-        };
+          start: segment.start,
+          end: segment.end,
+          originalStart: segment.originalStart,
+          originalEnd: segment.originalEnd,
+        });
       }
-    })
-    .filter(Boolean);
+    }
+  }
+
+  return segments;
 });
 
 /**
- * Maps remote events and pending appointments to a lane and total lane count, to handle time overlapping
+ * Maps remote events and pending appointments to a lane and total lane count, to handle time overlapping.
+ * Lanes are grouped and assigned strictly per day column to prevent multi-day events from shrinking events on other days.
  */
 const eventLanes = computed(() => {
   const events = [...filteredRemoteEventsForGrid.value, ...filteredPendingAppointmentsForGrid.value];
-  // Duration matching the minimum event height, so short events whose blocks overlap are placed side by side too
-  const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const remPx = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
   const minDuration = ((MIN_EVENT_HEIGHT_REM * remPx) / ROW_HEIGHT_PX) * 60 * 60 * 1000;
-  const lanes = assignEventLanes(
-    events.map((e) => ({ start: dj(e.start).valueOf(), end: dj(e.end).valueOf() })),
-    minDuration
-  );
 
-  return new Map(events.map((e, i) => [e, lanes[i]]));
+  const resultMap = new Map();
+  const eventsByColumn = new Map<number, typeof events>();
+
+  for (const e of events) {
+    const col = e.gridColumn;
+    if (!eventsByColumn.has(col)) {
+      eventsByColumn.set(col, []);
+    }
+    eventsByColumn.get(col)!.push(e);
+  }
+
+  for (const colEvents of eventsByColumn.values()) {
+    const lanes = assignEventLanes(
+      colEvents.map((e) => ({ start: dj(e.start).valueOf(), end: dj(e.end).valueOf() })),
+      minDuration
+    );
+    colEvents.forEach((e, i) => resultMap.set(e, lanes[i]));
+  }
+
+  return resultMap;
 });
 
 /**
  * Generates an array of all-day remote events per weekday that fall within the active week.
+ * All-day events are timezone-independent calendar dates, so comparisons are done on the date portions directly.
  */
 const filteredRemoteAllDayEvents = computed(() => {
   const slots = timeSlotsForGrid.value;
   if (!slots.length) return [];
 
   const { start, end } = props.activeDateRange;
-  const remoteAllDayEventsWithinActiveWeek = props.events.filter(
-    (remoteEvent) => dj(remoteEvent.start).isBetween(start, end, 'day', '[]') && remoteEvent.all_day
-  );
+  const rangeStartStr = start.slice(0, 10);
+  const rangeEndStr = end.slice(0, 10);
+
+  const remoteAllDayEventsWithinActiveWeek = props.events.filter((remoteEvent) => {
+    if (!remoteEvent.all_day) return false;
+    const startDateStr = remoteEvent.start.slice(0, 10);
+    const rawEndStr = remoteEvent.end ? remoteEvent.end.slice(0, 10) : startDateStr;
+    const isExclusive =
+      remoteEvent.end &&
+      rawEndStr > startDateStr &&
+      (!remoteEvent.end.includes('T') || remoteEvent.end.includes('T00:00:00'));
+    const endDateStr = isExclusive
+      ? dj(rawEndStr).subtract(1, 'day').format('YYYY-MM-DD')
+      : rawEndStr;
+
+    return startDateStr <= rangeEndStr && endDateStr >= rangeStartStr;
+  });
 
   return weekdays.value.map((day) => {
-    // All-day events are timezone independent dates, so compare dates only
-    return remoteAllDayEventsWithinActiveWeek.filter(
-      (remoteEvent) => dj(remoteEvent.start).format('YYYY-MM-DD') === day.format('YYYY-MM-DD')
-    );
+    const dayStr = day.format('YYYY-MM-DD');
+    return remoteAllDayEventsWithinActiveWeek.filter((remoteEvent) => {
+      const startDateStr = remoteEvent.start.slice(0, 10);
+      const rawEndStr = remoteEvent.end ? remoteEvent.end.slice(0, 10) : startDateStr;
+      const isExclusive =
+        remoteEvent.end &&
+        rawEndStr > startDateStr &&
+        (!remoteEvent.end.includes('T') || remoteEvent.end.includes('T00:00:00'));
+      const endDateStr = isExclusive
+        ? dj(rawEndStr).subtract(1, 'day').format('YYYY-MM-DD')
+        : rawEndStr;
+
+      return dayStr >= startDateStr && dayStr <= endDateStr;
+    });
   });
 });
 
@@ -507,7 +601,7 @@ onMounted(() => {
       <!-- Remote events -->
       <div
         v-for="remoteEvent in filteredRemoteEventsForGrid"
-        :key="remoteEvent?.start"
+        :key="`${remoteEvent?.id || remoteEvent?.title || 'remote'}-${remoteEvent?.start}-${remoteEvent?.gridColumn}`"
         class="event-item remote-event"
         :class="{ dark: isDarkMode }"
         :style="{
@@ -528,7 +622,7 @@ onMounted(() => {
       <!-- Pending appointments -->
       <div
         v-for="pendingAppointment in filteredPendingAppointmentsForGrid"
-        :key="pendingAppointment?.id"
+        :key="`${pendingAppointment?.id || 'pending'}-${pendingAppointment?.start}-${pendingAppointment?.gridColumn}`"
         class="event-item pending-appointment"
         :class="{ dark: isDarkMode }"
         :style="{
