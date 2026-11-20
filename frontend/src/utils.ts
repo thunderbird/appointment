@@ -408,6 +408,60 @@ export const assignEventLanes = (
   return events.map((event) => result.get(event));
 };
 
+function resolveDayjsAndTimezone(djOrTz?: any, tz?: string): { dj: typeof dayjs; timezone?: string } {
+  if (typeof djOrTz === 'function') {
+    return { dj: djOrTz, timezone: tz };
+  }
+  if (typeof djOrTz === 'string') {
+    return { dj: dayjs, timezone: djOrTz };
+  }
+  return { dj: dayjs, timezone: tz };
+}
+
+function getDayBoundaries(day: Dayjs, dj: typeof dayjs, timezone?: string) {
+  const dayDateStr = day.format('YYYY-MM-DD');
+  const nextDateStr = day.add(1, 'day').format('YYYY-MM-DD');
+  if (timezone && dj.tz) {
+    return {
+      dayStart: dj.tz(dayDateStr, timezone),
+      dayEnd: dj.tz(nextDateStr, timezone),
+    };
+  }
+  return {
+    dayStart: day.startOf('day'),
+    dayEnd: day.add(1, 'day').startOf('day'),
+  };
+}
+
+function sliceSegmentForDay(
+  eventStart: Dayjs,
+  eventEnd: Dayjs,
+  dayStart: Dayjs,
+  dayEnd: Dayjs
+): { start: string; end: string } | null {
+  const isZeroLength = eventStart.valueOf() === eventEnd.valueOf();
+  const startsBeforeDayEnd = eventStart.valueOf() < dayEnd.valueOf();
+  const endsAfterDayStart = isZeroLength
+    ? eventStart.valueOf() >= dayStart.valueOf()
+    : eventEnd.valueOf() > dayStart.valueOf();
+
+  if (!startsBeforeDayEnd || !endsAfterDayStart) {
+    return null;
+  }
+
+  const segStart = eventStart.valueOf() > dayStart.valueOf() ? eventStart : dayStart;
+  const segEnd = eventEnd.valueOf() < dayEnd.valueOf() ? eventEnd : dayEnd;
+
+  if (segStart.valueOf() > segEnd.valueOf()) {
+    return null;
+  }
+
+  return {
+    start: segStart.format(),
+    end: segEnd.format(),
+  };
+}
+
 /**
  * Splits a calendar event across individual days in the active week.
  * Events spanning multiple days or crossing midnight are broken into one segment per day,
@@ -419,15 +473,7 @@ export const splitEventIntoDaySegments = <T extends { start: string | Dayjs; end
   djOrTz?: any,
   tz?: string
 ): Array<T & { start: string; end: string; originalStart: string; originalEnd: string }> => {
-  let dj = dayjs;
-  let timezone = tz;
-
-  if (typeof djOrTz === 'function') {
-    dj = djOrTz;
-  } else if (typeof djOrTz === 'string') {
-    timezone = djOrTz;
-  }
-
+  const { dj, timezone } = resolveDayjsAndTimezone(djOrTz, tz);
   const eventStart = timezone && dj.tz ? dj(event.start).tz(timezone) : dj(event.start);
   const eventEnd = timezone && dj.tz ? dj(event.end).tz(timezone) : dj(event.end);
 
@@ -440,29 +486,17 @@ export const splitEventIntoDaySegments = <T extends { start: string | Dayjs; end
   const segments: Array<T & { start: string; end: string; originalStart: string; originalEnd: string }> = [];
 
   for (const day of weekdays) {
-    const dayDateStr = day.format('YYYY-MM-DD');
-    const dayStart = timezone && dj.tz ? dj.tz(dayDateStr, timezone) : day.startOf('day');
-    const nextDateStr = day.add(1, 'day').format('YYYY-MM-DD');
-    const dayEnd = timezone && dj.tz ? dj.tz(nextDateStr, timezone) : day.add(1, 'day').startOf('day');
+    const { dayStart, dayEnd } = getDayBoundaries(day, dj, timezone);
+    const slice = sliceSegmentForDay(eventStart, eventEnd, dayStart, dayEnd);
 
-    const overlapsDay =
-      eventStart.valueOf() < dayEnd.valueOf() &&
-      (eventEnd.valueOf() > dayStart.valueOf() ||
-        (eventStart.valueOf() === eventEnd.valueOf() && eventStart.valueOf() >= dayStart.valueOf()));
-
-    if (overlapsDay) {
-      const segStart = eventStart.valueOf() > dayStart.valueOf() ? eventStart : dayStart;
-      const segEnd = eventEnd.valueOf() < dayEnd.valueOf() ? eventEnd : dayEnd;
-
-      if (segStart.valueOf() <= segEnd.valueOf()) {
-        segments.push({
-          ...event,
-          start: segStart.format(),
-          end: segEnd.format(),
-          originalStart,
-          originalEnd,
-        });
-      }
+    if (slice) {
+      segments.push({
+        ...event,
+        start: slice.start,
+        end: slice.end,
+        originalStart,
+        originalEnd,
+      });
     }
   }
 

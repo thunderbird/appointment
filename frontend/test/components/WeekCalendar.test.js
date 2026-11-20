@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, test } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createPinia } from 'pinia';
 import dayjs from 'dayjs';
@@ -135,52 +135,40 @@ describe('WeekCalendar', () => {
     expect(wednesdayEvent.element.style.getPropertyValue('--current-lane')).toBe('0');
   });
 
-  it('spans all 24 visual grid rows on Daylight Saving Time transition days', () => {
-    // March 29, 2026 is the spring-forward DST transition day in Europe/London (only 23 elapsed hours)
+  test.each([
+    {
+      description: 'spans all 24 visual grid rows on Daylight Saving Time transition days',
+      activeDateRange: { start: '2026-03-29', end: '2026-04-04' },
+      event: {
+        title: 'Full Day Event on DST day',
+        start: '2026-03-29T00:00:00+00:00',
+        end: '2026-03-30T00:00:00+01:00',
+      },
+      expectedHeight: 'max(1.5rem, 1438px)',
+    },
+    {
+      description: 'preserves positive duration for bookings crossing the repeated fall-back DST hour',
+      activeDateRange: { start: '2026-10-25', end: '2026-10-31' },
+      event: {
+        title: 'Repeated Hour Booking',
+        start: '2026-10-25T01:30:00+01:00',
+        end: '2026-10-25T01:15:00+00:00',
+      },
+      expectedHeight: 'max(1.5rem, 43px)',
+    },
+  ])('$description', ({ activeDateRange, event, expectedHeight }) => {
     wrapper = mount(
       WeekCalendar,
       getMountOptions({
-        activeDateRange: { start: '2026-03-29', end: '2026-04-04' },
+        activeDateRange,
         timezone: 'Europe/London',
-        events: [
-          {
-            title: 'Full Day Event on DST day',
-            start: '2026-03-29T00:00:00+00:00',
-            end: '2026-03-30T00:00:00+01:00',
-          },
-        ],
+        events: [event],
       })
     );
 
     const remoteEvents = wrapper.findAll('.remote-event');
     expect(remoteEvents).toHaveLength(1);
-    // Even though elapsed time is 23h, visual grid height must cover all 24 visual rows (1440px - 2px gap = 1438px)
-    expect(remoteEvents[0].element.style.height).toBe('max(1.5rem, 1438px)');
-  });
-
-  it('preserves positive duration for bookings crossing the repeated fall-back DST hour', () => {
-    // October 25, 2026 is the autumn fall-back DST transition day in Europe/London.
-    // At 02:00 BST (+01:00), clocks move back 1 hour to 01:00 GMT (+00:00).
-    // A booking from 01:30+01:00 to 01:15+00:00 lasts 45 physical minutes.
-    wrapper = mount(
-      WeekCalendar,
-      getMountOptions({
-        activeDateRange: { start: '2026-10-25', end: '2026-10-31' },
-        timezone: 'Europe/London',
-        events: [
-          {
-            title: 'Repeated Hour Booking',
-            start: '2026-10-25T01:30:00+01:00',
-            end: '2026-10-25T01:15:00+00:00',
-          },
-        ],
-      })
-    );
-
-    const remoteEvents = wrapper.findAll('.remote-event');
-    expect(remoteEvents).toHaveLength(1);
-    // 45 minutes duration = 45px - 2px gap = 43px height (instead of collapsing to minimum height)
-    expect(remoteEvents[0].element.style.height).toBe('max(1.5rem, 43px)');
+    expect(remoteEvents[0].element.style.height).toBe(expectedHeight);
   });
 
   it('keeps all-day events on the correct calendar date regardless of display timezone', () => {

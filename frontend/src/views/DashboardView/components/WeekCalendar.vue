@@ -368,7 +368,7 @@ const filteredRemoteEventsForGrid = computed(() => {
  */
 const eventLanes = computed(() => {
   const events = [...filteredRemoteEventsForGrid.value, ...filteredPendingAppointmentsForGrid.value];
-  const remPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+  const remPx = Number.parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
   const minDuration = ((MIN_EVENT_HEIGHT_REM * remPx) / ROW_HEIGHT_PX) * 60 * 60 * 1000;
 
   const resultMap = new Map();
