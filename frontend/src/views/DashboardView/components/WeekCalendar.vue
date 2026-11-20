@@ -160,6 +160,14 @@ function calculateEventGridPosition(
     : 24 * 60;
 
   let durationMinutes = endMinutesTotal - startMinutesTotal;
+
+  // On autumn DST "fall-back" transition days, a booking crossing the repeated hour
+  // can have a positive physical duration even though wall-clock difference is <= 0.
+  // Fall back to elapsed physical minutes if the event has a positive duration.
+  if (durationMinutes <= 0 && eventEnd.valueOf() > eventStart.valueOf()) {
+    durationMinutes = eventEnd.diff(eventStart, 'minute');
+  }
+
   const maxRemainingMinutesInDay = 24 * 60 - startMinutesTotal;
 
   if (durationMinutes < 0) {

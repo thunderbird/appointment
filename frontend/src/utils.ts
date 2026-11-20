@@ -431,7 +431,7 @@ export const splitEventIntoDaySegments = <T extends { start: string | Dayjs; end
   const eventStart = timezone && dj.tz ? dj(event.start).tz(timezone) : dj(event.start);
   const eventEnd = timezone && dj.tz ? dj(event.end).tz(timezone) : dj(event.end);
 
-  if (!eventStart.isValid() || !eventEnd.isValid() || eventEnd.isBefore(eventStart)) {
+  if (!eventStart.isValid() || !eventEnd.isValid() || eventEnd.valueOf() < eventStart.valueOf()) {
     return [];
   }
 
@@ -446,15 +446,15 @@ export const splitEventIntoDaySegments = <T extends { start: string | Dayjs; end
     const dayEnd = timezone && dj.tz ? dj.tz(nextDateStr, timezone) : day.add(1, 'day').startOf('day');
 
     const overlapsDay =
-      eventStart.isBefore(dayEnd) &&
-      (eventEnd.isAfter(dayStart) ||
-        (eventStart.isSame(eventEnd) && (eventStart.isSame(dayStart) || eventStart.isAfter(dayStart))));
+      eventStart.valueOf() < dayEnd.valueOf() &&
+      (eventEnd.valueOf() > dayStart.valueOf() ||
+        (eventStart.valueOf() === eventEnd.valueOf() && eventStart.valueOf() >= dayStart.valueOf()));
 
     if (overlapsDay) {
-      const segStart = eventStart.isAfter(dayStart) ? eventStart : dayStart;
-      const segEnd = eventEnd.isBefore(dayEnd) ? eventEnd : dayEnd;
+      const segStart = eventStart.valueOf() > dayStart.valueOf() ? eventStart : dayStart;
+      const segEnd = eventEnd.valueOf() < dayEnd.valueOf() ? eventEnd : dayEnd;
 
-      if (!segStart.isAfter(segEnd)) {
+      if (segStart.valueOf() <= segEnd.valueOf()) {
         segments.push({
           ...event,
           start: segStart.format(),

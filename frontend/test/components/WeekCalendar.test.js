@@ -158,6 +158,31 @@ describe('WeekCalendar', () => {
     expect(remoteEvents[0].element.style.height).toBe('max(1.5rem, 1438px)');
   });
 
+  it('preserves positive duration for bookings crossing the repeated fall-back DST hour', () => {
+    // October 25, 2026 is the autumn fall-back DST transition day in Europe/London.
+    // At 02:00 BST (+01:00), clocks move back 1 hour to 01:00 GMT (+00:00).
+    // A booking from 01:30+01:00 to 01:15+00:00 lasts 45 physical minutes.
+    wrapper = mount(
+      WeekCalendar,
+      getMountOptions({
+        activeDateRange: { start: '2026-10-25', end: '2026-10-31' },
+        timezone: 'Europe/London',
+        events: [
+          {
+            title: 'Repeated Hour Booking',
+            start: '2026-10-25T01:30:00+01:00',
+            end: '2026-10-25T01:15:00+00:00',
+          },
+        ],
+      })
+    );
+
+    const remoteEvents = wrapper.findAll('.remote-event');
+    expect(remoteEvents).toHaveLength(1);
+    // 45 minutes duration = 45px - 2px gap = 43px height (instead of collapsing to minimum height)
+    expect(remoteEvents[0].element.style.height).toBe('max(1.5rem, 43px)');
+  });
+
   it('keeps all-day events on the correct calendar date regardless of display timezone', () => {
     wrapper = mount(
       WeekCalendar,
