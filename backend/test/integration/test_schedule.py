@@ -1888,3 +1888,79 @@ class TestDecideScheduleAvailabilitySlot:
 
         assert response.status_code == 401, response.text
         assert response.json()['detail']['id'] == 'INVALID_TOKEN'
+
+
+class TestCancelScheduleAvailabilitySlot:
+    @pytest.fixture
+    def setup_slot(
+        self, with_db, make_caldav_calendar, make_schedule, make_appointment, make_appointment_slot, make_attendee
+    ):
+        """Creates a schedule with a single slot, returns a function to configure status and start of that slot"""
+
+        def _setup_slot(booking_status=models.BookingStatus.requested, start=None):
+            with with_db() as db:
+                subscriber = repo.subscriber.get(db, TEST_USER_ID)
+            generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
+            schedule = make_schedule(calendar_id=generated_calendar.id, active=True)
+            attendee = make_attendee()
+            appointment = make_appointment(generated_calendar.id, status=models.AppointmentStatus.opened, slots=[])
+            slot = make_appointment_slot(
+                appointment_id=appointment.id,
+                attendee_id=attendee.id,
+                booking_status=booking_status,
+                booking_tkn='abcd',
+                start=start or datetime.now() + timedelta(days=1),
+            )[0]
+
+            with with_db() as db:
+                db.add(slot)
+                slot.schedule_id = schedule.id
+                db.commit()
+                return slot.id
+
+        return _setup_slot
+
+    @pytest.mark.parametrize('booking_status', [models.BookingStatus.requested, models.BookingStatus.booked])
+    def test_cancel(self, with_db, with_client, setup_slot, booking_status):
+        slot_id = setup_slot(booking_status)
+        data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='abcd').model_dump()
+
+        with patch('appointment.controller.calendar.Tools.send_cancel_vevent') as mock_send_cancel:
+            # No auth headers, the bookee is not logged in
+            response = with_client.put('/schedule/public/availability/cancel', json=data)
+
+            assert response.status_code == 200, response.text
+            mock_send_cancel.assert_called_once()
+
+        with with_db() as db:
+            slot = db.get(models.Slot, slot_id)
+            assert slot.booking_status == models.BookingStatus.cancelled
+
+        # Cancelling the same slot again fails
+        response = with_client.put('/schedule/public/availability/cancel', json=data)
+        assert response.status_code == 404, response.text
+
+    def test_cancel_fails_with_wrong_token(self, with_db, with_client, setup_slot):
+        slot_id = setup_slot()
+        data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='wrong').model_dump()
+
+        response = with_client.put('/schedule/public/availability/cancel', json=data)
+        assert response.status_code == 404, response.text
+
+        with with_db() as db:
+            assert db.get(models.Slot, slot_id).booking_status == models.BookingStatus.requested
+
+    @pytest.mark.parametrize('booking_status', [models.BookingStatus.declined, models.BookingStatus.cancelled])
+    def test_cancel_fails_for_closed_booking(self, with_client, setup_slot, booking_status):
+        slot_id = setup_slot(booking_status)
+        data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='abcd').model_dump()
+
+        response = with_client.put('/schedule/public/availability/cancel', json=data)
+        assert response.status_code == 404, response.text
+
+    def test_cancel_fails_for_past_booking(self, with_client, setup_slot):
+        slot_id = setup_slot(models.BookingStatus.booked, start=datetime.now() - timedelta(days=1))
+        data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='abcd').model_dump()
+
+        response = with_client.put('/schedule/public/availability/cancel', json=data)
+        assert response.status_code == 404, response.text

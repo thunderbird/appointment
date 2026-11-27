@@ -24,6 +24,7 @@ from ..database.schemas import ExternalConnection
 from ..dependencies.auth import get_subscriber, get_subscriber_from_schedule_or_signed_url
 from ..dependencies.database import get_db, get_redis
 from ..dependencies.google import get_google_client
+from ..dependencies.zoom import get_zoom_client
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -614,6 +615,72 @@ def decide_on_schedule_availability_slot(
     handle_schedule_availability_decision(
         data.confirmed, calendar, schedule, subscriber, slot, db, redis, google_client, background_tasks
     )
+
+    return schemas.AvailabilitySlotAttendee(
+        slot=schemas.SlotBase(start=slot.start, duration=slot.duration),
+        attendee=schemas.AttendeeBase(
+            email=slot.attendee.email, name=slot.attendee.name, timezone=slot.attendee.timezone
+        ),
+    )
+
+
+@router.put('/public/availability/cancel', response_model=schemas.AvailabilitySlotAttendee, tags=['no-cache'])
+@limiter.limit('20/minute')
+def cancel_schedule_availability_slot(
+    request: Request,
+    data: schemas.AvailabilitySlotCancel,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    redis=Depends(get_redis),
+    google_client: GoogleClient = Depends(get_google_client),
+):
+    """endpoint for the bookee to cancel their requested or booked time slot via the token sent to them"""
+    slot = repo.slot.get(db, data.slot_id)
+
+    # Only open, upcoming bookings with a matching token can be cancelled
+    if (
+        not slot
+        or not slot.schedule
+        or not slot.appointment
+        or slot.booking_tkn != data.slot_token
+        or slot.booking_status not in (BookingStatus.requested, BookingStatus.booked)
+        or slot.start.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc)
+    ):
+        raise validation.SlotNotFoundException()
+
+    schedule = slot.schedule
+    appointment = slot.appointment
+    calendar = appointment.calendar
+    subscriber = schedule.calendar.owner
+
+    use_google_invite = calendar.provider == CalendarProvider.google and os.getenv('GOOGLE_INVITE_ENABLED') == 'True'
+
+    # If needed, delete the booking's Zoom meeting
+    if slot.meeting_link_id and appointment.meeting_link_provider == MeetingLinkProviderType.zoom:
+        try:
+            get_zoom_client(subscriber).delete_meeting(slot.meeting_link_id)
+        except Exception as ex:
+            sentry_sdk.capture_exception(ex)
+
+    # For Google invites, the delete with sendUpdates handles the cancellation notification
+    if not use_google_invite:
+        Tools().send_cancel_vevent(
+            background_tasks,
+            appointment,
+            slot,
+            subscriber,
+            slot.attendee,
+            schedule_name=schedule.name,
+        )
+
+    # Mark the slot as BookingStatus.cancelled, this also invalidates the owner's confirmation link
+    slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.cancelled)
+    repo.slot.update(db, slot.id, slot_update)
+
+    # Delete the remote (HOLD) event
+    uuid = appointment.external_id if appointment.external_id else str(appointment.uuid)
+    send_updates = SendUpdates.ALL if use_google_invite else SendUpdates.NONE
+    delete_remote_event(uuid, calendar, subscriber, db, redis, google_client, send_updates=send_updates)
 
     return schemas.AvailabilitySlotAttendee(
         slot=schemas.SlotBase(start=slot.start, duration=slot.duration),

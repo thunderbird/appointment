@@ -398,6 +398,11 @@ class AvailabilitySlotConfirmation(BaseModel):
     confirmed: bool | None = False
 
 
+class AvailabilitySlotCancel(BaseModel):
+    slot_id: int
+    slot_token: str
+
+
 class DisconnectGoogleAccountRequest(BaseModel):
     type_id: str
 
