@@ -1,21 +1,23 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue';
+import { computed, inject, ref, useTemplateRef } from 'vue';
 import { timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user-store';
 
 import { LinkButton, PrimaryButton } from '@thunderbirdops/services-ui';
-import { apiUrlKey, dayjsKey } from '@/keys';
+import { apiUrlKey, callKey, dayjsKey } from '@/keys';
 import { BookingResultState } from '@/definitions';
 import { Appointment, Attendee, Slot } from '@/models';
 import { PhArrowRight, PhDownloadSimple, PhConfetti } from '@phosphor-icons/vue';
+import BookingCancelModal from './BookingCancelModal.vue';
 
 const { t } = useI18n();
 const router = useRouter();
 
 const dj = inject(dayjsKey);
 const apiUrl = inject(apiUrlKey);
+const call = inject(callKey);
 const user = useUserStore();
 
 // component properties
@@ -26,10 +28,20 @@ interface Props {
 }
 const props = defineProps<Props>();
 
-const isCancelled = computed(() => props.state === BookingResultState.Cancelled);
+const cancelModal = useTemplateRef('cancelModal');
+const cancelled = ref(false);
+const cancelLoading = ref(false);
+const cancelError = ref('');
+
+// A booking cancelled on this screen overrides the given state
+const currentState = computed(() => (cancelled.value ? BookingResultState.Cancelled : props.state));
+const isCancelled = computed(() => currentState.value === BookingResultState.Cancelled);
+
+// Only bookings with a token can be cancelled by the bookee
+const canCancel = computed(() => !isCancelled.value && !!props.selectedEvent.booking_tkn);
 
 const heading = computed(() => {
-  switch (props.state) {
+  switch (currentState.value) {
     case BookingResultState.Requested:
       return t('info.bookingSuccessfullyRequested');
     case BookingResultState.Cancelled:
@@ -40,7 +52,7 @@ const heading = computed(() => {
 });
 
 const description = computed(() => {
-  switch (props.state) {
+  switch (currentState.value) {
     case BookingResultState.Requested:
       return t('text.hostHasBeenNotified');
     case BookingResultState.Cancelled:
@@ -63,6 +75,31 @@ const date =
   ')';
 
 const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${props.selectedEvent.id}`;
+
+const openCancelModal = () => {
+  cancelError.value = '';
+  cancelModal.value?.show();
+};
+
+// Cancel the booking and switch to the cancelled state on success
+const cancelBooking = async () => {
+  cancelLoading.value = true;
+  cancelError.value = '';
+
+  const { data, error } = await call('schedule/public/availability/cancel')
+    .put({ slot_id: props.selectedEvent.id, slot_token: props.selectedEvent.booking_tkn })
+    .json();
+
+  cancelLoading.value = false;
+
+  if (error.value) {
+    cancelError.value = data.value?.detail?.message ?? t('error.bookingCancelError');
+    return;
+  }
+
+  cancelModal.value?.hide();
+  cancelled.value = true;
+};
 </script>
 
 <template>
@@ -89,8 +126,19 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
         </template>
         {{ t('label.downloadTheIcsFile') }}
       </link-button>
+      <link-button v-if="canCancel" @click="openCancelModal" data-testid="booking-view-cancel-link">
+        {{ t('label.needToCancel') }}
+      </link-button>
     </div>
   </div>
+  <booking-cancel-modal
+    v-if="canCancel"
+    ref="cancelModal"
+    :loading="cancelLoading"
+    :error-message="cancelError"
+    @confirmed="cancelBooking"
+    @dismiss-error="cancelError = ''"
+  />
   <div class="appointment-call-out">
     <img src="@/assets/svg/appointment_logo.svg" alt="Appointment Logo" />
     <span class="tagline" v-text="t('app.tagline')"></span>
@@ -155,6 +203,8 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
 
   .actions {
     display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
 
     a {
       padding: 0;
