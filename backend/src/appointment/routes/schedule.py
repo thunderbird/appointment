@@ -712,10 +712,13 @@ def cancel_schedule_availability_slot(
     slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.cancelled)
     repo.slot.update(db, slot.id, slot_update)
 
-    # Delete the remote (HOLD) event
+    # Delete the remote (HOLD) event, a failure must not abort the cancellation (e.g. the host already deleted it)
     uuid = appointment.external_id if appointment.external_id else str(appointment.uuid)
     send_updates = SendUpdates.ALL if use_google_invite else SendUpdates.NONE
-    delete_remote_event(uuid, calendar, subscriber, db, redis, google_client, send_updates=send_updates)
+    try:
+        delete_remote_event(uuid, calendar, subscriber, db, redis, google_client, send_updates=send_updates)
+    except Exception as ex:
+        sentry_sdk.capture_exception(ex)
 
     # Notify the subscriber that the bookee cancelled, with the date in the subscriber's timezone
     background_tasks.add_task(

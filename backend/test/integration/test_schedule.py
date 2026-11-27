@@ -12,6 +12,7 @@ from appointment.controller.auth import signed_url_by_subscriber
 from appointment.controller.calendar import CalDavConnector
 from appointment.database import schemas, models, repo
 from appointment.exceptions import validation
+from appointment.exceptions.validation import EventCouldNotBeDeleted
 from appointment.dependencies import auth
 from defines import DAY1, DAY5, DAY14, DAY2, TEST_USER_ID, auth_headers
 
@@ -1952,6 +1953,30 @@ class TestCancelScheduleAvailabilitySlot:
         # Cancelling the same slot again fails
         response = with_client.put('/schedule/public/availability/cancel', json=data)
         assert response.status_code == 404, response.text
+
+    @pytest.mark.parametrize('error', [EventCouldNotBeDeleted(), Exception('Event not found')])
+    def test_cancel_completes_if_remote_event_deletion_fails(self, with_db, with_client, setup_slot, error):
+        slot_id = setup_slot(models.BookingStatus.booked)
+        data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='abcd').model_dump()
+
+        with (
+            patch('appointment.routes.schedule.delete_remote_event', side_effect=error) as mock_delete,
+            patch('appointment.controller.calendar.Tools.send_cancel_vevent') as mock_send_cancel,
+            patch('fastapi.BackgroundTasks.add_task') as mock_add_task,
+            patch('appointment.routes.schedule.sentry_sdk.capture_exception') as mock_capture,
+        ):
+            response = with_client.put('/schedule/public/availability/cancel', json=data)
+
+            assert response.status_code == 200, response.text
+            mock_delete.assert_called_once()
+            mock_capture.assert_called_once_with(error)
+
+            # Bookee and owner are still notified
+            mock_send_cancel.assert_called_once()
+            assert email_tasks.send_booker_cancelled_email in mock_add_task.call_args[0]
+
+        with with_db() as db:
+            assert db.get(models.Slot, slot_id).booking_status == models.BookingStatus.cancelled
 
     # Both bookee endpoints share the same validation, failures are tested for each of them
     endpoints = pytest.mark.parametrize(
