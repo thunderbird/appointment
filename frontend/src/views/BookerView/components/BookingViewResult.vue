@@ -204,9 +204,9 @@ const cancelBooking = async () => {
   .actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 1rem;
+    gap: 2rem;
 
-    a {
+    .base.link {
       padding: 0;
       color: var(--colour-ti-highlight);
       font-size: 0.75rem;
