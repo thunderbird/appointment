@@ -158,6 +158,7 @@
   "info": {
     "availabilitySavedSuccessfully": "Verfügbarkeit erfolgreich gespeichert",
     "bookedPleaseCheckEmail": "Das Event wurde bereits gebucht. Bitte überprüfe deinen Posteingang, um das Event in deinen Kalender einzutragen.",
+    "bookingCancelLinkIsInvalid": "Dieser Link zum Absagen ist ungültig.",
     "bookingLinkHasAlreadyBeenUsed": "Dieser Buchungslink wurde offenbar schon genutzt.",
     "bookingLinkIsInvalid": "Der Link zur Buchungsbestätigung ist ungültig.",
     "bookingModified": "Buchung geändert",
@@ -541,6 +542,7 @@
     },
     "appointmentHasBeenCancelled": "Dieser Termin wurde abgesagt.",
     "bookATimeToMeetWith": "Buche einen Zeitpunkt um dich mit {name} zu treffen",
+    "bookingCannotBeCancelled": "Die Buchung wurde möglicherweise bereits abgesagt, abgelehnt oder hat schon stattgefunden, oder der Link ist defekt.",
     "calendarDeletionWarning": "Wenn die Verbindung zu diesem Kalender getrennt wird, werden alle Termine und Zeitpläne aus Thunderbird Appointment entfernt. Es werden keine Termine entfernt, die derzeit in diesem Kalender gespeichert sind.",
     "cancelBookingNotice": "Möchtest du diese Buchung wirklich absagen? Dein Gastgeber wird benachrichtigt.",
     "chooseDateAndTime": "Wähle Tag und Zeit für ein Treffen.",

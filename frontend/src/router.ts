@@ -6,6 +6,7 @@ import { RouteRecordRaw, createRouter, createWebHistory } from 'vue-router';
 import { userManager } from '@/composables/oidcUserManager';
 import { useUserStore } from '@/stores/user-store';
 import BookerView from '@/views/BookerView/index.vue';
+import BookingCancelView from '@/views/BookingCancelView.vue';
 import BookingConfirmationView from '@/views/BookingConfirmationView.vue';
 import DashboardView from '@/views/DashboardView/index.vue';
 import HomeView from '@/views/HomeView.vue';
@@ -81,6 +82,15 @@ const routes: RouteRecordRaw[] = [
     name: 'confirmation',
     component: BookingConfirmationView,
     meta: {
+      maskForMetrics: true,
+    },
+  },
+  {
+    path: '/booking/cancel/:slot/:token',
+    name: 'booking-cancel',
+    component: BookingCancelView,
+    meta: {
+      isPublic: true,
       maskForMetrics: true,
     },
   },

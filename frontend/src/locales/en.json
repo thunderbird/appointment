@@ -161,6 +161,7 @@
   "info": {
     "availabilitySavedSuccessfully": "Availability saved successfully",
     "bookedPleaseCheckEmail": "This event has been booked. Check your email to add it to your calendar.",
+    "bookingCancelLinkIsInvalid": "This cancellation link is invalid.",
     "bookingLinkHasAlreadyBeenUsed": "It looks like this link has been used.",
     "bookingLinkIsInvalid": "This booking confirmation link is invalid.",
     "bookingModified": "Booking Modified",
@@ -542,6 +543,7 @@
     },
     "appointmentHasBeenCancelled": "This appointment has been cancelled.",
     "bookATimeToMeetWith": "Book a time to meet with {name}",
+    "bookingCannotBeCancelled": "The booking might have already been cancelled, declined or taken place, or the link is broken.",
     "calendarDeletionWarning": "Removing this calendar will remove all appointments and schedules from Thunderbird Appointment. Any confirmed events currently stored in your calendar will not be removed.",
     "cancelBookingNotice": "Are you sure you want to cancel this booking? Your host will be notified.",
     "chooseDateAndTime": "Choose when to meet.",
