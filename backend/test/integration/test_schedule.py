@@ -1114,6 +1114,9 @@ class TestRequestScheduleAvailability:
         data = response.json()
         assert data.get('id')
 
+        # The bookee receives the token to cancel their booking
+        assert data.get('booking_tkn')
+
         # Check that sensitive fields are not in the response
         assert 'meeting_link_id' not in data
         assert 'meeting_link_url' not in data
@@ -1187,6 +1190,7 @@ class TestRequestScheduleAvailability:
             data = response.json()
 
             assert data.get('id')
+            assert data.get('booking_tkn')
 
             slot_id = data.get('id')
 
@@ -1575,6 +1579,7 @@ class TestRequestScheduleAvailability:
             data = response.json()
 
             assert data.get('id')
+            assert data.get('booking_tkn')
 
             slot_id = data.get('id')
 

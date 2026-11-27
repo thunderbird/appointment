@@ -93,6 +93,12 @@ class SlotOut(BaseModel):
     start: datetime
 
 
+class SlotBookingOut(SlotOut):
+    """Slot returned to the bookee after a booking request, includes the token needed for cancellation"""
+
+    booking_tkn: str
+
+
 class SlotAttendee(BaseModel):
     slot_id: int
     attendee: AttendeeBase
