@@ -539,6 +539,7 @@
       "completelyRemoveUser": "This will completely remove a user from Thunderbird Appointment, including all of their user data. Don't do this unless you're told to.",
       "disableAccountFirst": "You must disable the account first."
     },
+    "appointmentHasBeenCancelled": "This appointment has been cancelled.",
     "bookATimeToMeetWith": "Book a time to meet with {name}",
     "calendarDeletionWarning": "Removing this calendar will remove all appointments and schedules from Thunderbird Appointment. Any confirmed events currently stored in your calendar will not be removed.",
     "chooseDateAndTime": "Choose when to meet.",

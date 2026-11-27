@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BookingCalendarView } from '@/definitions';
+import { BookingCalendarView, BookingResultState } from '@/definitions';
 import { inject, onMounted, ref } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
@@ -8,7 +8,7 @@ import { dayjsKey, callKey } from '@/keys';
 import { Appointment, Slot, Exception, ExceptionDetail, AppointmentResponse } from '@/models';
 import LoadingSpinner from '@/elements/LoadingSpinner.vue';
 import BookingViewSlotSelection from './components/BookingViewSlotSelection.vue';
-import BookingViewSuccess from './components/BookingViewSuccess.vue';
+import BookingViewResult from './components/BookingViewResult.vue';
 import BookingViewError from './components/BookingViewError.vue';
 
 // component constants
@@ -134,10 +134,10 @@ export default {
   </main>
   <!-- booking page content: successful booking -->
   <main v-else-if="activeView === BookingCalendarView.Success" class="booking-success-container">
-    <booking-view-success
+    <booking-view-result
       :selected-event="selectedEvent"
       :attendee="attendee"
-      :requested="appointment?.booking_confirmation"
+      :state="appointment?.booking_confirmation ? BookingResultState.Requested : BookingResultState.Confirmed"
     />
   </main>
   <!-- booking page content: time slot selection -->

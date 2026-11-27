@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject } from 'vue';
+import { computed, inject } from 'vue';
 import { timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -7,6 +7,7 @@ import { useUserStore } from '@/stores/user-store';
 
 import { LinkButton, PrimaryButton } from '@thunderbirdops/services-ui';
 import { apiUrlKey, dayjsKey } from '@/keys';
+import { BookingResultState } from '@/definitions';
 import { Appointment, Attendee, Slot } from '@/models';
 import { PhArrowRight, PhDownloadSimple, PhConfetti } from '@phosphor-icons/vue';
 
@@ -21,15 +22,33 @@ const user = useUserStore();
 interface Props {
   selectedEvent: Appointment & Slot;
   attendee: Attendee;
-  requested: boolean; // True if we are requesting a booking, false if already confirmed
+  state: BookingResultState;
 }
 const props = defineProps<Props>();
 
-const heading = props.requested ? t('info.bookingSuccessfullyRequested') : t('info.bookingSuccessfullyConfirmed');
+const isCancelled = computed(() => props.state === BookingResultState.Cancelled);
 
-const description = props.requested
-  ? t('text.hostHasBeenNotified')
-  : t('text.timeHasBeenConfirmed', { email: props.attendee.email });
+const heading = computed(() => {
+  switch (props.state) {
+    case BookingResultState.Requested:
+      return t('info.bookingSuccessfullyRequested');
+    case BookingResultState.Cancelled:
+      return t('info.bookingSuccessfullyCancelled');
+    default:
+      return t('info.bookingSuccessfullyConfirmed');
+  }
+});
+
+const description = computed(() => {
+  switch (props.state) {
+    case BookingResultState.Requested:
+      return t('text.hostHasBeenNotified');
+    case BookingResultState.Cancelled:
+      return t('text.appointmentHasBeenCancelled');
+    default:
+      return t('text.timeHasBeenConfirmed', { email: props.attendee.email });
+  }
+});
 
 const date =
   dj(props.selectedEvent.start).format('ddd') +
@@ -48,8 +67,8 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
 
 <template>
   <div class="booking-details">
-    <div class="heading">
-      <ph-confetti />
+    <div class="heading" data-testid="booking-view-result-heading">
+      <ph-confetti v-if="!isCancelled" />
       {{ heading }}
     </div>
     <p>{{ description }}</p>
@@ -63,7 +82,7 @@ const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${prop
         {{ t('text.virtualMeetingWith', { name: attendee.name }) }}
       </div>
     </div>
-    <div class="actions">
+    <div v-if="!isCancelled" class="actions">
       <link-button :href="downloadUrl">
         <template #iconLeft>
           <ph-download-simple />
