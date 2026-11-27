@@ -219,6 +219,16 @@ class TestTools:
         # Only the healthy calendar's busy time should come through
         assert len(events) == 1
 
+    def test_booking_cancel_url(self, monkeypatch):
+        monkeypatch.setenv('FRONTEND_URL', 'https://example.org')
+
+        slot = Mock(id=42, booking_tkn='abcd')
+        assert Tools.booking_cancel_url(slot) == 'https://example.org/booking/cancel/42/abcd'
+
+        # Slots without a booking token can't be cancelled by the bookee
+        slot = Mock(id=42, booking_tkn=None)
+        assert Tools.booking_cancel_url(slot) is None
+
 
 class TestVCreate:
     def test_meeting_url_in_location(

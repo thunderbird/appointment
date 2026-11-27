@@ -237,6 +237,7 @@ class InvitationMail(BaseBookingMail):
         """
         self.schedule_name = schedule_name
         self.attendee_email = attendee_email
+        self.cancel_url = kwargs.pop('cancel_url', None)
         lang = kwargs.get('lang')
         default_kwargs = {
             'subject': l10n('invite-mail-subject', lang=lang),
@@ -274,6 +275,8 @@ class InvitationMail(BaseBookingMail):
                 'invite-mail-plain-meeting-link', {'meeting_link_url': self.meeting_link_url}, lang=self.lang
             )
             plain = meeting_link_text + '\n\n' + plain
+        if self.cancel_url:
+            plain += '\n\n' + l10n('mail-plain-cancel-booking', {'cancel_url': self.cancel_url}, lang=self.lang)
         return plain
 
     def html(self):
@@ -287,6 +290,7 @@ class InvitationMail(BaseBookingMail):
             day=self.day,
             duration=self.duration,
             meeting_link_url=self.meeting_link_url,
+            cancel_url=self.cancel_url,
             lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
@@ -558,6 +562,7 @@ class PendingRequestMail(Mailer):
         self.schedule_name = schedule_name
         self.date = date
         self.duration = duration
+        self.cancel_url = kwargs.pop('cancel_url', None)
         default_kwargs = {'subject': l10n('pending-mail-subject', lang=kwargs.get('lang'))}
         super(PendingRequestMail, self).__init__(*args, **default_kwargs, **kwargs)
 
@@ -597,11 +602,14 @@ class PendingRequestMail(Mailer):
         ]
 
     def text(self):
-        return l10n(
+        plain = l10n(
             'pending-mail-plain',
             {'owner_name': self.owner_name, 'day': self.day, 'time_range': self.time_range, 'timezone': self.timezone},
             lang=self.lang,
         )
+        if self.cancel_url:
+            plain += '\n\n' + l10n('mail-plain-cancel-booking', {'cancel_url': self.cancel_url}, lang=self.lang)
+        return plain
 
     def html(self):
         return get_template('pending.jinja2').render(
@@ -613,6 +621,7 @@ class PendingRequestMail(Mailer):
             start_time=self.date.strftime(self.time_format),
             timezone=self.timezone,
             duration=self.duration,
+            cancel_url=self.cancel_url,
             lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,

@@ -27,6 +27,7 @@ def send_invite_email(
     attachment,
     lang,
     meeting_link_url=None,
+    cancel_url=None,
 ):
     try:
         mail = InvitationMail(
@@ -40,6 +41,7 @@ def send_invite_email(
             attachments=[attachment],
             lang=lang,
             meeting_link_url=meeting_link_url,
+            cancel_url=cancel_url,
         )
         mail.send()
     except Exception as e:
@@ -89,7 +91,9 @@ def send_new_booking_email(name, email, date, duration, to, schedule_name, lang)
             sentry_sdk.capture_exception(e)
 
 
-def send_pending_email(owner_name, owner_email, attendee_email, schedule_name, date, duration, to, attachment, lang):
+def send_pending_email(
+    owner_name, owner_email, attendee_email, schedule_name, date, duration, to, attachment, lang, cancel_url=None
+):
     try:
         mail = PendingRequestMail(
             owner_name=owner_name,
@@ -101,6 +105,7 @@ def send_pending_email(owner_name, owner_email, attendee_email, schedule_name, d
             to=to,
             attachments=[attachment],
             lang=lang,
+            cancel_url=cancel_url,
         )
         mail.send()
     except Exception as e:

@@ -55,3 +55,8 @@
     {{ attendee_email }}
   </div>
 {% endblock %}
+{% block call_to_action %}
+  {% if cancel_url %}
+  {% include './includes/cancel_booking.jinja2' %}
+  {% endif %}
+{% endblock %}

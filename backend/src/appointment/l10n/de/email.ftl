@@ -25,6 +25,11 @@ mail-brand-footer-support = Hilfe benötigt? Support besuchen
 # $duration (String) - Length of minutes the appointment will be
 mail-html-time = { $duration } Minuten
 mail-html-meeting-with = Termin mit:
+mail-html-cancel-booking = Buchung stornieren
+
+# Variables:
+# $cancel_url (String) - URL for the bookee to cancel their booking
+mail-plain-cancel-booking = Du kannst nicht teilnehmen? Hier kannst du deine Buchung stornieren: { $cancel_url }
 
 ## Invitation
 

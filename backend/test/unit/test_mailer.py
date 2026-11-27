@@ -66,6 +66,28 @@ class TestMailer:
         assert meeting_url in mailer.html()
         assert meeting_url in mailer.text()
 
+    def test_invite_cancel_url(self, with_l10n):
+        cancel_url = 'https://example.org/booking/cancel/1/abcd'
+        params = dict(
+            to='to@example.org',
+            name='fake',
+            email='fake@example.org',
+            schedule_name='test',
+            attendee_email='fake@example.org',
+            date=datetime.datetime.now(),
+            duration=30,
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+        )
+
+        mailer = InvitationMail(**params, cancel_url=cancel_url)
+        assert cancel_url in mailer.html()
+        assert cancel_url in mailer.text()
+
+        # Without a cancel url there is no cancel action
+        mailer = InvitationMail(**params)
+        assert 'Cancel booking' not in mailer.html()
+        assert 'cancel' not in mailer.text().lower()
+
     def test_confirm(self, faker, with_l10n):
         confirm_url = 'https://example.org/yes'
         deny_url = 'https://example.org/no'
@@ -130,6 +152,29 @@ class TestMailer:
         for idx, content in enumerate([mailer.text(), mailer.html()]):
             fault = 'text' if idx == 0 else 'html'
             assert subscriber.name in content, fault
+
+    def test_pending_cancel_url(self, with_l10n, make_pro_subscriber):
+        subscriber = make_pro_subscriber()
+        cancel_url = 'https://example.org/booking/cancel/1/abcd'
+        params = dict(
+            owner_name=subscriber.name,
+            owner_email=subscriber.email,
+            attendee_email='to@example.org',
+            schedule_name='test',
+            date=datetime.datetime.now(),
+            duration=30,
+            to='to@example.org',
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+        )
+
+        mailer = PendingRequestMail(**params, cancel_url=cancel_url)
+        assert cancel_url in mailer.html()
+        assert cancel_url in mailer.text()
+
+        # Without a cancel url there is no cancel action
+        mailer = PendingRequestMail(**params)
+        assert 'Cancel booking' not in mailer.html()
+        assert 'cancel' not in mailer.text().lower()
 
     def test_reject(self, faker, with_l10n, make_pro_subscriber):
         subscriber = make_pro_subscriber()
