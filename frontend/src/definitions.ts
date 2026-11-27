@@ -45,6 +45,13 @@ export enum BookingCalendarView {
   Invalid = 12,
 }
 
+// State of a booking shown to the bookee on the result screen
+export enum BookingResultState {
+  Requested = 'requested',
+  Confirmed = 'confirmed',
+  Cancelled = 'cancelled',
+}
+
 /**
  * Booking status for slots. This mirrors models.BookingStatus on the backend
  */

@@ -1,0 +1,23 @@
+{# Secondary call to action for the bookee to cancel their booking, requires cancel_url and lang #}
+<div class="apmt-row">
+  <a
+    href="{{ cancel_url }}"
+    style="
+      background: {{ colour_neutral }};
+      border-radius: 3px;
+      border: 1px solid {{ colour_primary }};
+      box-shadow: 0 2px 4px 0 #0000001f;
+      box-sizing: border-box;
+      color: {{ colour_primary }};
+      display: block;
+      flex: 1 1 0;
+      font-size: 13px;
+      font-weight: 700;
+      min-width: 128px;
+      padding: 12px 24px;
+      text-align: center;
+      text-decoration: none;
+      white-space: nowrap;
+      "
+  >{{ l10n('mail-html-cancel-booking', lang=lang) }}</a>
+</div>

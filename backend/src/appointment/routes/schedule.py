@@ -24,6 +24,7 @@ from ..database.schemas import ExternalConnection
 from ..dependencies.auth import get_subscriber, get_subscriber_from_schedule_or_signed_url
 from ..dependencies.database import get_db, get_redis
 from ..dependencies.google import get_google_client
+from ..dependencies.zoom import get_zoom_client
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
 
@@ -41,6 +42,7 @@ from ..tasks.emails import (
     send_confirmation_email,
     send_zoom_meeting_failed_email,
     send_new_booking_email,
+    send_booker_cancelled_email,
 )
 from ..l10n import l10n
 from slowapi import Limiter
@@ -549,12 +551,13 @@ def request_schedule_availability_slot(
             )
 
         # Mini version of slot, so we can grab the newly created slot id for tests
-        return schemas.SlotOut(
+        return schemas.SlotBookingOut(
             id=slot.id,
             slug=appointment.slug,
             start=slot.start,
             duration=slot.duration,
             attendee_id=slot.attendee_id,
+            booking_tkn=token,  # cancellation token for bookee
         )
     except Exception as ex:
         logging.error('Error in request_schedule_availability_slot: ', ex)
@@ -613,6 +616,120 @@ def decide_on_schedule_availability_slot(
     # handle decision, do the actual booking if confirmed and send invitation mail
     handle_schedule_availability_decision(
         data.confirmed, calendar, schedule, subscriber, slot, db, redis, google_client, background_tasks
+    )
+
+    return schemas.AvailabilitySlotAttendee(
+        slot=schemas.SlotBase(start=slot.start, duration=slot.duration),
+        attendee=schemas.AttendeeBase(
+            email=slot.attendee.email, name=slot.attendee.name, timezone=slot.attendee.timezone
+        ),
+    )
+
+
+def get_cancellable_slot(db: Session, data: schemas.AvailabilitySlotCancel) -> models.Slot:
+    """Returns an open, upcoming booking slot with matching token, raises SlotNotFoundException otherwise"""
+    slot = repo.slot.get(db, data.slot_id)
+
+    if (
+        not slot
+        or not slot.schedule
+        or not slot.appointment
+        or slot.booking_tkn != data.slot_token
+        or slot.booking_status not in (BookingStatus.requested, BookingStatus.booked)
+        or slot.start.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc)
+    ):
+        raise validation.SlotNotFoundException()
+
+    return slot
+
+
+@router.post(
+    '/public/availability/cancel/details', response_model=schemas.AvailabilitySlotBookingOut, tags=['no-cache']
+)
+@limiter.limit('20/minute')
+def schedule_availability_slot_cancel_details(
+    request: Request,
+    data: schemas.AvailabilitySlotCancel,
+    db: Session = Depends(get_db),
+):
+    """endpoint for the bookee to retrieve details of their booking before cancelling it via the token sent to them"""
+    slot = get_cancellable_slot(db, data)
+
+    return schemas.AvailabilitySlotBookingOut(
+        slot=schemas.SlotOut(
+            id=slot.id,
+            slug=slot.appointment.slug,
+            booking_status=slot.booking_status,
+            start=slot.start,
+            duration=slot.duration,
+        ),
+        attendee=schemas.AttendeeBase(
+            email=slot.attendee.email, name=slot.attendee.name, timezone=slot.attendee.timezone
+        ),
+    )
+
+
+@router.put('/public/availability/cancel', response_model=schemas.AvailabilitySlotAttendee, tags=['no-cache'])
+@limiter.limit('20/minute')
+def cancel_schedule_availability_slot(
+    request: Request,
+    data: schemas.AvailabilitySlotCancel,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+    redis=Depends(get_redis),
+    google_client: GoogleClient = Depends(get_google_client),
+):
+    """endpoint for the bookee to cancel their requested or booked time slot via the token sent to them"""
+    slot = get_cancellable_slot(db, data)
+
+    schedule = slot.schedule
+    appointment = slot.appointment
+    calendar = appointment.calendar
+    subscriber = schedule.calendar.owner
+
+    use_google_invite = calendar.provider == CalendarProvider.google and os.getenv('GOOGLE_INVITE_ENABLED') == 'True'
+
+    # If needed, delete the booking's Zoom meeting
+    if slot.meeting_link_id and appointment.meeting_link_provider == MeetingLinkProviderType.zoom:
+        try:
+            get_zoom_client(subscriber).delete_meeting(slot.meeting_link_id)
+        except Exception as ex:
+            sentry_sdk.capture_exception(ex)
+
+    # For Google invites, the delete with sendUpdates handles the cancellation notification
+    if not use_google_invite:
+        Tools().send_cancel_vevent(
+            background_tasks,
+            appointment,
+            slot,
+            subscriber,
+            slot.attendee,
+            schedule_name=schedule.name,
+            cancelled_by_attendee=True,
+        )
+
+    # Mark the slot as BookingStatus.cancelled, this also invalidates the owner's confirmation link
+    slot_update = schemas.SlotUpdate(booking_status=models.BookingStatus.cancelled)
+    repo.slot.update(db, slot.id, slot_update)
+
+    # Delete the remote (HOLD) event, a failure must not abort the cancellation (e.g. the host already deleted it)
+    uuid = appointment.external_id if appointment.external_id else str(appointment.uuid)
+    send_updates = SendUpdates.ALL if use_google_invite else SendUpdates.NONE
+    try:
+        delete_remote_event(uuid, calendar, subscriber, db, redis, google_client, send_updates=send_updates)
+    except Exception as ex:
+        sentry_sdk.capture_exception(ex)
+
+    # Notify the subscriber that the bookee cancelled, with the date in the subscriber's timezone
+    background_tasks.add_task(
+        send_booker_cancelled_email,
+        name=slot.attendee.name,
+        email=slot.attendee.email,
+        date=slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone or 'UTC')),
+        duration=slot.duration,
+        schedule_name=schedule.name,
+        to=subscriber.preferred_email,
+        lang=subscriber.language,
     )
 
     return schemas.AvailabilitySlotAttendee(

@@ -237,6 +237,7 @@ class InvitationMail(BaseBookingMail):
         """
         self.schedule_name = schedule_name
         self.attendee_email = attendee_email
+        self.cancel_url = kwargs.pop('cancel_url', None)
         lang = kwargs.get('lang')
         default_kwargs = {
             'subject': l10n('invite-mail-subject', lang=lang),
@@ -274,6 +275,8 @@ class InvitationMail(BaseBookingMail):
                 'invite-mail-plain-meeting-link', {'meeting_link_url': self.meeting_link_url}, lang=self.lang
             )
             plain = meeting_link_text + '\n\n' + plain
+        if self.cancel_url:
+            plain += '\n\n' + l10n('mail-plain-cancel-booking', {'cancel_url': self.cancel_url}, lang=self.lang)
         return plain
 
     def html(self):
@@ -287,6 +290,7 @@ class InvitationMail(BaseBookingMail):
             day=self.day,
             duration=self.duration,
             meeting_link_url=self.meeting_link_url,
+            cancel_url=self.cancel_url,
             lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
@@ -403,6 +407,8 @@ class CancelMail(Mailer):
         self.schedule_name = schedule_name
         self.date = date
         self.duration = duration
+        # Wording differs if the bookee cancelled the booking themselves
+        self.cancelled_by_attendee = kwargs.pop('cancelled_by_attendee', False)
         default_kwargs = {'subject': l10n('cancel-mail-subject', lang=kwargs.get('lang'))}
         super(CancelMail, self).__init__(*args, **default_kwargs, **kwargs)
 
@@ -443,7 +449,7 @@ class CancelMail(Mailer):
 
     def text(self):
         return l10n(
-            'cancel-mail-plain',
+            'cancel-mail-attendee-plain' if self.cancelled_by_attendee else 'cancel-mail-plain',
             {
                 'owner_name': self.owner_name,
                 'day': self.day,
@@ -463,6 +469,7 @@ class CancelMail(Mailer):
             start_time=self.date.strftime(self.time_format),
             timezone=self.timezone,
             duration=self.duration,
+            cancelled_by_attendee=self.cancelled_by_attendee,
             lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
@@ -558,6 +565,7 @@ class PendingRequestMail(Mailer):
         self.schedule_name = schedule_name
         self.date = date
         self.duration = duration
+        self.cancel_url = kwargs.pop('cancel_url', None)
         default_kwargs = {'subject': l10n('pending-mail-subject', lang=kwargs.get('lang'))}
         super(PendingRequestMail, self).__init__(*args, **default_kwargs, **kwargs)
 
@@ -597,11 +605,14 @@ class PendingRequestMail(Mailer):
         ]
 
     def text(self):
-        return l10n(
+        plain = l10n(
             'pending-mail-plain',
             {'owner_name': self.owner_name, 'day': self.day, 'time_range': self.time_range, 'timezone': self.timezone},
             lang=self.lang,
         )
+        if self.cancel_url:
+            plain += '\n\n' + l10n('mail-plain-cancel-booking', {'cancel_url': self.cancel_url}, lang=self.lang)
+        return plain
 
     def html(self):
         return get_template('pending.jinja2').render(
@@ -613,6 +624,7 @@ class PendingRequestMail(Mailer):
             start_time=self.date.strftime(self.time_format),
             timezone=self.timezone,
             duration=self.duration,
+            cancel_url=self.cancel_url,
             lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,
@@ -645,6 +657,47 @@ class NewBookingMail(BaseBookingMail):
 
     def html(self):
         return get_template('new_booking.jinja2').render(
+            name=self.name,
+            email=self.email,
+            time_range=self.time_range,
+            timezone=self.timezone,
+            day=self.day,
+            duration=self.duration,
+            schedule_name=self.schedule_name,
+            lang=self.lang,
+            # Image cids
+            tbpro_logo_cid=self._attachments()[0].filename,
+            calendar_icon_cid=self._attachments()[1].filename,
+            clock_icon_cid=self._attachments()[2].filename,
+        )
+
+
+class BookerCancelledMail(BaseBookingMail):
+    def __init__(self, name, email, date, duration, schedule_name, *args, **kwargs):
+        """Init Mailer with booker-cancelled specific defaults
+        To: Event owner
+        """
+        self.schedule_name = schedule_name
+        default_kwargs = {'subject': l10n('booker-cancelled-subject', {'name': name}, lang=kwargs.get('lang'))}
+        super(BookerCancelledMail, self).__init__(
+            name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs
+        )
+
+    def text(self):
+        return l10n(
+            'booker-cancelled-plain',
+            {
+                'name': self.name,
+                'email': self.email,
+                'day': self.day,
+                'time_range': self.time_range,
+                'timezone': self.timezone,
+            },
+            lang=self.lang,
+        )
+
+    def html(self):
+        return get_template('booker_cancelled.jinja2').render(
             name=self.name,
             email=self.email,
             time_range=self.time_range,

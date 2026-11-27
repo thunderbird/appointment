@@ -12,6 +12,7 @@ from appointment.controller.auth import signed_url_by_subscriber
 from appointment.controller.calendar import CalDavConnector
 from appointment.database import schemas, models, repo
 from appointment.exceptions import validation
+from appointment.exceptions.validation import EventCouldNotBeDeleted
 from appointment.dependencies import auth
 from defines import DAY1, DAY5, DAY14, DAY2, TEST_USER_ID, auth_headers
 
@@ -1114,6 +1115,9 @@ class TestRequestScheduleAvailability:
         data = response.json()
         assert data.get('id')
 
+        # The bookee receives the token to cancel their booking
+        assert data.get('booking_tkn')
+
         # Check that sensitive fields are not in the response
         assert 'meeting_link_id' not in data
         assert 'meeting_link_url' not in data
@@ -1187,6 +1191,7 @@ class TestRequestScheduleAvailability:
             data = response.json()
 
             assert data.get('id')
+            assert data.get('booking_tkn')
 
             slot_id = data.get('id')
 
@@ -1575,6 +1580,7 @@ class TestRequestScheduleAvailability:
             data = response.json()
 
             assert data.get('id')
+            assert data.get('booking_tkn')
 
             slot_id = data.get('id')
 
@@ -1888,3 +1894,145 @@ class TestDecideScheduleAvailabilitySlot:
 
         assert response.status_code == 401, response.text
         assert response.json()['detail']['id'] == 'INVALID_TOKEN'
+
+
+class TestCancelScheduleAvailabilitySlot:
+    @pytest.fixture
+    def setup_slot(
+        self, with_db, make_caldav_calendar, make_schedule, make_appointment, make_appointment_slot, make_attendee
+    ):
+        """Creates a schedule with a single slot, returns a function to configure status and start of that slot"""
+
+        def _setup_slot(booking_status=models.BookingStatus.requested, start=None):
+            with with_db() as db:
+                subscriber = repo.subscriber.get(db, TEST_USER_ID)
+            generated_calendar = make_caldav_calendar(subscriber.id, connected=True)
+            schedule = make_schedule(calendar_id=generated_calendar.id, active=True)
+            attendee = make_attendee()
+            appointment = make_appointment(generated_calendar.id, status=models.AppointmentStatus.opened, slots=[])
+            slot = make_appointment_slot(
+                appointment_id=appointment.id,
+                attendee_id=attendee.id,
+                booking_status=booking_status,
+                booking_tkn='abcd',
+                start=start or datetime.now() + timedelta(days=1),
+            )[0]
+
+            with with_db() as db:
+                db.add(slot)
+                slot.schedule_id = schedule.id
+                db.commit()
+                return slot.id
+
+        return _setup_slot
+
+    @pytest.mark.parametrize('booking_status', [models.BookingStatus.requested, models.BookingStatus.booked])
+    def test_cancel(self, with_db, with_client, setup_slot, booking_status):
+        slot_id = setup_slot(booking_status)
+        data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='abcd').model_dump()
+
+        with (
+            patch('appointment.controller.calendar.Tools.send_cancel_vevent') as mock_send_cancel,
+            patch('fastapi.BackgroundTasks.add_task') as mock_add_task,
+        ):
+            # No auth headers, the bookee is not logged in
+            response = with_client.put('/schedule/public/availability/cancel', json=data)
+
+            assert response.status_code == 200, response.text
+            mock_send_cancel.assert_called_once()
+            assert mock_send_cancel.call_args.kwargs['cancelled_by_attendee'] is True
+
+            # The owner is notified about the cancellation
+            mock_add_task.assert_called_once()
+            assert email_tasks.send_booker_cancelled_email in mock_add_task.call_args[0]
+
+        with with_db() as db:
+            slot = db.get(models.Slot, slot_id)
+            assert slot.booking_status == models.BookingStatus.cancelled
+
+        # Cancelling the same slot again fails
+        response = with_client.put('/schedule/public/availability/cancel', json=data)
+        assert response.status_code == 404, response.text
+
+    @pytest.mark.parametrize('error', [EventCouldNotBeDeleted(), Exception('Event not found')])
+    def test_cancel_completes_if_remote_event_deletion_fails(self, with_db, with_client, setup_slot, error):
+        slot_id = setup_slot(models.BookingStatus.booked)
+        data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='abcd').model_dump()
+
+        with (
+            patch('appointment.routes.schedule.delete_remote_event', side_effect=error) as mock_delete,
+            patch('appointment.controller.calendar.Tools.send_cancel_vevent') as mock_send_cancel,
+            patch('fastapi.BackgroundTasks.add_task') as mock_add_task,
+            patch('appointment.routes.schedule.sentry_sdk.capture_exception') as mock_capture,
+        ):
+            response = with_client.put('/schedule/public/availability/cancel', json=data)
+
+            assert response.status_code == 200, response.text
+            mock_delete.assert_called_once()
+            mock_capture.assert_called_once_with(error)
+
+            # Bookee and owner are still notified
+            mock_send_cancel.assert_called_once()
+            assert email_tasks.send_booker_cancelled_email in mock_add_task.call_args[0]
+
+        with with_db() as db:
+            assert db.get(models.Slot, slot_id).booking_status == models.BookingStatus.cancelled
+
+    # Both bookee endpoints share the same validation, failures are tested for each of them
+    endpoints = pytest.mark.parametrize(
+        'method,url',
+        [('put', '/schedule/public/availability/cancel'), ('post', '/schedule/public/availability/cancel/details')],
+    )
+
+    @endpoints
+    def test_fails_with_wrong_token(self, with_db, with_client, setup_slot, method, url):
+        slot_id = setup_slot()
+        data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='wrong').model_dump()
+
+        response = getattr(with_client, method)(url, json=data)
+        assert response.status_code == 404, response.text
+
+        with with_db() as db:
+            assert db.get(models.Slot, slot_id).booking_status == models.BookingStatus.requested
+
+    @endpoints
+    @pytest.mark.parametrize('booking_status', [models.BookingStatus.declined, models.BookingStatus.cancelled])
+    def test_fails_for_closed_booking(self, with_client, setup_slot, booking_status, method, url):
+        slot_id = setup_slot(booking_status)
+        data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='abcd').model_dump()
+
+        response = getattr(with_client, method)(url, json=data)
+        assert response.status_code == 404, response.text
+
+    @endpoints
+    def test_fails_for_past_booking(self, with_client, setup_slot, method, url):
+        slot_id = setup_slot(models.BookingStatus.booked, start=datetime.now() - timedelta(days=1))
+        data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='abcd').model_dump()
+
+        response = getattr(with_client, method)(url, json=data)
+        assert response.status_code == 404, response.text
+
+    @pytest.mark.parametrize('booking_status', [models.BookingStatus.requested, models.BookingStatus.booked])
+    def test_details(self, with_db, with_client, setup_slot, booking_status):
+        slot_id = setup_slot(booking_status)
+        data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='abcd').model_dump()
+
+        # No auth headers, the bookee is not logged in
+        response = with_client.post('/schedule/public/availability/cancel/details', json=data)
+        assert response.status_code == 200, response.text
+        details = response.json()
+
+        with with_db() as db:
+            slot = db.get(models.Slot, slot_id)
+            assert details['slot']['id'] == slot_id
+            assert details['slot']['slug'] == slot.appointment.slug
+            assert details['slot']['booking_status'] == booking_status.value
+            assert details['slot']['duration'] == slot.duration
+            assert details['attendee']['email'] == slot.attendee.email
+            assert details['attendee']['name'] == slot.attendee.name
+
+            # Retrieving details doesn't change the booking
+            assert slot.booking_status == booking_status
+
+        # The token is only known by the bookee and is not returned again
+        assert 'booking_tkn' not in details['slot']

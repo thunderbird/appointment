@@ -831,6 +831,13 @@ class Tools:
         cal.add_component(event)
         return cal.to_ical()
 
+    @staticmethod
+    def booking_cancel_url(slot: schemas.Slot) -> str | None:
+        """Frontend URL for the bookee to cancel their booking, None if the slot has no booking token"""
+        if not slot.booking_tkn:
+            return None
+        return f'{os.getenv("FRONTEND_URL")}/booking/cancel/{slot.id}/{slot.booking_tkn}'
+
     def send_invitation_vevent(
         self,
         background_tasks: BackgroundTasks,
@@ -874,6 +881,7 @@ class Tools:
             attachment=ics_file,
             lang=lang,
             meeting_link_url=meeting_link_url,
+            cancel_url=self.booking_cancel_url(slot),
         )
 
     def send_hold_vevent(
@@ -916,6 +924,7 @@ class Tools:
             to=attendee.email,
             attachment=ics_file,
             lang=lang,
+            cancel_url=self.booking_cancel_url(slot),
         )
 
     def send_reject_vevent(
@@ -968,6 +977,7 @@ class Tools:
         organizer: schemas.Subscriber,
         attendee: schemas.AttendeeBase,
         schedule_name: str,
+        cancelled_by_attendee: bool = False,
     ):
         """send a booking cancellation email to attendee with .ics file attached"""
         ics_file = Attachment(
@@ -1000,6 +1010,7 @@ class Tools:
             to=attendee.email,
             attachment=ics_file,
             lang=lang,
+            cancelled_by_attendee=cancelled_by_attendee,
         )
 
     @staticmethod

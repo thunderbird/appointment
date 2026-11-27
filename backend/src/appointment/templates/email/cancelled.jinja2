@@ -5,7 +5,8 @@
 {# Code begins! #}
 {% block introduction %}
   <div style="color: {{ colour_text_base }}; font-size: 20px; font-weight: 600;">
-    {{ l10n('cancel-mail-html-heading', {'owner_name': owner_name, 'owner_email': owner_email}, lang) }}
+    {% set heading_key = 'cancel-mail-attendee-html-heading' if cancelled_by_attendee else 'cancel-mail-html-heading' %}
+    {{ l10n(heading_key, {'owner_name': owner_name, 'owner_email': owner_email}, lang) }}
   </div>
 {% endblock %}
 {% block information %}

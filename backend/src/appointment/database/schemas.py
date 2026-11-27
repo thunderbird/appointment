@@ -93,6 +93,12 @@ class SlotOut(BaseModel):
     start: datetime
 
 
+class SlotBookingOut(SlotOut):
+    """Slot returned to the bookee after a booking request"""
+
+    booking_tkn: str
+
+
 class SlotAttendee(BaseModel):
     slot_id: int
     attendee: AttendeeBase
@@ -100,6 +106,13 @@ class SlotAttendee(BaseModel):
 
 class AvailabilitySlotAttendee(BaseModel):
     slot: SlotBase
+    attendee: AttendeeBase
+
+
+class AvailabilitySlotBookingOut(BaseModel):
+    """Booking details shown to the bookee"""
+
+    slot: SlotOut
     attendee: AttendeeBase
 
 
@@ -396,6 +409,11 @@ class AvailabilitySlotConfirmation(BaseModel):
     slot_token: str
     owner_url: str
     confirmed: bool | None = False
+
+
+class AvailabilitySlotCancel(BaseModel):
+    slot_id: int
+    slot_token: str
 
 
 class DisconnectGoogleAccountRequest(BaseModel):

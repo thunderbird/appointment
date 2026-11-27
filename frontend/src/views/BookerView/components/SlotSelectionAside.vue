@@ -82,9 +82,10 @@ const bookEvent = async () => {
 
   bookingRequestError.value = '';
 
-  // Enrich the selected event with data we need to request ICS download after booking request
+  // Enrich the selected event with data we need to request ICS download and cancellation after booking request
   selectedEvent.value.id = data.value.id;
   selectedEvent.value.slug = data.value.slug;
+  selectedEvent.value.booking_tkn = data.value.booking_tkn;
 
   // replace calendar view if every thing worked fine
   attendee.value = attendeeData;

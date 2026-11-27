@@ -25,6 +25,11 @@ mail-brand-footer-support = Need help? Visit Support
 # $duration (String) - Length of minutes the appointment will be
 mail-html-time = { $duration } minutes
 mail-html-meeting-with = Meeting with:
+mail-html-cancel-booking = Cancel booking
+
+# Variables:
+# $cancel_url (String) - URL for the bookee to cancel their booking
+mail-plain-cancel-booking = Need to cancel? Cancel your booking here: { $cancel_url }
 
 ## Invitation
 
@@ -65,6 +70,28 @@ new-booking-html-heading-name = { $name }
 new-booking-html-heading-email = ({ $email })
 new-booking-html-heading-text = has just booked time in { $schedule_name }:
 new-booking-html-time = { $duration } mins
+
+## Booker Cancelled Appointment
+
+# Variables:
+# $name (String) - Name of the person who cancelled the appointment
+booker-cancelled-subject = { $name } cancelled their booking
+# Variables:
+# $name (String) - Name of the person who cancelled the appointment
+# $email (String) - Email of the person who cancelled the appointment
+# $day (String) - Localized date of the cancelled appointment
+# $time_range (String) - Time range of the cancelled appointment (e.g. "2:00PM - 2:30PM")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+booker-cancelled-plain = { $name } ({ $email }) cancelled their booking for { $day } at { $time_range } { $timezone }.
+# Variables:
+# $name (String) - Name of the person who cancelled the appointment
+# $email (String) - Email of the person who cancelled the appointment
+# $schedule_name (String) - The name of the schedule used to book the appointment
+# $duration (String) - Length of minutes the appointment would have been
+booker-cancelled-html-heading-name = { $name }
+booker-cancelled-html-heading-email = ({ $email })
+booker-cancelled-html-heading-text = has cancelled their booking in { $schedule_name }:
+booker-cancelled-html-time = { $duration } mins
 
 ## Confirm Appointment
 
@@ -118,6 +145,17 @@ cancel-mail-html-badge = Cancelled
 # $time_range (String) - Time range of the requested appointment (e.g. "2:00PM - 2:30PM")
 # $timezone (String) - Timezone abbreviation (e.g. "(CET)")
 cancel-mail-plain = { $owner_name } cancelled your booking request for { $day } at { $time_range } { $timezone }.
+{-brand-footer}
+# Variables:
+# $owner_name (String) - Name of the person who owns the schedule
+# $owner_email (String) - Email of the person who owns the schedule
+cancel-mail-attendee-html-heading = You CANCELLED the following booking with { $owner_name } ({ $owner_email }).
+# Variables:
+# $owner_name (String) - Name of the person who owns the schedule
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "2:00PM - 2:30PM")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+cancel-mail-attendee-plain = You cancelled your booking with { $owner_name } for { $day } at { $time_range } { $timezone }.
 {-brand-footer}
 
 ## Rejected Appointment

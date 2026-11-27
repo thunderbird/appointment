@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 from starlette_context import request_cycle_context
 
 from appointment.controller.mailer import (
+    BookerCancelledMail,
     CancelMail,
     ConfirmationMail,
     RejectionMail,
@@ -66,6 +67,28 @@ class TestMailer:
         assert meeting_url in mailer.html()
         assert meeting_url in mailer.text()
 
+    def test_invite_cancel_url(self, with_l10n):
+        cancel_url = 'https://example.org/booking/cancel/1/abcd'
+        params = dict(
+            to='to@example.org',
+            name='fake',
+            email='fake@example.org',
+            schedule_name='test',
+            attendee_email='fake@example.org',
+            date=datetime.datetime.now(),
+            duration=30,
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+        )
+
+        mailer = InvitationMail(**params, cancel_url=cancel_url)
+        assert cancel_url in mailer.html()
+        assert cancel_url in mailer.text()
+
+        # Without a cancel url there is no cancel action
+        mailer = InvitationMail(**params)
+        assert 'Cancel booking' not in mailer.html()
+        assert 'cancel' not in mailer.text().lower()
+
     def test_confirm(self, faker, with_l10n):
         confirm_url = 'https://example.org/yes'
         deny_url = 'https://example.org/no'
@@ -109,6 +132,22 @@ class TestMailer:
             assert attendee.name in content, fault
             assert attendee.email in content, fault
 
+    def test_booker_cancelled(self, faker, with_l10n):
+        fake_email = 'to@example.org'
+        attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
+
+        mailer = BookerCancelledMail(
+            attendee.name, attendee.email, datetime.datetime.now(), 30, 'test', lang='en', to=fake_email
+        )
+        assert mailer.subject == f'{attendee.name} cancelled their booking'
+        assert 'has cancelled their booking in test' in mailer.html()
+        assert 'cancelled their booking for' in mailer.text()
+
+        for idx, content in enumerate([mailer.text(), mailer.html()]):
+            fault = 'text' if idx == 0 else 'html'
+            assert attendee.name in content, fault
+            assert attendee.email in content, fault
+
     def test_pending(self, faker, with_l10n, make_pro_subscriber):
         subscriber = make_pro_subscriber()
         now = datetime.datetime.now()
@@ -130,6 +169,29 @@ class TestMailer:
         for idx, content in enumerate([mailer.text(), mailer.html()]):
             fault = 'text' if idx == 0 else 'html'
             assert subscriber.name in content, fault
+
+    def test_pending_cancel_url(self, with_l10n, make_pro_subscriber):
+        subscriber = make_pro_subscriber()
+        cancel_url = 'https://example.org/booking/cancel/1/abcd'
+        params = dict(
+            owner_name=subscriber.name,
+            owner_email=subscriber.email,
+            attendee_email='to@example.org',
+            schedule_name='test',
+            date=datetime.datetime.now(),
+            duration=30,
+            to='to@example.org',
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+        )
+
+        mailer = PendingRequestMail(**params, cancel_url=cancel_url)
+        assert cancel_url in mailer.html()
+        assert cancel_url in mailer.text()
+
+        # Without a cancel url there is no cancel action
+        mailer = PendingRequestMail(**params)
+        assert 'Cancel booking' not in mailer.html()
+        assert 'cancel' not in mailer.text().lower()
 
     def test_reject(self, faker, with_l10n, make_pro_subscriber):
         subscriber = make_pro_subscriber()
@@ -175,6 +237,32 @@ class TestMailer:
         for idx, content in enumerate([mailer.text(), mailer.html()]):
             fault = 'text' if idx == 0 else 'html'
             assert subscriber.name in content, fault
+            assert f'by {subscriber.name}' in content or f'{subscriber.name} cancelled' in content, fault
+
+    def test_cancel_by_attendee(self, with_l10n, make_pro_subscriber):
+        subscriber = make_pro_subscriber()
+        fake_email = 'to@example.org'
+
+        mailer = CancelMail(
+            owner_name=subscriber.name,
+            owner_email=subscriber.email,
+            attendee_email=fake_email,
+            schedule_name='test',
+            date=datetime.datetime.now(),
+            duration=30,
+            to=fake_email,
+            lang='en',
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+            cancelled_by_attendee=True,
+        )
+
+        # The bookee is told that they cancelled, not the owner
+        assert 'You CANCELLED' in mailer.html()
+        assert 'You cancelled' in mailer.text()
+        for content in [mailer.text(), mailer.html()]:
+            assert subscriber.name in content
+            assert f'by {subscriber.name}' not in content
+            assert f'{subscriber.name} cancelled' not in content
 
     def test_cancel_icons_attached_alongside_html_with_ics_present(self, faker, with_l10n, make_pro_subscriber):
         """Regression test: adding the ics attachment used to reindex message.get_payload(), causing icons
