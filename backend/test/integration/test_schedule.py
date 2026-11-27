@@ -1930,13 +1930,20 @@ class TestCancelScheduleAvailabilitySlot:
         slot_id = setup_slot(booking_status)
         data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='abcd').model_dump()
 
-        with patch('appointment.controller.calendar.Tools.send_cancel_vevent') as mock_send_cancel:
+        with (
+            patch('appointment.controller.calendar.Tools.send_cancel_vevent') as mock_send_cancel,
+            patch('fastapi.BackgroundTasks.add_task') as mock_add_task,
+        ):
             # No auth headers, the bookee is not logged in
             response = with_client.put('/schedule/public/availability/cancel', json=data)
 
             assert response.status_code == 200, response.text
             mock_send_cancel.assert_called_once()
             assert mock_send_cancel.call_args.kwargs['cancelled_by_attendee'] is True
+
+            # The owner is notified about the cancellation
+            mock_add_task.assert_called_once()
+            assert email_tasks.send_booker_cancelled_email in mock_add_task.call_args[0]
 
         with with_db() as db:
             slot = db.get(models.Slot, slot_id)

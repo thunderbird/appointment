@@ -670,3 +670,44 @@ class NewBookingMail(BaseBookingMail):
             calendar_icon_cid=self._attachments()[1].filename,
             clock_icon_cid=self._attachments()[2].filename,
         )
+
+
+class BookerCancelledMail(BaseBookingMail):
+    def __init__(self, name, email, date, duration, schedule_name, *args, **kwargs):
+        """Init Mailer with booker-cancelled specific defaults
+        To: Event owner
+        """
+        self.schedule_name = schedule_name
+        default_kwargs = {'subject': l10n('booker-cancelled-subject', {'name': name}, lang=kwargs.get('lang'))}
+        super(BookerCancelledMail, self).__init__(
+            name=name, email=email, date=date, duration=duration, *args, **default_kwargs, **kwargs
+        )
+
+    def text(self):
+        return l10n(
+            'booker-cancelled-plain',
+            {
+                'name': self.name,
+                'email': self.email,
+                'day': self.day,
+                'time_range': self.time_range,
+                'timezone': self.timezone,
+            },
+            lang=self.lang,
+        )
+
+    def html(self):
+        return get_template('booker_cancelled.jinja2').render(
+            name=self.name,
+            email=self.email,
+            time_range=self.time_range,
+            timezone=self.timezone,
+            day=self.day,
+            duration=self.duration,
+            schedule_name=self.schedule_name,
+            lang=self.lang,
+            # Image cids
+            tbpro_logo_cid=self._attachments()[0].filename,
+            calendar_icon_cid=self._attachments()[1].filename,
+            clock_icon_cid=self._attachments()[2].filename,
+        )

@@ -42,6 +42,7 @@ from ..tasks.emails import (
     send_confirmation_email,
     send_zoom_meeting_failed_email,
     send_new_booking_email,
+    send_booker_cancelled_email,
 )
 from ..l10n import l10n
 from slowapi import Limiter
@@ -683,6 +684,18 @@ def cancel_schedule_availability_slot(
     uuid = appointment.external_id if appointment.external_id else str(appointment.uuid)
     send_updates = SendUpdates.ALL if use_google_invite else SendUpdates.NONE
     delete_remote_event(uuid, calendar, subscriber, db, redis, google_client, send_updates=send_updates)
+
+    # Notify the subscriber that the bookee cancelled, with the date in the subscriber's timezone
+    background_tasks.add_task(
+        send_booker_cancelled_email,
+        name=slot.attendee.name,
+        email=slot.attendee.email,
+        date=slot.start.replace(tzinfo=timezone.utc).astimezone(ZoneInfo(subscriber.timezone or 'UTC')),
+        duration=slot.duration,
+        schedule_name=schedule.name,
+        to=subscriber.preferred_email,
+        lang=subscriber.language,
+    )
 
     return schemas.AvailabilitySlotAttendee(
         slot=schemas.SlotBase(start=slot.start, duration=slot.duration),

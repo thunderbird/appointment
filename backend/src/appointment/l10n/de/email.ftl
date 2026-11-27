@@ -71,6 +71,28 @@ new-booking-html-heading-email = ({ $email })
 new-booking-html-heading-text = hat gerade Zeit im { $schedule_name } gebucht
 new-booking-html-time = { $duration } mins
 
+## Booker Cancelled Appointment
+
+# Variables:
+# $name (String) - Name of the person who cancelled the appointment
+booker-cancelled-subject = { $name } hat die Buchung abgesagt
+# Variables:
+# $name (String) - Name of the person who cancelled the appointment
+# $email (String) - Email of the person who cancelled the appointment
+# $day (String) - Localized date of the cancelled appointment
+# $time_range (String) - Time range of the cancelled appointment (e.g. "2:00PM - 2:30PM")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+booker-cancelled-plain = { $name } ({ $email }) hat die Buchung für { $day } um { $time_range } { $timezone } abgesagt.
+# Variables:
+# $name (String) - Name of the person who cancelled the appointment
+# $email (String) - Email of the person who cancelled the appointment
+# $schedule_name (String) - The name of the schedule used to book the appointment
+# $duration (String) - Length of minutes the appointment would have been
+booker-cancelled-html-heading-name = { $name }
+booker-cancelled-html-heading-email = ({ $email })
+booker-cancelled-html-heading-text = hat die Buchung im { $schedule_name } abgesagt:
+booker-cancelled-html-time = { $duration } Min.
+
 ## Confirm Appointment
 
 # Variables

@@ -5,6 +5,7 @@ from unittest.mock import MagicMock
 from starlette_context import request_cycle_context
 
 from appointment.controller.mailer import (
+    BookerCancelledMail,
     CancelMail,
     ConfirmationMail,
     RejectionMail,
@@ -125,6 +126,22 @@ class TestMailer:
         mailer = NewBookingMail(attendee.name, attendee.email, now, 30, 'test schedule', lang='en', to=fake_email)
         assert mailer.html()
         assert mailer.text()
+
+        for idx, content in enumerate([mailer.text(), mailer.html()]):
+            fault = 'text' if idx == 0 else 'html'
+            assert attendee.name in content, fault
+            assert attendee.email in content, fault
+
+    def test_booker_cancelled(self, faker, with_l10n):
+        fake_email = 'to@example.org'
+        attendee = schemas.AttendeeBase(email=faker.email(), name=faker.name(), timezone='Europe/Berlin')
+
+        mailer = BookerCancelledMail(
+            attendee.name, attendee.email, datetime.datetime.now(), 30, 'test', lang='en', to=fake_email
+        )
+        assert mailer.subject == f'{attendee.name} cancelled their booking'
+        assert 'has cancelled their booking in test' in mailer.html()
+        assert 'cancelled their booking for' in mailer.text()
 
         for idx, content in enumerate([mailer.text(), mailer.html()]):
             fault = 'text' if idx == 0 else 'html'

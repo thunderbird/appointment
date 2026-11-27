@@ -12,6 +12,7 @@ from appointment.controller.mailer import (
     RejectionMail,
     NewBookingMail,
     CancelMail,
+    BookerCancelledMail,
 )
 from appointment.defines import APP_ENV_DEV
 
@@ -82,6 +83,19 @@ def send_new_booking_email(name, email, date, duration, to, schedule_name, lang)
     # send notice mail to owner
     try:
         mail = NewBookingMail(name, email, date, duration, schedule_name, to=to, lang=lang)
+        mail.send()
+    except Exception as e:
+        if os.getenv('APP_ENV') == APP_ENV_DEV:
+            logging.error('[tasks.emails] An exception has occurred: ', e)
+            traceback.print_exc()
+        if os.getenv('SENTRY_DSN'):
+            sentry_sdk.capture_exception(e)
+
+
+def send_booker_cancelled_email(name, email, date, duration, to, schedule_name, lang):
+    # send notice mail to owner
+    try:
+        mail = BookerCancelledMail(name, email, date, duration, schedule_name, to=to, lang=lang)
         mail.send()
     except Exception as e:
         if os.getenv('APP_ENV') == APP_ENV_DEV:
