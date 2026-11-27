@@ -8,9 +8,10 @@ import { IsoWeekday } from '@/composables/dayjs';
  * These are typed Symbols for use with inject/provide in VueJS
  */
 
-// Provides Dayjs class functionality as well as the timezone plugin, customParseFormat and related keys
+// Provides Dayjs class functionality as well as the timezone and utc plugins, customParseFormat and related keys
 type DayjsType = ((_?: ConfigType) => Dayjs) & {
   tz: DayjsTimezone;
+  utc: (config?: ConfigType, format?: string, strict?: boolean) => Dayjs;
   max: (...dayjs: Dayjs[]) => Dayjs | null;
   min: (...dayjs: Dayjs[]) => Dayjs | null;
   duration: CreateDurationType;
