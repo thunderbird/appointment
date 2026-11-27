@@ -1936,6 +1936,7 @@ class TestCancelScheduleAvailabilitySlot:
 
             assert response.status_code == 200, response.text
             mock_send_cancel.assert_called_once()
+            assert mock_send_cancel.call_args.kwargs['cancelled_by_attendee'] is True
 
         with with_db() as db:
             slot = db.get(models.Slot, slot_id)

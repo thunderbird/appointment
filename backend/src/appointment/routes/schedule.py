@@ -672,6 +672,7 @@ def cancel_schedule_availability_slot(
             subscriber,
             slot.attendee,
             schedule_name=schedule.name,
+            cancelled_by_attendee=True,
         )
 
     # Mark the slot as BookingStatus.cancelled, this also invalidates the owner's confirmation link

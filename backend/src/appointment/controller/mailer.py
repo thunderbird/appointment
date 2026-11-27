@@ -407,6 +407,8 @@ class CancelMail(Mailer):
         self.schedule_name = schedule_name
         self.date = date
         self.duration = duration
+        # Wording differs if the bookee cancelled the booking themselves
+        self.cancelled_by_attendee = kwargs.pop('cancelled_by_attendee', False)
         default_kwargs = {'subject': l10n('cancel-mail-subject', lang=kwargs.get('lang'))}
         super(CancelMail, self).__init__(*args, **default_kwargs, **kwargs)
 
@@ -447,7 +449,7 @@ class CancelMail(Mailer):
 
     def text(self):
         return l10n(
-            'cancel-mail-plain',
+            'cancel-mail-attendee-plain' if self.cancelled_by_attendee else 'cancel-mail-plain',
             {
                 'owner_name': self.owner_name,
                 'day': self.day,
@@ -467,6 +469,7 @@ class CancelMail(Mailer):
             start_time=self.date.strftime(self.time_format),
             timezone=self.timezone,
             duration=self.duration,
+            cancelled_by_attendee=self.cancelled_by_attendee,
             lang=self.lang,
             # Image cids
             tbpro_logo_cid=self._attachments()[0].filename,

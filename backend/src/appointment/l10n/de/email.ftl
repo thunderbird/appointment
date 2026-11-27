@@ -124,6 +124,17 @@ cancel-mail-html-badge = Abgesagt
 # $timezone (String) - Timezone abbreviation (e.g. "(CET)")
 cancel-mail-plain = { $owner_name } hat deine Buchungsanfrage für { $day } um { $time_range } { $timezone } abgesagt.
 {-brand-footer}
+# Variables:
+# $owner_name (String) - Name der Person, der der Terminplan gehört
+# $owner_email (String) - E-Mail-Adresse der Person, der der Terminplan gehört
+cancel-mail-attendee-html-heading = Du hast die folgende Buchung mit { $owner_name } ({ $owner_email }) ABGESAGT.
+# Variables:
+# $owner_name (String) - Name of the person who owns the schedule
+# $day (String) - Localized date of the requested appointment
+# $time_range (String) - Time range of the requested appointment (e.g. "14:00 - 14:30")
+# $timezone (String) - Timezone abbreviation (e.g. "(CET)")
+cancel-mail-attendee-plain = Du hast deine Buchung mit { $owner_name } für { $day } um { $time_range } { $timezone } abgesagt.
+{-brand-footer}
 
 ## Rejected Appointment
 

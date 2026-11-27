@@ -977,6 +977,7 @@ class Tools:
         organizer: schemas.Subscriber,
         attendee: schemas.AttendeeBase,
         schedule_name: str,
+        cancelled_by_attendee: bool = False,
     ):
         """send a booking cancellation email to attendee with .ics file attached"""
         ics_file = Attachment(
@@ -1009,6 +1010,7 @@ class Tools:
             to=attendee.email,
             attachment=ics_file,
             lang=lang,
+            cancelled_by_attendee=cancelled_by_attendee,
         )
 
     @staticmethod

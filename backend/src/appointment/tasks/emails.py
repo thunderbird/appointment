@@ -116,7 +116,18 @@ def send_pending_email(
             sentry_sdk.capture_exception(e)
 
 
-def send_cancel_email(owner_name, owner_email, attendee_email, schedule_name, date, duration, to, attachment, lang):
+def send_cancel_email(
+    owner_name,
+    owner_email,
+    attendee_email,
+    schedule_name,
+    date,
+    duration,
+    to,
+    attachment,
+    lang,
+    cancelled_by_attendee=False,
+):
     try:
         mail = CancelMail(
             owner_name=owner_name,
@@ -128,6 +139,7 @@ def send_cancel_email(owner_name, owner_email, attendee_email, schedule_name, da
             to=to,
             attachments=[attachment],
             lang=lang,
+            cancelled_by_attendee=cancelled_by_attendee,
         )
         mail.send()
     except Exception as e:

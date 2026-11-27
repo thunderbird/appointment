@@ -220,6 +220,32 @@ class TestMailer:
         for idx, content in enumerate([mailer.text(), mailer.html()]):
             fault = 'text' if idx == 0 else 'html'
             assert subscriber.name in content, fault
+            assert f'by {subscriber.name}' in content or f'{subscriber.name} cancelled' in content, fault
+
+    def test_cancel_by_attendee(self, with_l10n, make_pro_subscriber):
+        subscriber = make_pro_subscriber()
+        fake_email = 'to@example.org'
+
+        mailer = CancelMail(
+            owner_name=subscriber.name,
+            owner_email=subscriber.email,
+            attendee_email=fake_email,
+            schedule_name='test',
+            date=datetime.datetime.now(),
+            duration=30,
+            to=fake_email,
+            lang='en',
+            attachments=[Attachment(mime=('text', 'calendar'), filename='test.ics', data=b'')],
+            cancelled_by_attendee=True,
+        )
+
+        # The bookee is told that they cancelled, not the owner
+        assert 'You CANCELLED' in mailer.html()
+        assert 'You cancelled' in mailer.text()
+        for content in [mailer.text(), mailer.html()]:
+            assert subscriber.name in content
+            assert f'by {subscriber.name}' not in content
+            assert f'{subscriber.name} cancelled' not in content
 
     def test_cancel_icons_attached_alongside_html_with_ics_present(self, faker, with_l10n, make_pro_subscriber):
         """Regression test: adding the ics attachment used to reindex message.get_payload(), causing icons
