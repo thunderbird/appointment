@@ -557,7 +557,7 @@ def request_schedule_availability_slot(
             start=slot.start,
             duration=slot.duration,
             attendee_id=slot.attendee_id,
-            booking_tkn=token, # cancellation token for bookee
+            booking_tkn=token,  # cancellation token for bookee
         )
     except Exception as ex:
         logging.error('Error in request_schedule_availability_slot: ', ex)
