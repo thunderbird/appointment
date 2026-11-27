@@ -64,17 +64,23 @@ describe('BookingCancelView', () => {
   });
 
   it.each([
-    [BookingStatus.Requested, 'Booking request sent'],
-    [BookingStatus.Booked, 'Booking confirmed'],
-  ])('loads the booking details with the token from the url (status %s)', async (bookingStatus, heading) => {
+    [BookingStatus.Requested, 'This booking request is currently pending a response from the host.'],
+    [BookingStatus.Booked, 'This booking request has been confirmed.'],
+  ])('loads the booking details with the token from the url (status %s)', async (bookingStatus, description) => {
     const { call, post } = mountView(details(bookingStatus));
     await flushPromises();
 
     expect(call).toHaveBeenCalledWith('schedule/public/availability/cancel/details');
     expect(post).toHaveBeenCalledWith({ slot_id: 42, slot_token: 'tkn' });
-    expect(wrapper.get('[data-testid="booking-view-result-heading"]').text()).toBe(heading);
+
+    // Neutral texts instead of the success texts shown right after booking
+    expect(wrapper.get('[data-testid="booking-view-result-heading"]').text()).toBe('Booking request');
+    expect(wrapper.find('[data-testid="booking-view-result-heading"] svg').exists()).toBe(false);
+    expect(wrapper.text()).toContain(description);
     expect(wrapper.text()).toContain('Virtual meeting with Jane');
-    expect(wrapper.get('[data-testid="booking-view-cancel-link"]').text()).toBe('Need to cancel?');
+
+    // The cancel modal is shown right away
+    expect(wrapper.find('[data-testid="booking-cancel-confirm-btn"]').exists()).toBe(true);
   });
 
   it('shows an error for an invalid or closed booking', async () => {
@@ -83,5 +89,6 @@ describe('BookingCancelView', () => {
 
     expect(wrapper.get('h1').text()).toBe('This cancellation link is invalid.');
     expect(wrapper.find('[data-testid="booking-view-result-heading"]').exists()).toBe(false);
+    expect(wrapper.find('[data-testid="booking-cancel-confirm-btn"]').exists()).toBe(false);
   });
 });

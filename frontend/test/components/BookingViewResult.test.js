@@ -21,12 +21,13 @@ describe('BookingViewResult', () => {
     wrapper?.unmount();
   });
 
-  const mountResult = (state, selectedEvent = {}, call = vi.fn()) =>
+  const mountResult = (state, selectedEvent = {}, call = vi.fn(), props = {}) =>
     mount(BookingViewResult, {
       props: {
         selectedEvent: { start: '2026-12-01T10:00:00Z', duration: 30, id: 42, slug: 'abc', ...selectedEvent },
         attendee: { name: 'Jane', email: 'jane@example.org' },
         state,
+        ...props,
       },
       global: {
         plugins: [createPinia(), i18ninstance, router],
@@ -106,5 +107,43 @@ describe('BookingViewResult', () => {
 
     expect(wrapper.get('.booking-cancel-modal').text()).toContain('Slot not found');
     expect(wrapper.get('[data-testid="booking-view-result-heading"]').text()).toBe('Booking confirmed');
+  });
+
+  it('shows custom texts without icon until the booking is cancelled', async () => {
+    const { call } = mockCall({ data: ref({}), error: ref(null) });
+    wrapper = mountResult(BookingResultState.Requested, { booking_tkn: 'tkn' }, call, {
+      customHeading: 'Custom heading',
+      customDescription: 'Custom description',
+    });
+
+    expect(wrapper.get('[data-testid="booking-view-result-heading"]').text()).toBe('Custom heading');
+    expect(wrapper.find('[data-testid="booking-view-result-heading"] svg').exists()).toBe(false);
+    expect(wrapper.text()).toContain('Custom description');
+
+    await wrapper.get('[data-testid="booking-view-cancel-link"]').trigger('click');
+    await wrapper.get('[data-testid="booking-cancel-confirm-btn"]').trigger('click');
+    await flushPromises();
+
+    // After cancelling, the cancelled texts replace the custom ones
+    expect(wrapper.get('[data-testid="booking-view-result-heading"]').text()).toBe('Booking cancelled');
+    expect(wrapper.text()).toContain('This appointment has been cancelled.');
+    expect(wrapper.text()).not.toContain('Custom description');
+  });
+
+  it.each([
+    [{ booking_tkn: 'tkn' }, true],
+    [{}, false],
+  ])('opens the cancel modal on mount if requested and possible (%o)', async (selectedEvent, opened) => {
+    wrapper = mountResult(BookingResultState.Confirmed, selectedEvent, vi.fn(), { openCancelModal: true });
+    await flushPromises();
+
+    expect(wrapper.find('[data-testid="booking-cancel-confirm-btn"]').exists()).toBe(opened);
+  });
+
+  it('does not open the cancel modal on mount by default', async () => {
+    wrapper = mountResult(BookingResultState.Confirmed, { booking_tkn: 'tkn' });
+    await flushPromises();
+
+    expect(wrapper.find('[data-testid="booking-cancel-confirm-btn"]').exists()).toBe(false);
   });
 });

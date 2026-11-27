@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref, useTemplateRef } from 'vue';
+import { computed, inject, onMounted, ref, useTemplateRef } from 'vue';
 import { timeFormat } from '@/utils';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -25,6 +25,9 @@ interface Props {
   selectedEvent: Appointment & Slot;
   attendee: Attendee;
   state: BookingResultState;
+  customHeading?: string; // Replaces the state heading as long as the booking isn't cancelled
+  customDescription?: string; // Replaces the state description as long as the booking isn't cancelled
+  openCancelModal?: boolean; // Shows the cancel modal right away if the booking can be cancelled
 }
 const props = defineProps<Props>();
 
@@ -40,7 +43,13 @@ const isCancelled = computed(() => currentState.value === BookingResultState.Can
 // Only bookings with a token can be cancelled by the bookee
 const canCancel = computed(() => !isCancelled.value && !!props.selectedEvent.booking_tkn);
 
+// Custom texts are neutral, so the success icon is only shown for default texts
+const hasCustomHeading = computed(() => !isCancelled.value && !!props.customHeading);
+
 const heading = computed(() => {
+  if (hasCustomHeading.value) {
+    return props.customHeading;
+  }
   switch (currentState.value) {
     case BookingResultState.Requested:
       return t('info.bookingSuccessfullyRequested');
@@ -52,6 +61,9 @@ const heading = computed(() => {
 });
 
 const description = computed(() => {
+  if (!isCancelled.value && props.customDescription) {
+    return props.customDescription;
+  }
   switch (currentState.value) {
     case BookingResultState.Requested:
       return t('text.hostHasBeenNotified');
@@ -76,10 +88,16 @@ const date =
 
 const downloadUrl = `${apiUrl}/apmt/serve/ics/${props.selectedEvent.slug}/${props.selectedEvent.id}`;
 
-const openCancelModal = () => {
+const showCancelModal = () => {
   cancelError.value = '';
   cancelModal.value?.show();
 };
+
+onMounted(() => {
+  if (props.openCancelModal && canCancel.value) {
+    showCancelModal();
+  }
+});
 
 // Cancel the booking and switch to the cancelled state on success
 const cancelBooking = async () => {
@@ -105,7 +123,7 @@ const cancelBooking = async () => {
 <template>
   <div class="booking-details">
     <div class="heading" data-testid="booking-view-result-heading">
-      <ph-confetti v-if="!isCancelled" />
+      <ph-confetti v-if="!isCancelled && !hasCustomHeading" />
       {{ heading }}
     </div>
     <p>{{ description }}</p>
@@ -126,7 +144,7 @@ const cancelBooking = async () => {
         </template>
         {{ t('label.downloadTheIcsFile') }}
       </link-button>
-      <link-button v-if="canCancel" @click="openCancelModal" data-testid="booking-view-cancel-link">
+      <link-button v-if="canCancel" @click="showCancelModal" data-testid="booking-view-cancel-link">
         {{ t('label.needToCancel') }}
       </link-button>
     </div>

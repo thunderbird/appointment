@@ -57,7 +57,16 @@ onMounted(async () => {
     <booking-view-error :heading="t('info.bookingCancelLinkIsInvalid')" :body="t('text.bookingCannotBeCancelled')" />
   </main>
   <main v-else class="booking-success-container">
-    <booking-view-result :selected-event="selectedEvent" :attendee="attendee" :state="state" />
+    <booking-view-result
+      :selected-event="selectedEvent"
+      :attendee="attendee"
+      :state="state"
+      :custom-heading="t('info.bookingRequest')"
+      :custom-description="
+        state === BookingResultState.Requested ? t('text.bookingRequestPending') : t('text.bookingRequestConfirmed')
+      "
+      open-cancel-modal
+    />
   </main>
 </template>
 
