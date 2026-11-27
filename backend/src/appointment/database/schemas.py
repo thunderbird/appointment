@@ -94,7 +94,7 @@ class SlotOut(BaseModel):
 
 
 class SlotBookingOut(SlotOut):
-    """Slot returned to the bookee after a booking request, includes the token needed for cancellation"""
+    """Slot returned to the bookee after a booking request"""
 
     booking_tkn: str
 
@@ -106,6 +106,13 @@ class SlotAttendee(BaseModel):
 
 class AvailabilitySlotAttendee(BaseModel):
     slot: SlotBase
+    attendee: AttendeeBase
+
+
+class AvailabilitySlotBookingOut(BaseModel):
+    """Booking details shown to the bookee"""
+
+    slot: SlotOut
     attendee: AttendeeBase
 
 

@@ -1953,27 +1953,61 @@ class TestCancelScheduleAvailabilitySlot:
         response = with_client.put('/schedule/public/availability/cancel', json=data)
         assert response.status_code == 404, response.text
 
-    def test_cancel_fails_with_wrong_token(self, with_db, with_client, setup_slot):
+    # Both bookee endpoints share the same validation, failures are tested for each of them
+    endpoints = pytest.mark.parametrize(
+        'method,url',
+        [('put', '/schedule/public/availability/cancel'), ('post', '/schedule/public/availability/cancel/details')],
+    )
+
+    @endpoints
+    def test_fails_with_wrong_token(self, with_db, with_client, setup_slot, method, url):
         slot_id = setup_slot()
         data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='wrong').model_dump()
 
-        response = with_client.put('/schedule/public/availability/cancel', json=data)
+        response = getattr(with_client, method)(url, json=data)
         assert response.status_code == 404, response.text
 
         with with_db() as db:
             assert db.get(models.Slot, slot_id).booking_status == models.BookingStatus.requested
 
+    @endpoints
     @pytest.mark.parametrize('booking_status', [models.BookingStatus.declined, models.BookingStatus.cancelled])
-    def test_cancel_fails_for_closed_booking(self, with_client, setup_slot, booking_status):
+    def test_fails_for_closed_booking(self, with_client, setup_slot, booking_status, method, url):
         slot_id = setup_slot(booking_status)
         data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='abcd').model_dump()
 
-        response = with_client.put('/schedule/public/availability/cancel', json=data)
+        response = getattr(with_client, method)(url, json=data)
         assert response.status_code == 404, response.text
 
-    def test_cancel_fails_for_past_booking(self, with_client, setup_slot):
+    @endpoints
+    def test_fails_for_past_booking(self, with_client, setup_slot, method, url):
         slot_id = setup_slot(models.BookingStatus.booked, start=datetime.now() - timedelta(days=1))
         data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='abcd').model_dump()
 
-        response = with_client.put('/schedule/public/availability/cancel', json=data)
+        response = getattr(with_client, method)(url, json=data)
         assert response.status_code == 404, response.text
+
+    @pytest.mark.parametrize('booking_status', [models.BookingStatus.requested, models.BookingStatus.booked])
+    def test_details(self, with_db, with_client, setup_slot, booking_status):
+        slot_id = setup_slot(booking_status)
+        data = schemas.AvailabilitySlotCancel(slot_id=slot_id, slot_token='abcd').model_dump()
+
+        # No auth headers, the bookee is not logged in
+        response = with_client.post('/schedule/public/availability/cancel/details', json=data)
+        assert response.status_code == 200, response.text
+        details = response.json()
+
+        with with_db() as db:
+            slot = db.get(models.Slot, slot_id)
+            assert details['slot']['id'] == slot_id
+            assert details['slot']['slug'] == slot.appointment.slug
+            assert details['slot']['booking_status'] == booking_status.value
+            assert details['slot']['duration'] == slot.duration
+            assert details['attendee']['email'] == slot.attendee.email
+            assert details['attendee']['name'] == slot.attendee.name
+
+            # Retrieving details doesn't change the booking
+            assert slot.booking_status == booking_status
+
+        # The token is only known by the bookee and is not returned again
+        assert 'booking_tkn' not in details['slot']

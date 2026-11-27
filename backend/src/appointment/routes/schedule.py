@@ -626,6 +626,49 @@ def decide_on_schedule_availability_slot(
     )
 
 
+def get_cancellable_slot(db: Session, data: schemas.AvailabilitySlotCancel) -> models.Slot:
+    """Returns an open, upcoming booking slot with matching token, raises SlotNotFoundException otherwise"""
+    slot = repo.slot.get(db, data.slot_id)
+
+    if (
+        not slot
+        or not slot.schedule
+        or not slot.appointment
+        or slot.booking_tkn != data.slot_token
+        or slot.booking_status not in (BookingStatus.requested, BookingStatus.booked)
+        or slot.start.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc)
+    ):
+        raise validation.SlotNotFoundException()
+
+    return slot
+
+
+@router.post(
+    '/public/availability/cancel/details', response_model=schemas.AvailabilitySlotBookingOut, tags=['no-cache']
+)
+@limiter.limit('20/minute')
+def schedule_availability_slot_cancel_details(
+    request: Request,
+    data: schemas.AvailabilitySlotCancel,
+    db: Session = Depends(get_db),
+):
+    """endpoint for the bookee to retrieve details of their booking before cancelling it via the token sent to them"""
+    slot = get_cancellable_slot(db, data)
+
+    return schemas.AvailabilitySlotBookingOut(
+        slot=schemas.SlotOut(
+            id=slot.id,
+            slug=slot.appointment.slug,
+            booking_status=slot.booking_status,
+            start=slot.start,
+            duration=slot.duration,
+        ),
+        attendee=schemas.AttendeeBase(
+            email=slot.attendee.email, name=slot.attendee.name, timezone=slot.attendee.timezone
+        ),
+    )
+
+
 @router.put('/public/availability/cancel', response_model=schemas.AvailabilitySlotAttendee, tags=['no-cache'])
 @limiter.limit('20/minute')
 def cancel_schedule_availability_slot(
@@ -637,18 +680,7 @@ def cancel_schedule_availability_slot(
     google_client: GoogleClient = Depends(get_google_client),
 ):
     """endpoint for the bookee to cancel their requested or booked time slot via the token sent to them"""
-    slot = repo.slot.get(db, data.slot_id)
-
-    # Only open, upcoming bookings with a matching token can be cancelled
-    if (
-        not slot
-        or not slot.schedule
-        or not slot.appointment
-        or slot.booking_tkn != data.slot_token
-        or slot.booking_status not in (BookingStatus.requested, BookingStatus.booked)
-        or slot.start.replace(tzinfo=timezone.utc) <= datetime.now(timezone.utc)
-    ):
-        raise validation.SlotNotFoundException()
+    slot = get_cancellable_slot(db, data)
 
     schedule = slot.schedule
     appointment = slot.appointment
